@@ -8,21 +8,23 @@
       <feGaussianBlur stdDeviation="1.5" result="blur" />
       <feComposite in="SourceGraphic" in2="blur" operator="over" />
     </filter>
+    <clipPath id="blue-front">
+      <rect x="-30" y="0" width="60" height="30" transform="translate(32, 32) rotate(-30)" />
+    </clipPath>
   </defs>
 
   <!-- Fundo com cantos arredondados -->
   <rect width="64" height="64" rx="16" fill="url(#bg)" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
 
-  <!-- Órbita 1 (Física - Azul/Ciano) -->
+  <!-- Órbita 1 (Física - Azul/Ciano) - Camada traseira -->
   <ellipse cx="32" cy="32" rx="22" ry="8" fill="none" stroke="#63b3ed" stroke-width="2.5" transform="rotate(-30 32 32)" opacity="0.95" />
 
-  <!-- Órbita 2 (Matemática - Roxo) -->
-  <ellipse cx="32" cy="32" rx="22" ry="8" fill="none" stroke="#9a75f8" stroke-width="2.5" transform="rotate(30 32 32)" opacity="0.95" />
+  <!-- Órbita 2 (Matemática - Roxo) - Levemente menor, passando por dentro -->
+  <ellipse cx="32" cy="32" rx="18" ry="6.5" fill="none" stroke="#9a75f8" stroke-width="2.5" transform="rotate(30 32 32)" opacity="0.95" />
 
   <!-- Núcleo Central com Brilho (Amarelo) -->
   <circle cx="32" cy="32" r="5" fill="#facc15" filter="url(#glow)"/>
 
-  <!-- Partículas / Elétrons -->
-  <circle cx="16" cy="23" r="2.5" fill="#63b3ed"/>
-  <circle cx="48" cy="23" r="2.5" fill="#9a75f8"/>
+  <!-- Órbita 1 (Física - Azul/Ciano) - Metade frontal passando por cima da roxa -->
+  <ellipse cx="32" cy="32" rx="22" ry="8" fill="none" stroke="#63b3ed" stroke-width="2.5" transform="rotate(-30 32 32)" opacity="0.95" clip-path="url(#blue-front)" />
 </svg>
