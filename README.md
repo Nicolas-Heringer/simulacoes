@@ -10,111 +10,67 @@ Repositório dedicado ao desenvolvimento de simulações interativas para o ensi
 
 Este projeto tem como objetivo fornecer ferramentas visuais e interativas para explorar fenômenos físicos e formulações matemáticas. O repositório e a página são atualizados de forma contínua para adicionar novas simulações, funcionalidades e melhorias na interface.
 
-A estrutura do projeto é modular: cada simulação é encapsulada em seu próprio arquivo HTML e conta com arquivos dedicados de estilo (CSS) e lógica (JavaScript). Esse formato facilita a manutenção e a inclusão de novos módulos sem interferir nas demais simulações.
+Todas as simulações seguem a arquitetura do **Design System 2.0**, com controladores padronizados, suporte completo a dispositivos móveis via *Bottom Sheet*, modo de foco imersivo em tela cheia e renderização de equações em KaTeX.
 
 ---
 
 ## Simulações Disponíveis
 
-- **Átomo de Hidrogênio:** Visualização dos autovalores (energias) e autovetores (estados quânticos).
-- **Áudio Fourier:** Análise de ondas sonoras e decomposição no espectro de frequências via transformada de Fourier.
-- **Fônons:** Visualização de ondas de matéria e modos vibracionais em uma rede cristalina.
-- **Lei de Snell:** Simulação de refração e reflexão da luz em meios com diferentes índices de refração.
-- **Ondas Estacionárias 2D:** Visualização de padrões de interferência bidimensionais (padrões de Chladni).
-- **Queda Livre:** Simulação interativa de cinemática sob aceleração gravitacional.
-- **Modelo de Drude:** Representação microscópica da condução elétrica clássica interagindo com uma rede cristalina.
-- **Movimento em 1D e 2D:** Análise gráfica e dinâmica de corpos em movimento retilíneo e encontro de corpos.
-- **Simulação de Partículas:** Interação coulombiana e dinâmica de sistemas de partículas.
-- **Matrizes 2D:** Interpretação geométrica de matrizes 2x2, deformação do espaço e cálculo de determinante.
-- **Tensor de Inércia:** Visualização dos eixos principais e cálculo do tensor de inércia.
-- **Gravidade:** Dinâmica orbital e atração gravitacional entre corpos.
+- **Átomo de Hidrogênio:** Visualização 3D dos orbitais, densidade de probabilidade e autovetores quânticos.
+- **Áudio Fourier:** Análise de ondas sonoras e decomposição no espectro de frequências em tempo real via Web Audio API.
+- **Clima Terrestre:** Modelo 3D da circulação atmosférica, insolação, rotação axial e dinâmica de massas de ar com Web Worker.
+- **Fônons:** Visualização de ondas de matéria e modos normais de vibração em rede cristalina unidimensional e bidimensional.
+- **Gravidade:** Dinâmica orbital de múltiplos corpos e atração gravitacional newtoniana com telemetria de energia em tempo real.
+- **Lei de Snell:** Óptica geométrica com refração, reflexão total interna e dispersão da luz em múltiplos meios ópticos.
+- **Matrizes 2D:** Interpretação geométrica de transformações lineares, deformação do plano, autovetores e determinante.
+- **Modelo de Drude:** Representação microscópica da condução elétrica clássica de elétrons livres interagindo com a rede iônica.
+- **Movimento em 1D e 2D:** Cinemática gráfica em tempo real, estudo de movimento uniforme e acelerado, e colisão/encontro de corpos.
+- **Ondas Estacionárias 2D:** Visualização de padrões de interferência bidimensionais e modos vibracionais de placas (padrões de Chladni).
+- **Partículas:** Dinâmica coulombiana, interação eletrostática de atração/repulsão e colisão de sistemas de muitas partículas.
+- **Queda Livre:** Cinemática sob aceleração gravitacional com resistência do ar e gráficos dinâmicos de velocidade e posição.
+- **Tensor de Inércia:** Visualização 3D dos eixos principais de rotação, elipsoide de inércia e diagonalização tensorial.
+- **UI Lab (Design System 2.0):** Catálogo vivo e vitrine canônica de todos os componentes de interface, controladores e contratos visuais do laboratório.
 
 ---
 
 ## Estrutura do Projeto
 
-```mermaid
-graph TD
-    Site["Site/"] --> Raiz["Arquivos Principais"]
-    Site --> SimDir["simulacoes/"]
-
-    Raiz --> Index["index.html (Pagina Principal)"]
-    Raiz --> Styles["styles.css (Estilos Globais)"]
-    Raiz --> Script["script.js (Filtros e Interatividade)"]
-    Raiz --> Livros["livros.json (Dados Bibliograficos)"]
-
-    SimDir --> SimHTML["Paginas HTML dos Simuladores"]
-    SimDir --> SimCSS["css/ (Estilos Modulares)"]
-    SimDir --> SimJS["scripts/ (Logica e Web Workers)"]
-```
-
-<details>
-<summary><strong>Ver relacao completa de arquivos</strong></summary>
+A estrutura adota uma separação anatômica clara entre o portal de entrada, os componentes centrais de interface e as experiências interativas individuais:
 
 ```text
 Site/
-│
-├── favicon.svg
-├── index.html
-├── livros.json
-├── README.md
-├── script.js
-├── styles.css
-│
+├── index.html                   # Portal de entrada com cards de navegação e filtros por categoria
+├── script.js                    # Mecanismo de busca, filtros e interatividade do portal
+├── styles.css                   # Identidade visual e layout responsivo do portal principal
+├── livros.json                  # Referências bibliográficas e recomendações didáticas
+├── assets/
+│   └── icons/                   # Catálogo nativo com 71 ícones vetoriais SVG (currentColor)
+├── .github/
+│   └── workflows/
+│       └── validate.yml         # Integração Contínua (CI) para checagem estática automática
 └── simulacoes/
-    ├── atomo_de_hidrogenio.html
-    ├── audio.html
-    ├── drude.html
-    ├── estacionarias2d.html
-    ├── fonons.html
-    ├── gravidade.html
-    ├── matrizes.html
-    ├── movimento.html
-    ├── particulas.html
-    ├── quedalivre.html
-    ├── snell.html
-    ├── tensor_de_inercia.html
-    │
+    ├── ui_lab.html              # Vitrine canônica e fonte da verdade do Design System 2.0
+    ├── [simulacao].html         # Páginas individuais com layout responsivo (Desktop & Mobile Bottom-Sheet)
     ├── css/
-    │   ├── atomo_de_hidrogenio.css
-    │   ├── base.css
-    │   ├── buttons.css
-    │   ├── drude.css
-    │   ├── fonons.css
-    │   ├── gravidade.css
-    │   ├── matrizes.css
-    │   ├── movimento.css
-    │   ├── particulas.css
-    │   ├── quedalivre.css
-    │   ├── snell.css
-    │   └── tensor_de_inercia.css
-    │
+    │   ├── design-system.css    # Tokens globais (:root), temas, barras de transporte, abas e modais
+    │   └── [simulacao].css      # Estilos complementares e dimensionamento do canvas da simulação
     └── scripts/
-        ├── atomo_de_hidrogenio.js
-        ├── audio.js
-        ├── buttons.js
-        ├── drude.js
-        ├── estacionarias2d.js
-        ├── fonons.js
-        ├── gravidade.js
-        ├── matrizes.js
-        ├── movimento.js
-        ├── particulas.js
-        ├── quedalivre.js
-        ├── snell.js
-        ├── snell.worker.js
-        └── tensor_de_inercia.js
+        ├── sim-ui.js            # Biblioteca central de controladores (sliders, abas, plots, modais)
+        ├── validate-ds.js       # Script de análise estática e prevenção de regressões
+        ├── [simulacao].js       # Lógica matemática e física estruturada em ES Modules
+        └── *.worker.js          # Processamento numérico em segundo plano (Clima, Snell)
 ```
-
-</details>
 
 ---
 
 ## Tecnologias Utilizadas
 
-- **HTML5:** Estruturação semântica, Canvas API e Web Audio API.
-- **CSS3:** Estilização modular, temas e layouts responsivos.
-- **JavaScript (ES6+):** Lógica computacional, renderização gráfica e processamento paralelo com Web Workers.
+- **HTML5 & Web APIs:** Estruturação semântica, Canvas 2D, Web Audio API e Web Workers para cálculos em segundo plano sem travamento da taxa de quadros (60 FPS).
+- **Design System 2.0 (CSS3):** Design tokens semânticos (`:root`), responsividade adaptativa com *Bottom Sheet* para mobile e *Modo Foco* (`F`) para desktop.
+- **JavaScript Moderno (ES Modules):** Código desacoplado e manutenível, sem dependências externas obsoletas.
+- **Three.js (WebGL):** Visualizações tridimensionais de alta performance e controles orbitais com prevenção de rolagem acidental (`touch-action: none`).
+- **KaTeX:** Renderização ultrarrápida de tipografia matemática para equações e deduções didáticas.
+- **GitHub Actions (CI):** Esteira de integração contínua para validação automatizada de integridade a cada commit.
 
 ---
 
@@ -130,13 +86,18 @@ Site/
    cd Site
    ```
 
-3. Inicie um servidor local. Minha alternativa recomendada para rodar localmente de forma rápida é utilizar o próprio Python:
+3. Inicie um servidor local HTTP (recomendado via Python):
    ```bash
    python -m http.server 8080
    ```
    Depois, basta abrir o navegador e acessar `http://localhost:8080`.
 
-   Alternativamente, você também pode abrir o arquivo `index.html` diretamente no navegador ou utilizar extensões como o *Live Server* do VS Code.
+   *Alternativamente, você pode abrir o arquivo `index.html` diretamente no navegador ou utilizar extensões como o Live Server do VS Code.*
+
+4. Para rodar a validação do Design System localmente:
+   ```bash
+   node simulacoes/scripts/validate-ds.js
+   ```
 
 ---
 

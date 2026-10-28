@@ -1,0 +1,24 @@
+name: Validação do Design System
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validar-design-system:
+    name: Integridade e Conformidade DS 2.0
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Executar Validador do Design System
+        run: node simulacoes/scripts/validate-ds.js
