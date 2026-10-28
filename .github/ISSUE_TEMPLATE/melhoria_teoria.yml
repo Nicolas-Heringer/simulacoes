@@ -1,0 +1,53 @@
+name: Revisão Teórica ou Pedagógica
+description: Sugira correções, complementos ou melhorias no texto da aba Teoria ou fórmulas KaTeX.
+title: "[TEORIA]: "
+labels: ["documentation", "teoria"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A precisão pedagógica e matemática é fundamental para o projeto. Obrigado por colaborar com o rigor científico do laboratório!
+  - type: dropdown
+    id: simulation
+    attributes:
+      label: Simulação Relacionada
+      options:
+        - Átomo de Hidrogênio (atomo_de_hidrogenio.html)
+        - Análise Espectral de Áudio (audio.html)
+        - Dinâmica Atmosférica & Clima (clima.html)
+        - Modelo de Drude (drude.html)
+        - Ondas Estacionárias 2D (estacionarias2d.html)
+        - Dispersão de Fônons (fonons.html)
+        - Gravitação & Leis de Kepler (gravidade.html)
+        - Álgebra Linear & Matrizes (matrizes.html)
+        - Cinemática & Dinâmica (movimento.html)
+        - Sistema de N-Partículas (particulas.html)
+        - Queda Livre & Arrasto (quedalivre.html)
+        - Lei de Snell & Óptica (snell.html)
+        - Tensor de Inércia & Corpo Rígido (tensor_de_inercia.html)
+        - Geral / Várias simulações
+    validations:
+      required: true
+  - type: textarea
+    id: current_text
+    attributes:
+      label: Trecho Atual
+      description: Qual fórmula ou texto presente no card de Teoria precisa de revisão?
+      placeholder: Copie o trecho atual ou a fórmula KaTeX correspondente...
+    validations:
+      required: true
+  - type: textarea
+    id: suggested_change
+    attributes:
+      label: Proposta de Melhoria / Correção
+      description: Como você sugere que o texto ou a dedução matemática seja reescrita?
+      placeholder: Insira a nova dedução, correção de sinais ou complementação conceitual...
+    validations:
+      required: true
+  - type: input
+    id: references
+    attributes:
+      label: Referências Bibliográficas (Livro, Artigo ou Artigo Didático)
+      placeholder: "Ex: Griffiths - Mecânica Quântica, Cap. 4 / Feynman Lectures on Physics Vol. 1"
+    validations:
+      required: false

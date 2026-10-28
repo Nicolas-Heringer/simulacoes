@@ -1,0 +1,83 @@
+name: Relatório de Bug
+description: Crie um relatório para nos ajudar a identificar e corrigir problemas em simulações.
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por dedicar seu tempo para relatar um problema! Por favor, preencha os campos abaixo com o máximo de detalhes possível.
+  - type: dropdown
+    id: simulation
+    attributes:
+      label: Simulação Afetada
+      description: Em qual simulação ou página o problema ocorreu?
+      options:
+        - Átomo de Hidrogênio (atomo_de_hidrogenio.html)
+        - Análise Espectral de Áudio (audio.html)
+        - Dinâmica Atmosférica & Clima (clima.html)
+        - Modelo de Drude (drude.html)
+        - Ondas Estacionárias 2D (estacionarias2d.html)
+        - Dispersão de Fônons (fonons.html)
+        - Gravitação & Leis de Kepler (gravidade.html)
+        - Álgebra Linear & Matrizes (matrizes.html)
+        - Cinemática & Dinâmica (movimento.html)
+        - Sistema de N-Partículas (particulas.html)
+        - Queda Livre & Arrasto (quedalivre.html)
+        - Lei de Snell & Óptica (snell.html)
+        - Tensor de Inércia & Corpo Rígido (tensor_de_inercia.html)
+        - Catálogo UI Lab (ui_lab.html)
+        - Página Inicial (index.html)
+        - Outro / Geral
+    validations:
+      required: true
+  - type: dropdown
+    id: bug_type
+    attributes:
+      label: Categoria do Problema
+      description: Qual área foi impactada?
+      options:
+        - Visual / Renderização 3D ou 2D (Three.js / Canvas)
+        - Divergência Numérica ou Física (cálculos incorretos, passos no tempo)
+        - Fórmulas Matemáticas / KaTeX (renderização ou erro conceitual)
+        - Interface / Controles (sliders, transport-bar, abas, foco)
+        - Responsividade Mobile / Tablet (Bottom Sheet, gestos touch)
+        - Erro no Console / JavaScript
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição do Problema
+      description: O que aconteceu e qual era o comportamento esperado?
+      placeholder: Descreva claramente o erro ocorrido...
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Passos para Reproduzir
+      description: Como reproduzir o problema passo a passo?
+      value: |
+        1. Abra a simulação '...'
+        2. Altere o parâmetro '...' para '...'
+        3. Observe que '...'
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Dispositivo e Navegador
+      description: Ex.: Chrome 124 no Windows 11 / Safari no iOS 17 / Firefox no Ubuntu.
+      placeholder: "Ex: Chrome no Windows 11"
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Validação Prévia
+      options:
+        - label: Verifiquei se o erro também ocorre após recarregar a página sem cache (Ctrl + F5).
+          required: false
+        - label: Testei em outro navegador ou dispositivo, se aplicável.
+          required: false

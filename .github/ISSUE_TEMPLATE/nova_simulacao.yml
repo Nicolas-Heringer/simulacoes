@@ -1,0 +1,62 @@
+name: Sugestão de Nova Simulação
+description: Proponha um novo experimento, modelo físico ou demonstração matemática.
+title: "[SUGESTÃO]: "
+labels: ["enhancement", "nova-simulacao"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Adoramos expandir o laboratório com novas áreas e experimentos interativos! Compartilhe sua proposta abaixo.
+  - type: input
+    id: title
+    attributes:
+      label: Título da Simulação Proposta
+      placeholder: "Ex: Pêndulo Duplo e Dinâmica Caótica / Difração de Fraunhofer / Condução de Calor"
+    validations:
+      required: true
+  - type: dropdown
+    id: domain
+    attributes:
+      label: Grande Área do Conhecimento
+      options:
+        - Mecânica Clássica & Caos
+        - Eletromagnetismo & Circuitos
+        - Óptica & Fenômenos Ondulatórios
+        - Termodinâmica & Mecânica Estatística
+        - Física Quântica & Atômica
+        - Astrofísica & Mecânica Celeste
+        - Álgebra Linear, Geometria & Cálculo
+        - Outra
+    validations:
+      required: true
+  - type: textarea
+    id: concept
+    attributes:
+      label: Conceito Físico / Matemático
+      description: Qual fenômeno ou princípio será explorado e visualizado?
+      placeholder: Explique o objetivo pedagógico e o que o aluno/pesquisador verá na tela...
+    validations:
+      required: true
+  - type: textarea
+    id: controls
+    attributes:
+      label: Parâmetros e Interatividade Proposta
+      description: Quais variáveis o usuário deve poder alterar via sliders ou controles do Design System?
+      placeholder: "Ex: Massa das esferas, comprimento das hastes, gravidade local, atrito do ar..."
+    validations:
+      required: true
+  - type: textarea
+    id: formulas
+    attributes:
+      label: Equações Fundamentais e Referências (Opcional)
+      description: Equações diferenciais, leis físicas ou links úteis para a dedução teórica.
+      placeholder: "Ex: Equações de Euler-Lagrange, referências de livros (ex: Goldstein, Halliday, Griffiths)..."
+    validations:
+      required: false
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Disposição para Contribuir
+      options:
+        - label: Tenho interesse em desenvolver ou colaborar no código desta simulação no padrão Design System 2.0.
+          required: false
