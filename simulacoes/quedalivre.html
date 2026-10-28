@@ -32,7 +32,7 @@
     <!-- Cabeçalho da Simulação -->
     <header class="sim-header">
         <a href="../index.html#secao-simulacoes" class="btn-back">
-            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <img src="../assets/icons/arrow-left.svg" class="icon-svg" alt="Voltar">
             Voltar
         </a>
         <h1 class="sim-title">Queda Livre & Arremesso de Corpos</h1>
@@ -55,6 +55,9 @@
                     <span class="btn-label-text">Controles</span>
                 </button>
             </div>
+
+            <!-- Barra Flutuante de Contexto para Modo Foco -->
+            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
 
             <!-- HUD de Telemetria no Canto Inferior Esquerdo -->
             <div class="sim-hud" id="sim-hud">
@@ -88,11 +91,11 @@
 
             <!-- Topo: Barra de Abas Expansíveis -->
             <div class="tab-nav">
-                <button class="tab-btn active" id="tab-btn-params">
+                <button class="tab-btn active" id="tab-btn-params" data-tab="panel-tab-params">
                     <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Parâmetros">
                     <span class="tab-label">Parâmetros</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-theory">
+                <button class="tab-btn" id="tab-btn-theory" data-tab="panel-tab-theory">
                     <img src="../assets/icons/compass.svg" class="icon-svg" alt="Teoria">
                     <span class="tab-label">Teoria</span>
                 </button>
@@ -104,12 +107,13 @@
             <!-- Centro: Corpo Rolável de Conteúdo -->
             <div class="panel-body">
                 <!-- ABA 1: PARÂMETROS -->
-                <div id="panel-tab-params">
+                <div id="panel-tab-params" class="tab-pane active">
                     <!-- 1. Barra de Transporte / Playback -->
                     <div class="sim-transport-bar">
                         <div class="transport-controls-row">
                             <button class="btn-primary btn-toggle transport-btn-play" id="btn-play-sim"
                                     data-state="1"
+                                    data-focus-control="toggle"
                                     data-text-idle="Executar"
                                     data-text-active="Pausar"
                                     data-icon-idle="play"
@@ -117,10 +121,10 @@
                                 <img src="../assets/icons/pause.svg" class="icon-svg" alt="Play">
                                 <span class="btn-text">Pausar</span>
                             </button>
-                            <button class="btn-icon" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
+                            <button class="btn-icon" id="btn-step-sim" title="Avançar 1 Passo (Δt)" data-focus-control="action" data-focus-label="Passo">
                                 <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
                             </button>
-                            <button class="btn-icon" id="btn-reset-sim" title="Reiniciar (t = 0)">
+                            <button class="btn-icon" id="btn-reset-sim" title="Reiniciar (t = 0)" data-focus-control="action" data-focus-label="Reset">
                                 <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                             </button>
                         </div>
@@ -141,7 +145,7 @@
 
                     <!-- 2. Sliders Sincronizados -->
                     <div class="control-group">
-                        <div class="slider-container sim-dual-slider">
+                        <div class="slider-container sim-dual-slider" data-focus-control="slider" data-focus-label="g">
                             <div class="slider-header">
                                 <label for="slider-gravidade" class="slider-label">Aceleração Gravitacional ($g$)</label>
                                 <div class="dual-input-wrapper">
@@ -223,8 +227,8 @@
                 </div>
 
                 <!-- ABA 2: TEORIA -->
-                <div id="panel-tab-theory" style="display: none;">
-                    <div class="theory-section">
+                <div id="panel-tab-theory" class="tab-pane" style="display: none;">
+                    <div class="theory-card">
                         <h4>1. Equações do Movimento Sob Gravidade e Arrasto</h4>
                         <p>Pela Segunda Lei de Newton, a dinâmica vetorial da partícula sujeita à gravidade e à força resistiva do fluido é expressa por:</p>
                         $$m \frac{d\vec{v}}{dt} = m \vec{g} - b \vec{v}$$
@@ -232,14 +236,14 @@
                         $$\frac{dv_y}{dt} = g - \frac{b}{m} v_y$$
                     </div>
 
-                    <div class="theory-section">
+                    <div class="theory-card">
                         <h4>2. Colisão e Coeficiente de Restituição ($e$)</h4>
                         <p>No choque contra as bordas ou solo, a velocidade normal é invertida com dissipação de energia cinética:</p>
                         $$v'_n = -e \, v_n \quad (0 \le e \le 1)$$
                         <p>Onde $e = 1$ representa colisão puramente elástica e $e < 1$ representa impacto inelástico.</p>
                     </div>
 
-                    <div class="theory-section">
+                    <div class="theory-card">
                         <h4>3. Conservação e Dissipação da Energia Mecânica</h4>
                         <p>A energia total instantânea do corpo em relação ao solo é dada pela soma da energia cinética $K$ e potencial gravitacional $U$:</p>
                         $$E(t) = K + U = \frac{1}{2} m v^2 + m g (y_{\text{solo}} - y)$$

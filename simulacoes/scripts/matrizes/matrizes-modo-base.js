@@ -5,7 +5,7 @@
 // Modo 1: Interpretação Geométrica e Imagens da Base Canônica
 // =============================================================================
 
-import { setFieldState, det2x2 } from '../sim-ui.js';
+import { setFieldState, det2x2, syncDualSlider } from '../sim-ui.js';
 
 export class ModoBase {
     /**
@@ -101,7 +101,7 @@ export class ModoBase {
         }
 
         if (rotSlider) {
-            rotSlider.addEventListener('input', () => {
+            syncDualSlider('#base-rotSlider', '#base-rotNum', () => {
                 this.updateRotationPreset();
             });
         }

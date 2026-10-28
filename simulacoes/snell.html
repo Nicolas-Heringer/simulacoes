@@ -30,7 +30,7 @@
     <!-- Cabeçalho da Simulação -->
     <header class="sim-header">
         <a href="../index.html#secao-simulacoes" class="btn-back">
-            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <img src="../assets/icons/arrow-left.svg" class="icon-svg" alt="Voltar">
             Voltar ao Hub
         </a>
         <h1 class="sim-title">Lei de Snell — Ray Tracing Contínuo</h1>
@@ -41,6 +41,7 @@
 
         <!-- 1. Área do Canvas Interativo 2D -->
         <div class="canvas-area">
+            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
             <canvas id="simulationCanvas"></canvas>
 
             <!-- Indicador de Carregamento / Worker Computando -->
@@ -98,11 +99,11 @@
 
             <!-- Topo: Barra de Abas Expansíveis -->
             <div class="tab-nav">
-                <button class="tab-btn active" id="tab-btn-params" title="Parâmetros da Simulação">
+                <button class="tab-btn active" data-tab="panel-tab-params" id="tab-btn-params" title="Parâmetros da Simulação">
                     <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Parâmetros">
                     <span class="tab-label">Parâmetros</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-theory" title="Fundamentação Teórica & Dedução">
+                <button class="tab-btn" data-tab="panel-tab-theory" id="tab-btn-theory" title="Fundamentação Teórica & Dedução">
                     <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                     <span class="tab-label">Teoria</span>
                 </button>
@@ -115,7 +116,7 @@
             <div class="panel-body">
 
                 <!-- ABA 1: PARÂMETROS E CONTROLES -->
-                <div id="panel-tab-params">
+                <div class="tab-pane active" id="panel-tab-params">
                     <div class="tab-header">
                         <div class="tab-header-row">
                             <h3 class="tab-title">Óptica de Meios Contínuos</h3>
@@ -128,9 +129,10 @@
                     </div>
 
                     <!-- Barra de Controle e Ações -->
-                    <div class="control-group">
-                        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px;">
+                    <div class="sim-transport-bar">
+                        <div class="transport-controls-row">
                             <button class="btn-primary btn-toggle transport-btn-play" id="btnPlayPause"
+                                    data-focus-control="toggle"
                                     data-state="1"
                                     data-text-idle="Executar"
                                     data-text-active="Pausar"
@@ -139,7 +141,7 @@
                                 <img src="../assets/icons/pause.svg" class="icon-svg" alt="Pausar">
                                 <span class="btn-text">Pausar</span>
                             </button>
-                            <button class="btn-secondary" id="btnLimparFeixes" title="Limpar feixes e rastros">
+                            <button class="btn-secondary" id="btnLimparFeixes" data-focus-control="action" title="Limpar feixes e rastros">
                                 <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Limpar">
                                 <span>Limpar</span>
                             </button>
@@ -151,7 +153,7 @@
                     <!-- Seletor de Perfil n(x,y) -->
                     <div class="control-group">
                         <label for="refractiveIndexFunction">Perfil de Índice $n(x,y)$:</label>
-                        <select id="refractiveIndexFunction" class="sim-control">
+                        <select id="refractiveIndexFunction" class="sim-control" data-focus-control="select">
                             <option value="constante">Constante (n = 1.0 — Espaço Livre)</option>
                             <option value="interfacePlana">Interface Plana (n₁ = 1.0 / n₂ = 1.5)</option>
                             <option value="circulo">Lente Circular / Esfera Dielétrica</option>
@@ -194,7 +196,7 @@
                                     <span class="dual-input-unit" id="aberturaUnit">°</span>
                                 </div>
                             </div>
-                            <input type="range" class="sim-slider" id="aberturaSlider"
+                            <input type="range" class="sim-slider" id="aberturaSlider" data-focus-control="slider"
                                    min="0" max="360" step="2" value="45">
                         </div>
                     </div>
@@ -210,7 +212,7 @@
                                     <span class="dual-input-unit">raios</span>
                                 </div>
                             </div>
-                            <input type="range" class="sim-slider" id="numFeixesSlider"
+                            <input type="range" class="sim-slider" id="numFeixesSlider" data-focus-control="slider"
                                    min="1" max="500" step="1" value="100">
                         </div>
                     </div>
@@ -263,7 +265,7 @@
                 </div>
 
                 <!-- ABA 2: TEORIA E DEDUÇÃO MATEMÁTICA -->
-                <div id="panel-tab-theory" style="display: none;">
+                <div class="tab-pane" id="panel-tab-theory" style="display: none;">
                     <div class="tab-header">
                         <div class="tab-header-row">
                             <h3 class="tab-title">Fundamentação Teórica</h3>
@@ -403,16 +405,6 @@
                 <button class="btn-primary" data-modal-close style="min-width: 100px;">Entendido</button>
             </div>
         </div>
-    </div>
-
-    <!-- Elementos Ocultos de Retrocompatibilidade para Cache de Navegador -->
-    <div style="display: none;" aria-hidden="true">
-        <span id="aberturaValue">45</span>
-        <span id="numFeixesValue">100</span>
-        <span id="persistenciaValue">100%</span>
-        <span id="numWavelengthsValue">5</span>
-        <span id="btnPlayPauseIcon">⏸</span>
-        <span id="btnPlayPauseText">Pausar</span>
     </div>
 
     <!-- Script Principal da Simulação (ES Module com Cache-Buster) -->

@@ -12,7 +12,10 @@ import {
     initSidebarCollapse,
     initBottomSheet,
     inlineSVGImages,
-    syncDualSlider
+    syncDualSlider,
+    initTabs,
+    initFocusMirrorToolbar,
+    initKaTeXAutoRender
 } from './sim-ui.js';
 
 // ============================================================================
@@ -452,35 +455,10 @@ const statusMsg    = document.getElementById('status-msg');
 const legendFase   = document.getElementById('legend-fase');
 const legendDens   = document.getElementById('legend-density');
 
-// Referências DOM — Menu de Contexto (Topo Esquerdo do Canvas) & Popover
-const contextToolbar       = document.getElementById('quantum-context-toolbar');
-const quickSelectN         = document.getElementById('quick-select-n');
-const quickSelectL         = document.getElementById('quick-select-l');
-const quickSelectMl        = document.getElementById('quick-select-ml');
-const quickBadgeOrbital    = document.getElementById('quick-badge-orbital');
-const btnQuickGerar        = document.getElementById('btn-quick-gerar');
-const btnTogglePopover     = document.getElementById('btn-toggle-quantum-popover');
-
-const popoverEl            = document.getElementById('quantum-popover');
-const btnClosePopover      = document.getElementById('btn-close-quantum-popover');
-const popoverOrbitalName   = document.getElementById('popover-orbital-name');
-const popoverOrbitalEnergy = document.getElementById('popover-orbital-energy');
-const quickSelectMs        = document.getElementById('quick-select-ms');
-const quickSelectModo      = document.getElementById('quick-select-modo');
-const quickSliderPts       = document.getElementById('quick-slider-pontos');
-const quickSpanPts         = document.getElementById('quick-span-pontos');
-const btnPopoverGerar      = document.getElementById('btn-popover-gerar');
-
 // Ações Flutuantes no Topo Direito & Rodapé
 const btnQuickAutorotate   = document.getElementById('btn-quick-autorotate');
 const footerEnergyMeta     = document.getElementById('footer-energy-meta');
 const footerStatusText     = document.getElementById('footer-status-text');
-
-// Abas de Parâmetros e Teoria
-const tabBtnParams         = document.getElementById('tab-btn-params');
-const tabBtnTheory         = document.getElementById('tab-btn-theory');
-const panelTabParams       = document.getElementById('panel-tab-params');
-const panelTabTheory       = document.getElementById('panel-tab-theory');
 
 /** Formata o badge do orbital com tipografia matemática via KaTeX quando disponível */
 function formatarBadgeOrbital(n, l, ml) {
@@ -511,68 +489,46 @@ function atualizarBadges() {
 
     if (spanOrbital) spanOrbital.innerHTML = descCompleta;
     if (spanEnergia) spanEnergia.textContent = energiaStr;
-    if (quickBadgeOrbital) quickBadgeOrbital.innerHTML = descCompleta;
-    if (popoverOrbitalName) popoverOrbitalName.innerHTML = descCompleta;
-    if (popoverOrbitalEnergy) popoverOrbitalEnergy.textContent = energiaStr;
     if (footerEnergyMeta) footerEnergyMeta.textContent = energiaStr;
 }
 
-/** Preenche os <select> de l no painel lateral e no menu de contexto (0 … n−1). */
+/** Preenche os <select> de l no painel lateral (0 … n−1). */
 function atualizarSelectL() {
     const n = parseInt(selectN.value) || 1;
     const lPrev = parseInt(selectL.value) || 0;
 
     selectL.innerHTML = '';
-    if (quickSelectL) quickSelectL.innerHTML = '';
 
     for (let l = 0; l < n; l++) {
         const opt = document.createElement('option');
         opt.value = l;
         opt.textContent = `${l}  (${NOMES_L[l]})`;
         selectL.appendChild(opt);
-
-        if (quickSelectL) {
-            const qOpt = document.createElement('option');
-            qOpt.value = l;
-            qOpt.textContent = `${l} (${NOMES_L[l]})`;
-            quickSelectL.appendChild(qOpt);
-        }
     }
 
     const valL = Math.min(lPrev, n - 1);
     selectL.value = valL;
-    if (quickSelectL) quickSelectL.value = valL;
-    if (quickSelectN) quickSelectN.value = n;
 
     atualizarSelectMl();
     atualizarBadges();
 }
 
-/** Preenche os <select> de m_l no painel lateral e no menu de contexto (−l … +l). */
+/** Preenche os <select> de m_l no painel lateral (−l … +l). */
 function atualizarSelectMl() {
     const l = parseInt(selectL.value) || 0;
     const mlPrev = parseInt(selectMl.value) || 0;
 
     selectMl.innerHTML = '';
-    if (quickSelectMl) quickSelectMl.innerHTML = '';
 
     for (let ml = -l; ml <= l; ml++) {
         const opt = document.createElement('option');
         opt.value = ml;
         opt.textContent = ml >= 0 ? `+${ml}` : `${ml}`;
         selectMl.appendChild(opt);
-
-        if (quickSelectMl) {
-            const qOpt = document.createElement('option');
-            qOpt.value = ml;
-            qOpt.textContent = ml >= 0 ? `+${ml}` : `${ml}`;
-            quickSelectMl.appendChild(qOpt);
-        }
     }
 
     const valMl = Math.max(-l, Math.min(l, mlPrev));
     selectMl.value = valMl;
-    if (quickSelectMl) quickSelectMl.value = valMl;
 
     atualizarBadges();
 }
@@ -596,8 +552,6 @@ function setStatus(msg, carregando = false) {
         statusMsg.className = carregando ? 'status loading' : 'status';
     }
     if (btnGerar) btnGerar.disabled = carregando;
-    if (btnQuickGerar) btnQuickGerar.disabled = carregando;
-    if (btnPopoverGerar) btnPopoverGerar.disabled = carregando;
 }
 
 // Pontos atuais em memória — permite recolorir sem recalcular
@@ -609,112 +563,40 @@ function recolorirNuvem() {
     if (pontosAtuais) criarNuvem(pontosAtuais, selectModo.value, nAtual);
 }
 
-// ---- Listeners e Sincronização Bidirecional ----
+// ---- Listeners dos Controles ----
 
 // 1. Mudança em n
 selectN.addEventListener('change', () => {
-    if (quickSelectN) quickSelectN.value = selectN.value;
-    atualizarSelectL();
-    btnGerar.click();
-});
-quickSelectN?.addEventListener('change', () => {
-    selectN.value = quickSelectN.value;
     atualizarSelectL();
     btnGerar.click();
 });
 
 // 2. Mudança em l
 selectL.addEventListener('change', () => {
-    if (quickSelectL) quickSelectL.value = selectL.value;
-    atualizarSelectMl();
-    btnGerar.click();
-});
-quickSelectL?.addEventListener('change', () => {
-    selectL.value = quickSelectL.value;
     atualizarSelectMl();
     btnGerar.click();
 });
 
 // 3. Mudança em ml
 selectMl.addEventListener('change', () => {
-    if (quickSelectMl) quickSelectMl.value = selectMl.value;
-    atualizarBadges();
-    btnGerar.click();
-});
-quickSelectMl?.addEventListener('change', () => {
-    selectMl.value = quickSelectMl.value;
     atualizarBadges();
     btnGerar.click();
 });
 
-// 4. Mudança em ms (spin)
-selectMs?.addEventListener('change', () => {
-    if (quickSelectMs) quickSelectMs.value = selectMs.value;
-});
-quickSelectMs?.addEventListener('change', () => {
-    if (selectMs) selectMs.value = quickSelectMs.value;
-});
-
-// 5. Modo de Cor
+// 4. Modo de Cor
 selectModo.addEventListener('change', () => {
-    if (quickSelectModo) quickSelectModo.value = selectModo.value;
-    atualizarLegenda();
-    recolorirNuvem();
-});
-quickSelectModo?.addEventListener('change', () => {
-    selectModo.value = quickSelectModo.value;
     atualizarLegenda();
     recolorirNuvem();
 });
 
-// 6. Slider de Pontos com Dual Slider
-const numPts = document.getElementById('num-pontos');
+// 5. Slider de Pontos com Dual Slider
 syncDualSlider('#slider-pontos', '#num-pontos', (val) => {
     const pts = parseInt(val);
     const formatted = pts.toLocaleString('pt-BR');
     if (spanPts) spanPts.textContent = formatted;
-    if (quickSliderPts) quickSliderPts.value = val;
-    if (quickSpanPts) quickSpanPts.textContent = formatted;
 });
 
-quickSliderPts?.addEventListener('input', () => {
-    const pts = parseInt(quickSliderPts.value);
-    const formatted = pts.toLocaleString('pt-BR');
-    if (sliderPts) sliderPts.value = quickSliderPts.value;
-    if (numPts) numPts.value = quickSliderPts.value;
-    if (spanPts) spanPts.textContent = formatted;
-    if (quickSpanPts) quickSpanPts.textContent = formatted;
-});
-
-// 7. Botões Gerar
-btnQuickGerar?.addEventListener('click', () => btnGerar.click());
-btnPopoverGerar?.addEventListener('click', () => {
-    popoverEl?.classList.add('hidden');
-    btnGerar.click();
-});
-
-// 8. Popover Quântico
-btnTogglePopover?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    popoverEl?.classList.toggle('hidden');
-});
-btnClosePopover?.addEventListener('click', () => {
-    popoverEl?.classList.add('hidden');
-});
-document.addEventListener('click', (e) => {
-    if (popoverEl && !popoverEl.classList.contains('hidden')) {
-        if (!popoverEl.contains(e.target) && !btnTogglePopover?.contains(e.target)) {
-            popoverEl.classList.add('hidden');
-        }
-    }
-});
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && popoverEl && !popoverEl.classList.contains('hidden')) {
-        popoverEl.classList.add('hidden');
-    }
-});
-
-// 9. Alternância de Rotação da Câmera
+// 6. Alternância de Rotação da Câmera
 btnQuickAutorotate?.addEventListener('click', () => {
     if (!orbitControls) return;
     orbitControls.autoRotate = !orbitControls.autoRotate;
@@ -724,28 +606,8 @@ btnQuickAutorotate?.addEventListener('click', () => {
     if (icon) icon.classList.toggle('icon-spin', orbitControls.autoRotate);
 });
 
-// 10. Abas: Parâmetros vs. Teoria
-tabBtnParams?.addEventListener('click', () => {
-    tabBtnParams.classList.add('active');
-    tabBtnTheory?.classList.remove('active');
-    if (panelTabParams) panelTabParams.style.display = 'block';
-    if (panelTabTheory) panelTabTheory.style.display = 'none';
-});
-tabBtnTheory?.addEventListener('click', () => {
-    tabBtnTheory.classList.add('active');
-    tabBtnParams?.classList.remove('active');
-    if (panelTabParams) panelTabParams.style.display = 'none';
-    if (panelTabTheory) panelTabTheory.style.display = 'block';
-
-    if (window.renderMathInElement && panelTabTheory) {
-        window.renderMathInElement(panelTabTheory, {
-            delimiters: [
-                { left: '$$', right: '$$', display: true },
-                { left: '$', right: '$', display: false }
-            ]
-        });
-    }
-});
+// 7. Abas: Parâmetros vs. Teoria
+initTabs('.controls-panel');
 
 // Cálculo e Geração do Orbital
 btnGerar.addEventListener('click', () => {
@@ -819,6 +681,12 @@ window.addEventListener('DOMContentLoaded', async () => {
         layoutEl.classList.add('mobile-sheet-peek');
     }
 
+    // Barra Flutuante em Modo Foco
+    initFocusMirrorToolbar({
+        toolbarTarget: '#focus-context-toolbar',
+        scopeSelector: '.controls-panel'
+    });
+
     // Popula l e ml com valores iniciais (n=1)
     atualizarSelectL();
     atualizarLegenda();
@@ -828,6 +696,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // Transforma tags <img> de ícones em código SVG inline com currentColor
     await inlineSVGImages();
+    initKaTeXAutoRender(document.body);
 
     // Gera o orbital 1s automaticamente após a cena estar pronta
     setTimeout(() => btnGerar.click(), 450);

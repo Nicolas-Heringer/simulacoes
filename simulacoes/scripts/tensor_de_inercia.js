@@ -13,7 +13,9 @@ import {
     initTabs,
     inlineSVGImages,
     initKaTeXAutoRender,
-    diagonalizeSymmetric3x3
+    diagonalizeSymmetric3x3,
+    syncDualSlider,
+    initFocusMirrorToolbar
 } from './sim-ui.js';
 
 // =============================================================================
@@ -1029,12 +1031,9 @@ function initUI() {
         rebuildScene();
     });
 
-    // Speed slider
-    const speedSlider = document.getElementById('speed-slider');
-    const speedVal = document.getElementById('speed-val');
-    speedSlider.addEventListener('input', (e) => {
-        state.angularSpeed = parseFloat(e.target.value);
-        speedVal.textContent = state.angularSpeed.toFixed(1);
+    // Speed slider sincronizado
+    syncDualSlider('#speed-slider', '#speed-input', (val) => {
+        state.angularSpeed = val;
     });
 
     // Diagonalizar
@@ -1044,18 +1043,19 @@ function initUI() {
 
     // Inicializar subsistemas do Design System 2.0
     inlineSVGImages();
-    initTabs();
-    initSidebarCollapse();
+    initTabs('.controls-panel');
+    initSidebarCollapse({
+        layoutSelector: '.sim-layout',
+        collapseBtnSelector: '#btn-collapse-sidebar',
+        expandBtnSelector: '#btn-expand-sidebar',
+        onResize: handleResize
+    });
+    initFocusMirrorToolbar({
+        toolbarTarget: '#focus-context-toolbar',
+        scopeSelector: '.controls-panel'
+    });
     initBottomSheet('#controls-panel');
     initKaTeXAutoRender();
-
-    const btnFocus = document.getElementById('btn-focus-mode');
-    if (btnFocus) {
-        btnFocus.addEventListener('click', () => {
-            const sidebar = document.getElementById('controls-panel');
-            if (sidebar) sidebar.classList.toggle('collapsed');
-        });
-    }
 
     // Inicializar UI
     showPartControls();
@@ -1083,7 +1083,9 @@ function showPartControls() {
 
 function updatePlayButton() {
     const btn = document.getElementById('play-pause-btn');
+    if (!btn) return;
     btn.textContent = state.isPlaying ? '⏸ Pausar' : '▶ Play';
+    btn.classList.toggle('is-active', state.isPlaying);
 }
 
 function updatePart1Inputs() {

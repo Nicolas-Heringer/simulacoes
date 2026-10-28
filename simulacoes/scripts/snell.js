@@ -12,7 +12,10 @@ import {
     initSidebarCollapse,
     initBottomSheet,
     initModal,
-    inlineSVGImages
+    inlineSVGImages,
+    initTabs,
+    initFocusMirrorToolbar,
+    initKaTeXAutoRender
 } from './sim-ui.js';
 
 // =============================================================================
@@ -452,26 +455,13 @@ function setupEventListeners() {
     });
 
     // --- NAVEGAÇÃO ENTRE ABAS DO PAINEL ---
-    const tabParamsBtn = document.getElementById('tab-btn-params');
-    const tabTheoryBtn = document.getElementById('tab-btn-theory');
-    const panelParams = document.getElementById('panel-tab-params');
-    const panelTheory = document.getElementById('panel-tab-theory');
+    initTabs('.controls-panel');
 
-    if (tabParamsBtn && tabTheoryBtn && panelParams && panelTheory) {
-        tabParamsBtn.addEventListener('click', () => {
-            tabParamsBtn.classList.add('active');
-            tabTheoryBtn.classList.remove('active');
-            panelParams.style.display = 'block';
-            panelTheory.style.display = 'none';
-        });
-
-        tabTheoryBtn.addEventListener('click', () => {
-            tabTheoryBtn.classList.add('active');
-            tabParamsBtn.classList.remove('active');
-            panelTheory.style.display = 'block';
-            panelParams.style.display = 'none';
-        });
-    }
+    // --- BARRA DE CONTEXTO EM MODO FOCO ---
+    initFocusMirrorToolbar({
+        toolbarTarget: '#focus-context-toolbar',
+        scopeSelector: '.controls-panel'
+    });
 
     // --- PLAY / PAUSE COM TOGGLE BUTTON ---
     playControl = initToggleButton('#btnPlayPause', (active) => {
@@ -574,7 +564,7 @@ function setupEventListeners() {
         });
     }
 
-    // --- EVENTOS DO CANVAS ---
+    // --- EVENTOS DO CANVAS (POINTER EVENTS UNIFICADOS) ---
     if (canvas) {
         canvas.addEventListener('wheel', (e) => {
             e.preventDefault();
@@ -584,7 +574,7 @@ function setupEventListeners() {
             updateHudAngle();
         }, { passive: false });
 
-        canvas.addEventListener('mousedown', (e) => {
+        canvas.addEventListener('pointerdown', (e) => {
             if (e.button !== 0) return;
             isEmitting = true;
             const rect = canvas.getBoundingClientRect();
@@ -595,11 +585,11 @@ function setupEventListeners() {
             emitAt(mx, my);
         });
 
-        window.addEventListener('mouseup', () => {
+        window.addEventListener('pointerup', () => {
             isEmitting = false;
         });
 
-        canvas.addEventListener('mousemove', (e) => {
+        canvas.addEventListener('pointermove', (e) => {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
@@ -617,7 +607,7 @@ function setupEventListeners() {
             }
         });
 
-        canvas.addEventListener('mouseleave', () => {
+        canvas.addEventListener('pointerleave', () => {
             mousePos.inside = false;
             isEmitting = false;
             const hudCoords = document.getElementById('hudCoords');
@@ -705,13 +695,5 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     animate();
     await inlineSVGImages();
-
-    if (window.renderMathInElement) {
-        window.renderMathInElement(document.body, {
-            delimiters: [
-                { left: '$$', right: '$$', display: true },
-                { left: '$', right: '$', display: false }
-            ]
-        });
-    }
+    initKaTeXAutoRender(document.body);
 });

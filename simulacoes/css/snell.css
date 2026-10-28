@@ -8,6 +8,7 @@
     width: 100%;
     height: 100%;
     cursor: crosshair;
+    touch-action: none;
 }
 
 /* Indicador de carregamento / Cálculo do Web Worker */

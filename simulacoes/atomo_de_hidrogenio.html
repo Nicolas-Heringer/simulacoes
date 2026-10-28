@@ -23,16 +23,7 @@
     <!-- Suporte a LaTeX com KaTeX -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
-        crossorigin="anonymous" onload="renderMathInElement(document.body, {
-            delimiters: [
-                {left: '$$', right: '$$', display: true},
-                {left: '$', right: '$', display: false},
-                {left: '\\(', right: '\\)', display: false},
-                {left: '\\[', right: '\\]', display: true}
-            ],
-            throwOnError: false
-        });"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
 
     <!-- Three.js via importmap (ES Modules) -->
     <script type="importmap">
@@ -50,9 +41,7 @@
     <!-- Cabeçalho da Simulação -->
     <header class="sim-header">
         <a href="../index.html#secao-simulacoes" class="btn-back">
-            <svg class="icon-svg" viewBox="0 0 24 24">
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
+            <img src="../assets/icons/arrow-left.svg" class="icon-svg" alt="Voltar">
             Voltar ao Hub
         </a>
         <h1 class="sim-title">Átomo de Hidrogênio — Orbitais Quânticos</h1>
@@ -65,93 +54,8 @@
         <div class="canvas-area">
             <div id="three-container"></div>
 
-            <!-- Menu de Contexto Rápido no Topo Esquerdo (Ativado no Modo Foco / Sidebar Ocultada) -->
-            <div class="canvas-toolbar pos-top-left quantum-context-toolbar" id="quantum-context-toolbar"
-                title="Menu de Contexto — Números Quânticos">
-                <span class="toolbar-orbital-title">⚛</span>
-                <span class="toolbar-orbital-badge" id="quick-badge-orbital">1s</span>
-                <div class="toolbar-divider"></div>
-
-                <div class="quick-qn-group">
-                    <label for="quick-select-n" class="quick-qn-label">$n$</label>
-                    <select id="quick-select-n" class="quick-qn-select" title="Número quântico principal (n)">
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                    </select>
-
-                    <label for="quick-select-l" class="quick-qn-label">$l$</label>
-                    <select id="quick-select-l" class="quick-qn-select" title="Momento angular azimutal (l)"></select>
-
-                    <label for="quick-select-ml" class="quick-qn-label">$m_l$</label>
-                    <select id="quick-select-ml" class="quick-qn-select"
-                        title="Número quântico magnético (ml)"></select>
-                </div>
-
-                <div class="toolbar-divider"></div>
-                <button id="btn-quick-gerar" class="toolbar-btn" title="Recalcular orbital">
-                    <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Gerar">
-                    <span>Gerar</span>
-                </button>
-                <button id="btn-toggle-quantum-popover" class="toolbar-btn"
-                    title="Mais opções quânticas (Spin, Amostragem, Cor)">
-                    <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="Opções">
-                    <span>Mais</span>
-                </button>
-            </div>
-
-            <!-- Popover Quântico Flutuante -->
-            <div id="quantum-popover" class="sim-popover hidden">
-                <div class="popover-header">
-                    <div class="popover-title">
-                        <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="Opções">
-                        <span>Configurações Quânticas Avançadas</span>
-                    </div>
-                    <button id="btn-close-quantum-popover" class="popover-close" title="Fechar">✕</button>
-                </div>
-
-                <div class="quantum-popover-content">
-                    <div class="orbital-badge orbital-badge-compact">
-                        <span class="orbital-name" id="popover-orbital-name">1s <span class="badge-math">$(m_l =
-                                0)$</span></span>
-                        <span class="orbital-energy" id="popover-orbital-energy">E = −13.600 eV</span>
-                    </div>
-
-                    <!-- Spin ms -->
-                    <div class="popover-field-row">
-                        <label for="quick-select-ms" class="popover-field-label">Spin ($m_s$):</label>
-                        <select id="quick-select-ms" class="sim-control popover-field-select">
-                            <option value="+0.5">+½</option>
-                            <option value="-0.5">−½</option>
-                        </select>
-                    </div>
-
-                    <!-- Modo de colorização -->
-                    <div class="popover-field-row">
-                        <label for="quick-select-modo" class="popover-field-label">Colorização:</label>
-                        <select id="quick-select-modo" class="sim-control popover-field-select">
-                            <option value="fase">Fase de Ψ — arg(ψ)</option>
-                            <option value="densidade">Densidade — |Ψ|²</option>
-                        </select>
-                    </div>
-
-                    <!-- Pontos amostrados -->
-                    <div class="popover-field-col">
-                        <div class="popover-slider-title-row">
-                            <label for="quick-slider-pontos" class="popover-field-label">Pontos amostrados:</label>
-                            <span class="slider-val" id="quick-span-pontos">5.000</span>
-                        </div>
-                        <input type="range" id="quick-slider-pontos" class="sim-slider" min="500" max="20000" step="500"
-                            value="5000">
-                    </div>
-
-                    <button id="btn-popover-gerar" class="sim-btn" style="width: 100%; margin-top: 4px;">
-                        ⚛ Gerar Orbital
-                    </button>
-                </div>
-            </div>
+            <!-- Barra Flutuante em Modo Foco (Design System 2.0 Mirror) -->
+            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
 
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
@@ -182,12 +86,12 @@
 
             <!-- Topo: Barra de Abas Expansíveis com Botão de Recolher Sidebar -->
             <div class="tab-nav">
-                <button class="tab-btn active" id="tab-btn-params" title="Controles e Parâmetros">
-                    <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Parâmetros">
+                <button class="tab-btn active" data-tab="panel-tab-params" id="tab-btn-params" title="Controles e Parâmetros">
+                    <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Parâmetros">
                     <span class="tab-label">Parâmetros</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-theory" title="Fundamentação Teórica & Fórmulas">
-                    <img src="../assets/icons/compass.svg" class="icon-svg" alt="Teoria">
+                <button class="tab-btn" data-tab="panel-tab-theory" id="tab-btn-theory" title="Fundamentação Teórica & Fórmulas">
+                    <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                     <span class="tab-label">Teoria</span>
                 </button>
                 <button class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
@@ -199,7 +103,7 @@
             <div class="panel-body">
 
                 <!-- ABA 1: PARÂMETROS E CONTROLES -->
-                <div id="panel-tab-params">
+                <div class="tab-pane active" id="panel-tab-params">
                     <!-- Cabeçalho da Aba -->
                     <div class="tab-header">
                         <div class="tab-header-row">
@@ -213,7 +117,7 @@
 
                     <!-- Badge do orbital atual -->
                     <div class="orbital-badge">
-                        <span class="orbital-name" id="span-orbital">1s <span class="badge-math">$(m_l =
+                        <span class="orbital-name" id="span-orbital" data-focus-control="badge">1s <span class="badge-math">$(m_l =
                                 0)$</span></span>
                         <span class="orbital-energy" id="span-energia">E = −13.600 eV</span>
                     </div>
@@ -226,7 +130,7 @@
 
                             <div class="qn-cell">
                                 <span class="qn-symbol">$n$</span>
-                                <select id="select-n" class="sim-control qn-select">
+                                <select id="select-n" class="sim-control qn-select" data-focus-control="select">
                                     <option value="1">1</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>
@@ -238,13 +142,13 @@
 
                             <div class="qn-cell">
                                 <span class="qn-symbol">$l$</span>
-                                <select id="select-l" class="sim-control qn-select"></select>
+                                <select id="select-l" class="sim-control qn-select" data-focus-control="select"></select>
                                 <span class="qn-desc">azimutal</span>
                             </div>
 
                             <div class="qn-cell">
                                 <span class="qn-symbol">$m_l$</span>
-                                <select id="select-ml" class="sim-control qn-select"></select>
+                                <select id="select-ml" class="sim-control qn-select" data-focus-control="select"></select>
                                 <span class="qn-desc">magnético</span>
                             </div>
 
@@ -310,7 +214,7 @@
                     <div class="sim-divider-label"><span>Execução</span></div>
 
                     <!-- Botão -->
-                    <button id="btn-gerar" class="sim-btn">⚛ Gerar Orbital</button>
+                    <button id="btn-gerar" class="sim-btn" data-focus-control="action">⚛ Gerar Orbital</button>
 
                     <!-- Status -->
                     <p id="status-msg" class="status"></p>
@@ -366,7 +270,7 @@
                 </div>
 
                 <!-- ABA 2: TEORIA E FÓRMULAS MATEMÁTICAS -->
-                <div id="panel-tab-theory" style="display: none;">
+                <div class="tab-pane" id="panel-tab-theory" style="display: none;">
                     <div class="tab-header">
                         <div class="tab-header-row">
                             <h3 class="tab-title">Fundamentação Teórica</h3>

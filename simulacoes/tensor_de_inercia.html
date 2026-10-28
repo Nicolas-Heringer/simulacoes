@@ -28,28 +28,35 @@
     <!-- Cabeçalho da Simulação -->
     <header class="sim-header">
         <a href="../index.html#secao-simulacoes" class="btn-back">
-            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span>Voltar ao Hub</span>
+            <img src="../assets/icons/arrow-left.svg" class="icon-svg" alt="Voltar">
+            Voltar ao Hub
         </a>
-        <span class="sim-title">Tensor de Inércia: Visualização Interativa</span>
-        <div class="header-actions">
-            <button class="header-action-btn" id="btn-focus-mode" title="Modo Foco (F)">
-                <img src="../assets/icons/expand.svg" class="icon-svg" alt="Foco">
-            </button>
-        </div>
+        <h1 class="sim-title">Tensor de Inércia: Visualização Interativa</h1>
     </header>
 
     <!-- Conteúdo Principal -->
     <main class="sim-layout">
         <!-- Área de Visualização 3D -->
         <div class="canvas-area" id="canvas-area" style="touch-action: none;">
+            <!-- Barra Flutuante em Modo Foco (Design System 2.0 Mirror) -->
+            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+
+            <!-- Grupo de Ações Flutuantes no Topo Direito -->
+            <div class="canvas-top-actions">
+                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Painel (F)">
+                    <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
+                    <span class="btn-label-text">Controles</span>
+                </button>
+            </div>
+
             <!-- Badge de informação no canvas -->
-            <div class="canvas-overlay-badge" id="inertia-badge">
+            <div class="canvas-info-badge" id="inertia-badge">
                 I = <span id="badge-inertia-value">0.00</span> kg·m²
             </div>
 
-            <div class="canvas-instructions" id="canvas-hint">
-                💡 Arraste com o mouse/toque para orbitar. Use o botão de diagonalização para alinhar aos eixos principais.
+            <div class="interactive-hint" id="canvas-hint">
+                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dica">
+                Arraste com o mouse/toque para orbitar. Use o botão de diagonalização para alinhar aos eixos principais.
             </div>
         </div>
 
@@ -168,19 +175,30 @@
                     <!-- Botões de Ação e Reprodução -->
                     <div class="control-group">
                         <div class="button-row">
-                            <button class="btn-action primary" id="play-pause-btn">▶ Play</button>
-                            <button class="btn-action secondary" id="reset-btn">↺ Resetar</button>
+                            <button class="btn-action primary" id="play-pause-btn"
+                                data-focus-control="toggle" data-focus-order="1" data-focus-tooltip="Iniciar / Pausar Rotação">▶ Play</button>
+                            <button class="btn-action secondary" id="reset-btn"
+                                data-focus-control="action" data-focus-order="2" data-focus-icon="refresh" data-focus-tooltip="Reiniciar Rotação">↺ Resetar</button>
                         </div>
-                        <div class="slider-header" style="margin-top: 10px;">
-                            <label for="speed-slider">Velocidade Angular (rad/s)</label>
-                            <span class="slider-val" id="speed-val">1.0</span>
+                        <div class="slider-container sim-dual-slider" style="margin-top: 10px;">
+                            <div class="slider-header">
+                                <label for="speed-slider" class="slider-label">Velocidade Angular ($\omega$)</label>
+                                <div class="dual-input-wrapper">
+                                    <input type="number" class="dual-input-number" id="speed-input"
+                                           min="0.1" max="5.0" step="0.1" value="1.0">
+                                    <span class="dual-input-unit">rad/s</span>
+                                </div>
+                            </div>
+                            <input type="range" id="speed-slider" class="sim-slider" min="0.1" max="5.0" step="0.1" value="1.0" />
                         </div>
-                        <input type="range" id="speed-slider" class="sim-slider" min="0.1" max="5" step="0.1" value="1.0" />
                     </div>
 
                     <!-- Exibição do Tensor de Inércia -->
-                    <div class="readout-card" id="tensor-card">
-                        <div class="readout-header">📐 Tensor de Inércia (kg·m²)</div>
+                    <div class="sim-readout" id="tensor-card">
+                        <div class="sim-readout-title">
+                            <img src="../assets/icons/matrix-basis.svg" class="icon-svg icon-accent" alt="Tensor">
+                            <span>Tensor de Inércia (kg·m²)</span>
+                        </div>
                         <div class="tensor-matrix" id="tensor-matrix">
                             <span class="matrix-bracket left">[</span>
                             <div class="tensor-grid">
@@ -190,45 +208,61 @@
                             </div>
                             <span class="matrix-bracket right">]</span>
                         </div>
-                        <div class="readout-item">
-                            <span class="readout-label">Momento de Inércia (eixo escolhido)</span>
-                            <span class="readout-value highlight-yellow" id="moment-value">0.00 kg·m²</span>
+                        <div class="sim-readout-row">
+                            <span class="sim-readout-label">Momento de Inércia (eixo):</span>
+                            <span class="sim-readout-value tone-accent" id="moment-value">0.00 kg·m²</span>
                         </div>
-                        <div class="readout-item">
-                            <span class="readout-label">Autovalores (momentos principais)</span>
-                            <span class="readout-value highlight-cyan" id="eigenvalues">—</span>
+                        <div class="sim-readout-row">
+                            <span class="sim-readout-label">Autovalores ($I_1, I_2, I_3$):</span>
+                            <span class="sim-readout-value tone-cyan" id="eigenvalues">—</span>
                         </div>
                     </div>
 
-                    <!-- Ellipsoide de Inércia -->
-                    <div class="readout-card" id="ellipsoid-card">
-                        <div class="readout-header">🔮 Elipsoide de Inércia</div>
+                    <!-- Elipsoide de Inércia -->
+                    <div class="sim-readout" id="ellipsoid-card">
+                        <div class="sim-readout-title">
+                            <img src="../assets/icons/axis-3d.svg" class="icon-svg icon-accent" alt="Elipsoide">
+                            <span>Elipsoide de Inércia</span>
+                        </div>
                         <div id="ellipsoid-container">
                             <!-- Mini Three.js renderer para elipsoide -->
                         </div>
-                        <div class="readout-item">
-                            <span class="readout-label">Eixos Principais</span>
-                            <span class="readout-value highlight-green" id="principal-axes-info">—</span>
+                        <div class="sim-readout-row">
+                            <span class="sim-readout-label">Eixos Principais:</span>
+                            <span class="sim-readout-value tone-emerald" id="principal-axes-info">—</span>
                         </div>
                     </div>
 
                     <!-- Diagonalização -->
                     <div class="control-group" id="diag-group">
-                        <button class="btn-action primary" id="diagonalize-btn">⚡ Diagonalizar Tensor</button>
+                        <button class="btn-action primary" id="diagonalize-btn"
+                            data-focus-control="action" data-focus-order="3" data-focus-icon="axis-3d" data-focus-tooltip="Diagonalizar Tensor">⚡ Diagonalizar Tensor</button>
                     </div>
 
                 </div>
 
                 <!-- Aba de Teoria -->
                 <div class="tab-pane" id="tab-theory">
-                    <article class="theory-content">
-                        <h3>O Tensor de Inércia na Mecânica Clássica</h3>
+                    <div class="tab-header-row">
+                        <h3 class="tab-title">Fundamentação Teórica</h3>
+                        <div class="sim-badge"><span class="status-dot"></span><span>$\LaTeX$</span></div>
+                    </div>
+                    <p class="tab-subtitle">Dedução formal do tensor de inércia, diagonalização espectral e elipsoide de Poinsot.</p>
+
+                    <div class="sim-divider-label"><span>Mecânica Clássica</span></div>
+
+                    <div class="theory-card">
+                        <h4><img src="../assets/icons/compass.svg" class="icon-svg icon-accent" alt="Teoria"> O Tensor de Inércia</h4>
                         <p>
                             Em rotações tridimensionais de corpos rígidos, o momento angular $\mathbf{L}$ e a velocidade angular $\boldsymbol{\omega}$ geralmente não são paralelos. A relação entre ambos é mediada por um tensor de segunda ordem simétrico, o <strong>Tensor de Inércia</strong> $\mathbf{I}$:
                         </p>
                         $$\mathbf{L} = \mathbf{I} \boldsymbol{\omega}$$
+                    </div>
 
-                        <h3>Formulação Discreta e Contínua</h3>
+                    <div class="sim-divider-label"><span>Formulação Matemática</span></div>
+
+                    <div class="theory-card">
+                        <h4>Formulação Discreta e Contínua</h4>
                         <p>
                             Para um sistema de $N$ partículas pontuais com massas $m_k$ e posições $\mathbf{r}_k = (x_k, y_k, z_k)$:
                         </p>
@@ -249,14 +283,20 @@
                             e os elementos fora da diagonal são os <em>produtos de inércia</em>:
                         </p>
                         $$I_{xy} = I_{yx} = \sum m_k x_k y_k, \quad I_{xz} = I_{zx} = \sum m_k x_k z_k, \quad I_{yz} = I_{zy} = \sum m_k y_k z_k$$
+                    </div>
 
-                        <h3>Momento de Inércia em Torno de um Eixo Arbitrário</h3>
+                    <div class="theory-card">
+                        <h4>Momento de Inércia em Torno de um Eixo Arbitrário</h4>
                         <p>
                             Para qualquer eixo definido por um vetor unitário $\mathbf{\hat{n}} = (n_x, n_y, n_z)$, o momento de inércia escalar efetivo é dado pelo produto bilinear:
                         </p>
                         $$I_{\mathbf{\hat{n}}} = \mathbf{\hat{n}}^T \mathbf{I} \mathbf{\hat{n}} = \sum_{i,j} n_i I_{ij} n_j$$
+                    </div>
 
-                        <h3>Diagonalização e Eixos Principais</h3>
+                    <div class="sim-divider-label"><span>Diagonalização & Eixos Principais</span></div>
+
+                    <div class="theory-card">
+                        <h4>Diagonalização e Eixos Principais</h4>
                         <p>
                             Como o tensor de inércia é sempre <strong>real e simétrico</strong> ($\mathbf{I} = \mathbf{I}^T$), pelo Teorema Espectral existem sempre três autovalores reais $I_1, I_2, I_3$ (os <em>momentos principais de inércia</em>) e uma base ortogonal correspondente de autovetores $\mathbf{v}_1, \mathbf{v}_2, \mathbf{v}_3$ (os <em>eixos principais de inércia</em>):
                         </p>
@@ -264,12 +304,14 @@
                         <p>
                             Nesse sistema de coordenadas principal, os produtos de inércia se anulam e a rotação em torno de qualquer um dos eixos principais resulta em $\mathbf{L} \parallel \boldsymbol{\omega}$.
                         </p>
+                    </div>
 
-                        <h3>Elipsoide de Inércia (Poinsot)</h3>
+                    <div class="theory-card">
+                        <h4>Elipsoide de Inércia (Poinsot)</h4>
                         <p>
                             A superfície geométrica definida pelos pontos $\mathbf{r}$ que satisfazem $\mathbf{r}^T \mathbf{I} \mathbf{r} = 1$ descreve um elipsoide tridimensional cujos semi-eixos são inversamente proporcionais às raízes quadradas dos momentos principais de inércia: $1/\sqrt{I_1}, 1/\sqrt{I_2}, 1/\sqrt{I_3}$.
                         </p>
-                    </article>
+                    </div>
                 </div>
             </div>
 

@@ -8,6 +8,7 @@
     height: 100%;
     cursor: crosshair;
     background-color: #070b16;
+    touch-action: none;
 }
 
 /* =============================================================================

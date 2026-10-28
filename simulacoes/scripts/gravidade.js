@@ -11,6 +11,8 @@ import {
     initSidebarCollapse,
     initBottomSheet,
     initToggleButton,
+    initTabs,
+    initFocusMirrorToolbar,
     syncDualSlider,
     MultiSeriesPlot,
     initKaTeXAutoRender,
@@ -422,7 +424,7 @@ function aplicarPreset(presetKey) {
     if (inputVel) inputVel.value = state.velocidadeInicial.toFixed(2);
     if (sliderVel) sliderVel.value = state.velocidadeInicial.toFixed(2);
 
-    document.querySelectorAll('.preset-chip-btn').forEach(btn => {
+    document.querySelectorAll('.btn-preset, .preset-chip-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.preset === presetKey);
     });
 
@@ -441,6 +443,12 @@ function setupUI() {
     initBottomSheet({
         panelSelector: '.controls-panel',
         handleSelector: '#sheet-drag-handle'
+    });
+
+    // Barra Flutuante de Modo Foco (Focus Mirror Toolbar)
+    initFocusMirrorToolbar({
+        toolbarTarget: '#focus-context-toolbar',
+        scopeSelector: '.controls-panel'
     });
 
     // 2. Barra de Transporte
@@ -463,31 +471,11 @@ function setupUI() {
         });
     });
 
-    // 3. Alternância de Abas
-    const tabParams = document.getElementById('tab-btn-params');
-    const tabTheory = document.getElementById('tab-btn-theory');
-    const panelParams = document.getElementById('panel-tab-params');
-    const panelTheory = document.getElementById('panel-tab-theory');
-
-    tabParams?.addEventListener('click', () => {
-        tabParams.classList.add('active');
-        tabTheory?.classList.remove('active');
-        if (panelParams) panelParams.style.display = 'block';
-        if (panelTheory) panelTheory.style.display = 'none';
-    });
-
-    tabTheory?.addEventListener('click', () => {
-        tabTheory.classList.add('active');
-        tabParams?.classList.remove('active');
-        if (panelParams) panelParams.style.display = 'none';
-        if (panelTheory) {
-            panelTheory.style.display = 'block';
-            initKaTeXAutoRender(panelTheory);
-        }
-    });
+    // 3. Alternância de Abas Padronizada
+    initTabs('.controls-panel');
 
     // 4. Presets
-    document.querySelectorAll('.preset-chip-btn').forEach(btn => {
+    document.querySelectorAll('.btn-preset, .preset-chip-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             aplicarPreset(btn.dataset.preset);
         });

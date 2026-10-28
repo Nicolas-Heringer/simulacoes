@@ -42,9 +42,7 @@
     <!-- Cabeçalho da Simulação -->
     <header class="sim-header">
         <a href="../index.html#secao-simulacoes" class="btn-back">
-            <svg class="icon-svg" viewBox="0 0 24 24">
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
+            <img src="../assets/icons/arrow-left.svg" class="icon-svg" alt="Voltar">
             Voltar ao Hub
         </a>
         <h1 class="sim-title">Tesselação de Voronoi & Dinâmica Climática Planetária (SCVT)</h1>
@@ -56,6 +54,8 @@
         <!-- 1. Área do Canvas 3D Interativo -->
         <div class="canvas-area">
             <div id="three-container"></div>
+
+            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
 
             <!-- Barra de Ferramentas Flutuante no Topo Esquerdo (Opções de Exibição / Camadas) -->
             <div class="canvas-toolbar pos-top-left" id="display-toolbar">
@@ -87,17 +87,26 @@
                     <button id="btn-close-layers-popover" class="popover-close" title="Fechar">✕</button>
                 </div>
                 <div class="popover-body">
-                    <div class="toggle-row">
-                        <label for="toggle-generators">Pontos Geradores (Centros)</label>
-                        <input type="checkbox" id="toggle-generators" checked>
+                    <div class="switch-container">
+                        <span class="switch-label">Pontos Geradores (Centros)</span>
+                        <label class="sim-switch">
+                            <input type="checkbox" id="toggle-generators" checked>
+                            <span class="slider-round"></span>
+                        </label>
                     </div>
-                    <div class="toggle-row">
-                        <label for="toggle-wireframe">Linhas das Células (Wireframe)</label>
-                        <input type="checkbox" id="toggle-wireframe" checked>
+                    <div class="switch-container">
+                        <span class="switch-label">Linhas das Células (Wireframe)</span>
+                        <label class="sim-switch">
+                            <input type="checkbox" id="toggle-wireframe" checked>
+                            <span class="slider-round"></span>
+                        </label>
                     </div>
-                    <div class="toggle-row">
-                        <label for="toggle-graticule">Equador & Linhas de Grade</label>
-                        <input type="checkbox" id="toggle-graticule" checked>
+                    <div class="switch-container">
+                        <span class="switch-label">Equador & Linhas de Grade</span>
+                        <label class="sim-switch">
+                            <input type="checkbox" id="toggle-graticule" checked>
+                            <span class="slider-round"></span>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -185,11 +194,11 @@
 
             <!-- Topo: Barra de Abas Expansíveis -->
             <div class="tab-nav">
-                <button class="tab-btn active" id="tab-btn-params" title="Parâmetros e Controles">
+                <button class="tab-btn active" id="tab-btn-params" data-tab="panel-tab-params" title="Parâmetros e Controles">
                     <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Parâmetros">
                     <span class="tab-label">Parâmetros</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-theory" title="Fundamentação Teórica & Fórmulas">
+                <button class="tab-btn" id="tab-btn-theory" data-tab="panel-tab-theory" title="Fundamentação Teórica & Fórmulas">
                     <img src="../assets/icons/compass.svg" class="icon-svg" alt="Teoria">
                     <span class="tab-label">Teoria</span>
                 </button>
@@ -202,7 +211,7 @@
             <div class="panel-body">
 
                 <!-- ABA 1: PARÂMETROS E ETAPAS DA SIMULAÇÃO -->
-                <div id="panel-tab-params">
+                <div class="tab-pane active" id="panel-tab-params">
                     <!-- Seletor Segmentado de Etapas da Simulação -->
                     <div class="stage-nav-pills" id="stage-nav-pills">
                         <button class="stage-pill active" id="btn-tab-math">1. Geometria</button>
@@ -226,10 +235,14 @@
 
                         <!-- Resolução & Sorteio -->
                         <div class="control-group">
-                            <div class="slider-container">
+                            <div class="slider-container sim-dual-slider">
                                 <div class="slider-header">
-                                    <span>Número de Geradores ($N$)</span>
-                                    <span id="val-num-cells" class="slider-val">500</span>
+                                    <label for="slider-num-cells" class="slider-label">Número de Geradores ($N$)</label>
+                                    <div class="dual-input-wrapper">
+                                        <input type="number" class="dual-input-number" id="input-num-cells"
+                                               min="50" max="1200" step="50" value="500">
+                                        <span class="dual-input-unit">pts</span>
+                                    </div>
                                 </div>
                                 <input type="range" class="sim-slider" id="slider-num-cells" min="50" max="1200"
                                     step="50" value="500">
@@ -247,18 +260,24 @@
                         <div class="control-group">
                             <div class="control-grid-2x2">
                                 <button id="btn-auto-lloyd" class="btn-preset"
-                                    style="background: rgba(34, 197, 94, 0.2); border-color: #22c55e;">
+                                    style="background: rgba(34, 197, 94, 0.2); border-color: #22c55e;"
+                                    data-focus-control="action" data-focus-order="1" data-focus-icon="play" data-focus-tooltip="Iniciar Relaxamento">
                                     <img src="../assets/icons/play.svg" class="icon-svg" alt="Play"> Iniciar Relaxamento
                                 </button>
-                                <button id="btn-step-lloyd" class="btn-preset">
+                                <button id="btn-step-lloyd" class="btn-preset"
+                                    data-focus-control="action" data-focus-order="2" data-focus-icon="step" data-focus-tooltip="Passo Único (1x)">
                                     <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo"> Passo Único (1x)
                                 </button>
                             </div>
 
-                            <div class="slider-container" style="margin-top: 10px;">
+                            <div class="slider-container sim-dual-slider" style="margin-top: 10px;">
                                 <div class="slider-header">
-                                    <span>Velocidade de Relaxamento</span>
-                                    <span id="val-speed" class="slider-val">10 passos/s</span>
+                                    <label for="slider-speed" class="slider-label">Velocidade de Relaxamento</label>
+                                    <div class="dual-input-wrapper">
+                                        <input type="number" class="dual-input-number" id="input-speed"
+                                               min="1" max="30" step="1" value="10">
+                                        <span class="dual-input-unit">p/s</span>
+                                    </div>
                                 </div>
                                 <input type="range" class="sim-slider" id="slider-speed" min="1" max="30" step="1"
                                     value="10">
@@ -297,19 +316,27 @@
                         <div class="sim-divider-label"><span>Escala Planetária & Atmosfera</span></div>
 
                         <div class="control-group">
-                            <div class="slider-container">
+                            <div class="slider-container sim-dual-slider">
                                 <div class="slider-header">
-                                    <span>Raio do Núcleo Sólido</span>
-                                    <span id="val-core-radius" class="slider-val">R_solo = 0.93 (7.0%)</span>
+                                    <label for="slider-core-radius" class="slider-label">Raio do Núcleo Sólido ($R_{\text{solo}}$)</label>
+                                    <div class="dual-input-wrapper">
+                                        <input type="number" class="dual-input-number" id="input-core-radius"
+                                               min="0.80" max="0.95" step="0.01" value="0.93">
+                                        <span class="dual-input-unit">R</span>
+                                    </div>
                                 </div>
                                 <input type="range" class="sim-slider" id="slider-core-radius" min="0.80" max="0.95"
                                     step="0.01" value="0.93">
                             </div>
 
-                            <div class="slider-container">
+                            <div class="slider-container sim-dual-slider">
                                 <div class="slider-header">
-                                    <span>Opacidade da Camada de Ar</span>
-                                    <span id="val-shell-opacity" class="slider-val">85%</span>
+                                    <label for="slider-shell-opacity" class="slider-label">Opacidade da Camada de Ar</label>
+                                    <div class="dual-input-wrapper">
+                                        <input type="number" class="dual-input-number" id="input-shell-opacity"
+                                               min="0.30" max="1.00" step="0.05" value="0.85">
+                                        <span class="dual-input-unit">α</span>
+                                    </div>
                                 </div>
                                 <input type="range" class="sim-slider" id="slider-shell-opacity" min="0.30" max="1.00"
                                     step="0.05" value="0.85">
@@ -320,17 +347,26 @@
                         <div class="sim-divider-label"><span>Cenário Astronômico & Texturas</span></div>
 
                         <div class="control-group">
-                            <div class="toggle-row">
-                                <label for="toggle-earth-texture">Textura da Terra (NASA Blue Marble)</label>
-                                <input type="checkbox" id="toggle-earth-texture" checked>
+                            <div class="switch-container">
+                                <span class="switch-label">Textura da Terra (NASA Blue Marble)</span>
+                                <label class="sim-switch">
+                                    <input type="checkbox" id="toggle-earth-texture" checked>
+                                    <span class="slider-round"></span>
+                                </label>
                             </div>
-                            <div class="toggle-row">
-                                <label for="toggle-stars">Fundo Estelar (Deep Space - 2.000 Estrelas)</label>
-                                <input type="checkbox" id="toggle-stars" checked>
+                            <div class="switch-container">
+                                <span class="switch-label">Fundo Estelar (Deep Space - 2.000 Estrelas)</span>
+                                <label class="sim-switch">
+                                    <input type="checkbox" id="toggle-stars" checked>
+                                    <span class="slider-round"></span>
+                                </label>
                             </div>
-                            <div class="toggle-row">
-                                <label for="toggle-constellations">Constelações do Zodíaco & Órion/Crux</label>
-                                <input type="checkbox" id="toggle-constellations" checked>
+                            <div class="switch-container">
+                                <span class="switch-label">Constelações do Zodíaco & Órion/Crux</span>
+                                <label class="sim-switch">
+                                    <input type="checkbox" id="toggle-constellations" checked>
+                                    <span class="slider-round"></span>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -390,16 +426,21 @@
                                             <option value="10">Nov</option>
                                             <option value="11">Dez</option>
                                         </select>
+                                        <input type="number" id="input-day-of-year" class="dual-input-number" min="1" max="365" step="1" value="172" style="display:none;" aria-hidden="true">
                                     </div>
                                 </div>
                                 <input type="range" class="sim-slider" id="slider-day-of-year" min="1" max="365"
                                     step="1" value="172">
                             </div>
 
-                            <div class="slider-container">
+                            <div class="slider-container sim-dual-slider">
                                 <div class="slider-header">
-                                    <span>Rotação Diurna (Hora Local)</span>
-                                    <span id="val-hour-of-day" class="slider-val">12:00 (Meio-dia)</span>
+                                    <label for="slider-hour-of-day" class="slider-label">Rotação Diurna (Hora Local)</label>
+                                    <div class="dual-input-wrapper">
+                                        <input type="number" class="dual-input-number" id="input-hour-of-day"
+                                               min="0" max="24" step="0.25" value="12.00">
+                                        <span class="dual-input-unit">h</span>
+                                    </div>
                                 </div>
                                 <input type="range" class="sim-slider" id="slider-hour-of-day" min="0" max="24"
                                     step="0.25" value="12">
@@ -407,10 +448,12 @@
 
                             <div class="control-grid-2x2" style="margin-top: 8px;">
                                 <button id="btn-play-orbit" class="btn-preset"
-                                    style="background: rgba(56, 189, 248, 0.15); border-color: #38bdf8;">
+                                    style="background: rgba(56, 189, 248, 0.15); border-color: #38bdf8;"
+                                    data-focus-control="action" data-focus-order="3" data-focus-icon="play" data-focus-tooltip="Translação Anual">
                                     <img src="../assets/icons/play.svg" class="icon-svg" alt="Play"> Translação Anual
                                 </button>
-                                <button id="btn-play-diurnal" class="btn-preset">
+                                <button id="btn-play-diurnal" class="btn-preset"
+                                    data-focus-control="action" data-focus-order="4" data-focus-icon="rotate" data-focus-tooltip="Rotação Contínua">
                                     <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Rotação"> Rotação
                                     Contínua
                                 </button>
@@ -444,21 +487,33 @@
 
                         <!-- Guias Astronômicas -->
                         <div class="control-group">
-                            <div class="toggle-row">
-                                <label for="toggle-axial-tilt">Inclinação Axial Real (23,44°)</label>
-                                <input type="checkbox" id="toggle-axial-tilt" checked>
+                            <div class="switch-container">
+                                <span class="switch-label">Inclinação Axial Real (23,44°)</span>
+                                <label class="sim-switch">
+                                    <input type="checkbox" id="toggle-axial-tilt" checked>
+                                    <span class="slider-round"></span>
+                                </label>
                             </div>
-                            <div class="toggle-row">
-                                <label for="toggle-polar-axis">Linha do Eixo Polar (Norte-Sul)</label>
-                                <input type="checkbox" id="toggle-polar-axis" checked>
+                            <div class="switch-container">
+                                <span class="switch-label">Linha do Eixo Polar (Norte-Sul)</span>
+                                <label class="sim-switch">
+                                    <input type="checkbox" id="toggle-polar-axis" checked>
+                                    <span class="slider-round"></span>
+                                </label>
                             </div>
-                            <div class="toggle-row">
-                                <label for="toggle-sun-terminator">Terminador Dia/Noite (Luz Solar)</label>
-                                <input type="checkbox" id="toggle-sun-terminator" checked>
+                            <div class="switch-container">
+                                <span class="switch-label">Terminador Dia/Noite (Luz Solar)</span>
+                                <label class="sim-switch">
+                                    <input type="checkbox" id="toggle-sun-terminator" checked>
+                                    <span class="slider-round"></span>
+                                </label>
                             </div>
-                            <div class="toggle-row">
-                                <label for="toggle-ecliptic-plane">Plano da Eclíptica</label>
-                                <input type="checkbox" id="toggle-ecliptic-plane" checked>
+                            <div class="switch-container">
+                                <span class="switch-label">Plano da Eclíptica</span>
+                                <label class="sim-switch">
+                                    <input type="checkbox" id="toggle-ecliptic-plane" checked>
+                                    <span class="slider-round"></span>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -503,11 +558,11 @@
                 </div>
 
                 <!-- ABA 2: TEORIA E DEDUÇÃO MATEMÁTICA -->
-                <div id="panel-tab-theory" style="display: none;">
+                <div class="tab-pane" id="panel-tab-theory" style="display: none;">
                     <div class="tab-header">
                         <div class="tab-header-row">
                             <h3 class="tab-title">Fundamentação Científica</h3>
-                            <div class="sim-badge"><span class="status-dot"></span><span>$\KaTeX$</span></div>
+                            <div class="sim-badge"><span class="status-dot"></span><span>$\text{KaTeX}$</span></div>
                         </div>
                         <p class="tab-subtitle">Topologia esférica, escala planetária e mecânica celeste das estações.
                         </p>

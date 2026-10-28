@@ -10,36 +10,3 @@
     background: radial-gradient(circle at center, #070d1e 0%, #02050f 100%);
     touch-action: none;
 }
-
-.orbit-presets-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.preset-chip-btn {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    padding: 7px 10px;
-    border-radius: 6px;
-    font-size: 0.78rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
-}
-
-.preset-chip-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-primary);
-    border-color: var(--accent-color);
-}
-
-.preset-chip-btn.active {
-    background: var(--accent-surface, rgba(56, 189, 248, 0.15));
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-    font-weight: 600;
-}

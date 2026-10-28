@@ -21,24 +21,15 @@
     <!-- Suporte a LaTeX com KaTeX -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"
-        onload="renderMathInElement(document.body, {
-            delimiters: [
-                {left: '$$', right: '$$', display: true},
-                {left: '$', right: '$', display: false},
-                {left: '\\(', right: '\\)', display: false},
-                {left: '\\[', right: '\\]', display: true}
-            ],
-            throwOnError: false
-        });"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
     <!-- Cabeçalho da Simulação -->
     <header class="sim-header">
         <a href="../index.html#secao-simulacoes" class="btn-back">
-            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            Voltar
+            <img src="../assets/icons/arrow-left.svg" class="icon-svg" alt="Voltar">
+            Voltar ao Hub
         </a>
         <h1 class="sim-title">Laboratório de Áudio: Análise Espectral & Ondas</h1>
     </header>
@@ -47,6 +38,9 @@
     <main class="sim-layout">
         <!-- Área de Visualização (Canvas Principal em Destaque + Miniatura PIP Alternável) -->
         <div class="canvas-area">
+            <!-- Barra Flutuante em Modo Foco (Design System 2.0 Mirror) -->
+            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+
             <!-- Ações do Topo Direito (Modo Foco) -->
             <div class="canvas-top-actions">
                 <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
@@ -89,9 +83,13 @@
                             <button type="button" id="btnToggleTrigger" class="badge-btn active"
                                 title="Ativar/Desativar estabilização do osciloscópio">Trigger</button>
                             <button type="button" class="badge-btn btn-swap-focus"
-                                title="Alternar foco com o gráfico principal">🔄 Alternar</button>
+                                title="Alternar foco com o gráfico principal">
+                                <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Alternar"> Alternar
+                            </button>
                             <button type="button" class="badge-btn btn-toggle-pip"
-                                title="Recolher / Expandir Miniatura">_ Min</button>
+                                title="Recolher / Expandir Miniatura">
+                                <img src="../assets/icons/collapse.svg" class="icon-svg" alt="Minimizar"> Min
+                            </button>
                         </div>
                     </div>
                     <canvas id="timeCanvas"></canvas>
@@ -103,9 +101,13 @@
                         <span class="canvas-header-title" id="freqCanvasTitle">Espectro de Frequência — $|X(f)|$ (FFT)</span>
                         <div class="canvas-header-controls">
                             <button type="button" class="badge-btn btn-swap-focus"
-                                title="Alternar foco com a miniatura">🔄 Alternar</button>
+                                title="Alternar foco com a miniatura">
+                                <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Alternar"> Alternar
+                            </button>
                             <button type="button" class="badge-btn btn-toggle-pip"
-                                title="Recolher / Expandir Miniatura">_ Min</button>
+                                title="Recolher / Expandir Miniatura">
+                                <img src="../assets/icons/collapse.svg" class="icon-svg" alt="Minimizar"> Min
+                            </button>
                         </div>
                     </div>
                     <canvas id="freqCanvas"></canvas>
@@ -146,7 +148,7 @@
             <!-- Centro: Corpo Rolável de Conteúdo -->
             <div class="panel-body">
                 <!-- CONTEÚDO DA ABA 1: MICROFONE & ANÁLISE AO VIVO -->
-                <div id="tab-mic" class="tab-content active">
+                <div id="tab-mic" class="tab-pane active">
                     <div class="tab-header">
                         <h3>Captura e Análise de Microfone</h3>
                         <p class="tab-description">
@@ -156,8 +158,14 @@
 
                     <!-- Botão de Ação da Captura -->
                     <div class="control-group">
-                        <button type="button" id="btnMicStart" class="btn-primary" style="width: 100%;">
-                            <span id="btnMicStartIcon">▶</span>
+                        <button type="button" id="btnMicStart" class="btn-primary btn-toggle" style="width: 100%;"
+                                data-focus-control="toggle"
+                                data-state="0"
+                                data-text-idle="Iniciar Captura"
+                                data-text-active="Pausar / Congelar"
+                                data-icon-idle="play"
+                                data-icon-active="pause">
+                            <img src="../assets/icons/play.svg" class="icon-svg" alt="Captura">
                             <span id="btnMicStartText" class="btn-text">Iniciar Captura</span>
                         </button>
                     </div>
@@ -173,7 +181,7 @@
                 </div>
 
                 <!-- CONTEÚDO DA ABA 2: ONDAS -->
-                <div id="tab-waves" class="tab-content" style="display: none;">
+                <div id="tab-waves" class="tab-pane" style="display: none;">
                     <div class="tab-header">
                         <h3>Fontes de Onda & Decomposição</h3>
                     </div>
@@ -183,7 +191,7 @@
                 </div>
 
                 <!-- CONTEÚDO DA ABA 3: BATIMENTO ACÚSTICO -->
-                <div id="tab-beats" class="tab-content" style="display: none;">
+                <div id="tab-beats" class="tab-pane" style="display: none;">
                     <div class="tab-header">
                         <h3>Batimento Acústico</h3>
                     </div>
@@ -193,7 +201,7 @@
                 </div>
 
                 <!-- CONTEÚDO DA ABA 4: TEORIA & FOURIER -->
-                <div id="tab-theory" class="tab-content" style="display: none;">
+                <div id="tab-theory" class="tab-pane" style="display: none;">
                     <div class="theory-article">
                         <h3>Análise de Fourier & Física Acústica</h3>
                         <p>

@@ -11,7 +11,9 @@ import {
     initSidebarCollapse,
     initBottomSheet,
     initKaTeXAutoRender,
-    inlineSVGImages
+    inlineSVGImages,
+    initTabs,
+    initFocusMirrorToolbar
 } from './sim-ui.js';
 
 // =============================================================================
@@ -187,27 +189,37 @@ function toggleFreeze() {
 }
 
 function updateControlsState() {
+    const iconImg = btnMicStart?.querySelector('.icon-svg');
     if (isCapturing && !isFrozen) {
-        btnMicStart.className = 'sim-btn sim-btn--freeze';
-        btnMicStartIcon.textContent = '⏸';
-        btnMicStartText.textContent = 'Congelar Tela';
+        btnMicStart?.classList.add('active');
+        btnMicStart?.setAttribute('data-state', '1');
+        if (iconImg) iconImg.src = '../assets/icons/pause.svg';
+        if (btnMicStartText) btnMicStartText.textContent = 'Congelar Tela';
 
-        hudStatusBadge.className = 'hud-badge status-live';
-        hudStatusBadge.textContent = 'Ao Vivo';
+        if (hudStatusBadge) {
+            hudStatusBadge.className = 'hud-badge status-live';
+            hudStatusBadge.textContent = 'Ao Vivo';
+        }
     } else if (isCapturing && isFrozen) {
-        btnMicStart.className = 'sim-btn sim-btn--primary';
-        btnMicStartIcon.textContent = '▶';
-        btnMicStartText.textContent = 'Retomar Captura';
+        btnMicStart?.classList.remove('active');
+        btnMicStart?.setAttribute('data-state', '0');
+        if (iconImg) iconImg.src = '../assets/icons/play.svg';
+        if (btnMicStartText) btnMicStartText.textContent = 'Retomar Captura';
 
-        hudStatusBadge.className = 'hud-badge status-frozen';
-        hudStatusBadge.textContent = 'Congelado';
+        if (hudStatusBadge) {
+            hudStatusBadge.className = 'hud-badge status-frozen';
+            hudStatusBadge.textContent = 'Congelado';
+        }
     } else {
-        btnMicStart.className = 'sim-btn sim-btn--primary';
-        btnMicStartIcon.textContent = '▶';
-        btnMicStartText.textContent = 'Iniciar Captura';
+        btnMicStart?.classList.remove('active');
+        btnMicStart?.setAttribute('data-state', '0');
+        if (iconImg) iconImg.src = '../assets/icons/play.svg';
+        if (btnMicStartText) btnMicStartText.textContent = 'Iniciar Captura';
 
-        hudStatusBadge.className = 'hud-badge status-idle';
-        hudStatusBadge.textContent = 'Pronto';
+        if (hudStatusBadge) {
+            hudStatusBadge.className = 'hud-badge status-idle';
+            hudStatusBadge.textContent = 'Pronto';
+        }
     }
 }
 
@@ -555,41 +567,12 @@ function startAnimationLoop() {
 // 10. GESTÃO DE ABAS E EVENTOS DE INTERFACE
 // =============================================================================
 
-function switchTab(targetTabId) {
-    if (activeTabId === targetTabId) return;
-
-    // Se estiver capturando microfone e mudar para outra aba, pausa com segurança
-    if (activeTabId === 'tab-mic') {
+initTabs('.controls-panel', (targetTabId) => {
+    if (activeTabId === 'tab-mic' && targetTabId !== 'tab-mic') {
         stopMicrophone(false);
     }
-
     activeTabId = targetTabId;
-
-    // Atualiza botões
-    tabButtons.forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-tab') === targetTabId);
-    });
-
-    // Atualiza conteúdos
-    tabContents.forEach(content => {
-        const isActive = (content.id === targetTabId);
-        content.classList.toggle('active', isActive);
-        content.style.display = isActive ? 'flex' : 'none';
-    });
-
-    if (targetTabId === 'tab-theory') {
-        const theoryPanel = document.getElementById('tab-theory');
-        if (theoryPanel) initKaTeXAutoRender(theoryPanel);
-    }
-
     renderFrame();
-}
-
-tabButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-        const tab = btn.getAttribute('data-tab');
-        switchTab(tab);
-    });
 });
 
 // Chave de 2 posições para escala de frequência (Logarítmica / Linear)
@@ -629,7 +612,7 @@ swapFocusBtns.forEach(btn => {
 });
 
 // Inspetor sob o Cursor no Gráfico de Frequência
-freqCanvas.addEventListener('mousemove', e => {
+freqCanvas.addEventListener('pointermove', e => {
     const rect = freqCanvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
     const cx = (e.clientX - rect.left) * dpr;
@@ -655,7 +638,7 @@ freqCanvas.addEventListener('mousemove', e => {
     }
 });
 
-freqCanvas.addEventListener('mouseleave', () => {
+freqCanvas.addEventListener('pointerleave', () => {
     hudInspectorValue.textContent = 'Passe o mouse no gráfico';
 });
 
@@ -667,7 +650,7 @@ window.addEventListener('resize', () => {
 // =============================================================================
 // 11. INICIALIZAÇÃO DA PÁGINA (DESIGN SYSTEM 2.0)
 // =============================================================================
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
     initSidebarCollapse({
         layoutSelector: '.sim-layout',
         collapseBtnSelector: '#btn-collapse-sidebar',
@@ -680,6 +663,11 @@ window.addEventListener('DOMContentLoaded', () => {
         handleSelector: '#sheet-drag-handle'
     });
 
+    initFocusMirrorToolbar({
+        toolbarTarget: '#focus-context-toolbar',
+        scopeSelector: '.controls-panel'
+    });
+
     document.querySelectorAll('.btn-toggle-pip').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -687,7 +675,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    inlineSVGImages();
+    await inlineSVGImages();
     initKaTeXAutoRender(document.body);
     updateControlsState();
     renderFrame();

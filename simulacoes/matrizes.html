@@ -30,7 +30,7 @@
     <!-- Cabeçalho da Simulação -->
     <header class="sim-header">
         <a href="../index.html#secao-simulacoes" class="btn-back">
-            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <img src="../assets/icons/arrow-left.svg" class="icon-svg" alt="Voltar">
             <span>Voltar ao Hub</span>
         </a>
         <span class="sim-title">Transformações Matriciais em 2D</span>
@@ -142,7 +142,7 @@
                         <!-- Painel da Matriz 2x2 -->
                         <div class="control-group">
                             <label class="group-title">Matriz de Transformação $M$</label>
-                            <div class="matrix-box" id="base-matrix-box">
+                            <div class="sim-matrix-tensor-editor"><div class="matrix-box" id="base-matrix-box">
                                 <span class="matrix-bracket left">[</span>
                                 <div class="matrix-grid">
                                     <div class="matrix-cell cell-i">
@@ -163,7 +163,7 @@
                                     </div>
                                 </div>
                                 <span class="matrix-bracket right">]</span>
-                            </div>
+                            </div></div>
                             <div class="basis-info">
                                 <div class="basis-badge badge-i">î' = (<span id="base-valIx">1.00</span>, <span id="base-valIy">0.00</span>)</div>
                                 <div class="basis-badge badge-j">ĵ' = (<span id="base-valJx">0.00</span>, <span id="base-valJy">1.00</span>)</div>
@@ -191,11 +191,14 @@
 
                         <!-- Slider de Ângulo de Rotação -->
                         <div class="control-group" id="base-rotationGroup" style="display: none;">
-                            <div class="slider-header">
-                                <label for="base-rotSlider">Ângulo de Rotação (θ)</label>
-                                <span class="slider-val" id="base-rotVal">45°</span>
+                            <label class="control-label" for="base-rotSlider">Ângulo de Rotação (θ)</label>
+                            <div class="sim-dual-slider tone-cyan" data-focus-control="slider" data-focus-label="θ">
+                                <input type="range" id="base-rotSlider" min="-180" max="180" step="5" value="45">
+                                <div class="dual-number-wrapper">
+                                    <input type="number" id="base-rotNum" class="sim-input dual-number" min="-180" max="180" step="5" value="45">
+                                    <span class="dual-unit">°</span>
+                                </div>
                             </div>
-                            <input type="range" id="base-rotSlider" min="-180" max="180" step="5" value="45" class="sim-slider">
                         </div>
 
                         <!-- Ações de Transformação -->
@@ -231,19 +234,19 @@
                         </div>
 
                         <!-- Leitura do Determinante & Intuição Geométrica -->
-                        <div class="readout-card">
-                            <div class="readout-header">📐 Geometria do Espaço</div>
-                            <div class="readout-item">
-                                <span class="readout-label">Determinante det(M)</span>
-                                <span class="readout-value highlight-yellow" id="base-detVal" data-focus-control="badge" data-focus-order="7" title="Determinante det(M)">1.00</span>
+                        <div class="sim-readout readout-card">
+                            <div class="sim-readout-title readout-header">📐 Geometria do Espaço</div>
+                            <div class="sim-readout-row readout-item">
+                                <span class="sim-readout-label readout-label">Determinante det(M)</span>
+                                <span class="sim-readout-value readout-value highlight-yellow" id="base-detVal" data-focus-control="badge" data-focus-order="7" title="Determinante det(M)">1.00</span>
                             </div>
-                            <div class="readout-item">
-                                <span class="readout-label">Fator de Área</span>
-                                <span class="readout-value highlight-cyan" id="base-detAreaText">1.00x (Preservada)</span>
+                            <div class="sim-readout-row readout-item">
+                                <span class="sim-readout-label readout-label">Fator de Área</span>
+                                <span class="sim-readout-value readout-value highlight-cyan" id="base-detAreaText">1.00x (Preservada)</span>
                             </div>
-                            <div class="readout-item">
-                                <span class="readout-label">Orientação</span>
-                                <span class="readout-value highlight-green" id="base-detOrientText">Preservada (+)</span>
+                            <div class="sim-readout-row readout-item">
+                                <span class="sim-readout-label readout-label">Orientação</span>
+                                <span class="sim-readout-value readout-value highlight-green" id="base-detOrientText">Preservada (+)</span>
                             </div>
                         </div>
 
@@ -289,8 +292,8 @@
                         </div>
 
                         <!-- Sistema Linear e Matriz Resolvida -->
-                        <div class="readout-card" id="construir-system-card">
-                            <div class="readout-header">🔧 Operador Matricial Determinado</div>
+                        <div class="sim-readout readout-card" id="construir-system-card">
+                            <div class="sim-readout-title readout-header">🔧 Operador Matricial Determinado</div>
                             <div id="construir-katex-system" style="margin: 4px 0; font-size: 0.85rem;"></div>
                             <div id="construir-katex-matrix" style="margin: 6px 0;"></div>
                             <div id="construir-katex-evolution" style="margin: 4px 0; font-size: 0.85rem;"></div>
@@ -298,19 +301,19 @@
                         </div>
 
                         <!-- Telemetria do Vetor Transportado e Vetor Deslocamento -->
-                        <div class="readout-card">
-                            <div class="readout-header">🚀 Evolução do Vetor de Prova</div>
-                            <div class="readout-item">
-                                <span class="readout-label">Vetor Transformado $\vec{v}'$:</span>
-                                <span class="readout-value highlight-pink">(<span id="construir-val-vpx">2.00</span>, <span id="construir-val-vpy">1.00</span>)</span>
+                        <div class="sim-readout readout-card">
+                            <div class="sim-readout-title readout-header">🚀 Evolução do Vetor de Prova</div>
+                            <div class="sim-readout-row readout-item">
+                                <span class="sim-readout-label readout-label">Vetor Transformado $\vec{v}'$:</span>
+                                <span class="sim-readout-value readout-value highlight-pink">(<span id="construir-val-vpx">2.00</span>, <span id="construir-val-vpy">1.00</span>)</span>
                             </div>
-                            <div class="readout-item">
-                                <span class="readout-label">Vetor Deslocamento $\vec{d} = \vec{v}' - \vec{v}$:</span>
-                                <span class="readout-value highlight-rose">(<span id="construir-val-dx">0.00</span>, <span id="construir-val-dy">0.00</span>)</span>
+                            <div class="sim-readout-row readout-item">
+                                <span class="sim-readout-label readout-label">Vetor Deslocamento $\vec{d} = \vec{v}' - \vec{v}$:</span>
+                                <span class="sim-readout-value readout-value highlight-rose">(<span id="construir-val-dx">0.00</span>, <span id="construir-val-dy">0.00</span>)</span>
                             </div>
-                            <div class="readout-item">
-                                <span class="readout-label">Determinante $\det(M)$:</span>
-                                <span class="readout-value highlight-yellow" id="construir-val-detm" data-focus-control="badge" data-focus-order="3" title="Determinante det(M)">1.00</span>
+                            <div class="sim-readout-row readout-item">
+                                <span class="sim-readout-label readout-label">Determinante $\det(M)$:</span>
+                                <span class="sim-readout-value readout-value highlight-yellow" id="construir-val-detm" data-focus-control="badge" data-focus-order="3" title="Determinante det(M)">1.00</span>
                             </div>
                         </div>
 
@@ -460,7 +463,7 @@
                     <div class="subpane-controls hidden" id="subpane-controls-dinamico">
                         <div class="control-group">
                             <label class="group-title">Sistema Dinâmico Linear $\dot{\vec{x}} = M\vec{x}$</label>
-                            <div class="matrix-box" id="dyn-matrix-box">
+                            <div class="sim-matrix-tensor-editor"><div class="matrix-box" id="dyn-matrix-box">
                                 <span class="matrix-bracket left">[</span>
                                 <div class="matrix-grid">
                                     <div class="matrix-cell">
@@ -546,41 +549,41 @@
                         </div>
 
                         <!-- Classificação do Ponto de Equilíbrio -->
-                        <div class="readout-card">
-                            <div class="readout-header">⚖️ Classificação de Poincaré (0,0)</div>
-                            <div class="readout-item">
-                                <span class="readout-label">Topologia:</span>
-                                <span class="readout-value highlight-cyan" id="dyn-readout-type">Centro</span>
+                        <div class="sim-readout readout-card">
+                            <div class="sim-readout-title readout-header">⚖️ Classificação de Poincaré (0,0)</div>
+                            <div class="sim-readout-row readout-item">
+                                <span class="sim-readout-label readout-label">Topologia:</span>
+                                <span class="sim-readout-value readout-value highlight-cyan" id="dyn-readout-type">Centro</span>
                             </div>
-                            <div class="readout-item">
-                                <span class="readout-label">Traço $\tau = \operatorname{tr}(M)$:</span>
-                                <span class="readout-value" id="dyn-readout-trace">0.00</span>
+                            <div class="sim-readout-row readout-item">
+                                <span class="sim-readout-label readout-label">Traço $\tau = \operatorname{tr}(M)$:</span>
+                                <span class="sim-readout-value readout-value" id="dyn-readout-trace">0.00</span>
                             </div>
-                            <div class="readout-item">
-                                <span class="readout-label">Determinante $\Delta = \det(M)$:</span>
-                                <span class="readout-value" id="dyn-readout-det">4.00</span>
+                            <div class="sim-readout-row readout-item">
+                                <span class="sim-readout-label readout-label">Determinante $\Delta = \det(M)$:</span>
+                                <span class="sim-readout-value readout-value" id="dyn-readout-det">4.00</span>
                             </div>
-                            <div class="readout-item">
-                                <span class="readout-label">Discriminante $D = \tau^2 - 4\Delta$:</span>
-                                <span class="readout-value" id="dyn-readout-disc">-16.00</span>
+                            <div class="sim-readout-row readout-item">
+                                <span class="sim-readout-label readout-label">Discriminante $D = \tau^2 - 4\Delta$:</span>
+                                <span class="sim-readout-value readout-value" id="dyn-readout-disc">-16.00</span>
                             </div>
-                            <div class="readout-item">
-                                <span class="readout-label">Autovalores ($\lambda_1, \lambda_2$):</span>
-                                <span class="readout-value highlight-yellow" id="dyn-readout-eigen">0.00 ± 2.00i</span>
+                            <div class="sim-readout-row readout-item">
+                                <span class="sim-readout-label readout-label">Autovalores ($\lambda_1, \lambda_2$):</span>
+                                <span class="sim-readout-value readout-value highlight-yellow" id="dyn-readout-eigen">0.00 ± 2.00i</span>
                             </div>
-                            <div class="readout-item">
-                                <span class="readout-label">Estabilidade:</span>
-                                <span class="readout-value highlight-green" id="dyn-readout-stability">Marginalmente Estável</span>
+                            <div class="sim-readout-row readout-item">
+                                <span class="sim-readout-label readout-label">Estabilidade:</span>
+                                <span class="sim-readout-value readout-value highlight-green" id="dyn-readout-stability">Marginalmente Estável</span>
                             </div>
                         </div>
 
                         <!-- Telemetria de Raio / Energia da Órbita -->
-                        <div class="telemetry-container">
-                            <div class="telemetry-header">
+                        <div class="sim-plot-card telemetry-container">
+                            <div class="plot-header telemetry-header">
                                 <span>Distância à Origem $r(t) = \|\vec{x}(t)\|$</span>
-                                <span class="readout-value tone-cyan">Telemetria Realtime</span>
+                                <span class="sim-readout-value readout-value tone-cyan">Telemetria Realtime</span>
                             </div>
-                            <canvas id="dynTelemetryCanvas" class="telemetry-canvas"></canvas>
+                            <div class="plot-canvas-wrapper"><canvas id="dynTelemetryCanvas" class="sim-plot-canvas telemetry-canvas"></canvas></div>
                         </div>
 
                         <div class="control-group">

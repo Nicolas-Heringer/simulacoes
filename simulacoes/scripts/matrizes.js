@@ -233,9 +233,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnFocus) {
         btnFocus.addEventListener('click', () => {
             const layout = document.querySelector('.sim-layout');
-            if (layout) {
-                layout.classList.toggle('sidebar-collapsed');
-                handleGlobalResize();
+            const isCollapsed = layout?.classList.contains('sidebar-collapsed');
+            if (isCollapsed) {
+                document.getElementById('btn-expand-sidebar')?.click();
+            } else {
+                document.getElementById('btn-collapse-sidebar')?.click();
             }
         });
     }

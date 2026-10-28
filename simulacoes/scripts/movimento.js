@@ -11,7 +11,11 @@ import {
     initSidebarCollapse,
     initBottomSheet,
     initModal,
-    inlineSVGImages
+    inlineSVGImages,
+    initFocusMirrorToolbar,
+    initTabs,
+    syncDualSlider,
+    initKaTeXAutoRender
 } from './sim-ui.js';
 
 class MovimentoSimulation {
@@ -42,9 +46,10 @@ class MovimentoSimulation {
         this.panelTabEq2 = document.getElementById('panel-tab-eq2');
         this.panelTabTheory = document.getElementById('panel-tab-theory');
 
-        // Sliders e Labels Minimalistas
+        // Sliders e Entradas Numéricas (Dual-Input Sliders)
         // Manual
         this.sliderPos = document.getElementById('sliderPos');
+        this.inputPos = document.getElementById('inputPos');
         this.lblPosManual = document.getElementById('lbl-pos-manual');
 
         // 1 Móvel
@@ -52,40 +57,50 @@ class MovimentoSimulation {
         this.badgeTipoSingle = document.getElementById('badge-tipo-single');
         this.badgeTipoTextSingle = document.getElementById('badge-tipo-text-single');
         this.sliderS0A = document.getElementById('sliderS0A');
+        this.inputS0A = document.getElementById('inputS0A');
         this.lblS0A = document.getElementById('lbl-s0A');
         this.sliderV0A = document.getElementById('sliderV0A');
+        this.inputV0A = document.getElementById('inputV0A');
         this.lblV0A = document.getElementById('lbl-v0A');
         this.chkAccelSingle = document.getElementById('chk-accel-single');
         this.groupAccelSingle = document.getElementById('group-accel-single');
         this.sliderAA = document.getElementById('sliderAA');
+        this.inputAA = document.getElementById('inputAA');
         this.lblAA = document.getElementById('lbl-aA');
 
         // 2 Móveis
         this.equationDisplayA_dual = document.getElementById('equationDisplayA_dual');
         this.badgeTipoA = document.getElementById('badge-tipo-a');
         this.sliderS0A_dual = document.getElementById('sliderS0A_dual');
+        this.inputS0A_dual = document.getElementById('inputS0A_dual');
         this.lblS0A_dual = document.getElementById('lbl-s0A_dual');
         this.sliderV0A_dual = document.getElementById('sliderV0A_dual');
+        this.inputV0A_dual = document.getElementById('inputV0A_dual');
         this.lblV0A_dual = document.getElementById('lbl-v0A_dual');
         this.chkAccelDualA = document.getElementById('chk-accel-dual-a');
         this.groupAccelDualA = document.getElementById('group-accel-dual-a');
         this.sliderAA_dual = document.getElementById('sliderAA_dual');
+        this.inputAA_dual = document.getElementById('inputAA_dual');
         this.lblAA_dual = document.getElementById('lbl-aA_dual');
 
         this.equationDisplayB = document.getElementById('equationDisplayB');
         this.badgeTipoB = document.getElementById('badge-tipo-b');
         this.sliderS0B = document.getElementById('sliderS0B');
+        this.inputS0B = document.getElementById('inputS0B');
         this.lblS0B = document.getElementById('lbl-s0B');
         this.sliderV0B = document.getElementById('sliderV0B');
+        this.inputV0B = document.getElementById('inputV0B');
         this.lblV0B = document.getElementById('lbl-v0B');
         this.chkAccelDualB = document.getElementById('chk-accel-dual-b');
         this.groupAccelDualB = document.getElementById('group-accel-dual-b');
         this.sliderAB = document.getElementById('sliderAB');
+        this.inputAB = document.getElementById('inputAB');
         this.lblAB = document.getElementById('lbl-aB');
 
         // Scrubber
         this.groupScrubber = document.getElementById('groupScrubber');
         this.sliderScrubber = document.getElementById('sliderScrubber');
+        this.inputScrubber = document.getElementById('inputScrubber');
         this.lblScrubberVal = document.getElementById('lbl-scrubber-val');
 
         // Rodapé de Telemetria
@@ -233,19 +248,36 @@ class MovimentoSimulation {
             });
         });
 
-        // 5. Navegação entre as 4 Abas Principais
-        this.tabBtnManual?.addEventListener('click', () => this.switchTab('manual'));
-        this.tabBtnEq1?.addEventListener('click', () => this.switchTab('equation_1'));
-        this.tabBtnEq2?.addEventListener('click', () => this.switchTab('equation_2'));
-        this.tabBtnTheory?.addEventListener('click', () => this.switchTab('theory'));
+        // 5. Navegação por Abas Unificada (Design System 2.0)
+        initTabs('.controls-panel', (tabId) => {
+            if (tabId === 'panel-tab-manual') {
+                this.simTransportBar.style.display = 'block';
+                this.setMotionType('manual');
+            } else if (tabId === 'panel-tab-eq1') {
+                this.simTransportBar.style.display = 'block';
+                this.setMotionType('equation_1');
+            } else if (tabId === 'panel-tab-eq2') {
+                this.simTransportBar.style.display = 'block';
+                this.setMotionType('equation_2');
+            } else if (tabId === 'panel-tab-theory') {
+                this.simTransportBar.style.display = 'none';
+                initKaTeXAutoRender(this.panelTabTheory);
+            }
+        });
 
-        // 6. Modal de Teoria Didática
+        // 6. Barra de Ferramentas Espelhada do Modo Foco
+        initFocusMirrorToolbar({
+            toolbarTarget: '#focus-context-toolbar',
+            scopeSelector: '.controls-panel'
+        });
+
+        // 7. Modal de Teoria Didática
         const modalTeoria = initModal('#modal-teoria');
         document.getElementById('btn-abrir-modal-teoria')?.addEventListener('click', () => {
             modalTeoria?.open();
         });
 
-        // 7. Modo Foco (Sidebar Collapse)
+        // 8. Modo Foco (Sidebar Collapse)
         initSidebarCollapse({
             layoutSelector: '.sim-layout',
             collapseBtnSelector: '#btn-collapse-sidebar',
@@ -253,7 +285,7 @@ class MovimentoSimulation {
             onResize: () => this.resize()
         });
 
-        // 8. Mobile Bottom Sheet
+        // 9. Mobile Bottom Sheet
         initBottomSheet({
             panelSelector: '.controls-panel',
             handleSelector: '#sheet-drag-handle',
@@ -262,65 +294,52 @@ class MovimentoSimulation {
             defaultState: 'peek'
         });
 
-        // 9. Inline SVGs
+        // 10. Inline SVGs
         inlineSVGImages();
     }
 
     setupSliderEvents() {
         // Slider Manual
-        this.sliderPos?.addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
+        syncDualSlider('#sliderPos', '#inputPos', (val) => {
             this.setPos(val);
-            if (this.lblPosManual) this.lblPosManual.textContent = `${val.toFixed(1)} m`;
         });
 
         // Sliders Móvel A (1 Móvel)
-        this.sliderS0A?.addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
+        syncDualSlider('#sliderS0A', '#inputS0A', (val) => {
             this.setParamS0A(val);
         });
-        this.sliderV0A?.addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
+        syncDualSlider('#sliderV0A', '#inputV0A', (val) => {
             this.setParamV0A(val);
         });
-        this.sliderAA?.addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
+        syncDualSlider('#sliderAA', '#inputAA', (val) => {
             this.setParamAA(val);
         });
 
         // Sliders Móvel A (2 Móveis)
-        this.sliderS0A_dual?.addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
+        syncDualSlider('#sliderS0A_dual', '#inputS0A_dual', (val) => {
             this.setParamS0A(val);
         });
-        this.sliderV0A_dual?.addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
+        syncDualSlider('#sliderV0A_dual', '#inputV0A_dual', (val) => {
             this.setParamV0A(val);
         });
-        this.sliderAA_dual?.addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
+        syncDualSlider('#sliderAA_dual', '#inputAA_dual', (val) => {
             this.setParamAA(val);
         });
 
         // Sliders Móvel B (2 Móveis)
-        this.sliderS0B?.addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
+        syncDualSlider('#sliderS0B', '#inputS0B', (val) => {
             this.setParamS0B(val);
         });
-        this.sliderV0B?.addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
+        syncDualSlider('#sliderV0B', '#inputV0B', (val) => {
             this.setParamV0B(val);
         });
-        this.sliderAB?.addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
+        syncDualSlider('#sliderAB', '#inputAB', (val) => {
             this.setParamAB(val);
         });
 
         // Scrubber 2D
-        this.sliderScrubber?.addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
+        syncDualSlider('#sliderScrubber', '#inputScrubber', (val) => {
             this.seekToTime(val);
-            if (this.lblScrubberVal) this.lblScrubberVal.textContent = `${val.toFixed(2)} s`;
         });
 
         // Switches de Aceleração Opcional (MRUV)
@@ -352,7 +371,9 @@ class MovimentoSimulation {
     setParamS0A(val) {
         this.s0A = val;
         if (this.sliderS0A) this.sliderS0A.value = val;
+        if (this.inputS0A) this.inputS0A.value = val;
         if (this.sliderS0A_dual) this.sliderS0A_dual.value = val;
+        if (this.inputS0A_dual) this.inputS0A_dual.value = val;
         const text = `${val >= 0 ? '+' : ''}${val.toFixed(1)} m`;
         if (this.lblS0A) this.lblS0A.textContent = text;
         if (this.lblS0A_dual) this.lblS0A_dual.textContent = text;
@@ -362,7 +383,9 @@ class MovimentoSimulation {
     setParamV0A(val) {
         this.v0A = val;
         if (this.sliderV0A) this.sliderV0A.value = val;
+        if (this.inputV0A) this.inputV0A.value = val;
         if (this.sliderV0A_dual) this.sliderV0A_dual.value = val;
+        if (this.inputV0A_dual) this.inputV0A_dual.value = val;
         const text = `${val >= 0 ? '+' : ''}${val.toFixed(1)} m/s`;
         if (this.lblV0A) this.lblV0A.textContent = text;
         if (this.lblV0A_dual) this.lblV0A_dual.textContent = text;
@@ -372,7 +395,9 @@ class MovimentoSimulation {
     setParamAA(val) {
         this.aA = val;
         if (this.sliderAA) this.sliderAA.value = val;
+        if (this.inputAA) this.inputAA.value = val;
         if (this.sliderAA_dual) this.sliderAA_dual.value = val;
+        if (this.inputAA_dual) this.inputAA_dual.value = val;
         const text = `${val >= 0 ? '+' : ''}${val.toFixed(1)} m/s²`;
         if (this.lblAA) this.lblAA.textContent = text;
         if (this.lblAA_dual) this.lblAA_dual.textContent = text;
@@ -382,6 +407,7 @@ class MovimentoSimulation {
     setParamS0B(val) {
         this.s0B = val;
         if (this.sliderS0B) this.sliderS0B.value = val;
+        if (this.inputS0B) this.inputS0B.value = val;
         if (this.lblS0B) this.lblS0B.textContent = `${val >= 0 ? '+' : ''}${val.toFixed(1)} m`;
         this.onParamChangeB();
     }
@@ -389,6 +415,7 @@ class MovimentoSimulation {
     setParamV0B(val) {
         this.v0B = val;
         if (this.sliderV0B) this.sliderV0B.value = val;
+        if (this.inputV0B) this.inputV0B.value = val;
         if (this.lblV0B) this.lblV0B.textContent = `${val >= 0 ? '+' : ''}${val.toFixed(1)} m/s`;
         this.onParamChangeB();
     }
@@ -396,50 +423,27 @@ class MovimentoSimulation {
     setParamAB(val) {
         this.aB = val;
         if (this.sliderAB) this.sliderAB.value = val;
+        if (this.inputAB) this.inputAB.value = val;
         if (this.lblAB) this.lblAB.textContent = `${val >= 0 ? '+' : ''}${val.toFixed(1)} m/s²`;
         this.onParamChangeB();
     }
 
     switchTab(tabKey) {
-        [this.tabBtnManual, this.tabBtnEq1, this.tabBtnEq2, this.tabBtnTheory].forEach(btn => btn?.classList.remove('active'));
-
-        this.panelTabManual.style.display = 'none';
-        this.panelTabEq1.style.display = 'none';
-        this.panelTabEq2.style.display = 'none';
-        this.panelTabTheory.style.display = 'none';
-
-        if (tabKey === 'manual') {
-            this.tabBtnManual?.classList.add('active');
-            this.panelTabManual.style.display = 'block';
-            this.simTransportBar.style.display = 'block';
-            this.setMotionType('manual');
-        } else if (tabKey === 'equation_1') {
-            this.tabBtnEq1?.classList.add('active');
-            this.panelTabEq1.style.display = 'block';
-            this.simTransportBar.style.display = 'block';
-            this.setMotionType('equation_1');
-        } else if (tabKey === 'equation_2') {
-            this.tabBtnEq2?.classList.add('active');
-            this.panelTabEq2.style.display = 'block';
-            this.simTransportBar.style.display = 'block';
-            this.setMotionType('equation_2');
-        } else if (tabKey === 'theory') {
-            this.tabBtnTheory?.classList.add('active');
-            this.panelTabTheory.style.display = 'block';
-            this.simTransportBar.style.display = 'none';
-            this.renderKaTeXIn(this.panelTabTheory);
+        const tabMap = {
+            manual: 'tab-btn-manual',
+            equation_1: 'tab-btn-eq1',
+            equation_2: 'tab-btn-eq2',
+            theory: 'tab-btn-theory'
+        };
+        const btnId = tabMap[tabKey];
+        if (btnId) {
+            document.getElementById(btnId)?.click();
         }
     }
 
     renderKaTeXIn(element) {
-        if (window.renderMathInElement && element) {
-            window.renderMathInElement(element, {
-                delimiters: [
-                    { left: '$$', right: '$$', display: true },
-                    { left: '$', right: '$', display: false }
-                ],
-                throwOnError: false
-            });
+        if (element) {
+            initKaTeXAutoRender(element);
         }
     }
 
@@ -457,8 +461,8 @@ class MovimentoSimulation {
 
         const getCanvasCoords = (e) => {
             const rect = this.canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const clientX = e.clientX !== undefined ? e.clientX : (e.touches ? e.touches[0].clientX : 0);
+            const clientY = e.clientY !== undefined ? e.clientY : (e.touches ? e.touches[0].clientY : 0);
             return {
                 x: clientX - rect.left,
                 y: clientY - rect.top
@@ -527,7 +531,7 @@ class MovimentoSimulation {
         const onEnd = (e) => {
             if (this.mode !== '1D') {
                 if (this.isDragging && !this.hasPanned && e) {
-                    const pos = getCanvasCoords(e.changedTouches ? e.changedTouches[0] : e);
+                    const pos = getCanvasCoords(e);
                     if (pos && !isNaN(pos.x)) {
                         this.seekFromCanvasCoords(pos);
                     }
@@ -547,13 +551,25 @@ class MovimentoSimulation {
             this.canvas.classList.remove('cursor-grabbing');
         };
 
-        this.canvas.addEventListener('mousedown', onStart);
-        this.canvas.addEventListener('mousemove', onMove);
-        window.addEventListener('mouseup', onEnd);
-
-        this.canvas.addEventListener('touchstart', onStart, { passive: true });
-        this.canvas.addEventListener('touchmove', onMove, { passive: true });
-        window.addEventListener('touchend', onEnd);
+        this.canvas.addEventListener('pointerdown', (e) => {
+            if (e.pointerId && this.canvas.setPointerCapture) {
+                try { this.canvas.setPointerCapture(e.pointerId); } catch (_) {}
+            }
+            onStart(e);
+        });
+        this.canvas.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', (e) => {
+            if (e.pointerId && this.canvas.releasePointerCapture) {
+                try { this.canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+            }
+            onEnd(e);
+        });
+        window.addEventListener('pointercancel', (e) => {
+            if (e.pointerId && this.canvas.releasePointerCapture) {
+                try { this.canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+            }
+            onEnd(e);
+        });
 
         // Zoom com a roda do mouse (Wheel)
         this.canvas.addEventListener('wheel', (e) => {
@@ -643,6 +659,7 @@ class MovimentoSimulation {
             if (type === 'manual') {
                 this.xA = 0.0;
                 if (this.sliderPos) this.sliderPos.value = 0.0;
+                if (this.inputPos) this.inputPos.value = 0.0;
                 if (this.lblPosManual) this.lblPosManual.textContent = '0.0 m';
             } else if (type === 'equation_1') {
                 this.xA = this.s0A;
@@ -750,6 +767,7 @@ class MovimentoSimulation {
 
         this.setPos(physicsX);
         if (this.sliderPos) this.sliderPos.value = parseFloat(this.xA.toFixed(1));
+        if (this.inputPos) this.inputPos.value = parseFloat(this.xA.toFixed(1));
         if (this.lblPosManual) this.lblPosManual.textContent = `${this.xA.toFixed(1)} m`;
     }
 
@@ -810,6 +828,7 @@ class MovimentoSimulation {
         this.footerStatusBadge.className = 'sim-badge';
 
         if (this.sliderPos) this.sliderPos.value = this.xA;
+        if (this.inputPos) this.inputPos.value = this.xA;
         if (this.lblPosManual) this.lblPosManual.textContent = `${this.xA.toFixed(1)} m`;
         this.updateUI();
     }
@@ -901,6 +920,10 @@ class MovimentoSimulation {
             this.sliderScrubber.max = this.t.toFixed(2);
             this.sliderScrubber.value = this.t.toFixed(2);
         }
+        if (this.inputScrubber) {
+            this.inputScrubber.max = this.t.toFixed(2);
+            this.inputScrubber.value = this.t.toFixed(2);
+        }
         if (this.lblScrubberVal) {
             this.lblScrubberVal.textContent = `${this.t.toFixed(2)} s`;
         }
@@ -960,6 +983,7 @@ class MovimentoSimulation {
         const targetT = Math.max(0, Math.min(maxRecordedT, pt.t));
 
         if (this.sliderScrubber) this.sliderScrubber.value = targetT.toFixed(2);
+        if (this.inputScrubber) this.inputScrubber.value = targetT.toFixed(2);
         if (this.lblScrubberVal) this.lblScrubberVal.textContent = `${targetT.toFixed(2)} s`;
         this.seekToTime(targetT);
     }
@@ -1772,5 +1796,6 @@ class MovimentoSimulation {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    initKaTeXAutoRender(document.body);
     window.simulacao = new MovimentoSimulation();
 });

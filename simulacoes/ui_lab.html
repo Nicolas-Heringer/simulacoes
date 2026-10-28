@@ -70,6 +70,9 @@
                 </button>
             </div>
 
+            <!-- Barra Flutuante Espelhada do Modo Foco (declarativa via data-focus-control) -->
+            <div id="focus-context-toolbar" class="canvas-toolbar pos-top-left focus-mirror-toolbar" style="top: 56px;"></div>
+
             <!-- Popover Universal de Configurações / Customização Independente de Cores -->
             <div id="color-customizer-tooltip" class="sim-popover hidden">
                 <div class="popover-header">
@@ -244,23 +247,23 @@
 
             <!-- Navegação por Abas de Componentes (Design Deslizante Expansível) -->
             <div class="tab-nav">
-                <button class="tab-btn active" id="tab-btn-buttons" title="Botões & Presets">
+                <button class="tab-btn active" id="tab-btn-buttons" data-tab="panel-ui-buttons" title="Botões & Presets">
                     <img src="../assets/icons/play.svg" class="icon-svg" alt="Botões">
                     <span class="tab-label">Botões</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-sliders" title="Sliders & Entradas">
+                <button class="tab-btn" id="tab-btn-sliders" data-tab="panel-ui-sliders" title="Sliders & Entradas">
                     <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Sliders">
                     <span class="tab-label">Sliders</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-switches" title="Switches & Toggles">
+                <button class="tab-btn" id="tab-btn-switches" data-tab="panel-ui-switches" title="Switches & Toggles">
                     <img src="../assets/icons/toggle-switch.svg" class="icon-svg" alt="Switches">
                     <span class="tab-label">Switches</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-huds" title="HUDs & LaTeX">
+                <button class="tab-btn" id="tab-btn-huds" data-tab="panel-ui-huds" title="HUDs & LaTeX">
                     <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="HUDs">
                     <span class="tab-label">HUDs & LaTeX</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-icons" title="Galeria de Ícones">
+                <button class="tab-btn" id="tab-btn-icons" data-tab="panel-ui-icons" title="Galeria de Ícones">
                     <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="Ícones">
                     <span class="tab-label">Ícones SVG</span>
                 </button>
@@ -275,7 +278,7 @@
                 <!-- ============================================================= -->
                 <!-- ABA 1: BOTÕES & DISPARADORES DE AÇÃO                         -->
                 <!-- ============================================================= -->
-                <div id="panel-ui-buttons">
+                <div id="panel-ui-buttons" class="tab-pane active">
                     <div class="tab-header">
                         <div class="tab-header-row">
                             <h3 class="tab-title">Controle & Disparadores</h3>
@@ -292,14 +295,26 @@
                                     data-text-idle="Executar"
                                     data-text-active="Pausar"
                                     data-icon-idle="play"
-                                    data-icon-active="pause">
+                                    data-icon-active="pause"
+                                    data-focus-control="toggle"
+                                    data-focus-order="1"
+                                    data-focus-tab="global">
                                 <img src="../assets/icons/play.svg" class="icon-svg" alt="Play">
                                 <span class="btn-text">Executar</span>
                             </button>
-                            <button class="btn-icon" id="btn-transport-step" title="Avançar 1 Passo no Tempo (Δt)">
+                            <button class="btn-icon" id="btn-transport-step" title="Avançar 1 Passo no Tempo (Δt)"
+                                    data-focus-control="action"
+                                    data-focus-label=""
+                                    data-focus-order="2"
+                                    data-focus-tab="global">
                                 <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
                             </button>
-                            <button class="btn-icon" id="btn-demo-secondary" title="Reiniciar Simulação (t = 0)">
+                            <button class="btn-icon" id="btn-demo-secondary" title="Reiniciar Simulação (t = 0)"
+                                    data-focus-control="action"
+                                    data-focus-label=""
+                                    data-focus-order="3"
+                                    data-focus-divider="after"
+                                    data-focus-tab="global">
                                 <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                             </button>
                         </div>
@@ -376,10 +391,10 @@
             <!-- ============================================================= -->
             <!-- ABA 2: SLIDERS & ENTRADAS DE DADOS                           -->
             <!-- ============================================================= -->
-            <div id="panel-ui-sliders" style="display: none;">
+            <div id="panel-ui-sliders" class="tab-pane" style="display: none;">
                 <div class="tab-header">
                     <h3 class="tab-title">Sliders & Entradas Numéricas</h3>
-                    <p class="tab-subtitle">Sliders com entradas numéricas sincronizadas bidirecionalmente (Dual-Input).</p>
+                    <p class="tab-subtitle">Sliders Dual-Input, Estados Semânticos e Editor de Matrizes/Tensores.</p>
                 </div>
 
                 <!-- 1. Dual-Input Slider: Raio Geométrico -->
@@ -394,7 +409,11 @@
                             </div>
                         </div>
                         <input type="range" class="sim-slider" id="slider-demo-radius"
-                               min="0.5" max="2.5" step="0.05" value="1.00">
+                               min="0.5" max="2.5" step="0.05" value="1.00"
+                               data-focus-control="slider"
+                               data-focus-label="Raio"
+                               data-focus-order="5"
+                               data-focus-tab="global">
                     </div>
                 </div>
 
@@ -419,7 +438,10 @@
                 <!-- Dropdown e Input Numérico -->
                 <div class="control-group">
                     <label>Select Box Customizado & Input Numérico</label>
-                    <select class="sim-control" id="select-demo-mesh">
+                    <select class="sim-control" id="select-demo-mesh"
+                            data-focus-control="select"
+                            data-focus-order="4"
+                            data-focus-tab="global">
                         <option value="sphere">Esfera Geodésica 3D</option>
                         <option value="cube">Cubo Poligonal 3D</option>
                         <option value="torus">Torus / Toroide 3D</option>
@@ -430,12 +452,66 @@
                         <input type="number" class="sim-input" id="input-demo-num" value="42" min="0" max="100" style="width: 100%; margin-top: 4px;">
                     </div>
                 </div>
+
+                <!-- Estados Semânticos de Intencionalidade (setFieldState) -->
+                <div class="sim-divider-label"><span>Estados Semânticos (setFieldState)</span></div>
+
+                <div class="control-group">
+                    <label>Feedback de Validação e Prontidão (.is-valid, .is-warning, .is-invalid, .is-ready)</label>
+                    <div class="segmented-control" id="semantic-state-selector">
+                        <button class="segment-btn" data-state-demo="normal">Normal</button>
+                        <button class="segment-btn active" data-state-demo="valid">Válido</button>
+                        <button class="segment-btn" data-state-demo="warning">Aviso</button>
+                        <button class="segment-btn" data-state-demo="invalid">Inválido</button>
+                        <button class="segment-btn" data-state-demo="ready">Pronto</button>
+                        <button class="segment-btn" data-state-demo="disabled">Inativo</button>
+                    </div>
+
+                    <div class="slider-container sim-dual-slider" id="demo-semantic-field">
+                        <div class="slider-header">
+                            <label for="slider-semantic-demo" class="slider-label">Parâmetro Validado ($\alpha$)</label>
+                            <div class="dual-input-wrapper" id="demo-semantic-wrapper">
+                                <input type="number" class="dual-input-number" id="input-semantic-demo" min="0" max="10" step="0.5" value="5.0">
+                                <span class="dual-input-unit">rad</span>
+                            </div>
+                        </div>
+                        <input type="range" class="sim-slider" id="slider-semantic-demo" min="0" max="10" step="0.5" value="5.0">
+                    </div>
+                    <div class="field-hint" id="demo-semantic-hint" data-for="demo-semantic-field"></div>
+
+                    <button class="btn-primary" id="btn-semantic-action" style="width: 100%;">
+                        <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="Ação">
+                        <span>Aplicar Parâmetro</span>
+                    </button>
+                </div>
+
+                <!-- Editor de Matrizes & Tensores (MatrixTensorEditor) -->
+                <div class="sim-divider-label"><span>Matrizes & Tensores (MatrixTensorEditor)</span></div>
+
+                <div class="control-group">
+                    <label><img src="../assets/icons/matrix-basis.svg" class="icon-svg icon-accent" alt="Matriz"> Editor Interativo $2\times 2$ com Invariantes</label>
+                    <div id="demo-matrix-editor"></div>
+                    <div class="sim-readout" style="margin-top: 6px;">
+                        <div class="sim-readout-row">
+                            <span class="sim-readout-label">Determinante ($\det \mathbf{M}$):</span>
+                            <span class="sim-readout-value tone-accent" id="matrix-demo-det">1.00</span>
+                        </div>
+                        <div class="sim-readout-row">
+                            <span class="sim-readout-label">Traço ($\mathrm{tr}\,\mathbf{M}$):</span>
+                            <span class="sim-readout-value tone-cyan" id="matrix-demo-tr">2.00</span>
+                        </div>
+                        <div class="sim-readout-row">
+                            <span class="sim-readout-label">Autovalores ($\lambda_1, \lambda_2$):</span>
+                            <span class="sim-readout-value tone-emerald" id="matrix-demo-eig">1.00, 1.00</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- ============================================================= -->
             <!-- ABA 3: SWITCHES, TOGGLES & SEGMENTOS                         -->
             <!-- ============================================================= -->
-            <div id="panel-ui-switches" style="display: none;">
+            <div id="panel-ui-switches" class="tab-pane" style="display: none;">
                 <div class="tab-header">
                     <h3 class="tab-title">Switches & Controles Segmentados</h3>
                     <p class="tab-subtitle">Interruptores deslizantes animados estilo iOS e seletores em pílulas.</p>
@@ -491,13 +567,13 @@
             <!-- ============================================================= -->
             <!-- ABA 4: HUDS, BADGES & CARDS DE TEORIA (LATEX)                 -->
             <!-- ============================================================= -->
-            <div id="panel-ui-huds" style="display: none;">
+            <div id="panel-ui-huds" class="tab-pane" style="display: none;">
                 <div class="tab-header">
                     <div class="tab-header-row">
                         <h3 class="tab-title">Diagnósticos & $\LaTeX$</h3>
                         <div class="sim-badge"><span class="status-dot"></span><span>KaTeX</span></div>
                     </div>
-                    <p class="tab-subtitle">Badges de status, cards didáticos teóricos e fórmulas matemáticas.</p>
+                    <p class="tab-subtitle">Badges, Readouts, Gráficos Multissérie/Espaço de Fase e $\LaTeX$.</p>
                 </div>
 
                 <!-- Demonstração de Badges / Pílulas de Status -->
@@ -509,8 +585,36 @@
                     </div>
                 </div>
 
+                <!-- Painel de Leitura Numérica (.sim-readout & .tone-*) -->
+                <div class="sim-divider-label"><span>Painel de Leitura (.sim-readout)</span></div>
+
+                <div class="control-group">
+                    <div class="sim-readout">
+                        <div class="sim-readout-title">
+                            <img src="../assets/icons/gauge.svg" class="icon-svg icon-accent" alt="Telemetria">
+                            <span>Grandezas Físicas & Tons Semânticos</span>
+                        </div>
+                        <div class="sim-readout-row">
+                            <span class="sim-readout-label">Energia Total ($E$):</span>
+                            <span class="sim-readout-value tone-accent">12.50 J</span>
+                        </div>
+                        <div class="sim-readout-row">
+                            <span class="sim-readout-label">Energia Cinética ($K$):</span>
+                            <span class="sim-readout-value tone-cyan" id="readout-demo-k">6.25 J</span>
+                        </div>
+                        <div class="sim-readout-row">
+                            <span class="sim-readout-label">Energia Potencial ($U$):</span>
+                            <span class="sim-readout-value tone-rose" id="readout-demo-u">6.25 J</span>
+                        </div>
+                        <div class="sim-readout-row">
+                            <span class="sim-readout-label">Estabilidade Numérica:</span>
+                            <span class="sim-readout-value tone-emerald">Conservada ($\Delta E < 10^{-6}$)</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Mini-Gráfico de Telemetria em Tempo Real (Sparkline Plot) -->
-                <div class="sim-divider-label"><span>Telemetria em Tempo Real</span></div>
+                <div class="sim-divider-label"><span>Telemetria Canal Único (RealtimePlot)</span></div>
 
                 <div class="control-group">
                     <div class="sim-plot-card" id="demo-realtime-plot">
@@ -528,6 +632,31 @@
                             <canvas class="sim-plot-canvas" id="plot-canvas"></canvas>
                             <span class="plot-axis-label plot-axis-max" id="plot-axis-max">+1.2</span>
                             <span class="plot-axis-label plot-axis-min" id="plot-axis-min">-1.2</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Telemetria Multicanal & Espaço de Fase (MultiSeriesPlot) -->
+                <div class="sim-divider-label"><span>Multissérie & Espaço de Fase (MultiSeriesPlot)</span></div>
+
+                <div class="control-group">
+                    <div class="segmented-control" id="multiplot-mode-selector" style="margin-bottom: 4px;">
+                        <button class="segment-btn active" data-plot-mode="time-series">
+                            <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="Séries"> Séries Temporais
+                        </button>
+                        <button class="segment-btn" data-plot-mode="phase-space">
+                            <img src="../assets/icons/orbital.svg" class="icon-svg" alt="Fase"> Espaço de Fase $(x, p)$
+                        </button>
+                    </div>
+                    <div class="sim-plot-card">
+                        <div class="plot-header">
+                            <div class="plot-title-group">
+                                <span class="plot-dot"></span>
+                                <span class="plot-title" id="multiplot-title">Energias $K(t), U(t), E(t)$</span>
+                            </div>
+                        </div>
+                        <div class="plot-canvas-wrapper" style="height: 110px;">
+                            <canvas class="sim-plot-canvas" id="multi-plot-canvas"></canvas>
                         </div>
                     </div>
                 </div>
@@ -605,10 +734,10 @@
             <!-- ============================================================= -->
             <!-- ABA 5: GALERIA COMPLETA DE ÍCONES SVG                         -->
             <!-- ============================================================= -->
-            <div id="panel-ui-icons" style="display: none;">
+            <div id="panel-ui-icons" class="tab-pane" style="display: none;">
                 <div class="tab-header">
                     <h3 class="tab-title">Biblioteca de Ícones Nativos</h3>
-                    <p class="tab-subtitle">63 ícones vetoriais SVG em assets/icons/ configurados com currentColor e microanimações.</p>
+                    <p class="tab-subtitle">71 ícones vetoriais SVG em assets/icons/ configurados com currentColor e microanimações.</p>
                 </div>
 
                 <div class="control-group">
@@ -626,7 +755,7 @@
                     <span class="status-dot"></span>
                     <span id="footer-status-text">Simulação Pronta</span>
                 </div>
-                <span class="footer-meta" id="footer-sim-timer">t = 0.00s</span>
+                <span class="footer-meta" id="footer-sim-timer" data-focus-control="badge" data-focus-order="10" data-focus-tab="global">t = 0.00s</span>
             </div>
 
         </aside>

@@ -9,8 +9,11 @@
 import {
     syncDualSlider,
     initSidebarCollapse,
+    initFocusMirrorToolbar,
     initBottomSheet,
     initModal,
+    initTabs,
+    initKaTeXAutoRender,
     inlineSVGImages
 } from './sim-ui.js';
 
@@ -169,17 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
     inlineSVGImages();
 
     // 2. Renderização de equações KaTeX
-    if (window.renderMathInElement) {
-        window.renderMathInElement(document.body, {
-            delimiters: [
-                { left: '$$', right: '$$', display: true },
-                { left: '$', right: '$', display: false },
-                { left: '\\(', right: '\\)', display: false },
-                { left: '\\[', right: '\\]', display: true }
-            ],
-            throwOnError: false
-        });
-    }
+    initKaTeXAutoRender();
 
     // 3. Inicializa o Modo Foco Desktop (Recolhimento Lateral com atalho 'F')
     initSidebarCollapse({
@@ -187,6 +180,12 @@ document.addEventListener("DOMContentLoaded", () => {
         collapseBtnSelector: '#btn-collapse-sidebar',
         expandBtnSelector: '#btn-expand-sidebar',
         onResize: resizeCanvas
+    });
+
+    // Barra flutuante de contexto para Modo Foco
+    initFocusMirrorToolbar({
+        toolbarTarget: '#focus-context-toolbar',
+        scopeSelector: '.controls-panel'
     });
 
     // 4. Inicializa o Bottom Sheet Responsivo para Mobile (<= 900px)
@@ -204,27 +203,8 @@ document.addEventListener("DOMContentLoaded", () => {
         theoryModal?.open();
     });
 
-    // 6. Navegação entre Abas (Parâmetros <-> Teoria)
-    const tabParamsBtn = document.getElementById('tab-btn-params');
-    const tabTheoryBtn = document.getElementById('tab-btn-theory');
-    const panelParams = document.getElementById('panel-tab-params');
-    const panelTheory = document.getElementById('panel-tab-theory');
-
-    if (tabParamsBtn && tabTheoryBtn && panelParams && panelTheory) {
-        tabParamsBtn.addEventListener('click', () => {
-            tabParamsBtn.classList.add('active');
-            tabTheoryBtn.classList.remove('active');
-            panelParams.style.display = 'block';
-            panelTheory.style.display = 'none';
-        });
-
-        tabTheoryBtn.addEventListener('click', () => {
-            tabTheoryBtn.classList.add('active');
-            tabParamsBtn.classList.remove('active');
-            panelTheory.style.display = 'block';
-            panelParams.style.display = 'none';
-        });
-    }
+    // 6. Navegação entre Abas via Design System
+    initTabs();
 
     // 7. Sincronização dos Dual Sliders (Modo n e Modo m)
     const presetButtons = document.querySelectorAll('.btn-preset');
@@ -325,22 +305,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    canvas.addEventListener('mousemove', (e) => {
+    canvas.addEventListener('pointermove', (e) => {
         inspectAt(e.clientX, e.clientY);
     });
 
-    canvas.addEventListener('mouseleave', () => {
+    canvas.addEventListener('pointerleave', () => {
         if (hudCoords) hudCoords.textContent = `(x: -, y: -)`;
         if (hudAmplitude) {
             hudAmplitude.textContent = `ψ = 0.00`;
             hudAmplitude.style.color = '';
         }
     });
-
-    canvas.addEventListener('touchmove', (e) => {
-        if (!e.touches || e.touches.length === 0) return;
-        inspectAt(e.touches[0].clientX, e.touches[0].clientY);
-    }, { passive: true });
 
     // 14. Observador de Redimensionamento Automático
     window.addEventListener('resize', resizeCanvas);

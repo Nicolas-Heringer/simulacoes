@@ -28,8 +28,8 @@
     <!-- Cabeçalho da Simulação -->
     <header class="sim-header">
         <a href="../index.html#secao-simulacoes" class="btn-back">
-            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            Voltar
+            <img src="../assets/icons/arrow-left.svg" class="icon-svg" alt="Voltar">
+            Voltar ao Hub
         </a>
         <h1 class="sim-title">{{TITULO_SIMULACAO}}</h1>
     </header>
@@ -39,14 +39,6 @@
         <!-- 1. Área do Canvas 3D / 2D -->
         <div class="canvas-area">
             <div id="three-container"></div>
-
-            <!-- Barra de Ferramentas / Seletor Rápido (Topo Esquerdo) -->
-            <div class="canvas-toolbar pos-top-left" id="sim-toolbar">
-                <span>🎨 Acento:</span>
-                <div class="toolbar-dot active" style="--c: #facc15;" data-color="#facc15" title="Amarelo"></div>
-                <div class="toolbar-dot" style="--c: #38bdf8;" data-color="#38bdf8" title="Ciano"></div>
-                <div class="toolbar-dot" style="--c: #22c55e;" data-color="#22c55e" title="Verde"></div>
-            </div>
 
             <!-- Grupo de Ações do Topo Direito (Rotação + Reabrir Controles no Modo Foco) -->
             <div class="canvas-top-actions">
@@ -68,7 +60,7 @@
                 </div>
                 <div class="hud-item">
                     <span class="hud-label">FPS:</span>
-                    <span class="hud-val" id="hud-fps" style="color: var(--color-emerald, #22c55e);">60 fps</span>
+                    <span class="hud-val" id="hud-fps" style="color: var(--color-emerald);">60 fps</span>
                 </div>
             </div>
 
@@ -88,12 +80,12 @@
 
             <!-- Topo: Barra de Abas Expansíveis -->
             <div class="tab-nav">
-                <button class="tab-btn active" id="tab-btn-params">
-                    <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Parâmetros">
+                <button class="tab-btn active" id="tab-btn-params" data-tab="panel-tab-params">
+                    <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Parâmetros">
                     <span class="tab-label">Parâmetros</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-theory">
-                    <img src="../assets/icons/compass.svg" class="icon-svg" alt="Teoria">
+                <button class="tab-btn" id="tab-btn-theory" data-tab="panel-tab-theory">
+                    <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                     <span class="tab-label">Teoria</span>
                 </button>
                 <button class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
@@ -103,7 +95,7 @@
 
             <!-- Centro: Corpo Rolável de Conteúdo -->
             <div class="panel-body">
-                <div id="panel-tab-params">
+                <div id="panel-tab-params" class="tab-pane active">
                     <!-- 1. Barra de Transporte / Playback -->
                     <div class="sim-transport-bar">
                         <div class="transport-controls-row">
@@ -112,21 +104,33 @@
                                     data-text-idle="Executar"
                                     data-text-active="Pausar"
                                     data-icon-idle="play"
-                                    data-icon-active="pause">
+                                    data-icon-active="pause"
+                                    data-focus-control="toggle"
+                                    data-focus-order="1"
+                                    data-focus-tab="global">
                                 <img src="../assets/icons/play.svg" class="icon-svg" alt="Play">
                                 <span class="btn-text">Executar</span>
                             </button>
-                            <button class="btn-icon" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
+                            <button class="btn-icon" id="btn-step-sim" title="Avançar 1 Passo (Δt)"
+                                    data-focus-control="action"
+                                    data-focus-label=""
+                                    data-focus-order="2"
+                                    data-focus-tab="global">
                                 <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
                             </button>
-                            <button class="btn-icon" id="btn-reset-sim" title="Reiniciar (t = 0)">
+                            <button class="btn-icon" id="btn-reset-sim" title="Reiniciar (t = 0)"
+                                    data-focus-control="action"
+                                    data-focus-label=""
+                                    data-focus-order="3"
+                                    data-focus-divider="after"
+                                    data-focus-tab="global">
                                 <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                             </button>
                         </div>
 
                         <div class="transport-speed-row">
                             <span class="transport-speed-label">
-                                <img src="../assets/icons/rotate.svg" class="icon-svg" style="width: 14px; height: 14px;" alt="Velocidade">
+                                <img src="../assets/icons/stopwatch.svg" class="icon-svg" style="width: 14px; height: 14px;" alt="Velocidade">
                                 Velocidade:
                             </span>
                             <div class="transport-speed-pills" id="sim-speed-pills">
@@ -139,7 +143,7 @@
                     </div>
 
                     <!-- 2. Controles de Parâmetros com Dual Slider -->
-                    <div class="control-group">
+                    <div class="control-group" style="margin-top: 12px;">
                         <div class="slider-container sim-dual-slider">
                             <div class="slider-header">
                                 <label for="slider-param1" class="slider-label">Parâmetro Exemplo ($p_1$)</label>
@@ -150,14 +154,17 @@
                                 </div>
                             </div>
                             <input type="range" class="sim-slider" id="slider-param1"
-                                   min="0.1" max="10.0" step="0.1" value="1.0">
+                                   min="0.1" max="10.0" step="0.1" value="1.0"
+                                   data-focus-control="slider"
+                                   data-focus-label="p₁"
+                                   data-focus-order="4">
                         </div>
                     </div>
                 </div>
 
-                <div id="panel-tab-theory" style="display: none;">
-                    <div class="theory-section">
-                        <h4>Fundamentação Física</h4>
+                <div id="panel-tab-theory" class="tab-pane" style="display: none;">
+                    <div class="theory-card">
+                        <h4><img src="../assets/icons/book-open.svg" class="icon-svg icon-accent" alt="Teoria"> Fundamentação Física</h4>
                         <p>Descrição do modelo físico e formulação matemática:</p>
                         $$f(x, t) = A \cos(k x - \omega t)$$
                     </div>
@@ -170,7 +177,7 @@
                     <span class="status-dot"></span>
                     <span id="footer-status-text">Simulação Pronta</span>
                 </div>
-                <span class="footer-meta" id="footer-sim-timer">t = 0.00s</span>
+                <span class="footer-meta" id="footer-sim-timer" data-focus-control="badge" data-focus-order="10" data-focus-tab="global">t = 0.00s</span>
             </div>
         </aside>
     </main>

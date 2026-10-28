@@ -3,8 +3,11 @@ import {
     syncDualSlider,
     RealtimePlot,
     initSidebarCollapse,
+    initFocusMirrorToolbar,
     initBottomSheet,
-    initKaTeXAutoRender
+    initTabs,
+    initKaTeXAutoRender,
+    inlineSVGImages
 } from './sim-ui.js';
 
 // =============================================================================
@@ -434,6 +437,12 @@ function setupUI() {
         defaultState: 'peek'
     });
 
+    // Barra flutuante de contexto para Modo Foco
+    initFocusMirrorToolbar({
+        toolbarTarget: '#focus-context-toolbar',
+        scopeSelector: '.controls-panel'
+    });
+
     // Barra de Transporte (Play / Pause)
     const playControl = initToggleButton('#btn-play-sim', (active) => {
         state.isRunning = active;
@@ -499,28 +508,8 @@ function setupUI() {
         state.amortecimento = val;
     });
 
-    // Alternância de Abas
-    const tabParams = document.getElementById('tab-btn-params');
-    const tabTheory = document.getElementById('tab-btn-theory');
-    const panelParams = document.getElementById('panel-tab-params');
-    const panelTheory = document.getElementById('panel-tab-theory');
-
-    tabParams?.addEventListener('click', () => {
-        tabParams.classList.add('active');
-        tabTheory?.classList.remove('active');
-        if (panelParams) panelParams.style.display = 'block';
-        if (panelTheory) panelTheory.style.display = 'none';
-    });
-
-    tabTheory?.addEventListener('click', () => {
-        tabTheory.classList.add('active');
-        tabParams?.classList.remove('active');
-        if (panelParams) panelParams.style.display = 'none';
-        if (panelTheory) {
-            panelTheory.style.display = 'block';
-            initKaTeXAutoRender(panelTheory);
-        }
-    });
+    // Navegação de Abas via Design System
+    initTabs();
 
     // Mini-Gráfico RealtimePlot
     plotEnergia = new RealtimePlot('#canvas-plot-energia', {
@@ -569,6 +558,7 @@ function animate(currentTime) {
 // 7. INICIALIZAÇÃO
 // =============================================================================
 window.addEventListener('DOMContentLoaded', () => {
+    inlineSVGImages();
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
     setupPointerEvents();

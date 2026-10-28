@@ -6,7 +6,16 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { initSidebarCollapse, initBottomSheet, initModal, inlineSVGImages } from './sim-ui.js';
+import {
+    initSidebarCollapse,
+    initBottomSheet,
+    initTabs,
+    initFocusMirrorToolbar,
+    syncDualSlider,
+    initModal,
+    inlineSVGImages,
+    initKaTeXAutoRender
+} from './sim-ui.js';
 
 // Constantes Físicas Planetárias
 const REAL_EARTH_RADIUS_KM = 6371; // Raio médio real da Terra em km
@@ -1078,9 +1087,18 @@ function updateAstronomicalState() {
         selectDateMonth.value = String(info.monthIdx);
     }
 
+    const inputDay = document.getElementById('input-day-of-year');
+    if (inputDay && document.activeElement !== inputDay) {
+        inputDay.value = Math.floor(state.dayOfYear);
+    }
+
     const h = Math.floor(state.hourOfDay);
     const m = Math.floor((state.hourOfDay - h) * 60);
     if (valHour) valHour.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    const inputHour = document.getElementById('input-hour-of-day');
+    if (inputHour && document.activeElement !== inputHour) {
+        inputHour.value = state.hourOfDay.toFixed(2);
+    }
     if (labelOrreryMonth) labelOrreryMonth.textContent = info.dateShort;
 
     if (badgeTitle && badgeStatus) {
@@ -1325,39 +1343,6 @@ function animate(timestamp) {
 // =============================================================================
 
 function setupUIListeners() {
-    // Alternância de Abas Principais (Parâmetros vs Teoria)
-    const tabBtnParams = document.getElementById('tab-btn-params');
-    const tabBtnTheory = document.getElementById('tab-btn-theory');
-    const panelTabParams = document.getElementById('panel-tab-params');
-    const panelTabTheory = document.getElementById('panel-tab-theory');
-
-    if (tabBtnParams) {
-        tabBtnParams.addEventListener('click', () => {
-            tabBtnParams.classList.add('active');
-            if (tabBtnTheory) tabBtnTheory.classList.remove('active');
-            if (panelTabParams) panelTabParams.style.display = 'block';
-            if (panelTabTheory) panelTabTheory.style.display = 'none';
-        });
-    }
-
-    if (tabBtnTheory) {
-        tabBtnTheory.addEventListener('click', () => {
-            tabBtnTheory.classList.add('active');
-            if (tabBtnParams) tabBtnParams.classList.remove('active');
-            if (panelTabTheory) panelTabTheory.style.display = 'block';
-            if (panelTabParams) panelTabParams.style.display = 'none';
-            if (window.renderMathInElement && panelTabTheory) {
-                window.renderMathInElement(panelTabTheory, {
-                    delimiters: [
-                        { left: '$$', right: '$$', display: true },
-                        { left: '$', right: '$', display: false }
-                    ],
-                    throwOnError: false
-                });
-            }
-        });
-    }
-
     // Alternância de Etapas da Simulação (1 a 4)
     const btnTabMath = document.getElementById('btn-tab-math');
     const btnTabScience = document.getElementById('btn-tab-science');
@@ -1365,10 +1350,10 @@ function setupUIListeners() {
     const btnTabAtmosphere = document.getElementById('btn-tab-atmosphere');
 
     function activateStage(stageKey) {
-        if (tabBtnParams) tabBtnParams.classList.add('active');
-        if (tabBtnTheory) tabBtnTheory.classList.remove('active');
-        if (panelTabParams) panelTabParams.style.display = 'block';
-        if (panelTabTheory) panelTabTheory.style.display = 'none';
+        const tabBtnParams = document.getElementById('tab-btn-params');
+        if (tabBtnParams && !tabBtnParams.classList.contains('active')) {
+            tabBtnParams.click();
+        }
         switchTab(stageKey);
     }
 
@@ -1396,18 +1381,15 @@ function setupUIListeners() {
     }
 
     // --- CONTROLES DA ABA 1 (MATEMÁTICA) ---
-    const sliderNumCells = document.getElementById('slider-num-cells');
-    const valNumCells = document.getElementById('val-num-cells');
-    if (sliderNumCells && valNumCells) {
-        sliderNumCells.addEventListener('input', (e) => {
-            state.numCells = parseInt(e.target.value);
-            valNumCells.textContent = `${state.numCells}`;
-        });
-        sliderNumCells.addEventListener('change', () => {
-            stopAutoLloyd();
+    let meshDebounceTimer = null;
+    syncDualSlider('#slider-num-cells', '#input-num-cells', (val) => {
+        state.numCells = Math.round(val);
+        stopAutoLloyd();
+        clearTimeout(meshDebounceTimer);
+        meshDebounceTimer = setTimeout(() => {
             generateNewRandomMesh();
-        });
-    }
+        }, 150);
+    });
 
     const btnRandom = document.getElementById('btn-random-mesh');
     if (btnRandom) {
@@ -1449,45 +1431,29 @@ function setupUIListeners() {
         });
     }
 
-    const sliderSpeed = document.getElementById('slider-speed');
-    const valSpeed = document.getElementById('val-speed');
-    if (sliderSpeed && valSpeed) {
-        sliderSpeed.addEventListener('input', (e) => {
-            state.lloydSpeed = parseInt(e.target.value);
-            valSpeed.textContent = `${state.lloydSpeed} passos/s`;
-        });
-    }
+    syncDualSlider('#slider-speed', '#input-speed', (val) => {
+        state.lloydSpeed = Math.round(val);
+    });
 
     // --- CONTROLES DA ABA 2 (CIÊNCIA & PLANETA) ---
-    const sliderCoreRadius = document.getElementById('slider-core-radius');
-    const valCoreRadius = document.getElementById('val-core-radius');
-    if (sliderCoreRadius && valCoreRadius) {
-        sliderCoreRadius.addEventListener('input', (e) => {
-            state.coreRadius = parseFloat(e.target.value);
-            const thicknessPercent = ((1.0 - state.coreRadius) * 100).toFixed(1);
-            valCoreRadius.textContent = `R_solo = ${state.coreRadius.toFixed(2)} (${thicknessPercent}%)`;
-            if (globeCoreMesh) globeCoreMesh.scale.setScalar(state.coreRadius);
-            updatePlanetaryScaleStats();
-        });
-    }
+    syncDualSlider('#slider-core-radius', '#input-core-radius', (val) => {
+        state.coreRadius = parseFloat(val);
+        if (globeCoreMesh) globeCoreMesh.scale.setScalar(state.coreRadius);
+        updatePlanetaryScaleStats();
+    });
 
-    const sliderOpacity = document.getElementById('slider-shell-opacity');
-    const valOpacity = document.getElementById('val-shell-opacity');
-    if (sliderOpacity && valOpacity) {
-        sliderOpacity.addEventListener('input', (e) => {
-            state.shellOpacity = parseFloat(e.target.value);
-            valOpacity.textContent = `${(state.shellOpacity * 100).toFixed(0)}%`;
-            if (globeMaterial && state.activeTab !== 'tab-math') {
-                globeMaterial.transparent = state.shellOpacity < 1.0;
-                globeMaterial.opacity = state.shellOpacity;
-                globeMaterial.depthWrite = (state.shellOpacity >= 1.0);
-                globeMaterial.polygonOffset = true;
-                globeMaterial.polygonOffsetFactor = 1.0;
-                globeMaterial.polygonOffsetUnits = 1.0;
-                globeMaterial.needsUpdate = true;
-            }
-        });
-    }
+    syncDualSlider('#slider-shell-opacity', '#input-shell-opacity', (val) => {
+        state.shellOpacity = parseFloat(val);
+        if (globeMaterial && state.activeTab !== 'tab-math') {
+            globeMaterial.transparent = state.shellOpacity < 1.0;
+            globeMaterial.opacity = state.shellOpacity;
+            globeMaterial.depthWrite = (state.shellOpacity >= 1.0);
+            globeMaterial.polygonOffset = true;
+            globeMaterial.polygonOffsetFactor = 1.0;
+            globeMaterial.polygonOffsetUnits = 1.0;
+            globeMaterial.needsUpdate = true;
+        }
+    });
 
     const toggleEarthTexture = document.getElementById('toggle-earth-texture');
     if (toggleEarthTexture) {
@@ -1522,21 +1488,15 @@ function setupUIListeners() {
     }
 
     // --- CONTROLES DA ABA 3 (ESTAÇÕES DO ANO) ---
-    const sliderDay = document.getElementById('slider-day-of-year');
-    if (sliderDay) {
-        sliderDay.addEventListener('input', (e) => {
-            state.dayOfYear = parseFloat(e.target.value);
-            updateAstronomicalState();
-        });
-    }
+    syncDualSlider('#slider-day-of-year', '#input-day-of-year', (val) => {
+        state.dayOfYear = parseFloat(val);
+        updateAstronomicalState();
+    });
 
-    const sliderHour = document.getElementById('slider-hour-of-day');
-    if (sliderHour) {
-        sliderHour.addEventListener('input', (e) => {
-            state.hourOfDay = parseFloat(e.target.value);
-            updateAstronomicalState();
-        });
-    }
+    syncDualSlider('#slider-hour-of-day', '#input-hour-of-day', (val) => {
+        state.hourOfDay = parseFloat(val);
+        updateAstronomicalState();
+    });
 
     const btnPlayOrbit = document.getElementById('btn-play-orbit');
     if (btnPlayOrbit) {
@@ -1570,7 +1530,10 @@ function setupUIListeners() {
 
     function setSeasonDay(targetDay, activeBtn) {
         state.dayOfYear = targetDay;
+        const sliderDay = document.getElementById('slider-day-of-year');
         if (sliderDay) sliderDay.value = targetDay;
+        const inputDay = document.getElementById('input-day-of-year');
+        if (inputDay) inputDay.value = targetDay;
         seasonBtns.forEach(b => b && b.classList.remove('active'));
         if (activeBtn) activeBtn.classList.add('active');
         updateAstronomicalState();
@@ -1598,7 +1561,10 @@ function setupUIListeners() {
 
         const targetDoy = getDayOfYearFromDate(dayVal, safeMonth);
         state.dayOfYear = targetDoy;
+        const sliderDay = document.getElementById('slider-day-of-year');
         if (sliderDay) sliderDay.value = targetDoy;
+        const inputDay = document.getElementById('input-day-of-year');
+        if (inputDay) inputDay.value = targetDoy;
         seasonBtns.forEach(b => b && b.classList.remove('active'));
         updateAstronomicalState();
     }
@@ -1754,6 +1720,13 @@ window.addEventListener('DOMContentLoaded', async () => {
         defaultState: 'peek'
     });
 
+    initTabs('.controls-panel');
+
+    initFocusMirrorToolbar({
+        toolbarTarget: '#focus-context-toolbar',
+        scopeSelector: '.controls-panel'
+    });
+
     const modalTeoria = initModal('#modal-teoria');
     document.getElementById('btn-open-theory-modal')?.addEventListener('click', () => {
         modalTeoria?.open();
@@ -1764,13 +1737,5 @@ window.addEventListener('DOMContentLoaded', async () => {
     animate(performance.now());
     await inlineSVGImages();
 
-    if (window.renderMathInElement) {
-        window.renderMathInElement(document.body, {
-            delimiters: [
-                { left: '$$', right: '$$', display: true },
-                { left: '$', right: '$', display: false }
-            ],
-            throwOnError: false
-        });
-    }
+    initKaTeXAutoRender(document.body);
 });

@@ -4,7 +4,11 @@ import {
     initToggleButton,
     syncDualSlider,
     initSidebarCollapse,
-    initBottomSheet
+    initBottomSheet,
+    initTabs,
+    initFocusMirrorToolbar,
+    inlineSVGImages,
+    initKaTeXAutoRender
 } from './sim-ui.js';
 
 // --- 1. Estado da Simulação ---
@@ -61,9 +65,10 @@ function onWindowResize() {
     if (!container) return;
     const w = container.clientWidth;
     const h = container.clientHeight;
+    if (w === 0 || h === 0) return;
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
+    renderer.setSize(w, h, false);
 }
 window.addEventListener('resize', onWindowResize);
 
@@ -85,6 +90,9 @@ function setupUI() {
         collapseBtnSelector: '#btn-collapse-sidebar',
         defaultState: 'peek'
     });
+
+    // Navegação por Abas
+    initTabs();
 
     // Play / Pause
     const playControl = initToggleButton('#btn-play-sim', (active) => {
@@ -128,24 +136,11 @@ function setupUI() {
         mesh.scale.setScalar(val);
     });
 
-    // Abas
-    const tabParams = document.getElementById('tab-btn-params');
-    const tabTheory = document.getElementById('tab-btn-theory');
-    const panelParams = document.getElementById('panel-tab-params');
-    const panelTheory = document.getElementById('panel-tab-theory');
-
-    tabParams?.addEventListener('click', () => {
-        tabParams.classList.add('active');
-        tabTheory?.classList.remove('active');
-        if (panelParams) panelParams.style.display = 'block';
-        if (panelTheory) panelTheory.style.display = 'none';
-    });
-
-    tabTheory?.addEventListener('click', () => {
-        tabTheory.classList.add('active');
-        tabParams?.classList.remove('active');
-        if (panelParams) panelParams.style.display = 'none';
-        if (panelTheory) panelTheory.style.display = 'block';
+    // Barra Flutuante Espelhada para Modo Foco
+    initFocusMirrorToolbar({
+        scopeSelector: '.controls-panel',
+        layoutSelector: '.sim-layout',
+        onlyInFocusMode: true
     });
 }
 
@@ -194,15 +189,9 @@ function animate(currentTime) {
 }
 
 // --- 6. Inicialização ---
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
     setupUI();
-    if (window.renderMathInElement) {
-        window.renderMathInElement(document.body, {
-            delimiters: [
-                { left: '$$', right: '$$', display: true },
-                { left: '$', right: '$', display: false }
-            ]
-        });
-    }
+    await inlineSVGImages();
+    initKaTeXAutoRender(document.body);
     requestAnimationFrame(animate);
 });

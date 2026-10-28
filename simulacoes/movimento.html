@@ -24,24 +24,14 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
-        crossorigin="anonymous" onload="renderMathInElement(document.body, {
-            delimiters: [
-                {left: '$$', right: '$$', display: true},
-                {left: '$', right: '$', display: false},
-                {left: '\\(', right: '\\)', display: false},
-                {left: '\\[', right: '\\]', display: true}
-            ],
-            throwOnError: false
-        });"></script>
+        crossorigin="anonymous"></script>
 </head>
 
 <body>
     <!-- Cabeçalho da Simulação -->
     <header class="sim-header">
         <a href="../index.html#secao-simulacoes" class="btn-back">
-            <svg class="icon-svg" viewBox="0 0 24 24">
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
+            <img src="../assets/icons/arrow-left.svg" class="icon-svg" alt="Voltar">
             Voltar ao Hub
         </a>
         <h1 class="sim-title">Funções Horárias & Encontro de Móveis</h1>
@@ -53,6 +43,9 @@
         <!-- 1. Área do Canvas Interativo (Pista 1D / Gráficos Espaço-Tempo) -->
         <div class="canvas-area">
             <canvas id="simCanvas"></canvas>
+
+            <!-- Barra de Ferramentas Espelhada do Modo Foco -->
+            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
 
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
@@ -75,18 +68,9 @@
 
             <!-- Controles Flutuantes de Zoom do Gráfico 2D -->
             <div class="canvas-zoom-toolbar" id="canvasZoomToolbar" style="display: none;">
-                <button id="btn-zoom-in" class="zoom-btn" title="Aumentar Zoom (Scroll Up)">
-                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                </button>
+                <button id="btn-zoom-in" class="zoom-btn" title="Aumentar Zoom (Scroll Up)">+</button>
                 <span class="zoom-badge" id="lbl-zoom-level">100%</span>
-                <button id="btn-zoom-out" class="zoom-btn" title="Diminuir Zoom (Scroll Down)">
-                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                </button>
+                <button id="btn-zoom-out" class="zoom-btn" title="Diminuir Zoom (Scroll Down)">−</button>
                 <button id="btn-zoom-reset" class="zoom-btn" title="Centralizar e Redefinir Zoom">
                     <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                 </button>
@@ -110,19 +94,19 @@
 
             <!-- Topo: Barra de Abas Expansíveis Separadas por Modo -->
             <div class="tab-nav">
-                <button class="tab-btn active" id="tab-btn-manual" title="Modo Manual">
+                <button class="tab-btn active" id="tab-btn-manual" data-tab="panel-tab-manual" title="Modo Manual">
                     <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Manual">
                     <span class="tab-label">Manual</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-eq1" title="1 Corpo por Função Horária">
+                <button class="tab-btn" id="tab-btn-eq1" data-tab="panel-tab-eq1" title="1 Corpo por Função Horária">
                     <img src="../assets/icons/step.svg" class="icon-svg" alt="1 Corpo">
                     <span class="tab-label">1 Corpo</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-eq2" title="2 Corpos e Encontro">
+                <button class="tab-btn" id="tab-btn-eq2" data-tab="panel-tab-eq2" title="2 Corpos e Encontro">
                     <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="2 Corpos">
                     <span class="tab-label">2 Corpos</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-theory" title="Teoria">
+                <button class="tab-btn" id="tab-btn-theory" data-tab="panel-tab-theory" title="Teoria">
                     <img src="../assets/icons/compass.svg" class="icon-svg" alt="Teoria">
                     <span class="tab-label">Teoria</span>
                 </button>
@@ -139,14 +123,16 @@
                     <div class="transport-controls-row">
                         <button class="btn-primary btn-toggle transport-btn-play" id="btn-play-sim" data-state="0"
                             data-text-idle="Iniciar Tempo" data-text-active="Pausar Tempo" data-icon-idle="play"
-                            data-icon-active="pause">
+                            data-icon-active="pause" data-focus-control="toggle" data-focus-order="1">
                             <img src="../assets/icons/play.svg" class="icon-svg" alt="Play">
                             <span class="btn-text">Iniciar Tempo</span>
                         </button>
-                        <button class="btn-icon" id="btn-step-sim" title="Avançar 0.1s (Δt)">
+                        <button class="btn-icon" id="btn-step-sim" title="Avançar 0.1s (Δt)"
+                            data-focus-control="action" data-focus-order="2" data-focus-icon="step">
                             <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
                         </button>
-                        <button class="btn-icon" id="btn-reset-sim" title="Reiniciar (t = 0)">
+                        <button class="btn-icon" id="btn-reset-sim" title="Reiniciar (t = 0)"
+                            data-focus-control="action" data-focus-order="3" data-focus-icon="refresh">
                             <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                         </button>
                     </div>
@@ -167,10 +153,14 @@
 
                 <!-- Controle de Histórico Temporal (Modo Gráfico 2D) -->
                 <div class="control-group" id="groupScrubber" style="display: none;">
-                    <div class="clean-slider-item">
-                        <div class="clean-slider-header">
-                            <span>Instante Gravado ($t$):</span>
-                            <strong id="lbl-scrubber-val" style="color: var(--accent-color);">0.00 s</strong>
+                    <div class="slider-container sim-dual-slider">
+                        <div class="slider-header">
+                            <label for="sliderScrubber" class="slider-label">Instante Gravado ($t$)</label>
+                            <div class="dual-input-wrapper">
+                                <input type="number" class="dual-input-number" id="inputScrubber" min="0" max="10" step="0.05"
+                                    value="0.00">
+                                <span class="dual-input-unit">s</span>
+                            </div>
                         </div>
                         <input type="range" class="sim-slider" id="sliderScrubber" min="0" max="10" step="0.05"
                             value="0.00">
@@ -180,7 +170,7 @@
                 <!-- ======================================================= -->
                 <!-- ABA 1: MODO MANUAL LIVRE                                -->
                 <!-- ======================================================= -->
-                <div id="panel-tab-manual">
+                <div id="panel-tab-manual" class="tab-pane active">
                     <div class="tab-header">
                         <h3 class="tab-title">Movimento Livre</h3>
                         <p class="tab-subtitle">Arraste a esfera diretamente na reta para observar a velocidade escalar
@@ -188,10 +178,14 @@
                     </div>
 
                     <div class="control-group">
-                        <div class="clean-slider-item">
-                            <div class="clean-slider-header">
-                                <span>Posição do Móvel ($s$):</span>
-                                <strong id="lbl-pos-manual" style="color: var(--accent-color);">0.0 m</strong>
+                        <div class="slider-container sim-dual-slider">
+                            <div class="slider-header">
+                                <label for="sliderPos" class="slider-label">Posição do Móvel ($s$)</label>
+                                <div class="dual-input-wrapper">
+                                    <input type="number" class="dual-input-number" id="inputPos" min="-15" max="15" step="0.5"
+                                        value="0.0">
+                                    <span class="dual-input-unit">m</span>
+                                </div>
                             </div>
                             <input type="range" class="sim-slider" id="sliderPos" min="-15" max="15" step="0.5"
                                 value="0.0">
@@ -209,7 +203,7 @@
                 <!-- ======================================================= -->
                 <!-- ABA 2: 1 MÓVEL POR FUNÇÃO HORÁRIA                       -->
                 <!-- ======================================================= -->
-                <div id="panel-tab-eq1" style="display: none;">
+                <div id="panel-tab-eq1" class="tab-pane" style="display: none;">
                     <div class="tab-header">
                         <div class="tab-header-row">
                             <h3 class="tab-title">Função Horária da Posição</h3>
@@ -228,43 +222,54 @@
                         </div>
                     </div>
 
-                    <!-- Sliders Minimalistas Móvel A -->
+                    <!-- Sliders Móvel A -->
                     <div class="control-group">
-                        <div class="clean-slider-group">
-                            <div class="clean-slider-item">
-                                <div class="clean-slider-header">
-                                    <span>Posição Inicial ($s_0$):</span>
-                                    <strong id="lbl-s0A" style="color: var(--accent-color);">-5.0 m</strong>
+                        <div class="slider-container sim-dual-slider">
+                            <div class="slider-header">
+                                <label for="sliderS0A" class="slider-label">Posição Inicial ($s_0$)</label>
+                                <div class="dual-input-wrapper">
+                                    <input type="number" class="dual-input-number" id="inputS0A" min="-15" max="15" step="0.5"
+                                        value="-5.0">
+                                    <span class="dual-input-unit">m</span>
                                 </div>
-                                <input type="range" class="sim-slider" id="sliderS0A" min="-15" max="15" step="0.5"
-                                    value="-5.0">
                             </div>
+                            <input type="range" class="sim-slider" id="sliderS0A" min="-15" max="15" step="0.5"
+                                value="-5.0">
+                        </div>
 
-                            <div class="clean-slider-item">
-                                <div class="clean-slider-header">
-                                    <span>Velocidade ($v_0$):</span>
-                                    <strong id="lbl-v0A" style="color: var(--color-emerald, #22c55e);">+3.0 m/s</strong>
+                        <div class="slider-container sim-dual-slider" style="margin-top: 10px;">
+                            <div class="slider-header">
+                                <label for="sliderV0A" class="slider-label">Velocidade ($v_0$)</label>
+                                <div class="dual-input-wrapper">
+                                    <input type="number" class="dual-input-number" id="inputV0A" min="-10" max="10" step="0.5"
+                                        value="3.0">
+                                    <span class="dual-input-unit">m/s</span>
                                 </div>
-                                <input type="range" class="sim-slider" id="sliderV0A" min="-10" max="10" step="0.5"
-                                    value="3.0">
                             </div>
+                            <input type="range" class="sim-slider" id="sliderV0A" min="-10" max="10" step="0.5"
+                                value="3.0">
+                        </div>
 
-                            <!-- Switch de Aceleração Opcional -->
-                            <div class="accel-toggle-row">
-                                <label class="accel-checkbox-label">
-                                    <input type="checkbox" id="chk-accel-single">
-                                    <span>Incluir Aceleração (MRUV)</span>
-                                </label>
-                            </div>
+                        <!-- Switch de Aceleração Opcional -->
+                        <div class="switch-container" style="margin-top: 12px;">
+                            <span class="switch-label">Incluir Aceleração (MRUV)</span>
+                            <label class="sim-switch">
+                                <input type="checkbox" id="chk-accel-single">
+                                <span class="slider-round"></span>
+                            </label>
+                        </div>
 
-                            <div class="clean-slider-item" id="group-accel-single" style="display: none;">
-                                <div class="clean-slider-header">
-                                    <span>Aceleração ($a$):</span>
-                                    <strong id="lbl-aA" style="color: var(--color-purple, #c084fc);">0.0 m/s²</strong>
+                        <div class="slider-container sim-dual-slider" id="group-accel-single" style="display: none; margin-top: 10px;">
+                            <div class="slider-header">
+                                <label for="sliderAA" class="slider-label">Aceleração ($a$)</label>
+                                <div class="dual-input-wrapper">
+                                    <input type="number" class="dual-input-number" id="inputAA" min="-5" max="5" step="0.2"
+                                        value="0.0">
+                                    <span class="dual-input-unit">m/s²</span>
                                 </div>
-                                <input type="range" class="sim-slider" id="sliderAA" min="-5" max="5" step="0.2"
-                                    value="0.0">
                             </div>
+                            <input type="range" class="sim-slider" id="sliderAA" min="-5" max="5" step="0.2"
+                                value="0.0">
                         </div>
                     </div>
 
@@ -279,7 +284,7 @@
                 <!-- ======================================================= -->
                 <!-- ABA 3: 2 MÓVEIS (ENCONTRO DE CORPOS)                    -->
                 <!-- ======================================================= -->
-                <div id="panel-tab-eq2" style="display: none;">
+                <div id="panel-tab-eq2" class="tab-pane" style="display: none;">
                     <div class="tab-header">
                         <h3 class="tab-title">Encontro de Dois Móveis</h3>
                         <p class="tab-subtitle">Compare as trajetórias e observe o ponto de cruzamento.</p>
@@ -296,42 +301,51 @@
                                 $$s_A(t) = -5.0 + 3.0t$$
                             </div>
 
-                            <div class="clean-slider-group">
-                                <div class="clean-slider-item">
-                                    <div class="clean-slider-header">
-                                        <span>Posição Inicial ($s_{0A}$):</span>
-                                        <strong id="lbl-s0A_dual" style="color: var(--accent-color);">-5.0 m</strong>
+                            <div class="slider-container sim-dual-slider">
+                                <div class="slider-header">
+                                    <label for="sliderS0A_dual" class="slider-label">Posição Inicial ($s_{0A}$)</label>
+                                    <div class="dual-input-wrapper">
+                                        <input type="number" class="dual-input-number" id="inputS0A_dual" min="-15" max="15"
+                                            step="0.5" value="-5.0">
+                                        <span class="dual-input-unit">m</span>
                                     </div>
-                                    <input type="range" class="sim-slider" id="sliderS0A_dual" min="-15" max="15"
-                                        step="0.5" value="-5.0">
                                 </div>
+                                <input type="range" class="sim-slider" id="sliderS0A_dual" min="-15" max="15"
+                                    step="0.5" value="-5.0">
+                            </div>
 
-                                <div class="clean-slider-item">
-                                    <div class="clean-slider-header">
-                                        <span>Velocidade ($v_{0A}$):</span>
-                                        <strong id="lbl-v0A_dual" style="color: var(--color-emerald, #22c55e);">+3.0
-                                            m/s</strong>
+                            <div class="slider-container sim-dual-slider">
+                                <div class="slider-header">
+                                    <label for="sliderV0A_dual" class="slider-label">Velocidade ($v_{0A}$)</label>
+                                    <div class="dual-input-wrapper">
+                                        <input type="number" class="dual-input-number" id="inputV0A_dual" min="-10" max="10"
+                                            step="0.5" value="3.0">
+                                        <span class="dual-input-unit">m/s</span>
                                     </div>
-                                    <input type="range" class="sim-slider" id="sliderV0A_dual" min="-10" max="10"
-                                        step="0.5" value="3.0">
                                 </div>
+                                <input type="range" class="sim-slider" id="sliderV0A_dual" min="-10" max="10"
+                                    step="0.5" value="3.0">
+                            </div>
 
-                                <div class="accel-toggle-row">
-                                    <label class="accel-checkbox-label">
-                                        <input type="checkbox" id="chk-accel-dual-a">
-                                        <span>Incluir Aceleração ($a_A$)</span>
-                                    </label>
-                                </div>
+                            <div class="switch-container">
+                                <span class="switch-label">Incluir Aceleração ($a_A$)</span>
+                                <label class="sim-switch">
+                                    <input type="checkbox" id="chk-accel-dual-a">
+                                    <span class="slider-round"></span>
+                                </label>
+                            </div>
 
-                                <div class="clean-slider-item" id="group-accel-dual-a" style="display: none;">
-                                    <div class="clean-slider-header">
-                                        <span>Aceleração ($a_A$):</span>
-                                        <strong id="lbl-aA_dual" style="color: var(--color-purple, #c084fc);">0.0
-                                            m/s²</strong>
+                            <div class="slider-container sim-dual-slider" id="group-accel-dual-a" style="display: none;">
+                                <div class="slider-header">
+                                    <label for="sliderAA_dual" class="slider-label">Aceleração ($a_A$)</label>
+                                    <div class="dual-input-wrapper">
+                                        <input type="number" class="dual-input-number" id="inputAA_dual" min="-5" max="5"
+                                            step="0.2" value="0.0">
+                                        <span class="dual-input-unit">m/s²</span>
                                     </div>
-                                    <input type="range" class="sim-slider" id="sliderAA_dual" min="-5" max="5"
-                                        step="0.2" value="0.0">
                                 </div>
+                                <input type="range" class="sim-slider" id="sliderAA_dual" min="-5" max="5"
+                                    step="0.2" value="0.0">
                             </div>
                         </div>
                     </div>
@@ -347,42 +361,51 @@
                                 $$s_B(t) = 5.0 - 2.0t$$
                             </div>
 
-                            <div class="clean-slider-group">
-                                <div class="clean-slider-item">
-                                    <div class="clean-slider-header">
-                                        <span>Posição Inicial ($s_{0B}$):</span>
-                                        <strong id="lbl-s0B" style="color: var(--color-cyan, #38bdf8);">+5.0 m</strong>
+                            <div class="slider-container sim-dual-slider">
+                                <div class="slider-header">
+                                    <label for="sliderS0B" class="slider-label">Posição Inicial ($s_{0B}$)</label>
+                                    <div class="dual-input-wrapper">
+                                        <input type="number" class="dual-input-number" id="inputS0B" min="-15" max="15" step="0.5"
+                                            value="5.0">
+                                        <span class="dual-input-unit">m</span>
                                     </div>
-                                    <input type="range" class="sim-slider" id="sliderS0B" min="-15" max="15" step="0.5"
-                                        value="5.0">
                                 </div>
+                                <input type="range" class="sim-slider" id="sliderS0B" min="-15" max="15" step="0.5"
+                                    value="5.0">
+                            </div>
 
-                                <div class="clean-slider-item">
-                                    <div class="clean-slider-header">
-                                        <span>Velocidade ($v_{0B}$):</span>
-                                        <strong id="lbl-v0B" style="color: var(--color-emerald, #22c55e);">-2.0
-                                            m/s</strong>
+                            <div class="slider-container sim-dual-slider">
+                                <div class="slider-header">
+                                    <label for="sliderV0B" class="slider-label">Velocidade ($v_{0B}$)</label>
+                                    <div class="dual-input-wrapper">
+                                        <input type="number" class="dual-input-number" id="inputV0B" min="-10" max="10" step="0.5"
+                                            value="-2.0">
+                                        <span class="dual-input-unit">m/s</span>
                                     </div>
-                                    <input type="range" class="sim-slider" id="sliderV0B" min="-10" max="10" step="0.5"
-                                        value="-2.0">
                                 </div>
+                                <input type="range" class="sim-slider" id="sliderV0B" min="-10" max="10" step="0.5"
+                                    value="-2.0">
+                            </div>
 
-                                <div class="accel-toggle-row">
-                                    <label class="accel-checkbox-label">
-                                        <input type="checkbox" id="chk-accel-dual-b">
-                                        <span>Incluir Aceleração ($a_B$)</span>
-                                    </label>
-                                </div>
+                            <div class="switch-container">
+                                <span class="switch-label">Incluir Aceleração ($a_B$)</span>
+                                <label class="sim-switch">
+                                    <input type="checkbox" id="chk-accel-dual-b">
+                                    <span class="slider-round"></span>
+                                </label>
+                            </div>
 
-                                <div class="clean-slider-item" id="group-accel-dual-b" style="display: none;">
-                                    <div class="clean-slider-header">
-                                        <span>Aceleração ($a_B$):</span>
-                                        <strong id="lbl-aB" style="color: var(--color-purple, #c084fc);">0.0
-                                            m/s²</strong>
+                            <div class="slider-container sim-dual-slider" id="group-accel-dual-b" style="display: none;">
+                                <div class="slider-header">
+                                    <label for="sliderAB" class="slider-label">Aceleração ($a_B$)</label>
+                                    <div class="dual-input-wrapper">
+                                        <input type="number" class="dual-input-number" id="inputAB" min="-5" max="5" step="0.2"
+                                            value="0.0">
+                                        <span class="dual-input-unit">m/s²</span>
                                     </div>
-                                    <input type="range" class="sim-slider" id="sliderAB" min="-5" max="5" step="0.2"
-                                        value="0.0">
                                 </div>
+                                <input type="range" class="sim-slider" id="sliderAB" min="-5" max="5" step="0.2"
+                                    value="0.0">
                             </div>
                         </div>
                     </div>
@@ -398,35 +421,34 @@
                 <!-- ======================================================= -->
                 <!-- ABA 4: TEORIA E FUNDAMENTAÇÃO                           -->
                 <!-- ======================================================= -->
-                <div id="panel-tab-theory" style="display: none;">
+                <div id="panel-tab-theory" class="tab-pane" style="display: none;">
                     <div class="tab-header">
                         <h3 class="tab-title">Fundamentação Teórica</h3>
                         <p class="tab-subtitle">Cinemática Escalar para o Ensino Médio: Funções Horárias e Encontro.</p>
                     </div>
 
-                    <div class="theory-quick-card">
+                    <div class="theory-card">
                         <h4>1. Movimento Retilíneo Uniforme (MRU)</h4>
                         <p>No MRU, a velocidade escalar é constante e a aceleração é nula ($a = 0$). A posição varia
                             como função afim:</p>
-                        <div class="theory-equation-highlight">$$s(t) = s_0 + v \cdot t$$</div>
+                        $$s(t) = s_0 + v \cdot t$$
                         <p>No gráfico $s \times t$, a trajetória é uma reta cuja inclinação é a velocidade escalar:</p>
-                        <div class="theory-equation-highlight">$$v = \frac{\Delta s}{\Delta t} = \tan \theta$$</div>
+                        $$v = \frac{\Delta s}{\Delta t} = \tan \theta$$
                     </div>
 
-                    <div class="theory-quick-card">
+                    <div class="theory-card">
                         <h4>2. Movimento Uniformemente Variado (MRUV)</h4>
                         <p>No MRUV, a aceleração $a$ é constante e não nula. A velocidade varia linearmente e a posição
                             é quadrática:</p>
-                        <div class="theory-equation-highlight">$$s(t) = s_0 + v_0 \cdot t + \frac{1}{2} a \cdot t^2$$
-                        </div>
+                        $$s(t) = s_0 + v_0 \cdot t + \frac{1}{2} a \cdot t^2$$
                         <p>O gráfico $s \times t$ é um arco de parábola. Concavidade para cima indica $a > 0$; para
                             baixo indica $a < 0$.</p>
                     </div>
 
-                    <div class="theory-quick-card">
+                    <div class="theory-card">
                         <h4>3. Condição de Encontro</h4>
                         <p>O encontro físico ocorre quando ambos ocupam a mesma posição escalar no mesmo instante:</p>
-                        <div class="theory-equation-highlight">$$s_A(t_e) = s_B(t_e)$$</div>
+                        $$s_A(t_e) = s_B(t_e)$$
                     </div>
 
                     <div style="margin-top: 16px;">

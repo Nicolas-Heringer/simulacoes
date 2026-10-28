@@ -1,55 +1,62 @@
-/* 
-  Estilos Específicos para a Simulação do Tensor de Inércia
-*/
+/* =============================================================================
+   Design System 2.0 — Estilos Específicos: Tensor de Inércia
+   ============================================================================= */
 
-/* --- TÍTULOS E LABELS --- */
+/* --- CANVAS AREA --- */
+#canvas-area {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    touch-action: none;
+}
+
+/* --- TÍTULOS DE GRUPOS --- */
 .group-title {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 10px;
+    margin-bottom: 6px;
     display: block;
 }
 
-/* --- EIXO DE ROTAÇÃO BOTÕES --- */
+/* --- EIXO DE ROTAÇÃO (PRESETS) --- */
 .axis-preset-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 6px;
 }
 
 .axis-btn {
-    padding: 8px 6px !important;
-    font-size: 0.8rem !important;
-    background-color: rgba(255, 255, 255, 0.08) !important;
-    color: var(--text-secondary) !important;
-    border: 1px solid var(--border-color) !important;
-    border-radius: 6px !important;
+    padding: 7px 6px;
+    font-size: 0.8rem;
+    background-color: rgba(255, 255, 255, 0.06);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: all 0.25s ease;
-    text-transform: none !important;
-    letter-spacing: 0 !important;
+    transition: all 0.2s ease;
 }
 
 .axis-btn:hover {
-    background-color: rgba(255, 255, 255, 0.15) !important;
-    color: var(--text-primary) !important;
+    background-color: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
 }
 
 .axis-btn.active {
-    background-color: rgba(250, 204, 21, 0.15) !important;
-    color: var(--accent-color) !important;
-    border-color: rgba(250, 204, 21, 0.5) !important;
-    box-shadow: 0 0 8px rgba(250, 204, 21, 0.15);
+    background-color: color-mix(in srgb, var(--accent-color) 15%, transparent);
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--accent-color) 25%, transparent);
 }
 
-/* --- CUSTOM AXIS INPUTS --- */
+/* --- ENTRADAS DE EIXO PERSONALIZADO --- */
 .custom-axis-inputs {
-    margin-top: 8px;
-    padding: 10px;
+    margin-top: 6px;
+    padding: 8px 10px;
     background: rgba(15, 23, 42, 0.5);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -63,78 +70,66 @@
 }
 
 .input-row label {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: var(--text-secondary);
     font-weight: 500;
-    min-width: 70px;
+    min-width: 60px;
 }
 
 .input-row .sim-input {
     flex: 1;
-    max-width: 100px;
+    max-width: 90px;
 }
 
-/* --- BUTTON ROW --- */
+/* --- BOTÕES DE AÇÃO --- */
 .button-row {
     display: flex;
-    gap: 10px;
-    margin-top: 6px;
+    gap: 8px;
+    margin-top: 4px;
 }
 
 .btn-action {
     flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
     font-family: var(--font-family);
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .btn-action.primary {
-    background-color: #facc15;
-    color: #0f172a;
+    background-color: var(--accent-color);
+    color: var(--bg-main);
+    border: 1px solid var(--accent-color);
 }
 
 .btn-action.primary:hover {
-    background-color: #eab308;
-    box-shadow: 0 0 12px rgba(250, 204, 21, 0.4);
+    filter: brightness(1.1);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--accent-color) 35%, transparent);
 }
 
 .btn-action.secondary {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.08);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
 }
 
 .btn-action.secondary:hover {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.16);
 }
 
-/* --- SLIDER HEADER --- */
-.slider-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin-bottom: 4px;
-}
-
-.slider-val {
-    font-weight: 600;
-    color: var(--accent-color);
-    font-family: monospace;
-}
-
-/* --- MASS LIST (Part 2) --- */
+/* --- LISTA DE MASSAS PONTUAIS (Parte 2) --- */
 .mass-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-top: 10px;
+    gap: 6px;
+    margin-top: 8px;
     max-height: 200px;
     overflow-y: auto;
 }
@@ -143,16 +138,16 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 10px;
+    padding: 6px 8px;
     background: rgba(15, 23, 42, 0.5);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     font-size: 0.8rem;
     transition: border-color 0.2s;
 }
 
 .mass-item:hover {
-    border-color: rgba(250, 204, 21, 0.3);
+    border-color: color-mix(in srgb, var(--accent-color) 30%, transparent);
 }
 
 .mass-item .color-dot {
@@ -163,12 +158,12 @@
 }
 
 .mass-item input {
-    width: 50px;
-    padding: 3px 5px;
+    width: 48px;
+    padding: 2px 4px;
     background: var(--bg-surface);
     border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 4px;
-    color: white;
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
     font-weight: 500;
     text-align: center;
     font-size: 0.8rem;
@@ -177,207 +172,22 @@
 .mass-item .mass-label {
     color: var(--text-secondary);
     font-weight: 500;
-    min-width: 14px;
+    min-width: 12px;
 }
 
 .mass-item .btn-remove {
     background: none;
     border: none;
-    color: #ef4444;
+    color: var(--color-rose);
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 0.95rem;
     padding: 0 4px;
-    opacity: 0.6;
+    opacity: 0.7;
     transition: opacity 0.2s;
 }
 
 .mass-item .btn-remove:hover {
     opacity: 1;
-}
-
-/* --- READOUT CARD (Tensor display) --- */
-.readout-card {
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 14px;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.readout-header {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 6px;
-}
-
-.readout-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px 0;
-    font-size: 0.82rem;
-}
-
-.readout-label {
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
-.readout-value {
-    font-weight: 600;
-    font-family: monospace;
-    font-size: 0.85rem;
-}
-
-.highlight-yellow { color: #facc15; }
-.highlight-cyan   { color: #38bdf8; }
-.highlight-green  { color: #4ade80; }
-.highlight-pink   { color: #f472b6; }
-
-/* --- TENSOR MATRIX 3x3 DISPLAY --- */
-.tensor-matrix {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 12px;
-}
-
-.matrix-bracket {
-    font-family: 'Times New Roman', serif;
-    font-size: 4rem;
-    font-weight: 200;
-    color: #64748b;
-    line-height: 1;
-    user-select: none;
-}
-
-.tensor-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 4px 10px;
-    padding: 4px 8px;
-    font-family: monospace;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    text-align: center;
-}
-
-.tensor-grid span {
-    padding: 4px 6px;
-    background: rgba(15, 23, 42, 0.4);
-    border-radius: 4px;
-    min-width: 55px;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.tensor-grid span.diagonal {
-    background: rgba(250, 204, 21, 0.12);
-    color: #facc15;
-}
-
-.tensor-grid span.off-diagonal {
-    background: rgba(56, 189, 248, 0.08);
-    color: #94a3b8;
-}
-
-/* --- ELLIPSOID CONTAINER --- */
-#ellipsoid-container {
-    width: 100%;
-    height: 180px;
-    border-radius: 8px;
-    overflow: hidden;
-    background: rgba(0, 0, 0, 0.25);
-    border: 1px solid var(--border-color);
-    margin-bottom: 8px;
-}
-
-/* --- CANVAS OVERLAYS --- */
-.canvas-overlay-badge {
-    position: absolute;
-    top: 15px;
-    left: 20px;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    font-family: monospace;
-    background: rgba(15, 23, 42, 0.85);
-    border: 1px solid rgba(250, 204, 21, 0.4);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    color: var(--text-primary);
-    z-index: 10;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-}
-
-#badge-inertia-value {
-    color: #facc15;
-}
-
-.canvas-instructions {
-    position: absolute;
-    bottom: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    background: rgba(15, 23, 42, 0.7);
-    border: 1px solid var(--border-color);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    z-index: 10;
-    white-space: nowrap;
-    transition: opacity 0.5s;
-}
-
-/* --- BODY DIMENSIONS (Part 3) --- */
-#body-dimensions {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-top: 8px;
-}
-
-/* --- DIAGONALIZE BUTTON --- */
-#diagonalize-btn {
-    width: 100%;
-    padding: 12px;
-    font-size: 0.95rem;
-    letter-spacing: 0.5px;
-}
-
-/* Animação de pulse para o botão diagonalizar */
-@keyframes pulseGlow {
-    0%   { box-shadow: 0 0 6px rgba(250, 204, 21, 0.4); }
-    100% { box-shadow: 0 0 18px rgba(250, 204, 21, 0.8); }
-}
-
-.pulse-glow {
-    animation: pulseGlow 1s infinite alternate;
-}
-
-/* --- SCROLLBAR CUSTOM --- */
-.controls-panel::-webkit-scrollbar {
-    width: 6px;
-}
-
-.controls-panel::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.controls-panel::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 3px;
-}
-
-.controls-panel::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
 }
 
 .mass-list::-webkit-scrollbar {
@@ -387,4 +197,87 @@
 .mass-list::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.15);
     border-radius: 2px;
+}
+
+/* --- MATRIZ 3x3 DO TENSOR --- */
+.tensor-matrix {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 6px 0 10px 0;
+}
+
+.matrix-bracket {
+    font-family: 'Times New Roman', serif;
+    font-size: 3.6rem;
+    font-weight: 200;
+    color: var(--text-muted);
+    line-height: 1;
+    user-select: none;
+}
+
+.tensor-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px 8px;
+    padding: 2px 6px;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.tensor-grid span {
+    padding: 3px 6px;
+    background: rgba(15, 23, 42, 0.45);
+    border-radius: var(--radius-sm);
+    min-width: 52px;
+    transition: background-color 0.25s, color 0.25s;
+}
+
+.tensor-grid span.diagonal {
+    background: color-mix(in srgb, var(--accent-color) 15%, transparent);
+    color: var(--accent-color);
+}
+
+.tensor-grid span.off-diagonal {
+    background: color-mix(in srgb, var(--color-cyan) 10%, transparent);
+    color: var(--color-cyan);
+}
+
+/* --- MINI RENDERER DO ELIPSOIDE --- */
+#ellipsoid-container {
+    width: 100%;
+    height: 170px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    margin: 6px 0;
+}
+
+/* --- DIMENSÕES DO CORPO EXTENSO (Parte 3) --- */
+#body-dimensions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+/* --- BOTÃO DE DIAGONALIZAÇÃO --- */
+#diagonalize-btn {
+    width: 100%;
+    padding: 11px;
+    font-size: 0.9rem;
+    letter-spacing: 0.3px;
+}
+
+@keyframes pulseGlow {
+    0%   { box-shadow: 0 0 6px color-mix(in srgb, var(--accent-color) 35%, transparent); }
+    100% { box-shadow: 0 0 16px color-mix(in srgb, var(--accent-color) 75%, transparent); }
+}
+
+.pulse-glow {
+    animation: pulseGlow 1s infinite alternate;
 }

@@ -497,6 +497,11 @@
     left: 15px;
 }
 
+/* Barra Flutuante de Modo Foco Espelhada (Design System 2.0) */
+#focus-context-toolbar {
+    top: 56px;
+}
+
 @media (max-width: 640px) {
     #btn-quick-generators,
     #btn-quick-wireframe,

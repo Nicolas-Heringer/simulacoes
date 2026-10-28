@@ -13,7 +13,10 @@ import {
     initSidebarCollapse,
     initBottomSheet,
     initModal,
-    inlineSVGImages
+    inlineSVGImages,
+    initTabs,
+    initFocusMirrorToolbar,
+    initKaTeXAutoRender
 } from './sim-ui.js';
 
 // =============================================================================
@@ -552,34 +555,19 @@ function setupEventListeners() {
     });
 
     // --- NAVEGAÇÃO ENTRE ABAS ---
-    const tabs = [
-        { btnId: 'tab-btn-params', panelId: 'panel-tab-params' },
-        { btnId: 'tab-btn-telemetry', panelId: 'panel-tab-telemetry' },
-        { btnId: 'tab-btn-theory', panelId: 'panel-tab-theory' }
-    ];
+    initTabs('.controls-panel', (tabId) => {
+        if (tabId === 'panel-tab-telemetry') {
+            setTimeout(() => {
+                if (plotEnergia) plotEnergia.resize();
+                if (plotTemp) plotTemp.resize();
+            }, 50);
+        }
+    });
 
-    tabs.forEach(({ btnId, panelId }) => {
-        const btn = document.getElementById(btnId);
-        const panel = document.getElementById(panelId);
-        if (!btn || !panel) return;
-
-        btn.addEventListener('click', () => {
-            tabs.forEach(t => {
-                const b = document.getElementById(t.btnId);
-                const p = document.getElementById(t.panelId);
-                if (b) b.classList.remove('active');
-                if (p) p.style.display = 'none';
-            });
-            btn.classList.add('active');
-            panel.style.display = 'block';
-
-            if (panelId === 'panel-tab-telemetry') {
-                setTimeout(() => {
-                    if (plotEnergia) plotEnergia.resize();
-                    if (plotTemp) plotTemp.resize();
-                }, 50);
-            }
-        });
+    // --- BARRA DE CONTEXTO EM MODO FOCO ---
+    initFocusMirrorToolbar({
+        toolbarTarget: '#focus-context-toolbar',
+        scopeSelector: '.controls-panel'
     });
 
     // --- BARRA DE TRANSPORTE ---
@@ -696,20 +684,20 @@ function setupEventListeners() {
         });
     }
 
-    // --- INTERAÇÃO COM O CANVAS (IMPULSO VIA CLIQUE / ARRASTE) ---
+    // --- INTERAÇÃO COM O CANVAS (IMPULSO VIA CLIQUE / ARRASTE / TOQUE) ---
     if (canvas) {
-        let isMouseDown = false;
-        canvas.addEventListener('mousedown', (e) => {
-            isMouseDown = true;
+        let isPointerDown = false;
+        canvas.addEventListener('pointerdown', (e) => {
+            isPointerDown = true;
             aplicarImpulsoCursor(e);
         });
 
-        window.addEventListener('mouseup', () => {
-            isMouseDown = false;
+        window.addEventListener('pointerup', () => {
+            isPointerDown = false;
         });
 
-        canvas.addEventListener('mousemove', (e) => {
-            if (isMouseDown) aplicarImpulsoCursor(e);
+        canvas.addEventListener('pointermove', (e) => {
+            if (isPointerDown) aplicarImpulsoCursor(e);
         });
     }
 }
@@ -864,13 +852,5 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     anima();
     await inlineSVGImages();
-
-    if (window.renderMathInElement) {
-        window.renderMathInElement(document.body, {
-            delimiters: [
-                { left: '$$', right: '$$', display: true },
-                { left: '$', right: '$', display: false }
-            ]
-        });
-    }
+    initKaTeXAutoRender(document.body);
 });

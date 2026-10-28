@@ -237,6 +237,7 @@
     flex: 1;
     display: block;
     cursor: crosshair;
+    touch-action: none;
 }
 
 /* --- CONTROLE SEGMENTADO (CHAVE DE 2 POSIÇÕES) --- */

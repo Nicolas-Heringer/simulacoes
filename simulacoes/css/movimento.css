@@ -91,95 +91,14 @@
     color: var(--color-cyan);
 }
 
-/* Sliders Minimalistas de Linha Única (Sem Caixas Extras) */
-.clean-slider-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.equation-panel .slider-container {
+    background: rgba(0, 0, 0, 0.25);
 }
 
-.clean-slider-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.clean-slider-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.82rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-}
-
-.clean-slider-header strong {
-    font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: 0.90rem;
-}
-
-/* Switch / Checkbox Sutil para Aceleração Opcional */
-.accel-toggle-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.equation-panel .switch-container {
     padding: 6px 0 2px 0;
     border-top: 1px dashed var(--border-subtle);
     margin-top: 4px;
-}
-
-.accel-checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.78rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-    user-select: none;
-    transition: color var(--trans-fast);
-}
-
-.accel-checkbox-label:hover {
-    color: var(--text-primary);
-}
-
-.accel-checkbox-label input[type="checkbox"] {
-    accent-color: var(--accent-color);
-    width: 15px;
-    height: 15px;
-    cursor: pointer;
-}
-
-/* Cards Rápidos da Aba Teoria */
-.theory-quick-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: 12px 14px;
-    margin-bottom: 12px;
-}
-
-.theory-quick-card h4 {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--accent-color);
-    margin-bottom: 6px;
-}
-
-.theory-quick-card p {
-    font-size: 0.80rem;
-    color: var(--text-secondary);
-    line-height: 1.45;
-}
-
-.theory-equation-highlight {
-    margin: 8px 0;
-    padding: 6px 10px;
-    background: rgba(7, 11, 22, 0.6);
-    border-radius: var(--radius-sm);
-    border-left: 3px solid var(--accent-color);
-    text-align: center;
 }
 
 /* Barra Flutuante de Zoom & Pan no Canvas (Gráfico 2D) */
@@ -215,6 +134,9 @@
     cursor: pointer;
     transition: all var(--trans-fast);
     padding: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1;
 }
 
 .zoom-btn:hover {

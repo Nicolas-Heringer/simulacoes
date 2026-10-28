@@ -9,7 +9,8 @@
     width: 100%;
     height: 100%;
     cursor: default;
-    background-color: #070b16;
+    background-color: var(--bg-main, #09090d);
+    touch-action: none;
 }
 
 /* Botões de Sentido do Campo Elétrico */

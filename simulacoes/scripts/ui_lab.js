@@ -1,6 +1,6 @@
 // =============================================================================
 // Autor: Nicolas Heringer
-// Design System & Laboratório de Interface (UI Lab)
+// Design System & Laboratório de Interface (UI Lab) — Fonte da Verdade Canônica
 // =============================================================================
 
 import * as THREE from 'three';
@@ -13,40 +13,79 @@ import {
     initToggleButton,
     syncDualSlider,
     RealtimePlot,
+    MultiSeriesPlot,
     initModal,
     initSidebarCollapse,
+    initTabs,
     initBottomSheet,
+    initFocusMirrorToolbar,
     renderMath,
-    renderMathToString
+    renderMathToString,
+    initKaTeXAutoRender,
+    det2x2,
+    trace2x2,
+    eigen2x2,
+    det3x3,
+    trace3x3,
+    solveEigenvaluesSymmetric3x3,
+    diagonalizeSymmetric3x3,
+    MatrixTensorEditor,
+    setFieldState
 } from './sim-ui.js';
 
-// Re-exporta para retrocompatibilidade
+// Re-exporta todos os controladores e utilitários para retrocompatibilidade
 export {
+    getSVGContent,
+    setElementIcon,
+    inlineSVGImages,
+    setGlobalAccent,
     initToggleButton,
     syncDualSlider,
     RealtimePlot,
+    MultiSeriesPlot,
     initModal,
     initSidebarCollapse,
+    initTabs,
     initBottomSheet,
-    inlineSVGImages,
-    setElementIcon,
-    setGlobalAccent,
+    initFocusMirrorToolbar,
     renderMath,
-    renderMathToString
+    renderMathToString,
+    initKaTeXAutoRender,
+    det2x2,
+    trace2x2,
+    eigen2x2,
+    det3x3,
+    trace3x3,
+    solveEigenvaluesSymmetric3x3,
+    diagonalizeSymmetric3x3,
+    MatrixTensorEditor,
+    setFieldState
 };
 
+// Catálogo Canônico Completo: 71 Ícones Vetoriais SVG em assets/icons/
 const ICONS_LIST = [
-    'dice', 'play', 'pause', 'step', 'rotate', 'refresh',
-    'sliders', 'chart-line', 'book-open', 'toggle-switch',
+    // Transporte, Navegação & UI (18)
+    'play', 'pause', 'step', 'refresh', 'refresh-cw', 'rotate',
+    'camera-reset', 'stopwatch', 'collapse', 'expand', 'focus',
+    'arrow-left', 'chevron-right', 'sliders', 'toggle-switch',
+    'chart-line', 'book-open', 'book',
+    // Auxiliares & Presets (3)
+    'sparkles', 'lightbulb', 'dice',
+    // Dispositivos, Mouse, Teclado & Gestos Táteis (17)
+    'mouse', 'mouse-left', 'mouse-right', 'mouse-wheel', 'mouse-scroll',
+    'mouse-drag-horizontal', 'keyboard', 'key', 'smartphone', 'mobile',
+    'tablet', 'touch', 'touch-drag', 'touch-pan', 'touch-pinch',
+    'pinch', 'screen-rotate',
+    // Clima, Geofísica, Ecologia & Termodinâmica (10)
     'globe', 'sun', 'snowflake', 'leaf', 'flower',
-    'thermometer', 'cyclone', 'wind', 'compass', 'sparkles', 'lightbulb',
-    'collapse', 'expand', 'gauge', 'pressure', 'stopwatch', 'camera-reset',
-    'mouse', 'mouse-left', 'mouse-right', 'mouse-wheel', 'mouse-drag-horizontal',
-    'keyboard', 'key',
-    'smartphone', 'tablet', 'touch', 'touch-drag', 'touch-pinch', 'touch-pan', 'screen-rotate',
-    'motion-oscillate', 'spring', 'pendulum', 'wave-sine', 'fft-bars',
-    'prism', 'gravity-fall', 'dipole', 'magnetic-field', 'electron-drift', 'orbital',
-    'axis-3d', 'matrix-basis', 'chladni-plate',
+    'thermometer', 'cyclone', 'wind', 'gauge', 'pressure',
+    // Mecânica, Oscilações, Ondas, Óptica & Eletromagnetismo (11)
+    'gravity-fall', 'motion-oscillate', 'spring', 'pendulum',
+    'wave-sine', 'fft-bars', 'prism', 'dipole', 'magnetic-field',
+    'electron-drift', 'orbital',
+    // Álgebra Linear, Tensores & Geometria (4)
+    'compass', 'axis-3d', 'matrix-basis', 'chladni-plate',
+    // Dinâmica de Partículas & Redes Cristalinas (8)
     'particle-single', 'particle-moving', 'particles-double', 'particles-opposite',
     'particles-three', 'particle-circle', 'particle-grid', 'salt-nacl'
 ];
@@ -62,6 +101,7 @@ let simTime = 0.0;
 let isSimRunning = false;
 let simTimeScale = 1.0;
 let plotInstance = null;
+let multiPlotInstance = null;
 let playControl = null;
 
 const container = document.getElementById('three-container');
@@ -157,7 +197,7 @@ function animate() {
 
     if (controls) controls.update();
 
-    // Rotação suave no eixo vertical Y (sem inclinar indevidamente no eixo X)
+    // Rotação suave no eixo vertical Y
     if (autoRotateActive && currentMesh) {
         currentMesh.rotation.y += 0.005 * simTimeScale;
         if (wireMesh) wireMesh.rotation.y = currentMesh.rotation.y;
@@ -174,9 +214,9 @@ function animate() {
         timerSpan.textContent = `t = ${simTime.toFixed(2)}s`;
     }
 
-    // Alimentação contínua do Mini-Gráfico em Tempo Real
+    // 1. Alimentação contínua do Mini-Gráfico Canal Único (RealtimePlot)
+    const rad = parseFloat(document.getElementById('slider-demo-radius')?.value || 1.0);
     if (plotInstance) {
-        const rad = parseFloat(document.getElementById('slider-demo-radius')?.value || 1.0);
         const waveVal = Math.sin(simTime * 3) * rad * 0.8 + (Math.cos(simTime * 7) * 0.2);
         plotInstance.push(waveVal);
 
@@ -184,6 +224,26 @@ function animate() {
         if (valSpan) {
             valSpan.textContent = `${(waveVal * 1.5).toFixed(2)} rad/s`;
         }
+    }
+
+    // 2. Alimentação do MultiSeriesPlot (Série Temporal K, U, E e Espaço de Fase x, p)
+    if (multiPlotInstance) {
+        const x = rad * Math.cos(simTime * 2.2);
+        const p = -rad * Math.sin(simTime * 2.2);
+        const E = 12.5 * (rad * rad);
+        const K = E * (Math.sin(simTime * 2.2) ** 2);
+        const U = E - K;
+
+        if (multiPlotInstance.mode === 'phase-space') {
+            multiPlotInstance.pushPhasePoint(x, p);
+        } else {
+            multiPlotInstance.push({ K, U, E });
+        }
+
+        const kReadout = document.getElementById('readout-demo-k');
+        const uReadout = document.getElementById('readout-demo-u');
+        if (kReadout) kReadout.textContent = `${K.toFixed(2)} J`;
+        if (uReadout) uReadout.textContent = `${U.toFixed(2)} J`;
     }
 
     if (renderer && scene && camera) {
@@ -234,39 +294,27 @@ function setupListeners() {
         defaultState: 'peek'
     });
 
-    // --- NAVEGAÇÃO ENTRE ABAS DO LABORATÓRIO (MAPEAMENTO EXATO DE IDs) ---
-    const tabs = [
-        { btnId: 'tab-btn-buttons', panelId: 'panel-ui-buttons', label: 'Botões & Presets' },
-        { btnId: 'tab-btn-sliders', panelId: 'panel-ui-sliders', label: 'Sliders & Entradas' },
-        { btnId: 'tab-btn-switches', panelId: 'panel-ui-switches', label: 'Switches & Toggles' },
-        { btnId: 'tab-btn-huds', panelId: 'panel-ui-huds', label: 'HUDs & LaTeX' },
-        { btnId: 'tab-btn-icons', panelId: 'panel-ui-icons', label: 'Galeria de Ícones' }
-    ];
+    // --- NAVEGAÇÃO ENTRE ABAS DO LABORATÓRIO (via initTabs) ---
+    const tabLabels = {
+        'panel-ui-buttons': 'Botões & Presets',
+        'panel-ui-sliders': 'Sliders & Entradas',
+        'panel-ui-switches': 'Switches & Toggles',
+        'panel-ui-huds': 'HUDs & LaTeX',
+        'panel-ui-icons': 'Galeria de Ícones'
+    };
 
-    tabs.forEach(({ btnId, panelId, label }) => {
-        const btn = document.getElementById(btnId);
-        const panel = document.getElementById(panelId);
-        if (!btn || !panel) return;
+    initTabs(document, (tabId) => {
+        const hudActiveComp = document.getElementById('hud-active-comp');
+        if (hudActiveComp && tabLabels[tabId]) {
+            hudActiveComp.textContent = tabLabels[tabId];
+        }
 
-        btn.addEventListener('click', () => {
-            tabs.forEach(t => {
-                const b = document.getElementById(t.btnId);
-                const p = document.getElementById(t.panelId);
-                if (b) b.classList.remove('active');
-                if (p) p.style.display = 'none';
-            });
-            btn.classList.add('active');
-            panel.style.display = 'block';
-
-            // Atualiza o elemento ativo no HUD
-            const hudActiveComp = document.getElementById('hud-active-comp');
-            if (hudActiveComp) hudActiveComp.textContent = label;
-
-            // Redimensiona o gráfico de telemetria se for a aba 4
-            if (panelId === 'panel-ui-huds' && plotInstance) {
-                setTimeout(() => plotInstance.resize(), 50);
-            }
-        });
+        if (tabId === 'panel-ui-huds') {
+            setTimeout(() => {
+                if (plotInstance) plotInstance.resize();
+                if (multiPlotInstance) multiPlotInstance.resize();
+            }, 50);
+        }
     });
 
     // --- BOTÃO FLUTUANTE DE ROTAÇÃO NO CANVAS ---
@@ -314,7 +362,6 @@ function setupListeners() {
     document.querySelectorAll('.color-dots-group').forEach(group => {
         const targetComponent = group.getAttribute('data-target');
 
-        // Botão Auto / Herdar
         const inheritBtn = group.querySelector('.color-dot-inherit');
         if (inheritBtn) {
             inheritBtn.addEventListener('click', () => {
@@ -457,13 +504,44 @@ function setupListeners() {
         });
     });
 
-    // --- INICIALIZAÇÃO DO MINI-GRÁFICO EM TEMPO REAL (ABA 4) ---
+    // --- INICIALIZAÇÃO DOS GRÁFICOS EM TEMPO REAL (ABA 4) ---
     const plotCanvas = document.getElementById('plot-canvas');
     if (plotCanvas) {
         plotInstance = new RealtimePlot(plotCanvas, {
             maxPoints: 80,
             minVal: -1.5,
             maxVal: 1.5
+        });
+    }
+
+    const multiPlotCanvas = document.getElementById('multi-plot-canvas');
+    if (multiPlotCanvas) {
+        multiPlotInstance = new MultiSeriesPlot(multiPlotCanvas, {
+            maxPoints: 90,
+            mode: 'time-series',
+            showLegend: true,
+            showGrid: true,
+            series: [
+                { id: 'K', label: 'K', color: '#38bdf8', unit: ' J' },
+                { id: 'U', label: 'U', color: '#f43f5e', unit: ' J' },
+                { id: 'E', label: 'E', color: '#facc15', unit: ' J' }
+            ]
+        });
+
+        document.querySelectorAll('#multiplot-mode-selector .segment-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#multiplot-mode-selector .segment-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const mode = btn.getAttribute('data-plot-mode') || 'time-series';
+                multiPlotInstance.mode = mode;
+                multiPlotInstance.clear();
+                const titleEl = document.getElementById('multiplot-title');
+                if (titleEl) {
+                    titleEl.textContent = mode === 'phase-space'
+                        ? 'Retrato de Fase (x vs p)'
+                        : 'Energias K(t), U(t), E(t)';
+                }
+            });
         });
     }
 
@@ -529,7 +607,7 @@ function setupListeners() {
         }
     });
 
-    // Segmented Pills
+    // Segmented Pills (Aba 3)
     const segBtns = ['btn-seg-1', 'btn-seg-2', 'btn-seg-3'];
     segBtns.forEach(id => {
         const b = document.getElementById(id);
@@ -590,11 +668,113 @@ function setupListeners() {
         });
     }
 
+    // --- DEMONSTRAÇÃO DE ESTADOS SEMÂNTICOS (setFieldState) ---
+    setupSemanticStateDemo();
+
+    // --- DEMONSTRAÇÃO DO EDITOR DE MATRIZES & TENSORES (MatrixTensorEditor) ---
+    setupMatrixEditorDemo();
+
     // --- PLAYGROUND DE LATEX DINÂMICO ---
     setupMathPlayground();
 
     // --- GALERIA DE ÍCONES ---
     populateIconGallery();
+
+    // --- BARRA FLUTUANTE ESPELHADA DO MODO FOCO ---
+    initFocusMirrorToolbar({
+        toolbarTarget: '#focus-context-toolbar',
+        scopeSelector: '.controls-panel',
+        layoutSelector: '.sim-layout',
+        onlyInFocusMode: true
+    });
+}
+
+/** Configura a vitrine interativa de estados semânticos (setFieldState) */
+function setupSemanticStateDemo() {
+    const fieldEl = document.getElementById('demo-semantic-field');
+    const wrapperEl = document.getElementById('demo-semantic-wrapper');
+    const btnEl = document.getElementById('btn-semantic-action');
+    const selector = document.getElementById('semantic-state-selector');
+    if (!fieldEl || !selector) return;
+
+    syncDualSlider('#slider-semantic-demo', '#input-semantic-demo');
+
+    const applyDemoState = (mode) => {
+        setFieldState(fieldEl, null, '');
+        if (wrapperEl) setFieldState(wrapperEl, null);
+        if (btnEl) {
+            setFieldState(btnEl, null);
+            btnEl.disabled = false;
+        }
+
+        if (mode === 'valid') {
+            setFieldState(fieldEl, 'valid', 'Parâmetro dentro do regime físico de estabilidade linear.');
+            if (wrapperEl) setFieldState(wrapperEl, 'valid');
+            if (btnEl) setFieldState(btnEl, 'valid');
+        } else if (mode === 'warning') {
+            setFieldState(fieldEl, 'warning', 'Atenção: aproximação paraxial perde precisão para ângulos elevados.');
+            if (wrapperEl) setFieldState(wrapperEl, 'warning');
+            if (btnEl) setFieldState(btnEl, 'warning');
+        } else if (mode === 'invalid') {
+            setFieldState(fieldEl, 'invalid', 'Valor inválido: determinante nulo gera singularidade na inversão.');
+            if (wrapperEl) setFieldState(wrapperEl, 'invalid');
+            if (btnEl) setFieldState(btnEl, 'invalid');
+        } else if (mode === 'ready') {
+            setFieldState(fieldEl, 'ready', 'Configuração pronta! Clique no botão pulsante para executar.');
+            if (btnEl) setFieldState(btnEl, 'ready');
+        } else if (mode === 'disabled') {
+            setFieldState(fieldEl, 'disabled', 'Controle bloqueado no modo de simulação atual.');
+            if (btnEl) {
+                setFieldState(btnEl, 'disabled');
+                btnEl.disabled = true;
+            }
+        }
+    };
+
+    selector.querySelectorAll('.segment-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            selector.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            applyDemoState(btn.getAttribute('data-state-demo') || 'normal');
+        });
+    });
+
+    applyDemoState('valid');
+}
+
+/** Configura a demonstração do MatrixTensorEditor 2x2 */
+function setupMatrixEditorDemo() {
+    const containerEl = document.getElementById('demo-matrix-editor');
+    if (!containerEl) return;
+
+    const detEl = document.getElementById('matrix-demo-det');
+    const trEl = document.getElementById('matrix-demo-tr');
+    const eigEl = document.getElementById('matrix-demo-eig');
+
+    const updateReadout = (analysis) => {
+        if (!analysis) return;
+        if (detEl) detEl.textContent = analysis.determinant.toFixed(2);
+        if (trEl) trEl.textContent = analysis.trace.toFixed(2);
+        if (eigEl) {
+            if (analysis.isReal) {
+                eigEl.textContent = `${analysis.eigenvalues[0].toFixed(2)}, ${analysis.eigenvalues[1].toFixed(2)}`;
+            } else {
+                const { re, im } = analysis.eigenvalues[0];
+                eigEl.textContent = `${re.toFixed(2)} ± ${Math.abs(im).toFixed(2)}i`;
+            }
+        }
+    };
+
+    const editor = new MatrixTensorEditor(containerEl, {
+        dim: 2,
+        symmetric: false,
+        step: 0.1,
+        labels: [['a_{11}', 'a_{12}'], ['a_{21}', 'a_{22}']],
+        initialValue: [[1.2, 0.4], [0.2, 1.0]],
+        onChange: (_M, analysis) => updateReadout(analysis)
+    });
+
+    editor.notifyChange();
 }
 
 /** Configura o playground de fórmulas matemáticas interativas dinâmicas via KaTeX */
@@ -629,7 +809,6 @@ function setupMathPlayground() {
     syncDualSlider('#slider-math-w', '#input-math-w', () => updateLiveMath());
     modelSelect.addEventListener('change', updateLiveMath);
 
-    // Render inicial
     updateLiveMath();
 }
 
@@ -663,13 +842,5 @@ window.addEventListener('DOMContentLoaded', async () => {
     setupListeners();
     animate();
     await inlineSVGImages();
-
-    if (window.renderMathInElement) {
-        window.renderMathInElement(document.body, {
-            delimiters: [
-                { left: '$$', right: '$$', display: true },
-                { left: '$', right: '$', display: false }
-            ]
-        });
-    }
+    initKaTeXAutoRender(document.body);
 });
