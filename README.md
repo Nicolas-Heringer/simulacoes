@@ -1,5 +1,8 @@
 # Simulações Educacionais de Física e Matemática
 
+[![Validação do Design System](https://github.com/Nicolas-Heringer/Site/actions/workflows/validate.yml/badge.svg)](https://github.com/Nicolas-Heringer/Site/actions/workflows/validate.yml)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Online-success?logo=github)](https://nicolas-heringer.github.io/Site/)
+
 Repositório dedicado ao desenvolvimento de simulações interativas para o ensino e aprendizagem de conceitos de física e matemática.
 
 **Acesse o site online via GitHub Pages:** [https://nicolas-heringer.github.io/Site/](https://nicolas-heringer.github.io/Site/)
