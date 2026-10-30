@@ -1,8 +1,8 @@
 blank_issues_enabled: true
 contact_links:
   - name: Laboratório Interativo (Demo Online)
-    url: https://nicolas-heringer.github.io/Site/
+    url: https://nicolas-heringer.github.io/simulacoes/
     about: Acesse e teste todas as 13 simulações científicas diretamente no navegador.
   - name: Catálogo Canônico UI Lab (Design System 2.0)
-    url: https://nicolas-heringer.github.io/Site/simulacoes/ui_lab.html
+    url: https://nicolas-heringer.github.io/simulacoes/simulacoes/ui_lab.html
     about: Consulte todos os componentes, controles, sliders e gráficos permitidos no projeto.

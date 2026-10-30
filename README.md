@@ -1,11 +1,11 @@
 # Simulações Educacionais de Física e Matemática
 
-[![Validação do Design System](https://github.com/Nicolas-Heringer/Site/actions/workflows/validate.yml/badge.svg)](https://github.com/Nicolas-Heringer/Site/actions/workflows/validate.yml)
-[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Online-success?logo=github)](https://nicolas-heringer.github.io/Site/)
+[![Validação do Design System](https://github.com/Nicolas-Heringer/simulacoes/actions/workflows/validate.yml/badge.svg)](https://github.com/Nicolas-Heringer/simulacoes/actions/workflows/validate.yml)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Online-success?logo=github)](https://nicolas-heringer.github.io/simulacoes/)
 
 Repositório dedicado ao desenvolvimento de simulações interativas para o ensino e aprendizagem de conceitos de física e matemática.
 
-**Acesse o site online via GitHub Pages:** [https://nicolas-heringer.github.io/Site/](https://nicolas-heringer.github.io/Site/)
+**Acesse o site online via GitHub Pages:** [https://nicolas-heringer.github.io/simulacoes/](https://nicolas-heringer.github.io/simulacoes/)
 
 ---
 
@@ -41,7 +41,7 @@ Todas as simulações seguem uma arquitetura visual que está encapsulada no que
 A estrutura adota uma separação anatômica clara entre o portal de entrada, os componentes centrais de interface e as experiências interativas individuais:
 
 ```text
-Site/
+simulacoes/
 ├── index.html                   # Portal de entrada com cards de navegação e filtros por categoria
 ├── script.js                    # Mecanismo de busca, filtros e interatividade do portal
 ├── styles.css                   # Identidade visual e layout responsivo do portal principal
@@ -81,12 +81,12 @@ Site/
 
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/Nicolas-Heringer/Site.git
+   git clone https://github.com/Nicolas-Heringer/simulacoes.git
    ```
 
 2. Acesse o diretório do projeto:
    ```bash
-   cd Site
+   cd simulacoes
    ```
 
 3. Inicie um servidor local HTTP (recomendado via Python):
