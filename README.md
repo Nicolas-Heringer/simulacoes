@@ -11,9 +11,9 @@ Repositório dedicado ao desenvolvimento de simulações interativas para o ensi
 
 ## Sobre o Projeto
 
-Este projeto tem como objetivo fornecer ferramentas visuais e interativas para explorar fenômenos físicos e formulações matemáticas. O repositório e a página são atualizados de forma contínua para adicionar novas simulações, funcionalidades e melhorias na interface.
+Este projeto tem como objetivo fornecer ferramentas visuais e interativas para explorar fenômenos físicos e formulações matemáticas. O repositório e a página são atualizados de forma contínua para adicionar novas simulações, funcionalidades e melhorias na interface. Minha principal inspiração é o Phet, reconhecidamente uma das plataformas mais completas sobre simulações educacionais.
 
-Todas as simulações seguem a arquitetura do **Design System 2.0**, com controladores padronizados, suporte completo a dispositivos móveis via *Bottom Sheet*, modo de foco imersivo em tela cheia e renderização de equações em KaTeX.
+Todas as simulações seguem uma arquitetura visual que está encapsulada no que eu estou chamando de **Design System 2.0**, com controladores padronizados, suporte completo a dispositivos móveis via *Bottom Sheet*, modo de foco imersivo em tela cheia e renderização de equações em KaTeX. A proposta dessa padronização é que eu possa requisitar um agente para fazer uma alteração em qualquer uma das simulações, e ela não fique totalmente fora do formato após as alterações.
 
 ---
 
@@ -21,18 +21,18 @@ Todas as simulações seguem a arquitetura do **Design System 2.0**, com control
 
 - **Átomo de Hidrogênio:** Visualização 3D dos orbitais, densidade de probabilidade e autovetores quânticos.
 - **Áudio Fourier:** Análise de ondas sonoras e decomposição no espectro de frequências em tempo real via Web Audio API.
-- **Clima Terrestre:** Modelo 3D da circulação atmosférica, insolação, rotação axial e dinâmica de massas de ar com Web Worker.
-- **Fônons:** Visualização de ondas de matéria e modos normais de vibração em rede cristalina unidimensional e bidimensional.
-- **Gravidade:** Dinâmica orbital de múltiplos corpos e atração gravitacional newtoniana com telemetria de energia em tempo real.
-- **Lei de Snell:** Óptica geométrica com refração, reflexão total interna e dispersão da luz em múltiplos meios ópticos.
+- **Clima Terrestre:** Aqui começamos apresentando a ideia de dividir a esfera em células e depois trabalhamos estações do ano e modelos climáticos.
+- **Fônons:** Visualização de ondas de matéria.
+- **Gravidade:** Gravitação básica, a ideia é inserir uma análise via Leis de Kepler aqui, mas essa simulação ainda está numa versão rudimentar. O que o usuário pode ver aqui é basicamente o que o agente estabeleceu sem minha interferência.
+- **Lei de Snell:** Óptica geométrica com refração, reflexão total interna e dispersão da luz em múltiplos meios ópticos. Essa simulação está quase **impecável**. O mais legal aqui é que eu não estou solucionando a Lei de Snell simples, mas a equação dos raios geral.
 - **Matrizes 2D:** Interpretação geométrica de transformações lineares, deformação do plano, autovetores e determinante.
 - **Modelo de Drude:** Representação microscópica da condução elétrica clássica de elétrons livres interagindo com a rede iônica.
-- **Movimento em 1D e 2D:** Cinemática gráfica em tempo real, estudo de movimento uniforme e acelerado, e colisão/encontro de corpos.
+- **Movimento em 1D:** Cinemática gráfica em tempo real, estudo de movimento uniforme e acelerado, e colisão/encontro de corpos. Essa funcionou muito bem em sala de aula.
 - **Ondas Estacionárias 2D:** Visualização de padrões de interferência bidimensionais e modos vibracionais de placas (padrões de Chladni).
-- **Partículas:** Dinâmica coulombiana, interação eletrostática de atração/repulsão e colisão de sistemas de muitas partículas.
-- **Queda Livre:** Cinemática sob aceleração gravitacional com resistência do ar e gráficos dinâmicos de velocidade e posição.
-- **Tensor de Inércia:** Visualização 3D dos eixos principais de rotação, elipsoide de inércia e diagonalização tensorial.
-- **UI Lab (Design System 2.0):** Catálogo vivo e vitrine canônica de todos os componentes de interface, controladores e contratos visuais do laboratório.
+- **Partículas:** Sistemas interagentes com interações retardadas no tempo. Essa foi uma das primeiras simulações da página, a ideia para ela é de meados da minha graduação, em que eu comecei a estudar funções de Green e sistemas de elétrons e realizei que a modelagem de qualquer sistema físico fica incompleta se não colocarmos as interações retardadas.
+- **Queda Livre:** Cinemática sob aceleração gravitacional com resistência do ar e gráficos dinâmicos de velocidade e posição. Essa precisa de muitas alterações
+- **Tensor de Inércia:** Visualização 3D dos eixos principais de rotação, elipsoide de inércia e diagonalização tensorial. Essa está **HORRÍVEL**
+- **UI Lab (Design System 2.0):** Catálogo de todos os componentes de interface, controladores e contratos visuais do laboratório.
 
 ---
 
