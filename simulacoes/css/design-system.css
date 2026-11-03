@@ -1884,6 +1884,52 @@ input[type="text"].sim-input:focus {
     justify-content: center;
 }
 
+/* Botão de Play/Pausa da Barra de Transporte Flutuante (#canvas-transport-toolbar)
+   Semântica Cromática Universal:
+   - Pausado (Pronto para Iniciar / Play) -> Verde Esmeralda
+   - Executando / Ao Vivo (Pausar / Congelar) -> Vermelho / Rose */
+#canvas-transport-toolbar .toolbar-btn.btn-toggle,
+.canvas-toolbar .toolbar-btn.btn-toggle {
+    transition: all var(--trans-fast);
+}
+
+/* 1. Estado Pausado (Play) -> Verde Esmeralda */
+#canvas-transport-toolbar .toolbar-btn.btn-toggle:not(.is-active):not(.active),
+.canvas-toolbar .toolbar-btn.btn-toggle:not(.is-active):not(.active) {
+    background: color-mix(in srgb, var(--color-emerald, #22c55e) 15%, transparent);
+    border-color: color-mix(in srgb, var(--color-emerald, #22c55e) 65%, transparent);
+    color: var(--color-emerald, #22c55e) !important;
+}
+
+#canvas-transport-toolbar .toolbar-btn.btn-toggle:not(.is-active):not(.active):hover,
+.canvas-toolbar .toolbar-btn.btn-toggle:not(.is-active):not(.active):hover {
+    background: color-mix(in srgb, var(--color-emerald, #22c55e) 26%, transparent);
+    border-color: var(--color-emerald, #22c55e);
+    color: var(--color-emerald, #22c55e) !important;
+    box-shadow: 0 0 14px color-mix(in srgb, var(--color-emerald, #22c55e) 40%, transparent);
+}
+
+/* 2. Estado Executando / Ao Vivo (Pause) -> Vermelho / Rose */
+#canvas-transport-toolbar .toolbar-btn.btn-toggle.is-active,
+#canvas-transport-toolbar .toolbar-btn.btn-toggle.active,
+.canvas-toolbar .toolbar-btn.btn-toggle.is-active,
+.canvas-toolbar .toolbar-btn.btn-toggle.active {
+    background: color-mix(in srgb, var(--color-rose, #f43f5e) 20%, transparent);
+    border-color: var(--color-rose, #f43f5e);
+    color: var(--color-rose, #f43f5e) !important;
+    box-shadow: 0 0 14px color-mix(in srgb, var(--color-rose, #f43f5e) 35%, transparent);
+}
+
+#canvas-transport-toolbar .toolbar-btn.btn-toggle.is-active:hover,
+#canvas-transport-toolbar .toolbar-btn.btn-toggle.active:hover,
+.canvas-toolbar .toolbar-btn.btn-toggle.is-active:hover,
+.canvas-toolbar .toolbar-btn.btn-toggle.active:hover {
+    background: color-mix(in srgb, var(--color-rose, #f43f5e) 30%, transparent);
+    border-color: var(--color-rose, #f43f5e);
+    color: var(--color-rose, #f43f5e) !important;
+    box-shadow: 0 0 18px color-mix(in srgb, var(--color-rose, #f43f5e) 50%, transparent);
+}
+
 /* Ajuste automático da dica interativa quando há barra flutuante inferior central */
 .canvas-area:has(.canvas-toolbar.pos-bottom-center) .interactive-hint {
     bottom: 64px;
