@@ -358,7 +358,7 @@ Estrutura obrigatória para envolver instâncias de `RealtimePlot` ou `MultiSeri
 </div>
 ```
 
-### 3.8 Cards de Teoria e Modais Imersivos (`.theory-card` & `.sim-modal-overlay`)
+### 3.8 Cards de Teoria, Modal de Dedução e Modal de Instruções Iniciais (`.theory-card`, `.sim-modal-overlay`, `.modal-onboarding`)
 ```html
 <!-- Card de Teoria dentro da aba #tab-theory -->
 <div class="theory-card">
@@ -367,12 +367,58 @@ Estrutura obrigatória para envolver instâncias de `RealtimePlot` ou `MultiSeri
     <div class="math-block">$$i\hbar \frac{\partial}{\partial t}|\psi(t)\rangle = \hat{H}|\psi(t)\rangle$$</div>
 </div>
 
+<!-- Modal de Instruções Iniciais / Guia Rápido (Abre 1x na primeira sessão ou pelo botão #btn-open-onboarding) -->
+<div id="modal-onboarding" class="sim-modal-overlay modal-onboarding">
+    <div class="sim-modal-content">
+        <div class="sim-modal-header">
+            <h2 class="sim-modal-title">
+                <img src="../assets/icons/help-circle.svg" class="icon-svg icon-accent" alt="Guia Rápido">
+                Guia Rápido de Interatividade
+            </h2>
+            <button class="sim-modal-close" title="Fechar (Esc)">
+                <img src="../assets/icons/close.svg" class="icon-svg" alt="Fechar">
+            </button>
+        </div>
+        <div class="sim-modal-body">
+            <p class="onboarding-intro">
+                Resumo didático da interatividade básica da página.
+            </p>
+            <div class="onboarding-grid">
+                <div class="onboarding-card">
+                    <div class="onboarding-card-title">
+                        <img src="../assets/icons/orbit.svg" class="icon-svg icon-accent" alt="3D">
+                        Câmera e Navegação
+                    </div>
+                    <p class="onboarding-card-text">
+                        Arraste no canvas para orbitar em 3D e use o scroll para zoom.
+                    </p>
+                </div>
+                <div class="onboarding-card">
+                    <div class="onboarding-card-title">
+                        <img src="../assets/icons/sliders.svg" class="icon-svg icon-accent" alt="Parâmetros">
+                        Inspeção com Tempo Pausado
+                    </div>
+                    <p class="onboarding-card-text">
+                        Altere parâmetros mesmo com a simulação pausada para inspecionar mudanças instantaneamente.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="sim-modal-footer">
+            <button class="btn-primary sim-modal-close-btn">
+                <img src="../assets/icons/check.svg" class="icon-svg" alt="Começar">
+                Começar Exploração
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Modal Imersivo de Dedução Formal (Fora de .sim-layout, antes de fechar </body>) -->
-<div id="theory-modal" class="sim-modal-overlay hidden">
-    <div class="sim-modal-container">
+<div id="theory-modal" class="sim-modal-overlay">
+    <div class="sim-modal-content">
         <div class="sim-modal-header">
             <h2 class="sim-modal-title">Dedução Formal das Equações de Euler-Lagrange</h2>
-            <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+            <button class="sim-modal-close" title="Fechar (Esc)">✕</button>
         </div>
         <div class="sim-modal-body">
             <div class="theory-section">
@@ -384,7 +430,7 @@ Estrutura obrigatória para envolver instâncias de `RealtimePlot` ou `MultiSeri
             </div>
         </div>
         <div class="sim-modal-footer">
-            <button class="btn-secondary" data-modal-close>Fechar</button>
+            <button class="btn-secondary sim-modal-close-btn">Fechar</button>
         </div>
     </div>
 </div>
@@ -430,8 +476,10 @@ Sempre importe de `./sim-ui.js`:
   Espelha automaticamente na barra flutuante todos os controles marcados com `data-focus-control` (`action`, `toggle`, `select`, `slider`, `badge`) quando o painel lateral é recolhido, mantendo sincronização bidirecional.
 * **`initBottomSheet(panelSelector = '.controls-panel', handleSelector = '.sheet-drag-handle')`**:
   Habilita o arrasto vertical (peek / half / full) em telas `<= 900px`.
-* **`initModal(openBtnSelector, modalOverlaySelector)`**:
-  Conecta o botão de abertura ao overlay `.sim-modal-overlay`, fechando ao clicar em `[data-modal-close]`, no backdrop ou ao pressionar `Escape`.
+* **`initModal(modalTarget, options = {})`**:
+  Inicializa um modal `.sim-modal-overlay` (fechando em `.sim-modal-close`, `.sim-modal-close-btn`, clique no backdrop ou `Escape`). Aceita `{ triggerSelector, autoOpenFirstSession, storageKey }` e retorna `{ open, close }`.
+* **`initOnboardingModal(modalTarget = '#modal-onboarding', options = {})`**:
+  Inicializa o Modal de Instruções Iniciais (`.modal-onboarding`), abrindo automaticamente **apenas na primeira visita da sessão** (`sessionStorage`) e conectando por padrão o botão `#btn-open-onboarding` (`triggerSelector`) para reabertura sob demanda.
 * **`initPopover(triggerBtnSelector, popoverSelector)`**:
   Alterna a visibilidade (`.hidden`) de um `.sim-popover` ancorado, fechando automaticamente ao clicar fora ou pressionar `Escape`.
 

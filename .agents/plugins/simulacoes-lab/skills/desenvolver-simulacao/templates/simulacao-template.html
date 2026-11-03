@@ -45,18 +45,16 @@
                 <div id="focus-context-toolbar" class="canvas-toolbar pos-top-left focus-mirror-toolbar"></div>
             </div>
 
-            <!-- Grupo de Ações do Topo Direito (Reabrir Controles no Modo Foco) -->
+            <!-- Grupo de Ações do Topo Direito (Instruções e Reabrir Controles no Modo Foco) -->
             <div class="canvas-top-actions">
+                <button id="btn-open-onboarding" class="canvas-btn-expand-sidebar is-visible" title="Guia Rápido e Instruções">
+                    <img src="../assets/icons/help-circle.svg" class="icon-svg" alt="Ajuda">
+                    <span class="btn-label-text">Instruções</span>
+                </button>
                 <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
                 </button>
-            </div>
-
-            <!-- Dica Interativa Centralizada no Fundo (Desktop) -->
-            <div class="interactive-hint">
-                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dica">
-                Arraste para orbitar a cena 3D e use o painel para ajustar os parâmetros.
             </div>
 
             <!-- Barra Flutuante de Transporte / Playback (Padrão Canônico DS 2.0) -->
@@ -140,7 +138,7 @@
 
             <!-- Base: Rodapé Fixo de Telemetria -->
             <div class="panel-footer">
-                <div class="sim-badge" id="footer-status-badge">
+                <div class="sim-badge idle" id="footer-status-badge">
                     <span class="status-dot"></span>
                     <span id="footer-status-text">Simulação Pronta</span>
                 </div>
@@ -148,6 +146,52 @@
             </div>
         </aside>
     </main>
+
+    <!-- Modal de Instruções Iniciais / Guia Rápido (Abre 1x por sessão ou via botão Instruções) -->
+    <div id="modal-onboarding" class="sim-modal-overlay modal-onboarding">
+        <div class="sim-modal-content">
+            <div class="sim-modal-header">
+                <h2 class="sim-modal-title">
+                    <img src="../assets/icons/help-circle.svg" class="icon-svg icon-accent" alt="Guia Rápido">
+                    Guia Rápido: {{TITULO_SIMULACAO}}
+                </h2>
+                <button class="sim-modal-close" title="Fechar (Esc)">
+                    <img src="../assets/icons/close.svg" class="icon-svg" alt="Fechar">
+                </button>
+            </div>
+            <div class="sim-modal-body">
+                <p class="onboarding-intro">
+                    Explore o comportamento físico do sistema em tempo real ou com o tempo pausado utilizando os controles interativos.
+                </p>
+                <div class="onboarding-grid">
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/orbit.svg" class="icon-svg icon-accent" alt="Câmera">
+                            Navegação 3D
+                        </div>
+                        <p class="onboarding-card-text">
+                            Arraste no canvas para orbitar a câmera em 3D e use a roda do mouse (ou gesto de pinça) para aproximar ou afastar.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/sliders.svg" class="icon-svg icon-accent" alt="Parâmetros">
+                            Inspeção em Tempo Real
+                        </div>
+                        <p class="onboarding-card-text">
+                            Altere os sliders e opções no painel lateral mesmo com a simulação pausada para observar o efeito imediato na geometria.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="sim-modal-footer">
+                <button class="btn-primary sim-modal-close-btn">
+                    <img src="../assets/icons/check.svg" class="icon-svg" alt="Começar">
+                    Começar Exploração
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script type="module" src="scripts/{{NOME_SCRIPT}}.js"></script>
 </body>

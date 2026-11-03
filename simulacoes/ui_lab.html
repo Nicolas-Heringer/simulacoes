@@ -203,16 +203,14 @@
 
             <!-- Grupo de Ações Flutuantes no Topo Direito do Canvas -->
             <div class="canvas-top-actions">
+                <button id="btn-open-onboarding" class="canvas-btn-floating" title="Instruções e Dicas de Uso">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dicas">
+                    <span class="btn-label-text">Dicas</span>
+                </button>
                 <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Painel Lateral de Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
                 </button>
-            </div>
-
-            <!-- Dica Interativa -->
-            <div class="interactive-hint">
-                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dica">
-                Arraste com o mouse para orbitar a geometria 3D e teste os componentes no painel.
             </div>
 
             <!-- Barra Flutuante de Transporte / Playback (Padrão Canônico DS 2.0) -->
@@ -775,6 +773,46 @@
             <div class="sim-modal-footer">
                 <span class="sim-modal-hint">Pressione <kbd>Esc</kbd> para fechar</span>
                 <button class="btn-primary" data-modal-close style="min-width: 100px;">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- MODAL DE INSTRUÇÕES INICIAIS / GUIA RÁPIDO (.modal-onboarding) -->
+    <!-- ============================================================= -->
+    <div id="modal-onboarding" class="sim-modal-overlay modal-onboarding hidden" aria-hidden="true" role="dialog">
+        <div class="sim-modal-container">
+            <div class="sim-modal-header">
+                <div class="sim-modal-title">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dicas">
+                    <span>Como Explorar este Laboratório</span>
+                </div>
+                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+            </div>
+            <div class="sim-modal-body">
+                <p class="onboarding-intro">
+                    Esta vitrine apresenta os controles canônicos do Design System 2.0 integrados a uma cena 3D interativa.
+                </p>
+                <div class="onboarding-grid">
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/mouse-left.svg" class="icon-svg" alt="">
+                            <span>Câmera 3D Interativa</span>
+                        </div>
+                        <p class="onboarding-card-text">Arraste no canvas para orbitar a geometria e use a roda do mouse (ou pinça) para aplicar zoom.</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/play.svg" class="icon-svg" alt="">
+                            <span>Transporte Flutuante</span>
+                        </div>
+                        <p class="onboarding-card-text">Use a barra na base central para executar, avançar passo a passo ($\Delta t$), reiniciar ou ciclar a velocidade.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="sim-modal-footer">
+                <span class="sim-modal-hint">Clique fora ou pressione <kbd>Esc</kbd></span>
+                <button class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
             </div>
         </div>
     </div>

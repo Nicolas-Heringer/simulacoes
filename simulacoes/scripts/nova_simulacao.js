@@ -14,6 +14,7 @@ import {
     initBottomSheet,
     initTabs,
     initFocusMirrorToolbar,
+    initOnboardingModal,
     inlineSVGImages,
     initKaTeXAutoRender
 } from './sim-ui.js';
@@ -23,7 +24,7 @@ import {
 // =============================================================================
 const state = {
     mode: 1, // 1: Inércia & Desvio | 2: Movimento Circular
-    isRunning: true,
+    isRunning: false,
     speed: 1.0,
     time: 0.0,
 
@@ -1084,6 +1085,11 @@ function setupUI() {
         layoutSelector: '.sim-layout',
         onlyInFocusMode: true
     });
+
+    // 11. Modal de Instruções Iniciais (Exibido apenas na 1ª sessão e pelo botão Instruções)
+    initOnboardingModal('#modal-onboarding', {
+        triggerSelector: '#btn-open-onboarding'
+    });
 }
 
 // =============================================================================
@@ -1104,6 +1110,11 @@ let lastTime = performance.now();
 
 function animate(currentTime) {
     requestAnimationFrame(animate);
+
+    if (document.hidden) {
+        lastTime = currentTime;
+        return;
+    }
 
     const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
     lastTime = currentTime;

@@ -98,14 +98,20 @@ export function setGlobalAccent(color) {
 
 /**
  * Inicializa um botão de alternância binária (Toggle 0/1)
- * Gerencia classes .is-active, troca automática de rótulo e ícone, e dispara evento 'toggle'.
+ * Gerencia classes .is-active, troca automática de rótulo e ícone, sincroniza #footer-status-badge
+ * (e atalho de teclado Espaço quando no dock de transporte) e dispara evento 'toggle'.
  * @param {HTMLElement|string} target - Seletor ou elemento do botão
  * @param {Function} [onToggleCallback] - Callback: (isActive, state, btnEl) => void
+ * @param {Object} [options] - Opções adicionais ({ enableSpaceShortcut, syncFooterBadge })
  * @returns {Object} Controlador com .toggle(), .setState(val), .getState(), .isActive()
  */
-export function initToggleButton(target, onToggleCallback) {
+export function initToggleButton(target, onToggleCallback, options = {}) {
     const btn = typeof target === 'string' ? document.querySelector(target) : target;
     if (!btn) return null;
+
+    const isTransportPlayBtn = btn.id === 'btn-play-sim' || Boolean(btn.closest('#canvas-transport-toolbar'));
+    const enableSpaceShortcut = options.enableSpaceShortcut ?? isTransportPlayBtn;
+    const syncFooterBadge = options.syncFooterBadge ?? isTransportPlayBtn;
 
     const textIdle = btn.getAttribute('data-text-idle') || 'Executar';
     const textActive = btn.getAttribute('data-text-active') || 'Pausar';
@@ -113,6 +119,14 @@ export function initToggleButton(target, onToggleCallback) {
     const iconActive = btn.getAttribute('data-icon-active') || 'pause';
 
     let state = parseInt(btn.getAttribute('data-state') || '0', 10);
+
+    const syncStatusBadges = (isActive) => {
+        if (!syncFooterBadge) return;
+        const footerBadge = document.getElementById('footer-status-badge');
+        if (footerBadge) {
+            footerBadge.classList.toggle('idle', !isActive);
+        }
+    };
 
     const renderState = async () => {
         const isActive = state === 1;
@@ -126,6 +140,7 @@ export function initToggleButton(target, onToggleCallback) {
             textSpan.textContent = isActive ? textActive : textIdle;
         }
 
+        syncStatusBadges(isActive);
         await setElementIcon(btn, isActive ? iconActive : iconIdle);
     };
 
@@ -143,6 +158,26 @@ export function initToggleButton(target, onToggleCallback) {
             onToggleCallback(state === 1, state, btn);
         }
     });
+
+    if (enableSpaceShortcut && !btn.dataset.spaceBound) {
+        btn.dataset.spaceBound = 'true';
+        window.addEventListener('keydown', (e) => {
+            if (e.code !== 'Space' && e.key !== ' ') return;
+            if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+            const activeEl = document.activeElement;
+            const tag = activeEl ? activeEl.tagName : '';
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || activeEl?.isContentEditable) {
+                return;
+            }
+            if (document.querySelector('.sim-modal-overlay.is-open')) {
+                return;
+            }
+
+            e.preventDefault();
+            btn.click();
+        });
+    }
 
     renderState();
 
@@ -604,14 +639,24 @@ export class MultiSeriesPlot {
 }
 
 /**
- * Inicializa um modal didático de diálogo ou teoria (.sim-modal-overlay)
+ * Inicializa um modal didático de diálogo, teoria ou instruções iniciais (.sim-modal-overlay)
  * Suporta fechamento por botão [data-modal-close], clique fora e tecla Esc.
  * @param {HTMLElement|string} modalTarget - Seletor ou elemento do modal
+ * @param {Object} [options] - Opções adicionais
+ * @param {string|HTMLElement} [options.triggerSelector] - Botão que abre o modal ao clicar
+ * @param {boolean} [options.autoOpenFirstSession=false] - Se true, abre automaticamente na 1ª visita da sessão (sessionStorage)
+ * @param {string} [options.storageKey] - Chave personalizada para o sessionStorage
  * @returns {Object} Controlador com .open(), .close(), .toggle()
  */
-export function initModal(modalTarget) {
+export function initModal(modalTarget, options = {}) {
     const modal = typeof modalTarget === 'string' ? document.querySelector(modalTarget) : modalTarget;
     if (!modal) return null;
+
+    const {
+        triggerSelector = null,
+        autoOpenFirstSession = false,
+        storageKey = `sim_onboarding_seen_${window.location.pathname}`
+    } = options;
 
     const open = () => {
         modal.classList.remove('hidden');
@@ -637,6 +682,9 @@ export function initModal(modalTarget) {
         modal.classList.add('hidden');
         modal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
+        if (autoOpenFirstSession) {
+            try { sessionStorage.setItem(storageKey, '1'); } catch (_) {}
+        }
     };
 
     modal.querySelectorAll('[data-modal-close], .sim-modal-close').forEach(btn => {
@@ -653,11 +701,48 @@ export function initModal(modalTarget) {
         }
     });
 
+    if (triggerSelector) {
+        const triggerBtn = typeof triggerSelector === 'string'
+            ? document.querySelector(triggerSelector)
+            : triggerSelector;
+        if (triggerBtn) {
+            triggerBtn.addEventListener('click', open);
+        }
+    }
+
+    if (autoOpenFirstSession) {
+        let alreadySeen = false;
+        try {
+            alreadySeen = sessionStorage.getItem(storageKey) === '1';
+        } catch (_) {}
+        if (!alreadySeen) {
+            try { sessionStorage.setItem(storageKey, '1'); } catch (_) {}
+            open();
+        }
+    }
+
     return {
         open,
         close,
         toggle: () => modal.classList.contains('hidden') ? open() : close()
     };
+}
+
+/**
+ * Inicializa o Modal de Instruções Iniciais / Guia Rápido (.modal-onboarding)
+ * Abre automaticamente apenas na primeira visita da sessão (sessionStorage) e depois sob demanda pelo botão de dica.
+ * @param {HTMLElement|string} [modalTarget='#modal-onboarding']
+ * @param {Object} [options]
+ * @param {string|HTMLElement} [options.triggerSelector='#btn-open-onboarding']
+ * @param {boolean} [options.autoOpenFirstSession=true]
+ * @param {string} [options.storageKey]
+ */
+export function initOnboardingModal(modalTarget = '#modal-onboarding', options = {}) {
+    return initModal(modalTarget, {
+        triggerSelector: '#btn-open-onboarding',
+        autoOpenFirstSession: true,
+        ...options
+    });
 }
 
 /**

@@ -52,11 +52,17 @@
             <!-- Container do Renderizador Three.js -->
             <div id="three-container" style="width: 100%; height: 100%; position: relative; touch-action: none;"></div>
 
-            <!-- Barra Flutuante de Modo Foco (Design System 2.0 Focus Mirror) -->
-            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            <!-- Pilha Vertical Automática no Canto Superior Esquerdo -->
+            <div class="canvas-top-left-stack">
+                <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            </div>
 
             <!-- Grupo de Ações Flutuantes no Topo Direito do Canvas -->
             <div class="canvas-top-actions">
+                <button id="btn-open-onboarding" class="canvas-btn-floating" title="Instruções e Guia Rápido">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span class="btn-label-text">Instruções</span>
+                </button>
                 <button id="btn-reset-camera" class="canvas-btn-floating" title="Centralizar Visão">
                     <img src="../assets/icons/camera-reset.svg" class="icon-svg" alt="Câmera">
                     <span class="btn-label-text">Reset Visão</span>
@@ -67,23 +73,17 @@
                 </button>
             </div>
 
-            <!-- Dica Interativa Flutuante no Fundo Central -->
-            <div class="interactive-hint">
-                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dica">
-                Observe a trajetória pontilhada: ela representa o estado inercial onde o corpo estaria sem força resultante.
-            </div>
-
             <!-- Barra Flutuante de Transporte / Playback -->
             <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
                 <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
-                        data-state="1"
+                        data-state="0"
                         data-text-idle="Executar"
                         data-text-active="Pausar"
                         data-icon-idle="play"
                         data-icon-active="pause"
                         title="Executar / Pausar">
-                    <img src="../assets/icons/pause.svg" class="icon-svg" alt="Pausar">
-                    <span class="btn-text">Pausar</span>
+                    <img src="../assets/icons/play.svg" class="icon-svg" alt="Executar">
+                    <span class="btn-text">Executar</span>
                 </button>
                 <button class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
                     <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
@@ -458,7 +458,7 @@
 
             <!-- Base: Rodapé Fixo de Telemetria -->
             <div class="panel-footer">
-                <div class="sim-badge" id="footer-status-badge">
+                <div class="sim-badge idle" id="footer-status-badge">
                     <span class="status-dot"></span>
                     <span id="footer-status-text">Simulação Pronta</span>
                 </div>
@@ -466,6 +466,60 @@
             </div>
         </aside>
     </main>
+
+    <!-- ============================================================= -->
+    <!-- MODAL DE INSTRUÇÕES INICIAIS / GUIA RÁPIDO (.modal-onboarding) -->
+    <!-- ============================================================= -->
+    <div id="modal-onboarding" class="sim-modal-overlay modal-onboarding hidden" aria-hidden="true" role="dialog">
+        <div class="sim-modal-container">
+            <div class="sim-modal-header">
+                <div class="sim-modal-title">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span>Da Inércia ao Movimento Circular — Guia Rápido</span>
+                </div>
+                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+            </div>
+            <div class="sim-modal-body">
+                <p class="onboarding-intro">
+                    Observe a <strong>trajetória e a silhueta pontilhadas</strong>: elas mostram exatamente onde o corpo estaria por inércia (1ª Lei de Newton) caso nenhuma força resultante atuasse sobre ele.
+                </p>
+                <div class="onboarding-grid">
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/motion-oscillate.svg" class="icon-svg" alt="">
+                            <span>1. Inércia & Desvio</span>
+                        </div>
+                        <p class="onboarding-card-text">Aplique um pulso de força transversal ($\vec{F}$) e compare o novo MRU defletido com a trajetória inercial original.</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/orbital.svg" class="icon-svg" alt="">
+                            <span>2. Movimento Circular</span>
+                        </div>
+                        <p class="onboarding-card-text">Alterne entre a <em>Fuga Contínua</em> e o <em>Passo de Newton</em> ($\Delta t$), ou corte a força centrípeta ($\vec{F}_c = 0$).</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/mouse-left.svg" class="icon-svg" alt="">
+                            <span>Câmera 3D Livre</span>
+                        </div>
+                        <p class="onboarding-card-text">Arraste no palco para orbitar a cena 3D e use o scroll do mouse (ou gesto de pinça) para zoom.</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/sliders.svg" class="icon-svg" alt="">
+                            <span>Inspeção com Tempo Pausado</span>
+                        </div>
+                        <p class="onboarding-card-text">Pause a simulação na barra inferior e altere massas, raios ou vetores para inspecionar o quadro congelado.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="sim-modal-footer">
+                <span class="sim-modal-hint">Clique fora ou pressione <kbd>Esc</kbd> para iniciar</span>
+                <button class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Script Modular da Simulação -->
     <script type="module" src="scripts/nova_simulacao.js"></script>

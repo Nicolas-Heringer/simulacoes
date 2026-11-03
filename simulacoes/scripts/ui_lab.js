@@ -15,6 +15,7 @@ import {
     RealtimePlot,
     MultiSeriesPlot,
     initModal,
+    initOnboardingModal,
     initSidebarCollapse,
     initTabs,
     initBottomSheet,
@@ -44,6 +45,7 @@ export {
     RealtimePlot,
     MultiSeriesPlot,
     initModal,
+    initOnboardingModal,
     initSidebarCollapse,
     initTabs,
     initBottomSheet,
@@ -194,9 +196,12 @@ function onWindowResize() {
 function animate() {
     requestAnimationFrame(animate);
 
+    if (document.hidden) return;
+
     if (controls) controls.update();
 
-    // Telemetria do Rodapé e Avanço Temporal
+    // Telemetria do Rodapé e Avanço Temporal (Só avança e alimenta gráficos quando isSimRunning === true)
+    const rad = parseFloat(document.getElementById('slider-demo-radius')?.value || 1.0);
     if (isSimRunning) {
         simTime += 0.016 * simTimeScale;
         if (currentMesh) {
@@ -204,43 +209,42 @@ function animate() {
             if (wireMesh) wireMesh.rotation.y = currentMesh.rotation.y;
             if (pointsMesh) pointsMesh.rotation.y = currentMesh.rotation.y;
         }
+
+        // 1. Alimentação contínua do Mini-Gráfico Canal Único (RealtimePlot)
+        if (plotInstance) {
+            const waveVal = Math.sin(simTime * 3) * rad * 0.8 + (Math.cos(simTime * 7) * 0.2);
+            plotInstance.push(waveVal);
+
+            const valSpan = document.getElementById('plot-current-val');
+            if (valSpan) {
+                valSpan.textContent = `${(waveVal * 1.5).toFixed(2)} rad/s`;
+            }
+        }
+
+        // 2. Alimentação do MultiSeriesPlot (Série Temporal K, U, E e Espaço de Fase x, p)
+        if (multiPlotInstance) {
+            const x = rad * Math.cos(simTime * 2.2);
+            const p = -rad * Math.sin(simTime * 2.2);
+            const E = 12.5 * (rad * rad);
+            const K = E * (Math.sin(simTime * 2.2) ** 2);
+            const U = E - K;
+
+            if (multiPlotInstance.mode === 'phase-space') {
+                multiPlotInstance.pushPhasePoint(x, p);
+            } else {
+                multiPlotInstance.push({ K, U, E });
+            }
+
+            const kReadout = document.getElementById('readout-demo-k');
+            const uReadout = document.getElementById('readout-demo-u');
+            if (kReadout) kReadout.textContent = `${K.toFixed(2)} J`;
+            if (uReadout) uReadout.textContent = `${U.toFixed(2)} J`;
+        }
     }
 
     const timerSpan = document.getElementById('footer-sim-timer');
     if (timerSpan) {
         timerSpan.textContent = `t = ${simTime.toFixed(2)}s`;
-    }
-
-    // 1. Alimentação contínua do Mini-Gráfico Canal Único (RealtimePlot)
-    const rad = parseFloat(document.getElementById('slider-demo-radius')?.value || 1.0);
-    if (plotInstance) {
-        const waveVal = Math.sin(simTime * 3) * rad * 0.8 + (Math.cos(simTime * 7) * 0.2);
-        plotInstance.push(waveVal);
-
-        const valSpan = document.getElementById('plot-current-val');
-        if (valSpan) {
-            valSpan.textContent = `${(waveVal * 1.5).toFixed(2)} rad/s`;
-        }
-    }
-
-    // 2. Alimentação do MultiSeriesPlot (Série Temporal K, U, E e Espaço de Fase x, p)
-    if (multiPlotInstance) {
-        const x = rad * Math.cos(simTime * 2.2);
-        const p = -rad * Math.sin(simTime * 2.2);
-        const E = 12.5 * (rad * rad);
-        const K = E * (Math.sin(simTime * 2.2) ** 2);
-        const U = E - K;
-
-        if (multiPlotInstance.mode === 'phase-space') {
-            multiPlotInstance.pushPhasePoint(x, p);
-        } else {
-            multiPlotInstance.push({ K, U, E });
-        }
-
-        const kReadout = document.getElementById('readout-demo-k');
-        const uReadout = document.getElementById('readout-demo-u');
-        if (kReadout) kReadout.textContent = `${K.toFixed(2)} J`;
-        if (uReadout) uReadout.textContent = `${U.toFixed(2)} J`;
     }
 
     if (renderer && scene && camera) {
@@ -557,6 +561,11 @@ function setupListeners() {
             theoryModal.open();
         });
     }
+
+    // --- INICIALIZAÇÃO DO MODAL DE INSTRUÇÕES INICIAIS (1ª SESSÃO + BOTÃO DICAS) ---
+    initOnboardingModal('#modal-onboarding', {
+        triggerSelector: '#btn-open-onboarding'
+    });
 
     // --- CLIQUE E CONTADORES DE TESTE ---
     const registerClick = () => {

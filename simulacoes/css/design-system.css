@@ -1581,6 +1581,69 @@ input[type="text"].sim-input:focus {
     font-size: 0.72rem;
 }
 
+/* Variante Compacta de Instruções Iniciais / Boas-Vindas (.modal-onboarding) */
+.sim-modal-overlay.modal-onboarding {
+    background: rgba(5, 8, 18, 0.58);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.sim-modal-overlay.modal-onboarding .sim-modal-container {
+    max-width: 540px;
+}
+
+.onboarding-intro {
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    margin: 0 0 14px 0;
+}
+
+.onboarding-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 4px;
+}
+
+.onboarding-card {
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.onboarding-card-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.onboarding-card-title .icon-svg {
+    color: var(--accent-color);
+    width: 16px;
+    height: 16px;
+}
+
+.onboarding-card-text {
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+@media (max-width: 560px) {
+    .onboarding-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* =============================================================================
    8. ÍCONES VETORIAIS SVG & UTILITÁRIOS
    ============================================================================= */

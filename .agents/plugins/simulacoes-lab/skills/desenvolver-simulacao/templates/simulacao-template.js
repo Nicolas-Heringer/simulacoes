@@ -6,6 +6,7 @@ import {
     initSidebarCollapse,
     initBottomSheet,
     initTabs,
+    initOnboardingModal,
     initFocusMirrorToolbar,
     inlineSVGImages,
     initKaTeXAutoRender
@@ -93,6 +94,11 @@ function setupUI() {
     // Navegação por Abas
     initTabs();
 
+    // Modal de Instruções Iniciais (Abre automaticamente na 1ª visita da sessão + botão #btn-open-onboarding)
+    initOnboardingModal('#modal-onboarding', {
+        triggerSelector: '#btn-open-onboarding'
+    });
+
     // Play / Pause
     const playControl = initToggleButton('#btn-play-sim', (active) => {
         state.isRunning = active;
@@ -161,6 +167,11 @@ let lastTime = performance.now();
 
 function animate(currentTime) {
     requestAnimationFrame(animate);
+
+    if (document.hidden) {
+        lastTime = currentTime;
+        return;
+    }
 
     const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
     lastTime = currentTime;
