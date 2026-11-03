@@ -38,11 +38,18 @@
     <main class="sim-layout">
         <!-- Área de Visualização 3D -->
         <div class="canvas-area" id="canvas-area" style="touch-action: none;">
-            <!-- Barra Flutuante em Modo Foco (Design System 2.0 Mirror) -->
-            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            <!-- Pilha Vertical Automática no Canto Superior Esquerdo -->
+            <div class="canvas-top-left-stack">
+                <!-- Barra Flutuante em Modo Foco (Design System 2.0 Mirror) -->
+                <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            </div>
 
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
+                <button id="btn-open-onboarding" class="canvas-btn-floating" title="Instruções e Guia Rápido">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span class="btn-label-text">Instruções</span>
+                </button>
                 <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Painel (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
@@ -54,9 +61,17 @@
                 I = <span id="badge-inertia-value">0.00</span> kg·m²
             </div>
 
-            <div class="interactive-hint" id="canvas-hint">
-                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dica">
-                Arraste com o mouse/toque para orbitar. Use o botão de diagonalização para alinhar aos eixos principais.
+            <!-- Barra Flutuante de Transporte na Base do Canvas -->
+            <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
+                <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
+                        data-state="0" data-text-idle="Executar" data-text-active="Pausar"
+                        data-icon-idle="play" data-icon-active="pause" title="Girar Corpo / Pausar">
+                    <img src="../assets/icons/play.svg" class="icon-svg" alt="Executar">
+                    <span class="btn-text">Executar</span>
+                </button>
+                <button class="toolbar-btn" id="btn-reset-sim" title="Reiniciar Rotação (t = 0)">
+                    <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
+                </button>
             </div>
         </div>
 
@@ -172,15 +187,9 @@
                         </div>
                     </div>
 
-                    <!-- Botões de Ação e Reprodução -->
+                    <!-- Parâmetro de Velocidade Angular -->
                     <div class="control-group">
-                        <div class="button-row">
-                            <button class="btn-action primary" id="play-pause-btn"
-                                data-focus-control="toggle" data-focus-order="1" data-focus-tooltip="Iniciar / Pausar Rotação">▶ Play</button>
-                            <button class="btn-action secondary" id="reset-btn"
-                                data-focus-control="action" data-focus-order="2" data-focus-icon="refresh" data-focus-tooltip="Reiniciar Rotação">↺ Resetar</button>
-                        </div>
-                        <div class="slider-container sim-dual-slider" style="margin-top: 10px;">
+                        <div class="slider-container sim-dual-slider">
                             <div class="slider-header">
                                 <label for="speed-slider" class="slider-label">Velocidade Angular ($\omega$)</label>
                                 <div class="dual-input-wrapper">
@@ -317,11 +326,67 @@
 
             <!-- Rodapé do Painel -->
             <footer class="panel-footer">
+                <div class="sim-badge idle" id="footer-status-badge">
+                    <span class="status-dot"></span>
+                    <span id="footer-status-text">Pausado</span>
+                </div>
                 <span class="shortcut-tip">Pressione <kbd>F</kbd> para Modo Foco</span>
                 <span class="panel-version">DS 2.0 • Mecânica Clássica</span>
             </footer>
         </aside>
     </main>
+
+    <!-- Modal de Instruções Iniciais / Guia Rápido (.modal-onboarding) -->
+    <div id="modal-onboarding" class="sim-modal-overlay modal-onboarding hidden" aria-hidden="true" role="dialog">
+        <div class="sim-modal-container">
+            <div class="sim-modal-header">
+                <div class="sim-modal-title">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span>Tensor de Inércia — Guia Rápido</span>
+                </div>
+                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+            </div>
+            <div class="sim-modal-body">
+                <p class="onboarding-intro">
+                    Visualize em tempo real como a distribuição de massa determina o <strong>tensor de inércia $\mathbf{I}$</strong>, seu elipsoide característico e o alinhamento com os eixos principais de rotação.
+                </p>
+                <div class="onboarding-grid">
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/matrix-basis.svg" class="icon-svg" alt="">
+                            <span>1. Tensor de Inércia $\mathbf{I}$</span>
+                        </div>
+                        <p class="onboarding-card-text">Alterne entre massa pontual única, sistema discreto de partículas ou corpos extensos 3D. A matriz $3 \times 3$ com momentos e produtos de inércia é calculada instantaneamente.</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/axis-3d.svg" class="icon-svg" alt="">
+                            <span>2. Elipsoide de Poinsot</span>
+                        </div>
+                        <p class="onboarding-card-text">O mini-visualizador 3D exibe a quádrica de inércia $\mathbf{r}^T \mathbf{I} \mathbf{r} = 1$, cujos semi-eixos são inversamente proporcionais a $1/\sqrt{I_k}$.</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="">
+                            <span>3. Diagonalização & Eixos Principais</span>
+                        </div>
+                        <p class="onboarding-card-text">Clique em <em>⚡ Diagonalizar Tensor</em> para calcular os autovalores $I_1, I_2, I_3$ e animar a rotação do corpo até que seus eixos principais coincidam com o sistema cartesiano.</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/rotate.svg" class="icon-svg" alt="">
+                            <span>4. Rotação Livre em 3D</span>
+                        </div>
+                        <p class="onboarding-card-text">Use a barra de transporte inferior para iniciar/pausar a rotação em torno do eixo escolhido (X, Y, Z ou personalizado), ajuste $\omega$ e orbite a cena livremente.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="sim-modal-footer">
+                <span class="sim-modal-hint">Clique fora ou pressione <kbd>Esc</kbd> para fechar</span>
+                <button class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Three.js 0.165 via Import Map -->
     <script type="importmap">

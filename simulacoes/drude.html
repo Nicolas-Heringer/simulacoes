@@ -43,8 +43,17 @@
         <div class="canvas-area">
             <canvas id="drudeCanvas"></canvas>
 
+            <!-- Pilha Vertical Automática no Canto Superior Esquerdo -->
+            <div class="canvas-top-left-stack">
+                <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            </div>
+
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
+                <button id="btn-open-onboarding" class="canvas-btn-floating" title="Instruções e Guia Rápido">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span class="btn-label-text">Instruções</span>
+                </button>
                 <button id="btn-toggle-tracer" class="canvas-btn-floating" title="Alternar Rastro do Elétron Traçador">
                     <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="Traçador">
                     <span class="btn-label-text">Elétron Traçador</span>
@@ -55,33 +64,24 @@
                 </button>
             </div>
 
-            <!-- Barra Flutuante de Contexto para Modo Foco -->
-            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
-
-            <!-- HUD de Telemetria Físico em Tempo Real -->
-            <div class="sim-hud" id="sim-hud">
-                <div class="hud-item">
-                    <span class="hud-label">Velocidade de Deriva:</span>
-                    <span class="hud-val" id="hud-vd" style="color: var(--accent-hud, var(--accent-color));">v_d = 0.00</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Velocidade Térmica:</span>
-                    <span class="hud-val" id="hud-vth">v_th = 1.00</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Campo Elétrico $\vec{E}$:</span>
-                    <span class="hud-val" id="hud-efield">0.00 (Off)</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Taxa de Colisões:</span>
-                    <span class="hud-val" id="hud-col-rate" style="color: var(--color-emerald, #22c55e);">0 col/s</span>
-                </div>
-            </div>
-
-            <!-- Dica Interativa Flutuante -->
-            <div class="interactive-hint">
-                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dica">
-                Ligue o campo elétrico ($\vec{E}$) para gerar velocidade de deriva ou aumente a temperatura para visualizar a resistência por agitação térmica.
+            <!-- Barra Flutuante de Transporte (#canvas-transport-toolbar) -->
+            <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
+                <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
+                        data-state="0" data-text-idle="Executar" data-text-active="Pausar"
+                        data-icon-idle="play" data-icon-active="pause" title="Executar / Pausar">
+                    <img src="../assets/icons/play.svg" class="icon-svg" alt="Executar">
+                    <span class="btn-text">Executar</span>
+                </button>
+                <button class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
+                    <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
+                </button>
+                <button class="toolbar-btn" id="btn-reset-sim" title="Reiniciar Posições (t = 0)">
+                    <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
+                </button>
+                <span class="toolbar-divider"></span>
+                <button class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
+                    1.0×
+                </button>
             </div>
         </div>
 
@@ -116,44 +116,36 @@
                     <div class="tab-header">
                         <div class="tab-header-row">
                             <h3 class="tab-title">Dinâmica de Carga & Transporte</h3>
-                            <div class="sim-badge" id="header-status-badge">
+                            <div class="sim-badge idle" id="header-status-badge">
                                 <span class="status-dot"></span>
-                                <span>Ativo</span>
+                                <span>Pausado</span>
                             </div>
                         </div>
                         <p class="tab-subtitle">Modelo microscópico clássico de condução em sólidos cristalinos e amorfos.</p>
                     </div>
 
-                    <!-- 1. Barra de Reprodução Físico-Temporal -->
-                    <div class="sim-transport-bar">
-                        <div class="transport-controls-row">
-                            <button class="btn-primary btn-toggle transport-btn-play" id="btn-play-sim"
-                                    data-state="1"
-                                    data-text-idle="Executar"
-                                    data-text-active="Pausar"
-                                    data-icon-idle="play"
-                                    data-icon-active="pause"
-                                    data-focus-control="toggle">
-                                <img src="../assets/icons/pause.svg" class="icon-svg" alt="Pausar">
-                                <span class="btn-text">Pausar</span>
-                            </button>
-                            <button class="btn-icon" id="btn-step-sim" title="Avançar 1 Passo Temporal (Δt)" data-focus-control="action" data-focus-label="Passo" data-focus-order="2">
-                                <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
-                            </button>
-                            <button class="btn-icon" id="btn-reset-sim" title="Reiniciar Posições dos Elétrons" data-focus-control="action" data-focus-label="Reset" data-focus-order="3">
-                                <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
-                            </button>
-                        </div>
-
-                        <div class="transport-speed-row">
-                            <span class="transport-speed-label">
-                                <img src="../assets/icons/rotate.svg" class="icon-svg" style="width: 14px; height: 14px;" alt="Velocidade">
-                                Velocidade:
-                            </span>
-                            <div class="transport-speed-pills" id="sim-speed-pills">
-                                <button class="speed-btn" data-speed="0.5">0.5×</button>
-                                <button class="speed-btn active" data-speed="1.0">1.0×</button>
-                                <button class="speed-btn" data-speed="2.0">2.0×</button>
+                    <!-- Card de Telemetria de Transporte (.sim-readout) -->
+                    <div class="control-group">
+                        <div class="sim-readout">
+                            <div class="sim-readout-title">
+                                <img src="../assets/icons/gauge.svg" class="icon-svg icon-accent" alt="Telemetria">
+                                <span>Diagnóstico de Transporte Eletrônico</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Velocidade de Deriva ($v_d$):</span>
+                                <span class="sim-readout-value tone-accent" id="readout-vd">v_d = 0.00</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Velocidade Térmica ($v_{\text{th}}$):</span>
+                                <span class="sim-readout-value tone-cyan" id="readout-vth">v_th = 1.00</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Campo Elétrico ($\vec{E}$):</span>
+                                <span class="sim-readout-value tone-rose" id="readout-efield">0.00 (Off)</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Taxa de Colisões:</span>
+                                <span class="sim-readout-value tone-emerald" id="readout-col-rate">0 col/s</span>
                             </div>
                         </div>
                     </div>
@@ -172,7 +164,7 @@
 
                     <!-- Slider Sincronizado: Intensidade do Campo -->
                     <div class="control-group">
-                        <div class="slider-container sim-dual-slider">
+                        <div class="slider-container sim-dual-slider" data-focus-control="slider" data-focus-label="|E|" data-focus-order="4">
                             <div class="slider-header">
                                 <label for="slider-intensidade" class="slider-label">Intensidade do Campo ($|E|$)</label>
                                 <div class="dual-input-wrapper">
@@ -189,7 +181,7 @@
 
                     <!-- Slider Sincronizado: Temperatura -->
                     <div class="control-group">
-                        <div class="slider-container sim-dual-slider">
+                        <div class="slider-container sim-dual-slider" data-focus-control="slider" data-focus-label="Temp (T)" data-focus-order="5">
                             <div class="slider-header">
                                 <label for="slider-temperatura" class="slider-label">Temperatura ($T$)</label>
                                 <div class="dual-input-wrapper">
@@ -310,9 +302,9 @@
 
             <!-- Base: Rodapé Fixo de Telemetria -->
             <div class="panel-footer">
-                <div class="sim-badge" id="footer-status-badge">
+                <div class="sim-badge idle" id="footer-status-badge">
                     <span class="status-dot"></span>
-                    <span id="footer-status-text">Simulação Ativa</span>
+                    <span id="footer-status-text">Simulação Pausada</span>
                 </div>
                 <span class="footer-meta" id="footer-sim-info">v_d = 0.00 px/s</span>
             </div>
@@ -398,8 +390,70 @@
         </div>
     </div>
 
+    <!-- ============================================================= -->
+    <!-- MODAL DE INSTRUÇÕES INICIAIS / GUIA RÁPIDO (.modal-onboarding) -->
+    <!-- ============================================================= -->
+    <div id="modal-onboarding" class="sim-modal-overlay modal-onboarding hidden" aria-hidden="true" role="dialog">
+        <div class="sim-modal-container">
+            <div class="sim-modal-header">
+                <div class="sim-modal-title">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span>Modelo de Drude — Condução Elétrica Clássica — Guia Rápido</span>
+                </div>
+                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+            </div>
+            <div class="sim-modal-body">
+                <p class="onboarding-intro">
+                    Explore a física microscópica da condução elétrica clássica em redes sólidas, compreendendo a velocidade de deriva, agitação térmica e colisões inelásticas com íons.
+                </p>
+                <div class="onboarding-grid">
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/particle-grid.svg" class="icon-svg" alt="">
+                            <span>1. Gás de Elétrons Livres & Rede Iônica</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            No modelo de Paul Drude (1900), os elétrons de valência formam um gás clássico de cargas livres que transitam entre cátions fixos da rede cristalina, acelerados unicamente pelo campo elétrico entre colisões.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/electron-drift.svg" class="icon-svg" alt="">
+                            <span>2. Velocidade Térmica vs. Deriva ($v_d$)</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            A velocidade térmica $v_{\text{th}}$ é rápida e caótica (com média vetorial nula). Sob campo elétrico $\vec{E}$, surge uma velocidade de deriva líquida $v_d = -e\tau E / m$ muito sutil, responsável pelo fluxo de corrente macroscópico.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/stopwatch.svg" class="icon-svg" alt="">
+                            <span>3. Tempo de Colisão ($\tau$) & Lei de Ohm</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Colisões com íons e vibrações térmicas (fônons) re-termalizam o momento dos elétrons isotropicamente. O equilíbrio contínuo entre ganho e perda de momento deduz a Lei de Ohm microscópica $\vec{J} = \sigma_0 \vec{E}$.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="">
+                            <span>4. Elétron Traçador & Caminho com Drift</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Ative o botão <em>Elétron Traçador</em> para observar a trajetória estocástica de uma única partícula: um passeio aleatório (random walk) cujos ziguezagues sofrem um desvio direcionado constante imposto pelo campo.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="sim-modal-footer">
+                <span class="sim-modal-hint">Clique fora ou pressione <kbd>Esc</kbd> para fechar</span>
+                <button class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Script Principal da Simulação (ES Module) -->
     <script type="module" src="scripts/drude.js"></script>
 </body>
 
-</html>
+</html>

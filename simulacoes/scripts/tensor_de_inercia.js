@@ -15,7 +15,9 @@ import {
     initKaTeXAutoRender,
     diagonalizeSymmetric3x3,
     syncDualSlider,
-    initFocusMirrorToolbar
+    initFocusMirrorToolbar,
+    initToggleButton,
+    initOnboardingModal
 } from './sim-ui.js';
 
 // =============================================================================
@@ -90,6 +92,7 @@ let principalAxesGroup;     // setas dos eixos principais
 
 // Elipsoide mini-renderer
 let ellipsoidRenderer, ellipsoidScene, ellipsoidCamera, ellipsoidMesh;
+let playControl = null;
 
 function init() {
     canvasArea = document.getElementById('canvas-area');
@@ -885,7 +888,9 @@ function animateDiagonalization() {
 function animate() {
     requestAnimationFrame(animate);
 
-    const delta = clock.getDelta();
+    if (document.hidden) return;
+
+    const delta = Math.min(clock.getDelta(), 0.1);
 
     if (state.isPlaying) {
         state.time += delta;
@@ -1015,19 +1020,26 @@ function initUI() {
         rebuildScene();
     });
 
-    // Play/Pause
-    document.getElementById('play-pause-btn').addEventListener('click', () => {
-        state.isPlaying = !state.isPlaying;
-        updatePlayButton();
+    // Barra de Transporte (Play / Pause)
+    playControl = initToggleButton('#btn-play-sim', (active) => {
+        state.isPlaying = active;
+        const footerStatusText = document.getElementById('footer-status-text');
+        if (footerStatusText) {
+            footerStatusText.textContent = active ? 'Girando Corpo' : 'Pausado';
+        }
     });
 
-    // Reset
-    document.getElementById('reset-btn').addEventListener('click', () => {
+    // Reset da Rotação
+    document.getElementById('btn-reset-sim')?.addEventListener('click', () => {
         state.isPlaying = false;
+        if (playControl) playControl.setState(0);
         state.time = 0;
         animationGroup.rotation.set(0, 0, 0);
         animationGroup.quaternion.identity();
-        updatePlayButton();
+        const footerStatusText = document.getElementById('footer-status-text');
+        if (footerStatusText) {
+            footerStatusText.textContent = 'Pausado';
+        }
         rebuildScene();
     });
 
@@ -1055,6 +1067,7 @@ function initUI() {
         scopeSelector: '.controls-panel'
     });
     initBottomSheet('#controls-panel');
+    initOnboardingModal('#modal-onboarding', { triggerSelector: '#btn-open-onboarding' });
     initKaTeXAutoRender();
 
     // Inicializar UI
@@ -1082,10 +1095,13 @@ function showPartControls() {
 }
 
 function updatePlayButton() {
-    const btn = document.getElementById('play-pause-btn');
-    if (!btn) return;
-    btn.textContent = state.isPlaying ? '⏸ Pausar' : '▶ Play';
-    btn.classList.toggle('is-active', state.isPlaying);
+    if (playControl) {
+        playControl.setState(state.isPlaying ? 1 : 0);
+    }
+    const footerStatusText = document.getElementById('footer-status-text');
+    if (footerStatusText) {
+        footerStatusText.textContent = state.isPlaying ? 'Girando Corpo' : 'Pausado';
+    }
 }
 
 function updatePart1Inputs() {

@@ -12,6 +12,7 @@ import {
     initFocusMirrorToolbar,
     initBottomSheet,
     initModal,
+    initOnboardingModal,
     initTabs,
     initKaTeXAutoRender,
     inlineSVGImages
@@ -197,16 +198,19 @@ document.addEventListener("DOMContentLoaded", () => {
         defaultState: 'peek'
     });
 
-    // 5. Inicializa o Modal Teórico com KaTeX
+    // 5. Inicializa o Modal de Instruções Iniciais (Onboarding)
+    initOnboardingModal('#modal-onboarding', { triggerSelector: '#btn-open-onboarding' });
+
+    // 6. Inicializa o Modal Teórico com KaTeX
     const theoryModal = initModal('#modal-teoria');
     document.getElementById('btn-open-theory-modal')?.addEventListener('click', () => {
         theoryModal?.open();
     });
 
-    // 6. Navegação entre Abas via Design System
+    // 7. Navegação entre Abas via Design System
     initTabs();
 
-    // 7. Sincronização dos Dual Sliders (Modo n e Modo m)
+    // 8. Sincronização dos Dual Sliders (Modo n e Modo m)
     const presetButtons = document.querySelectorAll('.btn-preset');
 
     function updateActivePreset() {
@@ -306,6 +310,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     canvas.addEventListener('pointermove', (e) => {
+        inspectAt(e.clientX, e.clientY);
+    });
+
+    canvas.addEventListener('pointerdown', (e) => {
         inspectAt(e.clientX, e.clientY);
     });
 

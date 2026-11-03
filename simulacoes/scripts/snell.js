@@ -12,6 +12,7 @@ import {
     initSidebarCollapse,
     initBottomSheet,
     initModal,
+    initOnboardingModal,
     inlineSVGImages,
     initTabs,
     initFocusMirrorToolbar,
@@ -564,6 +565,9 @@ function setupEventListeners() {
         });
     }
 
+    // --- MODAL DE INSTRUÇÕES INICIAIS (ONBOARDING) ---
+    initOnboardingModal('#modal-onboarding', { triggerSelector: '#btn-open-onboarding' });
+
     // --- EVENTOS DO CANVAS (POINTER EVENTS UNIFICADOS) ---
     if (canvas) {
         canvas.addEventListener('wheel', (e) => {
@@ -621,6 +625,7 @@ function setupEventListeners() {
 // =============================================================================
 function animate() {
     requestAnimationFrame(animate);
+    if (document.hidden) return;
     if (!ctx || !maps || !backgroundCache) return;
 
     if (!isPaused) {

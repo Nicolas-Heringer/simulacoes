@@ -15,7 +15,8 @@ import {
     initModal,
     initTabs,
     initKaTeXAutoRender,
-    inlineSVGImages
+    inlineSVGImages,
+    initOnboardingModal
 } from './sim-ui.js';
 
 // =============================================================================
@@ -31,15 +32,16 @@ const btnZerar = document.getElementById('btnZerar');
 const btnToggleTracer = document.getElementById('btn-toggle-tracer');
 const btnStepSim = document.getElementById('btn-step-sim');
 const btnResetSim = document.getElementById('btn-reset-sim');
-const speedPills = document.querySelectorAll('#sim-speed-pills .speed-btn');
+const btnSpeedCycle = document.getElementById('btn-speed-cycle');
 
-// Elementos de Telemetria (HUD)
-const hudVd = document.getElementById('hud-vd');
-const hudVth = document.getElementById('hud-vth');
-const hudEfield = document.getElementById('hud-efield');
-const hudColRate = document.getElementById('hud-col-rate');
+// Elementos de Telemetria (.sim-readout & Rodapé)
+const readoutVd = document.getElementById('readout-vd') || document.getElementById('hud-vd');
+const readoutVth = document.getElementById('readout-vth') || document.getElementById('hud-vth');
+const readoutEfield = document.getElementById('readout-efield') || document.getElementById('hud-efield');
+const readoutColRate = document.getElementById('readout-col-rate') || document.getElementById('hud-col-rate');
 const footerSimInfo = document.getElementById('footer-sim-info');
 const footerStatusText = document.getElementById('footer-status-text');
+const footerStatusBadge = document.getElementById('footer-status-badge');
 const headerStatusBadge = document.getElementById('header-status-badge');
 
 // Variáveis de Estado Físico
@@ -51,8 +53,10 @@ let tipoRede = selectRede ? selectRede.value : 'quadrada';
 let numEletrons = 200;
 
 // Variáveis de Controle Temporal e Execução
-let isRunning = true;
+let isRunning = false; // Simulação inicia pausada conforme padrão DS 2.0
+let playControl = null;
 let simSpeed = 1.0;
+const speedCycleSteps = [0.5, 1.0, 2.0, 5.0];
 let showTracer = false;
 let tracerTrail = [];
 const maxTracerPoints = 120;
@@ -76,14 +80,14 @@ function updateWireGeometry() {
 
 function atualizarCampo() {
     campoEletrico = direcaoCampo * intensidadeCampo;
-    if (hudEfield) {
+    if (readoutEfield) {
         if (direcaoCampo === 0) {
-            hudEfield.textContent = '0.00 (Off)';
-            hudEfield.style.color = '';
+            readoutEfield.textContent = '0.00 (Off)';
+            readoutEfield.style.color = '';
         } else {
             const arrow = direcaoCampo > 0 ? '→' : '←';
-            hudEfield.textContent = `${arrow} ${intensidadeCampo.toFixed(2)}`;
-            hudEfield.style.color = 'var(--accent-hud, var(--accent-color))';
+            readoutEfield.textContent = `${arrow} ${intensidadeCampo.toFixed(2)}`;
+            readoutEfield.style.color = 'var(--accent-hud, var(--accent-color))';
         }
     }
 }
@@ -418,7 +422,7 @@ function desenharFundo() {
 }
 
 // =============================================================================
-// 5. ATUALIZAÇÃO DA FÍSICA E TELEMETRIA (HUD)
+// 5. ATUALIZAÇÃO DA FÍSICA E TELEMETRIA (.sim-readout)
 // =============================================================================
 function updateFisica(dtFactor = 1.0) {
     for (let n of nucleos) {
@@ -444,8 +448,8 @@ function updateFisica(dtFactor = 1.0) {
         colisoesContador = 0;
         ultimoTempoColisao = now;
 
-        if (hudColRate) {
-            hudColRate.textContent = `${colisoesPorSegundo} col/s`;
+        if (readoutColRate) {
+            readoutColRate.textContent = `${colisoesPorSegundo} col/s`;
         }
     }
 }
@@ -463,12 +467,15 @@ function updateHUD() {
     const vd = sumVx / eletrons.length;
     const vth = sumV / eletrons.length;
 
-    if (hudVd) {
+    if (readoutVd) {
         const sign = vd >= 0 ? '+' : '';
-        hudVd.textContent = `v_d = ${sign}${vd.toFixed(2)}`;
+        readoutVd.textContent = `v_d = ${sign}${vd.toFixed(2)}`;
     }
-    if (hudVth) {
-        hudVth.textContent = `v_th = ${vth.toFixed(2)}`;
+    if (readoutVth) {
+        readoutVth.textContent = `v_th = ${vth.toFixed(2)}`;
+    }
+    if (readoutColRate && !isRunning && colisoesPorSegundo === 0) {
+        readoutColRate.textContent = '0 col/s';
     }
     if (footerSimInfo) {
         const sign = vd >= 0 ? '+' : '';
@@ -477,17 +484,17 @@ function updateHUD() {
 }
 
 // =============================================================================
-// 6. RENDERIZAÇÃO
+// 6. RENDERIZAÇÃO DA CENA (PRESENTATION PASS)
 // =============================================================================
 function draw() {
     desenharFundo();
 
-    // 1. Desenha núcleos
+    // 1. Desenha núcleos da rede cristalina
     for (let n of nucleos) {
         n.draw(ctx);
     }
 
-    // 2. Desenha rastro do elétron traçador
+    // 2. Desenha rastro contínuo do elétron traçador
     if (showTracer && tracerTrail.length > 1) {
         ctx.lineWidth = 2;
         for (let i = 1; i < tracerTrail.length; i++) {
@@ -505,22 +512,28 @@ function draw() {
         }
     }
 
-    // 3. Desenha elétrons
+    // 3. Desenha elétrons de condução
     for (let i = 0; i < eletrons.length; i++) {
         eletrons[i].draw(ctx, showTracer && i === 0);
     }
 }
 
+const desenharCena = draw;
+
 // =============================================================================
-// 7. LOOP PRINCIPAL DE ANIMAÇÃO
+// 7. LOOP PRINCIPAL DE ANIMAÇÃO COM DESACOPLAMENTO TEMPORAL
 // =============================================================================
 function loop() {
+    requestAnimationFrame(loop);
+
+    // Pausa a execução/renderização quando a aba estiver oculta para economia de recursos
+    if (document.hidden) return;
+
     if (isRunning) {
         updateFisica(simSpeed);
     }
     updateHUD();
     draw();
-    requestAnimationFrame(loop);
 }
 
 // =============================================================================
@@ -559,12 +572,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. Renderização de fórmulas matemáticas KaTeX
     initKaTeXAutoRender();
 
-    // 3. Inicializa o Modo Foco Desktop (Recolhimento Lateral com atalho 'F')
+    // 3. Inicializa o Modal de Instruções Iniciais (Guia Rápido)
+    initOnboardingModal('#modal-onboarding', { triggerSelector: '#btn-open-onboarding' });
+
+    // 4. Inicializa o Modo Foco Desktop (Recolhimento Lateral com atalho 'F')
     initSidebarCollapse({
         layoutSelector: '.sim-layout',
         collapseBtnSelector: '#btn-collapse-sidebar',
         expandBtnSelector: '#btn-expand-sidebar',
-        onResize: resizeCanvas
+        onResize: () => {
+            resizeCanvas();
+            draw();
+        }
     });
 
     // Barra flutuante de contexto para Modo Foco
@@ -573,7 +592,7 @@ document.addEventListener('DOMContentLoaded', () => {
         scopeSelector: '.controls-panel'
     });
 
-    // 4. Inicializa o Bottom Sheet Responsivo para Mobile (<= 900px)
+    // 5. Inicializa o Bottom Sheet Responsivo para Mobile (<= 900px)
     initBottomSheet({
         panelSelector: '.controls-panel',
         handleSelector: '#sheet-drag-handle',
@@ -582,112 +601,143 @@ document.addEventListener('DOMContentLoaded', () => {
         defaultState: 'peek'
     });
 
-    // 5. Inicializa o Modal Teórico com KaTeX
+    // 6. Inicializa o Modal Teórico com KaTeX
     const theoryModal = initModal('#modal-teoria');
     document.getElementById('btn-open-theory-modal')?.addEventListener('click', () => {
         theoryModal?.open();
     });
 
-    // 6. Navegação entre Abas via Design System
+    // 7. Navegação entre Abas via Design System
     initTabs();
 
-    // 7. Controle de Play / Pause
-    const playControl = initToggleButton('#btn-play-sim', (active) => {
+    // 8. Controle de Play / Pause na Barra Flutuante de Transporte
+    playControl = initToggleButton('#btn-play-sim', (active) => {
         isRunning = active;
         if (footerStatusText) {
             footerStatusText.textContent = active ? 'Simulação Ativa' : 'Simulação Pausada';
         }
+        if (footerStatusBadge) {
+            footerStatusBadge.classList.toggle('idle', !active);
+        }
         if (headerStatusBadge) {
+            headerStatusBadge.classList.toggle('idle', !active);
             headerStatusBadge.innerHTML = active
                 ? '<span class="status-dot"></span><span>Ativo</span>'
-                : '<span class="status-dot" style="background: var(--text-muted);"></span><span>Pausado</span>';
+                : '<span class="status-dot"></span><span>Pausado</span>';
         }
     });
 
-    // 8. Botão de Avançar 1 Passo (Δt)
+    // 9. Botão de Avançar 1 Passo (Δt)
     if (btnStepSim) {
         btnStepSim.addEventListener('click', () => {
             if (isRunning && playControl) {
                 playControl.setState(0);
             }
             updateFisica(1.0);
+            updateHUD();
+            draw();
         });
     }
 
-    // 9. Botão de Reset
+    // 10. Botão de Reset
     if (btnResetSim) {
         btnResetSim.addEventListener('click', () => {
             inicializarEletrons();
+            colisoesContador = 0;
+            colisoesPorSegundo = 0;
+            updateHUD();
+            draw();
         });
     }
 
-    // 10. Seletor de Velocidade Temporal
-    speedPills.forEach(btn => {
-        btn.addEventListener('click', () => {
-            speedPills.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            simSpeed = parseFloat(btn.dataset.speed || '1.0');
+    // 11. Botão Cíclico de Velocidade na Barra Flutuante de Transporte [0.5, 1.0, 2.0, 5.0]×
+    if (btnSpeedCycle) {
+        btnSpeedCycle.addEventListener('click', () => {
+            const currentIdx = speedCycleSteps.indexOf(simSpeed);
+            const nextSpeed = speedCycleSteps[(currentIdx + 1) % speedCycleSteps.length];
+            simSpeed = nextSpeed;
+            btnSpeedCycle.dataset.speed = nextSpeed.toFixed(1);
+            btnSpeedCycle.textContent = `${nextSpeed.toFixed(1)}×`;
         });
-    });
+    }
 
-    // 11. Controle Segmentado de Sentido do Campo Elétrico
+    // 12. Controle Segmentado de Sentido do Campo Elétrico
     dirCampoBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             dirCampoBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             direcaoCampo = parseInt(btn.getAttribute('data-dir'), 10);
             atualizarCampo();
+            draw();
         });
     });
 
-    // 12. Dual Slider: Intensidade do Campo Elétrico
+    // 13. Dual Slider: Intensidade do Campo Elétrico
     syncDualSlider('#slider-intensidade', '#numIntensidade', (val) => {
         intensidadeCampo = val;
         atualizarCampo();
+        draw();
     });
 
-    // 13. Dual Slider: Temperatura (Agitação Térmica)
+    // 14. Dual Slider: Temperatura (Agitação Térmica)
     syncDualSlider('#slider-temperatura', '#numTemperatura', (val) => {
         temperatura = val;
+        draw();
     });
 
-    // 14. Dual Slider: Quantidade de Elétrons
+    // 15. Dual Slider: Quantidade de Elétrons
     syncDualSlider('#slider-eletrons', '#numEletronsInput', (val) => {
         numEletrons = Math.round(val);
         ajustarQuantidadeEletrons();
+        updateHUD();
+        draw();
     });
 
-    // 15. Seletor de Tipo de Rede Cristalina
+    // 16. Seletor de Tipo de Rede Cristalina
     if (selectRede) {
         selectRede.addEventListener('change', (e) => {
             tipoRede = e.target.value;
             gerarRede();
+            draw();
         });
     }
 
-    // 16. Botão Zerar Velocidades
+    // 17. Botão Zerar Velocidades Térmicas
     if (btnZerar) {
-        btnZerar.addEventListener('click', zerarVelocidades);
+        btnZerar.addEventListener('click', () => {
+            zerarVelocidades();
+            updateHUD();
+            draw();
+        });
     }
 
-    // 17. Botão Alternar Elétron Traçador
+    // 18. Botão Alternar Elétron Traçador
     if (btnToggleTracer) {
         btnToggleTracer.addEventListener('click', () => {
             showTracer = !showTracer;
             btnToggleTracer.classList.toggle('active', showTracer);
             tracerTrail = [];
+            draw();
         });
     }
 
-    // 18. Redimensionamento Dinâmico Reativo
-    window.addEventListener('resize', resizeCanvas);
-    if (window.ResizeObserver && canvas.parentElement) {
-        new ResizeObserver(() => resizeCanvas()).observe(canvas.parentElement);
+    // 19. Redimensionamento Dinâmico Reativo
+    window.addEventListener('resize', () => {
+        resizeCanvas();
+        draw();
+    });
+    if (window.ResizeObserver && canvas && canvas.parentElement) {
+        new ResizeObserver(() => {
+            resizeCanvas();
+            draw();
+        }).observe(canvas.parentElement);
     }
 
-    // 19. Inicialização e Início do Loop
+    // 20. Inicialização e Início do Loop
     resizeCanvas();
     inicializarEletrons();
     atualizarCampo();
+    updateHUD();
+    draw();
     requestAnimationFrame(loop);
-});
+});

@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movimento Planetário & Gravitação Universal 3D - Plataforma Científica</title>
+    <title>Movimento Planetário & Gravitação (Newton e Relatividade Geral) 3D - Plataforma Científica</title>
     
     <meta name="description"
-        content="Simulação 3D de mecânica orbital e gravitação universal de Newton. Acompanhe vetores de posição e velocidade e telemetria de conservação de energia em tempo real.">
+        content="Simulação 3D de mecânica orbital, gravitação universal de Newton e correção relativística de Schwarzschild. Acompanhe vetores físicos e telemetria de conservação de energia em tempo real.">
     <meta name="keywords"
-        content="gravitação 3D, órbitas keplerianas, leis de kepler, mecânica celeste, conservação de energia, telemetria orbital">
+        content="gravitação 3D, órbitas keplerianas, leis de kepler, mecânica celeste, conservação de energia, relatividade geral, precessão de schwarzschild, telemetria orbital">
     <meta name="author" content="Nicolas Heringer">
 
     <!-- Favicon e Design System CSS -->
@@ -28,7 +28,7 @@
             <img src="../assets/icons/arrow-left.svg" class="icon-svg" alt="Voltar">
             Voltar ao Hub
         </a>
-        <h1 class="sim-title">Movimento Planetário (Gravitação 3D)</h1>
+        <h1 class="sim-title">Movimento Planetário & Gravitação (Newton e Relatividade Geral)</h1>
     </header>
 
     <!-- Layout Grid Principal -->
@@ -37,11 +37,17 @@
         <div class="canvas-area">
             <canvas id="simulationCanvas"></canvas>
 
-            <!-- Menu Flutuante de Modo Foco Espelhado -->
-            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            <!-- Pilha Vertical no Canto Superior Esquerdo -->
+            <div class="canvas-top-left-stack">
+                <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            </div>
 
             <!-- Ações Flutuantes do Topo Direito -->
             <div class="canvas-top-actions">
+                <button id="btn-open-onboarding" class="canvas-btn-floating" title="Instruções e Guia Rápido">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span class="btn-label-text">Instruções</span>
+                </button>
                 <button id="btn-reset-view" class="canvas-btn-floating" title="Resetar Câmera 3D">
                     <img src="../assets/icons/camera-reset.svg" class="icon-svg" alt="Reset Câmera">
                     <span class="btn-label-text">Reset Visão</span>
@@ -52,29 +58,24 @@
                 </button>
             </div>
 
-            <!-- HUD de Telemetria no Canto Inferior Esquerdo -->
-            <div class="sim-hud" id="sim-hud">
-                <div class="hud-item">
-                    <span class="hud-label">Raio Orbital $r$</span>
-                    <span class="hud-value" id="hud-raio">--- u</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Velocidade $v$</span>
-                    <span class="hud-value" id="hud-velocidade">--- u/s</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Energia Total $E$</span>
-                    <span class="hud-value" id="hud-energia-total">--- J</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Excentricidade $e$</span>
-                    <span class="hud-value" id="hud-excentricidade">---</span>
-                </div>
-            </div>
-
-            <!-- Dica de Interação 3D -->
-            <div class="canvas-interaction-hint">
-                <span>Arraste para orbitar a câmera 3D • Roda do mouse ou pinch para zoom</span>
+            <!-- Barra Flutuante de Transporte (#canvas-transport-toolbar) -->
+            <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
+                <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
+                        data-state="0" data-text-idle="Executar" data-text-active="Pausar"
+                        data-icon-idle="play" data-icon-active="pause" title="Executar / Pausar Órbita">
+                    <img src="../assets/icons/play.svg" class="icon-svg" alt="Executar">
+                    <span class="btn-text">Executar</span>
+                </button>
+                <button class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
+                    <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
+                </button>
+                <button class="toolbar-btn" id="btn-reset-sim" title="Reiniciar Órbita (t = 0)">
+                    <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
+                </button>
+                <span class="toolbar-divider"></span>
+                <button class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
+                    1.0×
+                </button>
             </div>
         </div>
 
@@ -102,24 +103,6 @@
 
             <!-- Centro: Corpo Rolável de Conteúdo -->
             <div class="panel-body">
-                <!-- Barra de Transporte Temporal -->
-                <div class="sim-transport-bar">
-                    <button id="btn-toggle-sim" class="transport-btn transport-btn-play" title="Iniciar / Pausar"
-                        data-focus-control="toggle" data-focus-order="1" data-icon-idle="play" data-icon-active="pause">
-                        <img src="../assets/icons/play.svg" class="icon-svg" alt="Play/Pause">
-                    </button>
-                    <button id="btn-reset-sim" class="transport-btn" title="Reiniciar Órbita"
-                        data-focus-control="action" data-focus-order="2" data-focus-icon="refresh">
-                        <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reiniciar">
-                    </button>
-                    <div class="transport-time" id="footer-sim-timer">t = 0.00s</div>
-                    <div class="transport-speed-pills" id="sim-speed-pills">
-                        <button class="speed-btn" data-speed="0.5">0.5×</button>
-                        <button class="speed-btn active" data-speed="1.0">1.0×</button>
-                        <button class="speed-btn" data-speed="2.0">2.0×</button>
-                    </div>
-                </div>
-
                 <!-- CONTEÚDO DA ABA 1: PARÂMETROS E TELEMETRIA -->
                 <div class="tab-pane active" id="panel-tab-params">
                     <!-- Seção de Presets de Órbita -->
@@ -133,11 +116,38 @@
                         </div>
                     </div>
 
+                    <!-- Card de Telemetria Orbital Instantânea (.sim-readout) -->
+                    <div class="control-section">
+                        <span class="control-label">Telemetria Orbital Instantânea:</span>
+                        <div class="sim-readout">
+                            <div class="sim-readout-title">
+                                <img src="../assets/icons/gauge.svg" class="icon-svg icon-accent" alt="Telemetria">
+                                <span>Diagnóstico do Sistema Central</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Raio Orbital ($r$):</span>
+                                <span class="sim-readout-value tone-cyan" id="readout-raio">200.0 u</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Velocidade ($v$):</span>
+                                <span class="sim-readout-value tone-rose" id="readout-velocidade">2.24 u/s</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Energia Mecânica ($E$):</span>
+                                <span class="sim-readout-value tone-accent" id="readout-energia-total">-2.5 J</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Excentricidade ($e$):</span>
+                                <span class="sim-readout-value tone-emerald" id="readout-excentricidade">0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Sliders Numéricos de Gravidade -->
                     <div class="control-section">
                         <span class="control-label">Parâmetros Gravitacionais e Iniciais:</span>
 
-                        <div class="slider-container sim-dual-slider">
+                        <div class="slider-container sim-dual-slider" data-focus-control="slider" data-focus-label="Sol" data-focus-order="1">
                             <div class="slider-header">
                                 <label for="slider-massa-sol" class="slider-label">Massa do Sol ($M$):</label>
                                 <div class="dual-input-wrapper">
@@ -170,7 +180,7 @@
                             <input type="range" id="slider-distancia" class="sim-slider" min="80" max="400" step="5" value="200">
                         </div>
 
-                        <div class="slider-container sim-dual-slider">
+                        <div class="slider-container sim-dual-slider" data-focus-control="slider" data-focus-label="Velocidade" data-focus-order="2">
                             <div class="slider-header">
                                 <label for="slider-velocidade" class="slider-label">Velocidade Inicial ($v_0$):</label>
                                 <div class="dual-input-wrapper">
@@ -182,9 +192,9 @@
                         </div>
                     </div>
 
-                    <!-- Filtros Visuais de Vetores -->
+                    <!-- Filtros Visuais de Vetores e Efeitos -->
                     <div class="control-section">
-                        <span class="control-label">Camadas e Vetores Físicos:</span>
+                        <span class="control-label">Camadas, Vetores e Relatividade:</span>
                         <div class="switch-container">
                             <span class="switch-label">Vetor Posição $\vec{r}$ (Verde)</span>
                             <label class="sim-switch">
@@ -210,6 +220,13 @@
                             <span class="switch-label">Plano Eclíptico & Eixos 3D</span>
                             <label class="sim-switch">
                                 <input type="checkbox" id="show-grid-3d" checked>
+                                <span class="slider-round"></span>
+                            </label>
+                        </div>
+                        <div class="switch-container">
+                            <span class="switch-label">Correção Relativística (Schwarzschild)</span>
+                            <label class="sim-switch">
+                                <input type="checkbox" id="toggle-relativity">
                                 <span class="slider-round"></span>
                             </label>
                         </div>
@@ -283,16 +300,96 @@
                         <div class="katex-display">
                             $$v_{\text{circ}} = \sqrt{\frac{G M}{r}}, \quad v_{\text{esc}} = \sqrt{\frac{2 G M}{r}} = \sqrt{2} \cdot v_{\text{circ}}$$
                         </div>
+
+                        <h4>Correção Relativística & Precessão de Schwarzschild</h4>
+                        <p>
+                            Na <strong>Relatividade Geral de Einstein</strong>, o espaço-tempo em torno de uma massa esférica é descrito pela métrica de Schwarzschild. O potencial efetivo adquire um termo corretivo atrativo de ordem $1/r^3$:
+                        </p>
+                        <div class="katex-display">
+                            $$V_{\text{eff}}(r) = -\frac{G M}{r} + \frac{L^2}{2 m^2 r^2} - \frac{G M L^2}{c^2 m^2 r^3}$$
+                        </div>
+                        <p>
+                            Esse termo quebra a conservação estrita do vetor de Laplace-Runge-Lenz, provocando o avanço anômalo do periélio (precessão orbital) a cada revolução completa:
+                        </p>
+                        <div class="katex-display">
+                            $$\Delta \phi \approx \frac{6 \pi G M}{c^2 a (1 - e^2)} \quad \text{rad/órbita}$$
+                        </div>
                     </div>
                 </div>
+            </div>
 
             <!-- Rodapé Fixo do Painel -->
             <div class="panel-footer">
-                <span class="footer-meta">Órbitas: Velocity Verlet</span>
-                <span class="footer-meta">Foco: [F]</span>
+                <div class="sim-badge idle" id="footer-status-badge">
+                    <span class="status-dot"></span>
+                    <span id="footer-status-text">Pausado</span>
+                </div>
+                <span class="footer-meta" id="footer-sim-timer" data-focus-control="badge" data-focus-order="10" data-focus-tab="global">t = 0.00s</span>
             </div>
         </aside>
     </main>
+
+    <!-- ============================================================= -->
+    <!-- MODAL DE INSTRUÇÕES INICIAIS / GUIA RÁPIDO (.modal-onboarding) -->
+    <!-- ============================================================= -->
+    <div id="modal-onboarding" class="sim-modal-overlay modal-onboarding hidden" aria-hidden="true" role="dialog">
+        <div class="sim-modal-container">
+            <div class="sim-modal-header">
+                <div class="sim-modal-title">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span>Órbitas Gravitacionais & Mecânica Celeste — Guia Rápido</span>
+                </div>
+                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+            </div>
+            <div class="sim-modal-body">
+                <p class="onboarding-intro">
+                    Explore a dinâmica orbital em 3D, a conservação de grandezas físicas fundamentais e os regimes gravitacionais clássicos e relativísticos.
+                </p>
+                <div class="onboarding-grid">
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
+                            <span>1. Gravitação & Leis de Kepler</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            O campo central Newtoniano $\vec{F}_g = -G\frac{Mm}{r^2}\hat{r}$ preserva o momento angular e restringe a órbita a um plano bidimensional invariante, com o Sol em um dos focos.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/orbital.svg" class="icon-svg" alt="">
+                            <span>2. Tipos de Órbita & Excentricidade</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Experimente os regimes cônicos: circular ($e = 0$), elíptica ($0 < e < 1$), inclinada 3D e velocidade de escape parabólica ($e = 1$), calculados dinamicamente via vetor de Laplace-Runge-Lenz.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="">
+                            <span>3. Conservação de Energia ($K, U, E$)</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Acompanhe no gráfico multissérie a troca contínua entre energia cinética ($K$) e potencial ($U$). O integrador simplético Velocity Verlet preserva estritamente a energia mecânica total ($E = K + U$).
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="">
+                            <span>4. Correção Relativística (Schwarzschild)</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Em campos gravitacionais intensos da Relatividade Geral, o potencial efetivo recebe uma correção proporcional a $-GML^2 / (c^2 r^3)$, quebrando a simetria clássica e gerando a precessão do periélio.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="sim-modal-footer">
+                <span class="sim-modal-hint">Clique fora ou pressione <kbd>Esc</kbd> para iniciar</span>
+                <button class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Script Modular da Simulação -->
     <script type="module" src="scripts/gravidade.js"></script>

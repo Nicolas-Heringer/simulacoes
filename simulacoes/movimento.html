@@ -44,11 +44,17 @@
         <div class="canvas-area">
             <canvas id="simCanvas"></canvas>
 
-            <!-- Barra de Ferramentas Espelhada do Modo Foco -->
-            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            <!-- Pilha Vertical no Canto Superior Esquerdo -->
+            <div class="canvas-top-left-stack">
+                <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            </div>
 
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
+                <button id="btn-open-onboarding" class="canvas-btn-floating" title="Instruções e Guia Rápido">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span class="btn-label-text">Instruções</span>
+                </button>
                 <button id="btn-toggle-view" class="canvas-btn-floating"
                     title="Alternar entre Pista 1D e Gráfico Espaço-Tempo">
                     <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Gráfico">
@@ -76,11 +82,24 @@
                 </button>
             </div>
 
-            <!-- Dica Interativa Flutuante -->
-            <div class="interactive-hint" id="canvasHint">
-                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dica">
-                <span id="canvasHintText">Arraste a esfera ao longo da reta ou inicie o tempo para ver o movimento e os
-                    vetores.</span>
+            <!-- Barra Flutuante de Transporte (#canvas-transport-toolbar) -->
+            <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
+                <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
+                        data-state="0" data-text-idle="Executar" data-text-active="Pausar"
+                        data-icon-idle="play" data-icon-active="pause" title="Executar / Pausar">
+                    <img src="../assets/icons/play.svg" class="icon-svg" alt="Executar">
+                    <span class="btn-text">Executar</span>
+                </button>
+                <button class="toolbar-btn" id="btn-step-sim" title="Avançar 0.1s (Δt)">
+                    <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
+                </button>
+                <button class="toolbar-btn" id="btn-reset-sim" title="Reiniciar (t = 0)">
+                    <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
+                </button>
+                <span class="toolbar-divider"></span>
+                <button class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
+                    1.0×
+                </button>
             </div>
         </div>
 
@@ -117,39 +136,6 @@
 
             <!-- Centro: Corpo Rolável de Conteúdo -->
             <div class="panel-body">
-
-                <!-- Barra de Reprodução Físico-Temporal Universal -->
-                <div class="sim-transport-bar" id="sim-transport-bar">
-                    <div class="transport-controls-row">
-                        <button class="btn-primary btn-toggle transport-btn-play" id="btn-play-sim" data-state="0"
-                            data-text-idle="Iniciar Tempo" data-text-active="Pausar Tempo" data-icon-idle="play"
-                            data-icon-active="pause" data-focus-control="toggle" data-focus-order="1">
-                            <img src="../assets/icons/play.svg" class="icon-svg" alt="Play">
-                            <span class="btn-text">Iniciar Tempo</span>
-                        </button>
-                        <button class="btn-icon" id="btn-step-sim" title="Avançar 0.1s (Δt)"
-                            data-focus-control="action" data-focus-order="2" data-focus-icon="step">
-                            <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
-                        </button>
-                        <button class="btn-icon" id="btn-reset-sim" title="Reiniciar (t = 0)"
-                            data-focus-control="action" data-focus-order="3" data-focus-icon="refresh">
-                            <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
-                        </button>
-                    </div>
-
-                    <div class="transport-speed-row">
-                        <span class="transport-speed-label">
-                            <img src="../assets/icons/rotate.svg" class="icon-svg" style="width: 14px; height: 14px;"
-                                alt="Velocidade">
-                            Velocidade:
-                        </span>
-                        <div class="transport-speed-pills" id="sim-speed-pills">
-                            <button class="speed-btn" data-speed="0.5">0.5×</button>
-                            <button class="speed-btn active" data-speed="1.0">1.0×</button>
-                            <button class="speed-btn" data-speed="2.0">2.0×</button>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Controle de Histórico Temporal (Modo Gráfico 2D) -->
                 <div class="control-group" id="groupScrubber" style="display: none;">
@@ -531,6 +517,68 @@
             <div class="sim-modal-footer">
                 <span class="sim-modal-hint">Pressione <kbd>Esc</kbd> para fechar</span>
                 <button class="btn-primary" data-modal-close style="min-width: 100px;">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- MODAL DE INSTRUÇÕES INICIAIS / GUIA RÁPIDO (.modal-onboarding) -->
+    <!-- ============================================================= -->
+    <div id="modal-onboarding" class="sim-modal-overlay modal-onboarding hidden" aria-hidden="true" role="dialog">
+        <div class="sim-modal-container">
+            <div class="sim-modal-header">
+                <div class="sim-modal-title">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span>Funções Horárias & Cinemática Escalar — Guia Rápido</span>
+                </div>
+                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+            </div>
+            <div class="sim-modal-body">
+                <p class="onboarding-intro">
+                    Explore visualmente as funções horárias $s(t)$, alternando entre o movimento na reta orientada 1D e a construção analítica dos gráficos espaço-tempo.
+                </p>
+                <div class="onboarding-grid">
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/particle-moving.svg" class="icon-svg" alt="MRU">
+                            <span>1. Movimento Uniforme (MRU)</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Velocidade escalar constante ($a = 0$). A posição varia de forma linear segundo $s(t) = s_0 + vt$, gerando retas nos gráficos e marcas estroboscópicas com espaçamento equidistante a cada 1s.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="MRUV">
+                            <span>2. Movimento Variado (MRUV)</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Aceleração escalar constante ($a \neq 0$) e velocidade linear $v(t) = v_0 + at$. A trajetória no espaço-tempo é uma parábola $s(t) = s_0 + v_0 t + \frac{1}{2}at^2$, com espaçamento estroboscópico variável.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Transição">
+                            <span>3. Transição Pista 1D ↔ Gráfico 2D</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Alterne para o gráfico bidimensional para desdobrar a evolução no tempo. Use o botão de rotação para alternar os eixos (t no X ou no Y) e navegue com scroll (zoom) e arraste (pan).
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="Gráficos">
+                            <span>4. Gráficos & Encontro de Móveis</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Inspecione grandezas instantâneas ($s$, $v$, $a$) deslizando o scrubber temporal. No modo de 2 corpos, identifique visual e algebricamente o ponto onde $s_A(t) = s_B(t)$.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="sim-modal-footer">
+                <span class="sim-modal-hint">Clique fora ou pressione <kbd>Esc</kbd> para fechar</span>
+                <button class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
             </div>
         </div>
     </div>

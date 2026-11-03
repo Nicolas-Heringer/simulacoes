@@ -41,11 +41,19 @@
 
         <!-- 1. Área do Canvas Interativo 2D -->
         <div class="canvas-area">
-            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
             <canvas id="myCanvas"></canvas>
+
+            <!-- Pilha Vertical no Canto Superior Esquerdo -->
+            <div class="canvas-top-left-stack">
+                <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            </div>
 
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
+                <button id="btn-open-onboarding" class="canvas-btn-floating" title="Instruções e Guia Rápido">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span class="btn-label-text">Instruções</span>
+                </button>
                 <button id="btn-quick-reset" class="canvas-btn-floating" title="Reiniciar sistema de partículas">
                     <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                     <span class="btn-label-text">Reiniciar</span>
@@ -56,30 +64,24 @@
                 </button>
             </div>
 
-            <!-- HUD de Telemetria e Diagnóstico no Canvas -->
-            <div class="sim-hud" id="sim-hud">
-                <div class="hud-item">
-                    <span class="hud-label">Partículas ($N$):</span>
-                    <span class="hud-val" id="hud-particles-count" style="color: var(--accent-hud, var(--accent-color));">0</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Ondas Ativas:</span>
-                    <span class="hud-val" id="hud-waves-count" style="color: var(--color-cyan, #38bdf8);">0</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Energia Cinética ($K$):</span>
-                    <span class="hud-val" id="hud-kinetic-energy" style="color: var(--color-emerald, #22c55e);">0.00 J</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Temperatura ($T$):</span>
-                    <span class="hud-val" id="hud-temperature" style="color: var(--color-yellow, #facc15);">0.000</span>
-                </div>
-            </div>
-
-            <!-- Dica Interativa Flutuante -->
-            <div class="interactive-hint">
-                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dica">
-                Selecione um preset abaixo para carregar as partículas e clique em <strong>Executar</strong> para iniciar a dinâmica temporal.
+            <!-- Barra Flutuante de Transporte (#canvas-transport-toolbar) -->
+            <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
+                <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
+                        data-state="0" data-text-idle="Executar" data-text-active="Pausar"
+                        data-icon-idle="play" data-icon-active="pause" title="Executar / Pausar">
+                    <img src="../assets/icons/play.svg" class="icon-svg" alt="Executar">
+                    <span class="btn-text">Executar</span>
+                </button>
+                <button class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
+                    <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
+                </button>
+                <button class="toolbar-btn" id="btn-reset-sim" title="Reiniciar Sistema (t = 0)">
+                    <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
+                </button>
+                <span class="toolbar-divider"></span>
+                <button class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
+                    1.0×
+                </button>
             </div>
         </div>
 
@@ -124,41 +126,6 @@
                             </div>
                         </div>
                         <p class="tab-subtitle">Simulação de partículas com propagação causal retardada na velocidade $c$.</p>
-                    </div>
-
-                    <!-- 1. Barra de Reprodução Físico-Temporal -->
-                    <div class="sim-transport-bar">
-                        <div class="transport-controls-row">
-                            <button class="btn-primary btn-toggle transport-btn-play" id="btn-play-sim"
-                                    data-focus-control="toggle"
-                                    data-state="0"
-                                    data-text-idle="Executar"
-                                    data-text-active="Pausar"
-                                    data-icon-idle="play"
-                                    data-icon-active="pause">
-                                <img src="../assets/icons/play.svg" class="icon-svg" alt="Executar">
-                                <span class="btn-text">Executar</span>
-                            </button>
-                            <button class="btn-icon" id="btn-step-sim" data-focus-control="action" title="Avançar 1 Passo Temporal (Δt)">
-                                <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
-                            </button>
-                            <button class="btn-icon" id="btn-reset-sim" data-focus-control="action" title="Limpar Tela / Reiniciar (t = 0)">
-                                <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
-                            </button>
-                        </div>
-
-                        <div class="transport-speed-row">
-                            <span class="transport-speed-label">
-                                <img src="../assets/icons/rotate.svg" class="icon-svg" style="width: 14px; height: 14px;" alt="Velocidade">
-                                Velocidade:
-                            </span>
-                            <div class="transport-speed-pills" id="sim-speed-pills">
-                                <button class="speed-btn" data-speed="0.5">0.5×</button>
-                                <button class="speed-btn active" data-speed="1.0">1.0×</button>
-                                <button class="speed-btn" data-speed="2.0">2.0×</button>
-                                <button class="speed-btn" data-speed="5.0">5.0×</button>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="sim-divider-label"><span>Seletores de Presets</span></div>
@@ -310,7 +277,7 @@
                             </div>
                             <div class="plot-canvas-wrapper">
                                 <canvas class="sim-plot-canvas" id="canvas-plot-k"></canvas>
-                                <span class="plot-axis-label plot-axis-max" id="axis-k-max">+10.0</span>
+                                <span class="plot-axis-label plot-axis-max" id="axis-k-max">+20.0</span>
                                 <span class="plot-axis-label plot-axis-min">0.0</span>
                             </div>
                         </div>
@@ -331,7 +298,7 @@
                             </div>
                             <div class="plot-canvas-wrapper">
                                 <canvas class="sim-plot-canvas" id="canvas-plot-t"></canvas>
-                                <span class="plot-axis-label plot-axis-max" id="axis-t-max">+1.0</span>
+                                <span class="plot-axis-label plot-axis-max" id="axis-t-max">+2.0</span>
                                 <span class="plot-axis-label plot-axis-min">0.0</span>
                             </div>
                         </div>
@@ -421,7 +388,7 @@
 
             <!-- Base: Rodapé Fixo de Telemetria -->
             <div class="panel-footer">
-                <div class="sim-badge" id="footer-status-badge">
+                <div class="sim-badge idle" id="footer-status-badge">
                     <span class="status-dot"></span>
                     <span id="footer-status-text">Aguardando Preset</span>
                 </div>
@@ -493,6 +460,66 @@
             <div class="sim-modal-footer">
                 <span class="sim-modal-hint">Pressione <kbd>Esc</kbd> para fechar</span>
                 <button class="btn-primary" data-modal-close style="min-width: 100px;">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Instruções Iniciais / Guia Rápido -->
+    <div id="modal-onboarding" class="sim-modal-overlay modal-onboarding hidden" aria-hidden="true" role="dialog">
+        <div class="sim-modal-container">
+            <div class="sim-modal-header">
+                <div class="sim-modal-title">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span>Dinâmica Molecular & Campos Retardados — Guia Rápido</span>
+                </div>
+                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+            </div>
+            <div class="sim-modal-body">
+                <p class="onboarding-intro">
+                    Simule a dinâmica de partículas interagindo através de frentes de onda esféricas causais propagando-se na velocidade $c$, com potenciais interatômicos e controle termodinâmico.
+                </p>
+                <div class="onboarding-grid">
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="Ondas">
+                            <span>1. Propagação de Ondas na Velocidade $c$</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            A força entre partículas não é instantânea. Cada crista de onda esférica propaga-se a uma velocidade $c$, aplicando a interação retardada somente ao interceptar a posição física de outra partícula (Função de Green d'Alembertiana).
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="Potenciais">
+                            <span>2. Potencial Interatômico & Colisões</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Alterne entre interação coulombiana com cargas alternadas ($\pm q$), potencial de Lennard-Jones (12-6) e modelos de atração/repulsão pura. Partículas colidem elasticamente com as paredes do domínio.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/thermometer.svg" class="icon-svg" alt="Temperatura">
+                            <span>3. Temperatura & Equipartição</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Pelo teorema da equipartição em 2D ($K = N k_B T$), a energia cinética média define a temperatura instantânea. O termostato com taxa de atenuação $\gamma$ reescala velocidades para convergir à temperatura alvo.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/particle-grid.svg" class="icon-svg" alt="Presets">
+                            <span>4. Presets de Redes e Gás 2D</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Carregue cristais de $\text{NaCl}$ (64 íons), grades periódicas, anéis circulares ou sistemas simples de 1 a 3 corpos. Interaja diretamente clicando e arrastando sobre o canvas para aplicar impulsos mecânicos.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="sim-modal-footer">
+                <span class="sim-modal-hint">Clique fora ou pressione <kbd>Esc</kbd> para fechar</span>
+                <button class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
             </div>
         </div>
     </div>

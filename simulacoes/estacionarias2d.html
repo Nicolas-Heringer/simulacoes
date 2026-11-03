@@ -45,6 +45,10 @@
 
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
+                <button id="btn-open-onboarding" class="canvas-btn-floating" title="Instruções e Guia Rápido">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span class="btn-label-text">Instruções</span>
+                </button>
                 <button id="btn-export-png" class="canvas-btn-floating" title="Salvar Padrão como Imagem PNG">
                     <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="Exportar">
                     <span class="btn-label-text">Exportar PNG</span>
@@ -55,8 +59,10 @@
                 </button>
             </div>
 
-            <!-- Barra Flutuante de Contexto para Modo Foco -->
-            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            <!-- Barra Flutuante de Contexto para Modo Foco agrupada em .canvas-top-left-stack -->
+            <div class="canvas-top-left-stack">
+                <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            </div>
 
             <!-- HUD de Telemetria e Inspeção sob o Cursor -->
             <div class="sim-hud" id="sim-hud">
@@ -76,12 +82,6 @@
                     <span class="hud-label">Amplitude $\psi$:</span>
                     <span class="hud-val" id="hud-amplitude">ψ = 0.00</span>
                 </div>
-            </div>
-
-            <!-- Dica Interativa Flutuante -->
-            <div class="interactive-hint">
-                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dica">
-                Passe o cursor sobre a placa para ler a amplitude local $\psi(x, y)$ ou experimente os modos e presets.
             </div>
         </div>
 
@@ -141,7 +141,7 @@
 
                     <!-- Slider Sincronizado: Modo m -->
                     <div class="control-group">
-                        <div class="slider-container sim-dual-slider">
+                        <div class="slider-container sim-dual-slider" data-focus-control="slider" data-focus-label="m">
                             <div class="slider-header">
                                 <label for="slider-m" class="slider-label">Modo Vertical ($m$)</label>
                                 <div class="dual-input-wrapper">
@@ -159,7 +159,7 @@
                     <!-- Seletor de Tipo de Desenho -->
                     <div class="control-group">
                         <label for="drawType">Tipo de Desenho:</label>
-                        <select id="drawType" class="sim-control">
+                        <select id="drawType" class="sim-control" data-focus-control="select" data-focus-label="Desenho">
                             <option value="mapped">Escala de cinza (Amplitude Contínua)</option>
                             <option value="abs">Nós das ondas (Linhas de Chladni)</option>
                             <option value="positiveAndNegative">Positivo e negativo (Fases Opostas)</option>
@@ -352,6 +352,60 @@
             <div class="sim-modal-footer">
                 <span class="sim-modal-hint">Pressione <kbd>Esc</kbd> para fechar</span>
                 <button class="btn-primary" data-modal-close style="min-width: 100px;">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- MODAL DE INSTRUÇÕES INICIAIS / GUIA RÁPIDO (.modal-onboarding) -->
+    <!-- ============================================================= -->
+    <div id="modal-onboarding" class="sim-modal-overlay modal-onboarding hidden" aria-hidden="true" role="dialog">
+        <div class="sim-modal-container">
+            <div class="sim-modal-header">
+                <div class="sim-modal-title">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span>Padrões de Chladni em 2D — Guia Rápido</span>
+                </div>
+                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+            </div>
+            <div class="sim-modal-body">
+                <p class="onboarding-intro">
+                    Explore a física das <strong>ondas estacionárias bidimensionais</strong> e a geometria das figuras de Ernst Chladni formadas pela superposição antissimétrica de autofunções normais em superfícies quadradas com bordas livres.
+                </p>
+                <div class="onboarding-grid">
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/chladni-plate.svg" class="icon-svg" alt="">
+                            <span>1. Modos Harmônicos $(n, m)$</span>
+                        </div>
+                        <p class="onboarding-card-text">Ajuste os números quânticos modais $n$ e $m$ nos controles ou escolha presets clássicos para variar a frequência própria relativa $f/f_0 = \sqrt{n^2 + m^2}$.</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="">
+                            <span>2. Linhas Nodais de Chladni</span>
+                        </div>
+                        <p class="onboarding-card-text">No modo <em>Nós das ondas</em>, observe em preto as linhas com $\psi = 0$, onde partículas de areia repousam por ausência de aceleração vertical.</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/sliders.svg" class="icon-svg" alt="">
+                            <span>3. Paletas & Resolução</span>
+                        </div>
+                        <p class="onboarding-card-text">Alterne entre amplitude contínua em escala de cinza, fases opostas ou mapeamento cromático, além de regular a malha de cálculo (2 a 6 px).</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/mouse-left.svg" class="icon-svg" alt="">
+                            <span>4. Inspeção sob o Cursor</span>
+                        </div>
+                        <p class="onboarding-card-text">Passe o cursor ou toque na placa para inspecionar no HUD a posição $(x, y)$ normalizada e o valor pontual da amplitude $\psi(x, y)$. Use <em>Exportar PNG</em> para salvar a figura.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="sim-modal-footer">
+                <span class="sim-modal-hint">Clique fora ou pressione <kbd>Esc</kbd> para fechar</span>
+                <button class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
             </div>
         </div>
     </div>

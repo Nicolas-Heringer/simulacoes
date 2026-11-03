@@ -38,11 +38,17 @@
     <main class="sim-layout">
         <!-- Área de Visualização (Canvas Principal em Destaque + Miniatura PIP Alternável) -->
         <div class="canvas-area">
-            <!-- Barra Flutuante em Modo Foco (Design System 2.0 Mirror) -->
-            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            <!-- Pilha Vertical no Canto Superior Esquerdo (Barra de Modo Foco) -->
+            <div class="canvas-top-left-stack">
+                <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            </div>
 
-            <!-- Ações do Topo Direito (Modo Foco) -->
+            <!-- Ações do Topo Direito (Modo Foco e Ajuda) -->
             <div class="canvas-top-actions">
+                <button id="btn-open-onboarding" class="canvas-btn-floating" title="Instruções e Guia Rápido">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span class="btn-label-text">Instruções</span>
+                </button>
                 <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
@@ -234,6 +240,60 @@
             </div>
         </aside>
     </main>
+
+    <!-- ============================================================= -->
+    <!-- MODAL DE INSTRUÇÕES INICIAIS / GUIA RÁPIDO (.modal-onboarding) -->
+    <!-- ============================================================= -->
+    <div id="modal-onboarding" class="sim-modal-overlay modal-onboarding hidden" aria-hidden="true" role="dialog">
+        <div class="sim-modal-container">
+            <div class="sim-modal-header">
+                <div class="sim-modal-title">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span>Laboratório de Áudio & Análise Espectral — Guia Rápido</span>
+                </div>
+                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+            </div>
+            <div class="sim-modal-body">
+                <p class="onboarding-intro">
+                    Explore a física acústica e o processamento de sinais sonoros em tempo real através da <strong>Web Audio API</strong>, decompondo sinais acústicos em suas componentes espectrais harmônicas.
+                </p>
+                <div class="onboarding-grid">
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="">
+                            <span>1. Domínio do Tempo & Osciloscópio</span>
+                        </div>
+                        <p class="onboarding-card-text">Visualize a forma de onda $x(t)$ em tempo real. O algoritmo de <strong>Trigger por Passagem por Zero</strong> (<em>zero-crossing</em>) sincroniza a amostragem contínua, estabilizando ondas periódicas na tela para medição precisa de período e amplitude.</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/fft-bars.svg" class="icon-svg" alt="">
+                            <span>2. Domínio da Frequência & Transformada de Fourier</span>
+                        </div>
+                        <p class="onboarding-card-text">A <strong>Transformada Rápida de Fourier (FFT)</strong> calcula o espectro de magnitudes $|X(f)|$ de 20 Hz a 20 kHz. Identifique a fundamental, séries de sobretons harmônicos e a intensidade sonora em dBFS nas escalas logarítmica ou linear.</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/sliders.svg" class="icon-svg" alt="">
+                            <span>3. Fontes de Áudio</span>
+                        </div>
+                        <p class="onboarding-card-text">Capture áudio em tempo real via <strong>microfone do dispositivo</strong> (sem retorno de saída para prevenir microfonia e realimentação acústica) ou explore as abas de síntese de ondas harmônicas e fenômenos de batimento acústico.</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/rotate.svg" class="icon-svg" alt="">
+                            <span>4. Modo PiP e Congelamento (Freeze)</span>
+                        </div>
+                        <p class="onboarding-card-text">Use o botão <strong>Alternar</strong> no topo dos gráficos para trocar qual visualização ocupa o Canvas Principal e qual fica em Picture-in-Picture (PiP). Acione <strong>Pausar / Congelar</strong> para congelar a tela e inspecionar frequências e notas com o cursor.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="sim-modal-footer">
+                <span class="sim-modal-hint">Clique fora ou pressione <kbd>Esc</kbd> para fechar</span>
+                <button class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Script Modular da Simulação -->
     <script type="module" src="scripts/audio.js"></script>

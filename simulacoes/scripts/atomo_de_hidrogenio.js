@@ -15,7 +15,8 @@ import {
     syncDualSlider,
     initTabs,
     initFocusMirrorToolbar,
-    initKaTeXAutoRender
+    initKaTeXAutoRender,
+    initOnboardingModal
 } from './sim-ui.js';
 
 // ============================================================================
@@ -327,6 +328,7 @@ function initScene() {
     // Loop de animação
     (function animate() {
         requestAnimationFrame(animate);
+        if (document.hidden) return;
         orbitControls.update();
         renderer.render(scene, camera);
     })();
@@ -685,6 +687,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     initFocusMirrorToolbar({
         toolbarTarget: '#focus-context-toolbar',
         scopeSelector: '.controls-panel'
+    });
+
+    // Modal de Instruções Iniciais (Guia Rápido)
+    initOnboardingModal('#modal-onboarding', {
+        triggerSelector: '#btn-open-onboarding'
     });
 
     // Popula l e ml com valores iniciais (n=1)

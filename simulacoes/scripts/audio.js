@@ -13,7 +13,8 @@ import {
     initKaTeXAutoRender,
     inlineSVGImages,
     initTabs,
-    initFocusMirrorToolbar
+    initFocusMirrorToolbar,
+    initOnboardingModal
 } from './sim-ui.js';
 
 // =============================================================================
@@ -545,6 +546,10 @@ function resizeCanvases() {
 }
 
 function renderFrame() {
+    if (document.hidden) {
+        requestAnimationFrame(renderFrame);
+        return;
+    }
     resizeCanvases();
     drawTimeDomain();
     drawFrequencySpectrum();
@@ -555,6 +560,10 @@ function startAnimationLoop() {
     if (animationId) cancelAnimationFrame(animationId);
 
     function loop() {
+        if (document.hidden) {
+            animationId = requestAnimationFrame(loop);
+            return;
+        }
         renderFrame();
         if (isCapturing || isFrozen) {
             animationId = requestAnimationFrame(loop);
@@ -667,6 +676,9 @@ window.addEventListener('DOMContentLoaded', async () => {
         toolbarTarget: '#focus-context-toolbar',
         scopeSelector: '.controls-panel'
     });
+
+    // Modal de Instruções Iniciais (Onboarding)
+    initOnboardingModal('#modal-onboarding', { triggerSelector: '#btn-open-onboarding' });
 
     document.querySelectorAll('.btn-toggle-pip').forEach(btn => {
         btn.addEventListener('click', (e) => {

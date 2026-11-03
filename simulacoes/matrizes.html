@@ -65,6 +65,10 @@
 
             <!-- Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
+                <button id="btn-open-onboarding" class="canvas-btn-floating" title="Instruções e Guia Rápido">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span class="btn-label-text">Instruções</span>
+                </button>
                 <button id="btn-quick-reset" class="canvas-btn-floating" title="Resetar parâmetros do modo ativo">
                     <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                     <span class="btn-label-text">Resetar</span>
@@ -75,12 +79,9 @@
                 </button>
             </div>
 
-            <!-- Barra de Ferramentas Flutuante Reativa no Modo Foco (Gerenciada pelo Design System via sim-ui.js) -->
-            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
-
-            <div class="interactive-hint" id="canvasHint">
-                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dica">
-                <span id="canvasHintText">Arraste as pontas dos vetores <strong>î'</strong> (amarelo) ou <strong>ĵ'</strong> (ciano) no gráfico!</span>
+            <!-- Barra Flutuante de Contexto para Modo Foco agrupada em .canvas-top-left-stack -->
+            <div class="canvas-top-left-stack">
+                <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
             </div>
         </div>
 
@@ -774,6 +775,67 @@
             <div class="sim-modal-footer">
                 <span class="sim-modal-hint">Pressione <kbd>Esc</kbd> para fechar</span>
                 <button class="btn-primary" data-modal-close style="min-width: 100px;">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE INSTRUÇÕES INICIAIS / GUIA RÁPIDO (.modal-onboarding) -->
+    <!-- ============================================================= -->
+    <div id="modal-onboarding" class="sim-modal-overlay modal-onboarding hidden" aria-hidden="true" role="dialog">
+        <div class="sim-modal-container">
+            <div class="sim-modal-header">
+                <div class="sim-modal-title">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span>Transformações Matriciais 2D — Guia Rápido</span>
+                </div>
+                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+            </div>
+            <div class="sim-modal-body">
+                <p class="onboarding-intro">
+                    Explore a álgebra e a física das <strong>transformações matriciais em 2D</strong>: desde a interpretação geométrica dos vetores da base e síntese de operadores lineares até matrizes funcionais e sistemas dinâmicos contínuos.
+                </p>
+                <div class="onboarding-grid">
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/matrix-basis.svg" class="icon-svg" alt="">
+                            <span>1. Modo Base & Operadores Lineares</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Manipule os coeficientes da matriz $M$ ou arraste diretamente os vetores da base $\hat{i}'$ e $\hat{j}'$. Experimente rotações, escalas e cisalhamentos, compreendendo $\det(M)$ como fator de escala e orientação de área.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/axis-3d.svg" class="icon-svg" alt="">
+                            <span>2. Modo Construir & Espaço Dividido</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Visualize simultaneamente o espaço canônico $(\hat{i}, \hat{j}, \vec{v})$ e o transformado $(\hat{i}', \hat{j}', \vec{v}', \vec{d})$. Sintetize operadores lineares arbitrários através de pares de vetores e inspecione o vetor deslocamento $\vec{d} = (M - I)\vec{v}$.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="">
+                            <span>3. Modo Funções & Matrizes Não-Lineares</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Analise matrizes funcionais $M(x, y, t)$ com deformação contínua no tempo. Posicione superfícies de teste (círculos e quadrados) para examinar a curvatura espacial e a aproximação linear local pela matriz Jacobiana.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/motion-oscillate.svg" class="icon-svg" alt="">
+                            <span>4. Modo Dinâmico & Sistemas Contínuos</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Simule fluxos contínuos governados por $\frac{\mathrm{d}\vec{x}}{\mathrm{d}t} = M\vec{x}$ integrados via Runge-Kutta 4 (RK4). Observe o campo vetorial, gere órbitas interativas por clique e identifique autovetores invariantes e pontos fixos.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="sim-modal-footer">
+                <span class="sim-modal-hint">Clique fora ou pressione <kbd>Esc</kbd> para fechar</span>
+                <button class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
             </div>
         </div>
     </div>

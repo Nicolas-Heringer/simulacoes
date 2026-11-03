@@ -16,7 +16,8 @@ import {
     inlineSVGImages,
     initTabs,
     initFocusMirrorToolbar,
-    initKaTeXAutoRender
+    initKaTeXAutoRender,
+    initOnboardingModal
 } from './sim-ui.js';
 
 // =============================================================================
@@ -25,7 +26,7 @@ import {
 const canvas = document.getElementById('myCanvas');
 const ctx = canvas ? canvas.getContext('2d') : null;
 
-let isRunning = false;     // Inicia pausada por padrão
+let isRunning = false;     // Inicia estritamente pausada por padrão (idle)
 let simSpeed = 1.0;
 let simTime = 0.0;
 let tipoDeInteracao = 'coulomb';
@@ -43,7 +44,6 @@ const waveCache = new Map();
 let playControl = null;
 let plotEnergia = null;
 let plotTemp = null;
-
 
 // =============================================================================
 // 2. ESTRATÉGIAS DE CÁLCULO DE INTERAÇÃO & FORÇAS
@@ -499,15 +499,24 @@ function updateStatusBadges() {
     if (particles.length === 0) {
         if (headerBadge) headerBadge.innerHTML = '<span class="status-dot"></span><span>Aguardando Preset</span>';
         if (footerText) footerText.textContent = 'Aguardando Preset';
-        if (footerBadge) footerBadge.classList.remove('badge-accent');
+        if (footerBadge) {
+            footerBadge.classList.add('idle');
+            footerBadge.classList.remove('badge-accent');
+        }
     } else if (isRunning) {
         if (headerBadge) headerBadge.innerHTML = '<span class="status-dot"></span><span>Executando</span>';
         if (footerText) footerText.textContent = 'Simulação Ativa';
-        if (footerBadge) footerBadge.classList.add('badge-accent');
+        if (footerBadge) {
+            footerBadge.classList.remove('idle');
+            footerBadge.classList.add('badge-accent');
+        }
     } else {
         if (headerBadge) headerBadge.innerHTML = '<span class="status-dot"></span><span>Pausado (Pronto)</span>';
-        if (footerText) footerText.textContent = 'Pronto para Executar';
-        if (footerBadge) footerBadge.classList.add('badge-accent');
+        if (footerText) footerText.textContent = 'Pausada (Em Espera)';
+        if (footerBadge) {
+            footerBadge.classList.add('idle');
+            footerBadge.classList.remove('badge-accent');
+        }
     }
 }
 
@@ -526,7 +535,101 @@ function reiniciarSistema(novoTemplate = 'none') {
     const footerTimer = document.getElementById('footer-sim-timer');
     if (footerTimer) footerTimer.textContent = 't = 0.00s';
 
+    if (plotEnergia) {
+        plotEnergia.data.fill(0);
+        plotEnergia.render();
+    }
+    if (plotTemp) {
+        plotTemp.data.fill(0);
+        plotTemp.render();
+    }
+
     updateStatusBadges();
+    updateVisualScene();
+}
+
+function stepPhysics(dt = 0.016 * simSpeed) {
+    if (!canvas) return;
+
+    for (let i = circulos.length - 1; i >= 0; i--) {
+        const circulo = circulos[i];
+        circulo.propagaCampo(c);
+        if (circulo.aSerRemovido) {
+            circulos[i] = circulos[circulos.length - 1];
+            circulos.pop();
+        }
+    }
+
+    particles.forEach(particle => {
+        particle.update(canvas, circulos, interactionEnabled);
+    });
+
+    const temperatura = calcularTemperatura(particles);
+    if (temperatura > TEMP_LIMIT) {
+        particles.forEach(p => p.reduceSpeed(attenuation));
+    } else if (temperatura < TEMP_LIMIT && temperatura > 0) {
+        particles.forEach(p => p.increaseSpeed(attenuation));
+    }
+}
+
+function updateReadouts() {
+    const energiaTotal = calcularEnergiaCinetica(particles);
+    const temperatura = calcularTemperatura(particles);
+    const vrms = calcularVrms(particles);
+
+    // Valores nos cards de gráfico da aba Telemetria
+    const valK = document.getElementById('plot-val-k');
+    if (valK) valK.textContent = `${energiaTotal.toFixed(2)} J`;
+
+    const valT = document.getElementById('plot-val-t');
+    if (valT) valT.textContent = temperatura.toFixed(3);
+
+    // Painel de Balanço Termodinâmico (.sim-readout)
+    const telVrms = document.getElementById('telemetry-vrms');
+    const telStatus = document.getElementById('telemetry-thermostat-status');
+    const telWaves = document.getElementById('telemetry-waves-alive');
+
+    if (telVrms) telVrms.textContent = `${vrms.toFixed(2)} px/f`;
+    if (telWaves) telWaves.textContent = `${circulos.length}`;
+    if (telStatus) {
+        if (particles.length === 0) {
+            telStatus.textContent = 'Inativo';
+            telStatus.style.color = 'var(--text-muted)';
+        } else {
+            const diff = temperatura - TEMP_LIMIT;
+            if (Math.abs(diff) < 0.02) {
+                telStatus.textContent = 'Equilíbrio';
+                telStatus.style.color = 'var(--color-emerald, #22c55e)';
+            } else if (diff > 0) {
+                telStatus.textContent = 'Resfriando';
+                telStatus.style.color = 'var(--color-cyan, #38bdf8)';
+            } else {
+                telStatus.textContent = 'Aquecendo';
+                telStatus.style.color = 'var(--color-yellow, #facc15)';
+            }
+        }
+    }
+
+    // Timer do Rodapé
+    const footerTimer = document.getElementById('footer-sim-timer');
+    if (footerTimer) footerTimer.textContent = `t = ${simTime.toFixed(2)}s`;
+}
+
+function updateVisualScene() {
+    if (!ctx || !canvas) return;
+
+    // Fundo Dark Theme de Alto Contraste
+    ctx.fillStyle = '#070b16';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Renderiza frentes de onda esféricas
+    circulos.forEach(circulo => circulo.mostra(ctx));
+
+    // Renderiza partículas
+    particles.forEach(particle => particle.draw(ctx));
+
+    // Atualiza leituras de telemetria
+    updateReadouts();
 }
 
 // =============================================================================
@@ -542,6 +645,7 @@ function setupEventListeners() {
             resizeCanvas();
             if (plotEnergia) plotEnergia.resize();
             if (plotTemp) plotTemp.resize();
+            updateVisualScene();
         }
     });
 
@@ -570,7 +674,12 @@ function setupEventListeners() {
         scopeSelector: '.controls-panel'
     });
 
-    // --- BARRA DE TRANSPORTE ---
+    // --- MODAL DE INSTRUÇÕES INICIAIS / GUIA RÁPIDO ---
+    initOnboardingModal('#modal-onboarding', {
+        triggerSelector: '#btn-open-onboarding'
+    });
+
+    // --- BARRA FLUTUANTE DE TRANSPORTE (#canvas-transport-toolbar) ---
     playControl = initToggleButton('#btn-play-sim', (active) => {
         if (particles.length === 0 && active) {
             const defaultBtn = document.getElementById('preset-single-static');
@@ -594,17 +703,33 @@ function setupEventListeners() {
                 const defaultBtn = document.getElementById('preset-single-static');
                 if (defaultBtn) defaultBtn.classList.add('active');
             }
-            if (isRunning && playControl) playControl.setState(0);
+            if (isRunning && playControl) {
+                playControl.setState(0);
+            }
             isRunning = false;
-            simTime += 0.05 * simSpeed;
-            passoSimulacao();
+            simTime += 0.016 * simSpeed;
+            stepPhysics(0.016 * simSpeed);
+
+            const energiaTotal = calcularEnergiaCinetica(particles);
+            const temperatura = calcularTemperatura(particles);
+
+            if (plotEnergia) {
+                plotEnergia.push(energiaTotal);
+            }
+            if (plotTemp) {
+                plotTemp.push(temperatura);
+            }
+
             updateStatusBadges();
+            updateVisualScene();
         });
     }
 
     // Botões de Reset: Reiniciam o preset ativo para o estado inicial sem perder a seleção
     const resetAction = () => {
-        if (isRunning && playControl) playControl.setState(0);
+        if (isRunning && playControl) {
+            playControl.setState(0);
+        }
         isRunning = false;
         if (template && template !== 'none') {
             reiniciarSistema(template);
@@ -618,18 +743,21 @@ function setupEventListeners() {
     if (btnReset) btnReset.addEventListener('click', resetAction);
     if (btnQuickReset) btnQuickReset.addEventListener('click', resetAction);
 
-    // Seletor de Velocidade Temporal
-    document.querySelectorAll('#sim-speed-pills .speed-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('#sim-speed-pills .speed-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            simSpeed = parseFloat(btn.dataset.speed || '1.0');
+    // Botão Cíclico de Velocidade na Barra Flutuante [0.5, 1.0, 2.0, 5.0]×
+    const speedCycleSteps = [0.5, 1.0, 2.0, 5.0];
+    const btnSpeedCycle = document.getElementById('btn-speed-cycle');
+    if (btnSpeedCycle) {
+        btnSpeedCycle.addEventListener('click', () => {
+            const currentIdx = speedCycleSteps.indexOf(simSpeed);
+            const nextSpeed = speedCycleSteps[(currentIdx + 1) % speedCycleSteps.length];
+            simSpeed = nextSpeed;
+            btnSpeedCycle.dataset.speed = nextSpeed.toFixed(1);
+            btnSpeedCycle.textContent = `${nextSpeed.toFixed(1)}×`;
         });
-    });
+    }
 
     // --- PRESETS DE CONFIGURAÇÃO DE PARTÍCULAS ---
     const presetBtns = document.querySelectorAll('.control-grid-2x2 .btn-preset');
-
     presetBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             presetBtns.forEach(b => b.classList.remove('active'));
@@ -641,12 +769,12 @@ function setupEventListeners() {
         });
     });
 
-
     // --- SWITCH DE INTERAÇÃO & TIPO DE POTENCIAL ---
     const switchInteracao = document.getElementById('switch-interacao');
     if (switchInteracao) {
         switchInteracao.addEventListener('change', (e) => {
             interactionEnabled = e.target.checked;
+            updateVisualScene();
         });
     }
 
@@ -654,25 +782,30 @@ function setupEventListeners() {
     if (selectPotencial) {
         selectPotencial.addEventListener('change', (e) => {
             tipoDeInteracao = e.target.value;
+            updateVisualScene();
         });
     }
 
     // --- SLIDERS SINCRONIZADOS (DUAL-INPUT) ---
     syncDualSlider('#slider-temp', '#num-temp', (val) => {
         TEMP_LIMIT = val;
+        updateVisualScene();
     });
 
     syncDualSlider('#slider-wave-speed', '#num-wave-speed', (val) => {
         c = val;
         waveCache.clear();
+        updateVisualScene();
     });
 
     syncDualSlider('#slider-attenuation', '#num-attenuation', (val) => {
         attenuation = val;
+        updateVisualScene();
     });
 
     syncDualSlider('#slider-epsilon', '#num-epsilon', (val) => {
         epsilonCoulomb = val;
+        updateVisualScene();
     });
 
     // --- MODAL DE TEORIA ---
@@ -715,35 +848,13 @@ function aplicarImpulsoCursor(e) {
         const dy = p.y - my;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < 120 && dist > 1) {
-            const force = (120 - dist) / 120 * 0.8;
+            const force = ((120 - dist) / 120) * 0.8;
             p.velocityX += (dx / dist) * force;
             p.velocityY += (dy / dist) * force;
         }
     });
-}
 
-function passoSimulacao() {
-    if (!canvas) return;
-
-    for (let i = circulos.length - 1; i >= 0; i--) {
-        const circulo = circulos[i];
-        circulo.propagaCampo(c);
-        if (circulo.aSerRemovido) {
-            circulos[i] = circulos[circulos.length - 1];
-            circulos.pop();
-        }
-    }
-
-    particles.forEach(particle => {
-        particle.update(canvas, circulos, interactionEnabled);
-    });
-
-    const temperatura = calcularTemperatura(particles);
-    if (temperatura > TEMP_LIMIT) {
-        particles.forEach(p => p.reduceSpeed(attenuation));
-    } else if (temperatura < TEMP_LIMIT && temperatura > 0) {
-        particles.forEach(p => p.increaseSpeed(attenuation));
-    }
+    updateVisualScene();
 }
 
 // =============================================================================
@@ -753,74 +864,27 @@ function anima() {
     requestAnimationFrame(anima);
     if (!ctx || !canvas) return;
 
+    // Otimização de Abas em Background (economia de GPU)
+    if (document.hidden) return;
+
+    // REGRA DE OURO: EDO e plotagem executam estritamente quando rodando
     if (isRunning) {
         simTime += 0.016 * simSpeed;
-        passoSimulacao();
-    }
+        stepPhysics(0.016 * simSpeed);
 
-    // Fundo Dark Theme de Alto Contraste
-    ctx.fillStyle = '#070b16';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const energiaTotal = calcularEnergiaCinetica(particles);
+        const temperatura = calcularTemperatura(particles);
 
-    // Renderiza frentes de onda esféricas
-    circulos.forEach(circulo => circulo.mostra(ctx));
-
-    // Renderiza partículas
-    particles.forEach(particle => particle.draw(ctx));
-
-    // Telemetria e Grandezas Físicas
-    const energiaTotal = calcularEnergiaCinetica(particles);
-    const temperatura = calcularTemperatura(particles);
-    const vrms = calcularVrms(particles);
-
-    // 1. Atualiza HUD no Canvas
-    const hudPart = document.getElementById('hud-particles-count');
-    const hudWaves = document.getElementById('hud-waves-count');
-    const hudK = document.getElementById('hud-kinetic-energy');
-    const hudT = document.getElementById('hud-temperature');
-
-    if (hudPart) hudPart.textContent = `${particles.length}`;
-    if (hudWaves) hudWaves.textContent = `${circulos.length}`;
-    if (hudK) hudK.textContent = `${energiaTotal.toFixed(2)} J`;
-    if (hudT) hudT.textContent = temperatura.toFixed(3);
-
-    // 2. Atualiza Rodapé
-    const footerTimer = document.getElementById('footer-sim-timer');
-    if (footerTimer) footerTimer.textContent = `t = ${simTime.toFixed(2)}s`;
-
-    // 3. Alimenta Mini-Gráficos de Telemetria
-    if (plotEnergia) {
-        plotEnergia.push(energiaTotal);
-        const valK = document.getElementById('plot-val-k');
-        if (valK) valK.textContent = `${energiaTotal.toFixed(2)} J`;
-    }
-
-    if (plotTemp) {
-        plotTemp.push(temperatura);
-        const valT = document.getElementById('plot-val-t');
-        if (valT) valT.textContent = temperatura.toFixed(3);
-    }
-
-    // 4. Painel de Balanço Termodinâmico
-    const telVrms = document.getElementById('telemetry-vrms');
-    const telStatus = document.getElementById('telemetry-thermostat-status');
-    const telWaves = document.getElementById('telemetry-waves-alive');
-
-    if (telVrms) telVrms.textContent = `${vrms.toFixed(2)} px/f`;
-    if (telWaves) telWaves.textContent = `${circulos.length}`;
-    if (telStatus) {
-        const diff = temperatura - TEMP_LIMIT;
-        if (Math.abs(diff) < 0.02) {
-            telStatus.textContent = 'Equilíbrio';
-            telStatus.style.color = 'var(--color-emerald, #22c55e)';
-        } else if (diff > 0) {
-            telStatus.textContent = 'Resfriando';
-            telStatus.style.color = 'var(--color-cyan, #38bdf8)';
-        } else {
-            telStatus.textContent = 'Aquecendo';
-            telStatus.style.color = 'var(--color-yellow, #facc15)';
+        if (plotEnergia) {
+            plotEnergia.push(energiaTotal);
+        }
+        if (plotTemp) {
+            plotTemp.push(temperatura);
         }
     }
+
+    // Pass de Apresentação Gráfica e Leituras Numéricas (renderiza mesmo pausado)
+    updateVisualScene();
 }
 
 // =============================================================================
@@ -828,6 +892,11 @@ function anima() {
 // =============================================================================
 window.addEventListener('DOMContentLoaded', async () => {
     resizeCanvas();
+    window.addEventListener('resize', () => {
+        resizeCanvas();
+        updateVisualScene();
+    });
+
     setupEventListeners();
     reiniciarSistema('none');
 
@@ -837,7 +906,8 @@ window.addEventListener('DOMContentLoaded', async () => {
         plotEnergia = new RealtimePlot(canvasPlotK, {
             maxPoints: 80,
             minVal: 0.0,
-            maxVal: 20.0
+            maxVal: 20.0,
+            color: '#22c55e'
         });
     }
 
@@ -846,11 +916,13 @@ window.addEventListener('DOMContentLoaded', async () => {
         plotTemp = new RealtimePlot(canvasPlotT, {
             maxPoints: 80,
             minVal: 0.0,
-            maxVal: 2.0
+            maxVal: 2.0,
+            color: '#facc15'
         });
     }
 
+    updateVisualScene();
     anima();
     await inlineSVGImages();
     initKaTeXAutoRender(document.body);
-});
+});

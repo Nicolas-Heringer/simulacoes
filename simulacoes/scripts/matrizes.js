@@ -12,6 +12,7 @@ import {
     inlineSVGImages,
     initKaTeXAutoRender,
     initModal,
+    initOnboardingModal,
     initFocusMirrorToolbar
 } from './sim-ui.js';
 
@@ -48,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const containerSingle = document.getElementById('canvas-single-container');
     const containerSplit = document.getElementById('canvas-split-container');
 
-    const canvasHintText = document.getElementById('canvasHintText');
     const footerStatusText = document.getElementById('footer-status-text');
 
     // 3. Inicialização dos Planos Cartesianos
@@ -166,18 +166,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Sincronizar painel de ferramentas reativo do Modo Foco
         focusToolbar?.rebuild(newMode);
 
-        // Atualizar Dica e Legenda no Canvas
+        // Atualizar Legenda no Rodapé
         if (newMode === 'base') {
-            canvasHintText.innerHTML = 'Arraste as pontas dos vetores <strong>î\'</strong> (amarelo) ou <strong>ĵ\'</strong> (ciano) no gráfico!';
             footerStatusText.textContent = 'Modo 1: Interpretação Geométrica Canônica';
         } else if (newMode === 'construir') {
-            canvasHintText.innerHTML = 'Arraste <strong>î, ĵ, v⃗</strong> à esquerda e veja <strong>î\', ĵ\', v⃗\', d⃗</strong> evoluírem à direita!';
             footerStatusText.textContent = 'Modo 2: Construir Operador por Imagens';
         } else if (newMode === 'funcoes') {
-            canvasHintText.innerHTML = 'Arraste o centro das <strong>superfícies de prova</strong> ou suas bordas para inspecionar a área local!';
             footerStatusText.textContent = 'Modo 3: Matrizes Não-Lineares M(x, y, t)';
         } else if (newMode === 'dinamico') {
-            canvasHintText.innerHTML = '<strong>Clique no gráfico</strong> para semear novas órbitas no campo vetorial contínuo!';
             footerStatusText.textContent = 'Modo 4: Sistemas Dinâmicos dx/dt = Mx';
         }
 
@@ -204,6 +200,9 @@ document.addEventListener('DOMContentLoaded', () => {
             planoRight.resize();
             planoLeft.draw();
             planoRight.draw();
+        } else if (activeModeName === 'dinamico') {
+            planoSingle.resize();
+            modos.dinamico.drawDynamicScene();
         } else {
             planoSingle.resize();
             planoSingle.draw();
@@ -249,6 +248,9 @@ document.addEventListener('DOMContentLoaded', () => {
         btnAbrirModal.addEventListener('click', () => modalTeoria.open());
     }
 
-    // 10. Inicialização do Modo Padrão
+    // 10. Modal de Instruções Iniciais (Guia Rápido)
+    initOnboardingModal('#modal-onboarding', { triggerSelector: '#btn-open-onboarding' });
+
+    // 11. Inicialização do Modo Padrão
     switchMode('base');
 });

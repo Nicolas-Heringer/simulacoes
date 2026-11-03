@@ -44,8 +44,17 @@
         <div class="canvas-area">
             <canvas id="simulacao"></canvas>
 
+            <!-- Pilha Vertical no Canto Superior Esquerdo -->
+            <div class="canvas-top-left-stack">
+                <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            </div>
+
             <!-- Grupo de Ações do Topo Direito -->
             <div class="canvas-top-actions">
+                <button id="btn-open-onboarding" class="canvas-btn-floating" title="Instruções e Guia Rápido">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span class="btn-label-text">Instruções</span>
+                </button>
                 <button id="btn-quick-reset" class="canvas-btn-floating" title="Reposicionar Esfera">
                     <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                     <span class="btn-label-text">Repor Esfera</span>
@@ -56,29 +65,24 @@
                 </button>
             </div>
 
-            <!-- Barra Flutuante de Contexto para Modo Foco -->
-            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
-
-            <!-- HUD de Telemetria no Canto Inferior Esquerdo -->
-            <div class="sim-hud" id="sim-hud">
-                <div class="hud-item">
-                    <span class="hud-label">Velocidade:</span>
-                    <span class="hud-val" id="hud-vel">0.0 m/s</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Altura (h):</span>
-                    <span class="hud-val" id="hud-altura">0.0 m</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Energia:</span>
-                    <span class="hud-val" id="hud-energia">0.0 J</span>
-                </div>
-            </div>
-
-            <!-- Dica Interativa Centralizada no Fundo (Desktop) -->
-            <div class="interactive-hint">
-                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dica">
-                Clique/toque e arraste a esfera para arremessá-la em qualquer direção.
+            <!-- Barra Flutuante de Transporte (#canvas-transport-toolbar) -->
+            <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
+                <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
+                        data-state="0" data-text-idle="Executar" data-text-active="Pausar"
+                        data-icon-idle="play" data-icon-active="pause" title="Executar / Pausar">
+                    <img src="../assets/icons/play.svg" class="icon-svg" alt="Executar">
+                    <span class="btn-text">Executar</span>
+                </button>
+                <button class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
+                    <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
+                </button>
+                <button class="toolbar-btn" id="btn-reset-sim" title="Repor Esfera (t = 0)">
+                    <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
+                </button>
+                <span class="toolbar-divider"></span>
+                <button class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
+                    1.0×
+                </button>
             </div>
         </div>
 
@@ -108,37 +112,32 @@
             <div class="panel-body">
                 <!-- ABA 1: PARÂMETROS -->
                 <div id="panel-tab-params" class="tab-pane active">
-                    <!-- 1. Barra de Transporte / Playback -->
-                    <div class="sim-transport-bar">
-                        <div class="transport-controls-row">
-                            <button class="btn-primary btn-toggle transport-btn-play" id="btn-play-sim"
-                                    data-state="1"
-                                    data-focus-control="toggle"
-                                    data-text-idle="Executar"
-                                    data-text-active="Pausar"
-                                    data-icon-idle="play"
-                                    data-icon-active="pause">
-                                <img src="../assets/icons/pause.svg" class="icon-svg" alt="Play">
-                                <span class="btn-text">Pausar</span>
-                            </button>
-                            <button class="btn-icon" id="btn-step-sim" title="Avançar 1 Passo (Δt)" data-focus-control="action" data-focus-label="Passo">
-                                <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
-                            </button>
-                            <button class="btn-icon" id="btn-reset-sim" title="Reiniciar (t = 0)" data-focus-control="action" data-focus-label="Reset">
-                                <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
-                            </button>
-                        </div>
-
-                        <div class="transport-speed-row">
-                            <span class="transport-speed-label">
-                                <img src="../assets/icons/rotate.svg" class="icon-svg" style="width: 14px; height: 14px;" alt="Velocidade">
-                                Velocidade:
-                            </span>
-                            <div class="transport-speed-pills" id="sim-speed-pills">
-                                <button class="speed-btn" data-speed="0.25">0.25×</button>
-                                <button class="speed-btn" data-speed="0.5">0.5×</button>
-                                <button class="speed-btn active" data-speed="1.0">1.0×</button>
-                                <button class="speed-btn" data-speed="2.0">2.0×</button>
+                    <!-- 1. Painel de Leitura Numérica / Telemetria (.sim-readout) -->
+                    <div class="control-group">
+                        <div class="sim-readout">
+                            <div class="sim-readout-title">
+                                <img src="../assets/icons/gauge.svg" class="icon-svg icon-accent" alt="Telemetria">
+                                <span>Telemetria do Movimento</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Velocidade ($v$):</span>
+                                <span class="sim-readout-value tone-cyan" id="readout-vel">0.00 m/s</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Altura ($h$):</span>
+                                <span class="sim-readout-value tone-emerald" id="readout-altura">0.00 m</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Energia Cinética ($K$):</span>
+                                <span class="sim-readout-value tone-cyan" id="readout-energia-k">0.0 J</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Energia Potencial ($U$):</span>
+                                <span class="sim-readout-value tone-rose" id="readout-energia-u">0.0 J</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Energia Mecânica Total ($E$):</span>
+                                <span class="sim-readout-value tone-accent" id="readout-energia-total">0.0 J</span>
                             </div>
                         </div>
                     </div>
@@ -253,14 +252,74 @@
 
             <!-- Base: Rodapé Fixo de Telemetria -->
             <div class="panel-footer">
-                <div class="sim-badge" id="footer-status-badge">
+                <div class="sim-badge idle" id="footer-status-badge">
                     <span class="status-dot"></span>
-                    <span id="footer-status-text">Simulação Ativa</span>
+                    <span id="footer-status-text">Pausada (Em Espera)</span>
                 </div>
                 <span class="footer-meta" id="footer-sim-timer">t = 0.00s</span>
             </div>
         </aside>
     </main>
+
+    <!-- Modal de Instruções Iniciais / Guia Rápido (.modal-onboarding) -->
+    <div id="modal-onboarding" class="sim-modal-overlay modal-onboarding hidden" aria-hidden="true" role="dialog">
+        <div class="sim-modal-container">
+            <div class="sim-modal-header">
+                <div class="sim-modal-title">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span>Queda Livre & Resistência do Ar — Guia Rápido</span>
+                </div>
+                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+            </div>
+            <div class="sim-modal-body">
+                <p class="onboarding-intro">
+                    Simule a dinâmica de um corpo sob ação da gravidade, resistência viscosa do ar (arrasto) e colisões elásticas/inelásticas com as fronteiras.
+                </p>
+                <div class="onboarding-grid">
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/gravity-fall.svg" class="icon-svg" alt="Queda Livre">
+                            <span>1. Queda Livre no Vácuo vs Resistência do Ar</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            No vácuo ($b = 0$), todos os corpos aceleram à mesma taxa $g$, independentemente da massa. Com resistência ($b > 0$), a força de arrasto $\vec{F}_{\text{drag}} = -b\vec{v}$ opõe-se ao movimento e reduz a aceleração efetiva.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/wind.svg" class="icon-svg" alt="Velocidade Terminal">
+                            <span>2. Velocidade Terminal & Balanço de Forças</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            À medida que a velocidade aumenta, a força de arrasto equilibra o peso ($F_g = F_{\text{drag}} \implies mg = bv_t$). A resultante torna-se nula e a esfera atinge a velocidade terminal assintótica $v_t = mg/b$.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="Energia">
+                            <span>3. Conservação & Dissipação de Energia</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Acompanhe no gráfico a interconversão de energia potencial $U = mgh$ em cinética $K = \frac{1}{2}mv^2$. O arrasto dissipa energia continuamente em calor, enquanto o coeficiente de restituição $e$ dita a perda a cada quique.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/touch-drag.svg" class="icon-svg" alt="Interação">
+                            <span>4. Interação & Arremesso Manual</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Clique ou toque e arraste a esfera para posicioná-la no espaço ou realize um movimento rápido para arremessá-la em qualquer direção. O vetor de lançamento transfere a velocidade instantânea do ponteiro.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="sim-modal-footer">
+                <span class="sim-modal-hint">Clique fora ou pressione <kbd>Esc</kbd> para fechar</span>
+                <button class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
+            </div>
+        </div>
+    </div>
 
     <script type="module" src="scripts/quedalivre.js"></script>
 </body>

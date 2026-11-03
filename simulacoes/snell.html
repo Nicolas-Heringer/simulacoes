@@ -41,7 +41,11 @@
 
         <!-- 1. Área do Canvas Interativo 2D -->
         <div class="canvas-area">
-            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            <!-- Pilha Vertical no Canto Superior Esquerdo -->
+            <div class="canvas-top-left-stack">
+                <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            </div>
+
             <canvas id="simulationCanvas"></canvas>
 
             <!-- Indicador de Carregamento / Worker Computando -->
@@ -52,6 +56,10 @@
 
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
+                <button id="btn-open-onboarding" class="canvas-btn-floating" title="Instruções e Guia Rápido">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span class="btn-label-text">Instruções</span>
+                </button>
                 <button id="btn-quick-clear" class="canvas-btn-floating" title="Limpar feixes e rastros ópticos">
                     <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Limpar">
                     <span class="btn-label-text">Limpar Rastros</span>
@@ -80,12 +88,6 @@
                     <span class="hud-label">Feixes Ativos:</span>
                     <span class="hud-val" id="hudRaysCount" style="color: var(--color-emerald, #22c55e);">0</span>
                 </div>
-            </div>
-
-            <!-- Dica Interativa Flutuante -->
-            <div class="interactive-hint">
-                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dica">
-                Clique ou arraste no canvas para emitir raios. Use o scroll do mouse para girar o feixe ($\theta$).
             </div>
         </div>
 
@@ -407,8 +409,62 @@
         </div>
     </div>
 
+    <!-- ============================================================= -->
+    <!-- MODAL DE INSTRUÇÕES INICIAIS / GUIA RÁPIDO (.modal-onboarding) -->
+    <!-- ============================================================= -->
+    <div id="modal-onboarding" class="sim-modal-overlay modal-onboarding hidden" aria-hidden="true" role="dialog">
+        <div class="sim-modal-container">
+            <div class="sim-modal-header">
+                <div class="sim-modal-title">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span>Lei de Snell & Ray Tracing Contínuo — Guia Rápido</span>
+                </div>
+                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+            </div>
+            <div class="sim-modal-body">
+                <p class="onboarding-intro">
+                    Explore a propagação da luz em meios ópticos contínuos e não-homogêneos governada pela equação vetorial dos raios $\frac{d}{ds} \left( n \frac{d\mathbf{r}}{ds} \right) = \nabla n$ e pelo Princípio de Fermat.
+                </p>
+                <div class="onboarding-grid">
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/mouse-left.svg" class="icon-svg" alt="">
+                            <span>1. Emissão & Rotação do Feixe</span>
+                        </div>
+                        <p class="onboarding-card-text">Clique ou arraste no canvas para emitir raios luminosos. Use o <em>scroll do mouse</em> para girar a orientação ($\theta$) do feixe em tempo real.</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/prism.svg" class="icon-svg" alt="">
+                            <span>2. Perfis de Meios Ópticos</span>
+                        </div>
+                        <p class="onboarding-card-text">Alterne entre interfaces planas, lentes circulares, lentes GRIN (convergente/divergente), fibras ópticas e miragens atmosféricas.</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
+                            <span>3. Dispersão Cromática (Cauchy)</span>
+                        </div>
+                        <p class="onboarding-card-text">Ative a dispersão para decompor o feixe policromático: comprimentos de onda curtos (violeta) refratam mais intensamente que os longos (vermelho).</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/compass.svg" class="icon-svg" alt="">
+                            <span>4. Inspeção sob o Cursor (HUD)</span>
+                        </div>
+                        <p class="onboarding-card-text">Passe o cursor sobre qualquer ponto para ler o índice local $n(x,y)$, posição, ângulo de emissão e contagem de feixes ativos no HUD inferior.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="sim-modal-footer">
+                <span class="sim-modal-hint">Clique fora ou pressione <kbd>Esc</kbd> para fechar</span>
+                <button class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Script Principal da Simulação (ES Module com Cache-Buster) -->
-    <script type="module" src="scripts/snell.js?v=2.1"></script>
+    <script type="module" src="scripts/snell.js?v=2.2"></script>
 </body>
 
 </html>

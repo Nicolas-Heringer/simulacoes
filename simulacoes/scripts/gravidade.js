@@ -3,8 +3,8 @@
 // Coautor / Revisor: Gemini & Antigravity
 // Simulação: Gravitação e Órbitas Planetárias 3D (Design System 2.0)
 // Descrição: Simulação orbital 3D com projeção perspectiva interativa, integrador
-//            simplético Velocity Verlet, telemetria multicanal de conservação de energia
-//            e suporte a controles táteis mobile.
+//            simplético Velocity Verlet, telemetria multicanal de conservação de energia,
+//            correção relativística de Schwarzschild e suporte a controles táteis mobile.
 // =============================================================================
 
 import {
@@ -13,6 +13,7 @@ import {
     initToggleButton,
     initTabs,
     initFocusMirrorToolbar,
+    initOnboardingModal,
     syncDualSlider,
     MultiSeriesPlot,
     initKaTeXAutoRender,
@@ -25,7 +26,7 @@ import {
 const G = 1.0;
 
 const state = {
-    isRunning: true,
+    isRunning: false,
     speed: 1.0,
     time: 0.0,
 
@@ -35,11 +36,12 @@ const state = {
     distanciaInicial: 200,
     velocidadeInicial: 2.24,
 
-    // Camadas Visuais
+    // Camadas Visuais e Efeitos Físicos
     showPosition: true,
     showVelocity: true,
     showTrail: true,
     showGrid: true,
+    relativity: false,
 
     // Preset Ativo
     preset: 'circular'
@@ -101,11 +103,15 @@ class Planet {
             return;
         }
 
-        // Força Gravitacional de Newton F = G * M * m / r^2
+        // Força Gravitacional de Newton: a = G * M / r^2
         const fOverM = (G * state.massaSol) / distSq;
-        this.ax = (dx / dist) * fOverM;
-        this.ay = (dy / dist) * fOverM;
-        this.az = (dz / dist) * fOverM;
+
+        // Correção Relativística de Schwarzschild (termo 1/r^4 na aceleração efetiva)
+        const grFactor = state.relativity ? (1 + 2200 / distSq) : 1.0;
+
+        this.ax = (dx / dist) * fOverM * grFactor;
+        this.ay = (dy / dist) * fOverM * grFactor;
+        this.az = (dz / dist) * fOverM * grFactor;
     }
 
     // Passo Simplético de Velocity Verlet
@@ -132,6 +138,24 @@ class Planet {
 
 const planet = new Planet(200, 0, 0, 0, 2.236, 0, 10);
 planet.computeAcceleration();
+
+// Integração de física desacoplada (Executada estritamente com simulação ativa)
+function stepPhysics(simDt) {
+    state.time += simDt;
+
+    // Substepping para estabilidade numérica absoluta (8 passos por frame)
+    const subSteps = 8;
+    const subDt = simDt / subSteps;
+    for (let s = 0; s < subSteps; s++) {
+        planet.stepVerlet(subDt);
+    }
+
+    // Armazena rastro orbital EXCLUSIVAMENTE durante a integração física ativa
+    trail.push({ x: planet.x, y: planet.y, z: planet.z });
+    if (trail.length > MAX_TRAIL_POINTS) {
+        trail.shift();
+    }
+}
 
 // =============================================================================
 // 3. CANVAS, PERSPECTIVA 3D E RENDERIZAÇÃO
@@ -352,9 +376,10 @@ function setupPointerEvents() {
 
         // Limita a elevação para prevenir inversão da câmera
         camera.pitch = Math.max(-1.4, Math.min(1.4, camera.pitch));
+        renderScene();
     });
 
-    const endDrag = (e) => {
+    const endDrag = () => {
         if (camera.isDragging) {
             camera.isDragging = false;
         }
@@ -367,6 +392,7 @@ function setupPointerEvents() {
         e.preventDefault();
         camera.distance += e.deltaY * 0.45;
         camera.distance = Math.max(260, Math.min(1100, camera.distance));
+        renderScene();
     }, { passive: false });
 
     // Botão de reset de câmera
@@ -374,13 +400,51 @@ function setupPointerEvents() {
         camera.yaw = 0.35;
         camera.pitch = 0.55;
         camera.distance = 520;
+        renderScene();
     });
 }
 
 // =============================================================================
 // 5. TELEMETRIA E CONTROLES DE INTERFACE (sim-ui.js)
 // =============================================================================
+let playControl = null;
 let energyPlot = null;
+
+function updateReadouts() {
+    const r = Math.sqrt(planet.x * planet.x + planet.y * planet.y + planet.z * planet.z);
+    const vSq = planet.vx * planet.vx + planet.vy * planet.vy + planet.vz * planet.vz;
+    const v = Math.sqrt(vSq);
+
+    const K = 0.5 * planet.mass * vSq;
+    const U = -(G * state.massaSol * planet.mass) / Math.max(1, r);
+    const E = K + U;
+
+    // Excentricidade Kepleriana: e = sqrt(1 + 2 E L^2 / (G^2 M^2 m^3))
+    const lx = planet.y * planet.vz - planet.z * planet.vy;
+    const ly = planet.z * planet.vx - planet.x * planet.vz;
+    const lz = planet.x * planet.vy - planet.y * planet.vx;
+    const lSq = (lx * lx + ly * ly + lz * lz) * (planet.mass * planet.mass);
+    const mu = G * state.massaSol * planet.mass;
+    const eTerm = 1 + (2 * E * lSq) / (mu * mu * planet.mass);
+    const ecc = eTerm >= 0 ? Math.sqrt(eTerm) : 0;
+
+    // Atualização das leituras canônicas (.sim-readout)
+    const readoutR = document.getElementById('readout-raio');
+    const readoutV = document.getElementById('readout-velocidade');
+    const readoutE = document.getElementById('readout-energia-total');
+    const readoutEcc = document.getElementById('readout-excentricidade');
+
+    if (readoutR) readoutR.textContent = `${r.toFixed(1)} u`;
+    if (readoutV) readoutV.textContent = `${v.toFixed(2)} u/s`;
+    if (readoutE) readoutE.textContent = `${E.toFixed(1)} J`;
+    if (readoutEcc) readoutEcc.textContent = `${ecc.toFixed(2)}`;
+
+    // Atualização do cronômetro no rodapé
+    const timerEl = document.getElementById('footer-sim-timer');
+    if (timerEl) timerEl.textContent = `t = ${state.time.toFixed(2)}s`;
+
+    return { r, v, K, U, E, ecc };
+}
 
 function aplicarPreset(presetKey) {
     state.preset = presetKey;
@@ -429,6 +493,8 @@ function aplicarPreset(presetKey) {
     });
 
     if (energyPlot) energyPlot.clear();
+    updateReadouts();
+    renderScene();
 }
 
 function setupUI() {
@@ -451,11 +517,38 @@ function setupUI() {
         scopeSelector: '.controls-panel'
     });
 
-    // 2. Barra de Transporte
-    initToggleButton('#btn-toggle-sim', (active) => {
-        state.isRunning = active;
-    }, true);
+    // Modal de Instruções Iniciais / Guia Rápido
+    initOnboardingModal('#modal-onboarding', {
+        triggerSelector: '#btn-open-onboarding'
+    });
 
+    // 2. Barra de Transporte Flutuante (Play / Pause)
+    playControl = initToggleButton('#btn-play-sim', (active) => {
+        state.isRunning = active;
+        const footerStatus = document.getElementById('footer-status-text');
+        const label = active ? 'Órbita em Propagação' : 'Pausado';
+        if (footerStatus) footerStatus.textContent = label;
+    });
+
+    // Passo Único (Δt)
+    document.getElementById('btn-step-sim')?.addEventListener('click', () => {
+        if (state.isRunning && playControl) {
+            playControl.setState(0);
+        }
+        const dtStep = 0.05 * state.speed;
+        stepPhysics(dtStep);
+        const metrics = updateReadouts();
+        if (energyPlot) {
+            energyPlot.push({
+                k: metrics.K,
+                u: metrics.U,
+                e: metrics.E
+            });
+        }
+        renderScene();
+    });
+
+    // Reset da Órbita
     document.getElementById('btn-reset-sim')?.addEventListener('click', () => {
         aplicarPreset(state.preset);
         state.time = 0;
@@ -463,16 +556,26 @@ function setupUI() {
         if (timerEl) timerEl.textContent = 't = 0.00s';
     });
 
-    document.querySelectorAll('#sim-speed-pills .speed-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('#sim-speed-pills .speed-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            state.speed = parseFloat(btn.dataset.speed || '1.0');
+    // Botão Cíclico de Velocidade na Barra Flutuante [0.5, 1.0, 2.0, 5.0]×
+    const speedCycleSteps = [0.5, 1.0, 2.0, 5.0];
+    const btnSpeedCycle = document.getElementById('btn-speed-cycle');
+    if (btnSpeedCycle) {
+        btnSpeedCycle.addEventListener('click', () => {
+            const currentIdx = speedCycleSteps.indexOf(state.speed);
+            const nextSpeed = speedCycleSteps[(currentIdx + 1) % speedCycleSteps.length];
+            state.speed = nextSpeed;
+            btnSpeedCycle.dataset.speed = nextSpeed.toFixed(1);
+            btnSpeedCycle.textContent = `${nextSpeed.toFixed(1)}×`;
         });
-    });
+    }
 
     // 3. Alternância de Abas Padronizada
-    initTabs('.controls-panel');
+    initTabs('.controls-panel', (tabId) => {
+        if (tabId === 'panel-tab-theory') {
+            const theoryPane = document.getElementById('panel-tab-theory');
+            if (theoryPane) initKaTeXAutoRender(theoryPane);
+        }
+    });
 
     // 4. Presets
     document.querySelectorAll('.btn-preset, .preset-chip-btn').forEach(btn => {
@@ -485,37 +588,56 @@ function setupUI() {
     syncDualSlider('#slider-massa-sol', '#num-massa-sol', (val) => {
         state.massaSol = val;
         planet.computeAcceleration();
+        updateReadouts();
+        renderScene();
     });
 
     syncDualSlider('#slider-massa-planeta', '#num-massa-planeta', (val) => {
         state.massaPlaneta = val;
         planet.mass = val;
+        updateReadouts();
+        renderScene();
     });
 
     syncDualSlider('#slider-distancia', '#num-distancia', (val) => {
         state.distanciaInicial = val;
         planet.reset(state.distanciaInicial, 0, 0, 0, 0, state.velocidadeInicial, state.massaPlaneta);
         trail.length = 0;
+        if (energyPlot) energyPlot.clear();
+        updateReadouts();
+        renderScene();
     });
 
     syncDualSlider('#slider-velocidade', '#num-velocidade', (val) => {
         state.velocidadeInicial = val;
         planet.reset(state.distanciaInicial, 0, 0, 0, 0, state.velocidadeInicial, state.massaPlaneta);
         trail.length = 0;
+        if (energyPlot) energyPlot.clear();
+        updateReadouts();
+        renderScene();
     });
 
-    // 6. Checkboxes Visuais
+    // 6. Checkboxes e Interruptores Visuais
     document.getElementById('show-position')?.addEventListener('change', (e) => {
         state.showPosition = e.target.checked;
+        renderScene();
     });
     document.getElementById('show-velocity')?.addEventListener('change', (e) => {
         state.showVelocity = e.target.checked;
+        renderScene();
     });
     document.getElementById('show-orbit-trail')?.addEventListener('change', (e) => {
         state.showTrail = e.target.checked;
+        renderScene();
     });
     document.getElementById('show-grid-3d')?.addEventListener('change', (e) => {
         state.showGrid = e.target.checked;
+        renderScene();
+    });
+    document.getElementById('toggle-relativity')?.addEventListener('change', (e) => {
+        state.relativity = e.target.checked;
+        planet.computeAcceleration();
+        renderScene();
     });
 
     // 7. Telemetria Multicanal (MultiSeriesPlot)
@@ -540,69 +662,31 @@ let telemetryCounter = 0;
 function animate(currentTime) {
     requestAnimationFrame(animate);
 
+    if (document.hidden) {
+        lastTime = currentTime;
+        return;
+    }
+
     const elapsed = Math.min((currentTime - lastTime) / 1000, 0.05);
     lastTime = currentTime;
 
     if (state.isRunning) {
         const simDt = elapsed * state.speed;
-        state.time += simDt;
+        stepPhysics(simDt);
 
-        // Substepping para estabilidade numérica absoluta (8 passos por frame)
-        const subSteps = 8;
-        const subDt = simDt / subSteps;
-        for (let s = 0; s < subSteps; s++) {
-            planet.stepVerlet(subDt);
+        const metrics = updateReadouts();
+
+        // Push no gráfico de energia a cada 2 frames EXCLUSIVAMENTE durante simulação ativa
+        if (energyPlot && ++telemetryCounter % 2 === 0) {
+            energyPlot.push({
+                k: metrics.K,
+                u: metrics.U,
+                e: metrics.E
+            });
         }
-
-        // Armazena rastro
-        trail.push({ x: planet.x, y: planet.y, z: planet.z });
-        if (trail.length > MAX_TRAIL_POINTS) {
-            trail.shift();
-        }
-
-        const timerEl = document.getElementById('footer-sim-timer');
-        if (timerEl) timerEl.textContent = `t = ${state.time.toFixed(2)}s`;
     }
 
     renderScene();
-
-    // Cálculos de Telemetria e Conservação de Energia
-    const r = Math.sqrt(planet.x * planet.x + planet.y * planet.y + planet.z * planet.z);
-    const vSq = planet.vx * planet.vx + planet.vy * planet.vy + planet.vz * planet.vz;
-    const v = Math.sqrt(vSq);
-
-    const K = 0.5 * planet.mass * vSq;
-    const U = -(G * state.massaSol * planet.mass) / Math.max(1, r);
-    const E = K + U;
-
-    // Excentricidade Kepleriana: e = sqrt(1 + 2 E L^2 / (G^2 M^2 m^3))
-    const lx = planet.y * planet.vz - planet.z * planet.vy;
-    const ly = planet.z * planet.vx - planet.x * planet.vz;
-    const lz = planet.x * planet.vy - planet.y * planet.vx;
-    const lSq = (lx * lx + ly * ly + lz * lz) * (planet.mass * planet.mass);
-    const mu = G * state.massaSol * planet.mass;
-    const eTerm = 1 + (2 * E * lSq) / (mu * mu * planet.mass);
-    const ecc = eTerm >= 0 ? Math.sqrt(eTerm) : 0;
-
-    // Atualização de HUD
-    const hudR = document.getElementById('hud-raio');
-    const hudV = document.getElementById('hud-velocidade');
-    const hudE = document.getElementById('hud-energia-total');
-    const hudEcc = document.getElementById('hud-excentricidade');
-
-    if (hudR) hudR.textContent = `${r.toFixed(1)} u`;
-    if (hudV) hudV.textContent = `${v.toFixed(2)} u/s`;
-    if (hudE) hudE.textContent = `${E.toFixed(1)} J`;
-    if (hudEcc) hudEcc.textContent = `${ecc.toFixed(2)}`;
-
-    // Push no gráfico de energia a cada 2 frames
-    if (energyPlot && state.isRunning && ++telemetryCounter % 2 === 0) {
-        energyPlot.push({
-            k: K,
-            u: U,
-            e: E
-        });
-    }
 }
 
 // =============================================================================

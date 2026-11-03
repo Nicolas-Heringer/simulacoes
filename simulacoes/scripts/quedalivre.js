@@ -7,7 +7,8 @@ import {
     initBottomSheet,
     initTabs,
     initKaTeXAutoRender,
-    inlineSVGImages
+    inlineSVGImages,
+    initOnboardingModal
 } from './sim-ui.js';
 
 // =============================================================================
@@ -16,14 +17,14 @@ import {
 const PIXELS_POR_METRO = 50; // Escala: 50px = 1 metro
 
 const state = {
-    isRunning: true,
+    isRunning: false,    // Inicia estritamente pausada (idle)
     speed: 1.0,
     time: 0.0,
-    g: 9.8,             // m/s²
-    restituicao: 0.75,   // adimensional [0, 1]
-    arrasto: 0.02,      // kg/s
-    massa: 2.0,         // kg
-    raio: 28            // px
+    g: 9.8,              // m/s²
+    restituicao: 0.75,    // adimensional [0, 1]
+    arrasto: 0.02,       // kg/s
+    massa: 2.0,          // kg
+    raio: 28             // px
 };
 
 // Objeto Físico
@@ -42,6 +43,7 @@ const canvas = document.getElementById('simulacao');
 const ctx = canvas.getContext('2d');
 
 let plotEnergia = null;
+let playControl = null;
 
 // =============================================================================
 // 2. REDIMENSIONAMENTO FLUIDO DO CANVAS
@@ -76,7 +78,7 @@ function getCanvasLogicalHeight() {
 }
 
 // =============================================================================
-// 3. FÍSICA E INTEGRAÇÃO TEMPORAL
+// 3. FÍSICA E INTEGRAÇÃO TEMPORAL (EDO)
 // =============================================================================
 function stepPhysics(dt) {
     if (ball.isDragging) return;
@@ -86,7 +88,7 @@ function stepPhysics(dt) {
     const gPixels = state.g * PIXELS_POR_METRO;
     const r = state.raio;
 
-    // Sub-stepping numérico (4 passos por frame para precisão de impacto)
+    // Sub-stepping numérico (4 passos por frame para fidelidade de impacto)
     const subSteps = 4;
     const subDt = dt / subSteps;
 
@@ -110,7 +112,7 @@ function stepPhysics(dt) {
         if (ball.y + r >= h) {
             ball.y = h - r;
             ball.vy = -ball.vy * state.restituicao;
-            ball.vx = ball.vx * 0.98; // Atrito de contato com o chão
+            ball.vx = ball.vx * 0.98; // Atrito superficial com o piso
 
             // Repouso se a velocidade for imperceptível
             if (Math.abs(ball.vy) < 18) {
@@ -148,7 +150,7 @@ function computeMetrics() {
     const velPx = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
     const velM = velPx / PIXELS_POR_METRO;
 
-    // Energias (Joules)
+    // Energias instantâneas (Joules)
     const K = 0.5 * state.massa * velM * velM;
     const U = state.massa * state.g * alturaM;
     const E = K + U;
@@ -157,8 +159,36 @@ function computeMetrics() {
 }
 
 // =============================================================================
-// 4. RENDERIZAÇÃO GRÁFICA (CANVAS 2D)
+// 4. RENDERIZAÇÃO GRÁFICA & PASS DE APRESENTAÇÃO DESACOPLADO
 // =============================================================================
+function drawArrow(ctx, fromX, fromY, toX, toY, color, width = 2.5, headLength = 9) {
+    const dx = toX - fromX;
+    const dy = toY - fromY;
+    const len = Math.hypot(dx, dy);
+    if (len < 1) return;
+
+    const angle = Math.atan2(dy, dx);
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = width;
+
+    // Linha principal
+    ctx.beginPath();
+    ctx.moveTo(fromX, fromY);
+    ctx.lineTo(toX, toY);
+    ctx.stroke();
+
+    // Cabeça da seta
+    ctx.beginPath();
+    ctx.moveTo(toX, toY);
+    ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), toY - headLength * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+}
+
 function render() {
     const w = getCanvasLogicalWidth();
     const h = getCanvasLogicalHeight();
@@ -176,14 +206,14 @@ function render() {
         ctx.stroke();
     }
 
-    // 2. Linha do solo com gradiente
+    // 2. Linha do solo com gradiente de profundidade
     const groundGrad = ctx.createLinearGradient(0, h - 8, 0, h);
     groundGrad.addColorStop(0, 'rgba(56, 189, 248, 0.6)');
     groundGrad.addColorStop(1, 'rgba(56, 189, 248, 0.1)');
     ctx.fillStyle = groundGrad;
     ctx.fillRect(0, h - 6, w, 6);
 
-    // 3. Sombra projetada no solo
+    // 3. Sombra projetada no piso
     const distSolo = Math.max(0, h - r - ball.y);
     const shadowScale = Math.max(0.2, 1 - distSolo / 350);
     const shadowAlpha = Math.max(0.08, 0.45 * (1 - distSolo / 350));
@@ -192,18 +222,41 @@ function render() {
     ctx.fillStyle = `rgba(0, 0, 0, ${shadowAlpha.toFixed(2)})`;
     ctx.fill();
 
-    // 4. Trajetória / Vetor Velocidade
+    // 4. Vetores Físicos (Peso e Arrasto)
+    const velM_x = ball.vx / PIXELS_POR_METRO;
+    const velM_y = ball.vy / PIXELS_POR_METRO;
+
+    // Força Peso: P = m * g (orientada para baixo)
+    const Fg = state.massa * state.g;
+    if (Fg > 0.01) {
+        const fgArrowLen = Math.min(140, Math.max(16, Fg * 3.5));
+        drawArrow(ctx, ball.x, ball.y, ball.x, ball.y + fgArrowLen, '#f43f5e', 2.5, 8);
+        ctx.fillStyle = '#f43f5e';
+        ctx.font = '11px monospace';
+        ctx.fillText(`P = ${Fg.toFixed(1)} N`, ball.x + 8, ball.y + fgArrowLen);
+    }
+
+    // Força de Arrasto: F_drag = -b * v (sentido oposto ao vetor velocidade)
+    const Fdrag_x = -state.arrasto * velM_x;
+    const Fdrag_y = -state.arrasto * velM_y;
+    const FdragMag = Math.hypot(Fdrag_x, Fdrag_y);
+
+    if (FdragMag > 0.005) {
+        const dragScale = 220;
+        const dragArrowX = ball.x + Math.max(-140, Math.min(140, Fdrag_x * dragScale));
+        const dragArrowY = ball.y + Math.max(-140, Math.min(140, Fdrag_y * dragScale));
+        drawArrow(ctx, ball.x, ball.y, dragArrowX, dragArrowY, '#38bdf8', 2.5, 8);
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = '11px monospace';
+        ctx.fillText(`F_drag = ${FdragMag.toFixed(2)} N`, dragArrowX + 6, dragArrowY - 4);
+    }
+
+    // Vetor Velocidade (Amarelo)
     if (!ball.isDragging && (Math.abs(ball.vx) > 5 || Math.abs(ball.vy) > 5)) {
         const arrowScale = 0.15;
         const arrowX = ball.x + ball.vx * arrowScale;
         const arrowY = ball.y + ball.vy * arrowScale;
-
-        ctx.beginPath();
-        ctx.moveTo(ball.x, ball.y);
-        ctx.lineTo(arrowX, arrowY);
-        ctx.strokeStyle = 'rgba(250, 204, 21, 0.65)';
-        ctx.lineWidth = 2.5;
-        ctx.stroke();
+        drawArrow(ctx, ball.x, ball.y, arrowX, arrowY, 'rgba(250, 204, 21, 0.85)', 2, 7);
     }
 
     // 5. Renderização da Esfera Física com Efeito Glow
@@ -232,11 +285,33 @@ function render() {
     ctx.fillStyle = ballGrad;
     ctx.fill();
 
-    // Contorno
+    // Contorno estético
     ctx.shadowBlur = 0;
     ctx.lineWidth = 1.5;
     ctx.strokeStyle = ball.isDragging ? '#bae6fd' : '#fef08a';
     ctx.stroke();
+}
+
+function updateReadouts() {
+    const metrics = computeMetrics();
+    const elVel = document.getElementById('readout-vel');
+    const elAlt = document.getElementById('readout-altura');
+    const elK = document.getElementById('readout-energia-k');
+    const elU = document.getElementById('readout-energia-u');
+    const elE = document.getElementById('readout-energia-total');
+    const plotVal = document.getElementById('plot-valor-e');
+
+    if (elVel) elVel.textContent = `${metrics.velM.toFixed(2)} m/s`;
+    if (elAlt) elAlt.textContent = `${metrics.alturaM.toFixed(2)} m`;
+    if (elK) elK.textContent = `${metrics.K.toFixed(1)} J`;
+    if (elU) elU.textContent = `${metrics.U.toFixed(1)} J`;
+    if (elE) elE.textContent = `${metrics.E.toFixed(1)} J`;
+    if (plotVal) plotVal.textContent = `${metrics.E.toFixed(1)} J`;
+}
+
+function updateVisualScene() {
+    render();
+    updateReadouts();
 }
 
 // =============================================================================
@@ -267,6 +342,7 @@ function setupPointerEvents() {
             ball.dragHistory = [{ x: pos.x, y: pos.y, t: performance.now() }];
             canvas.setPointerCapture(e.pointerId);
             canvas.style.cursor = 'grabbing';
+            updateVisualScene();
         }
     });
 
@@ -288,6 +364,8 @@ function setupPointerEvents() {
             while (ball.dragHistory.length > 2 && (now - ball.dragHistory[0].t) > 80) {
                 ball.dragHistory.shift();
             }
+
+            updateVisualScene();
         } else {
             canvas.style.cursor = isInsideBall(pos) ? 'grab' : 'default';
         }
@@ -308,7 +386,7 @@ function setupPointerEvents() {
             ball.vx = (last.x - first.x) / dtSec;
             ball.vy = (last.y - first.y) / dtSec;
 
-            // Limitar velocidade máxima de arremesso para estabilidade
+            // Limitar velocidade máxima de arremesso para estabilidade numérica
             const maxSpeed = 2500;
             const curSpeed = Math.hypot(ball.vx, ball.vy);
             if (curSpeed > maxSpeed) {
@@ -317,13 +395,14 @@ function setupPointerEvents() {
             }
         }
         ball.dragHistory = [];
+        updateVisualScene();
     };
 
     canvas.addEventListener('pointerup', endDrag);
     canvas.addEventListener('pointercancel', endDrag);
 }
 
-// Reposiciona a bola no topo
+// Reposiciona a bola no topo central
 function resetBall() {
     const w = getCanvasLogicalWidth();
     ball.x = w / 2;
@@ -341,7 +420,10 @@ function setupUI() {
         layoutSelector: '.sim-layout',
         collapseBtnSelector: '#btn-collapse-sidebar',
         expandBtnSelector: '#btn-expand-sidebar',
-        onResize: resizeCanvas
+        onResize: () => {
+            resizeCanvas();
+            updateVisualScene();
+        }
     });
 
     // Mobile Bottom Sheet
@@ -359,53 +441,99 @@ function setupUI() {
         scopeSelector: '.controls-panel'
     });
 
-    // Barra de Transporte (Play / Pause)
-    const playControl = initToggleButton('#btn-play-sim', (active) => {
+    // Modal de Instruções Iniciais / Guia Rápido
+    initOnboardingModal('#modal-onboarding', {
+        triggerSelector: '#btn-open-onboarding'
+    });
+
+    // Barra Flutuante de Transporte: Play / Pause com toggle canônico
+    playControl = initToggleButton('#btn-play-sim', (active) => {
         state.isRunning = active;
+        const statusBadge = document.getElementById('footer-status-badge');
         const statusEl = document.getElementById('footer-status-text');
-        if (statusEl) statusEl.textContent = active ? 'Simulação Ativa' : 'Pausada';
+        if (statusBadge) {
+            if (active) {
+                statusBadge.classList.remove('idle');
+            } else {
+                statusBadge.classList.add('idle');
+            }
+        }
+        if (statusEl) {
+            statusEl.textContent = active ? 'Simulação Ativa' : 'Pausada (Em Espera)';
+        }
     });
 
-    // Botão de Avanço Passo a Passo
+    // Botão de Avanço Passo a Passo (Passo Único Δt)
     document.getElementById('btn-step-sim')?.addEventListener('click', () => {
-        if (state.isRunning) playControl.setState(0);
-        stepPhysics(0.016);
+        if (state.isRunning && playControl) {
+            playControl.setState(0);
+        }
+        const dtStep = 0.016 * state.speed;
+        stepPhysics(dtStep);
+        state.time += dtStep;
+
+        const timerEl = document.getElementById('footer-sim-timer');
+        if (timerEl) timerEl.textContent = `t = ${state.time.toFixed(2)}s`;
+
+        const metrics = computeMetrics();
+        if (plotEnergia) {
+            plotEnergia.push(metrics.E);
+        }
+        updateVisualScene();
     });
 
-    // Botão de Reinício (Reset)
+    // Botões de Reinício (Reset)
     const handleReset = () => {
         state.time = 0;
         resetBall();
         const timerEl = document.getElementById('footer-sim-timer');
         if (timerEl) timerEl.textContent = 't = 0.00s';
+        if (plotEnergia) {
+            plotEnergia.data.fill(0);
+            plotEnergia.render();
+        }
+        updateVisualScene();
     };
     document.getElementById('btn-reset-sim')?.addEventListener('click', handleReset);
     document.getElementById('btn-quick-reset')?.addEventListener('click', handleReset);
 
-    // Seletor de Velocidade Temporal
-    document.querySelectorAll('#sim-speed-pills .speed-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('#sim-speed-pills .speed-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            state.speed = parseFloat(btn.dataset.speed || '1.0');
+    // Botão Cíclico de Velocidade na Barra Flutuante [0.5, 1.0, 2.0, 5.0]×
+    const speedCycleSteps = [0.5, 1.0, 2.0, 5.0];
+    const btnSpeedCycle = document.getElementById('btn-speed-cycle');
+    if (btnSpeedCycle) {
+        btnSpeedCycle.addEventListener('click', () => {
+            const currentIdx = speedCycleSteps.indexOf(state.speed);
+            const nextSpeed = speedCycleSteps[(currentIdx + 1) % speedCycleSteps.length];
+            state.speed = nextSpeed;
+            btnSpeedCycle.dataset.speed = nextSpeed.toFixed(1);
+            btnSpeedCycle.textContent = `${nextSpeed.toFixed(1)}×`;
         });
-    });
+    }
 
-    // Sliders Sincronizados
+    // Sliders Sincronizados com Feedback Visual Imediato
     syncDualSlider('#slider-gravidade', '#num-gravidade', (val) => {
         state.g = val;
+        updateVisualScene();
     });
 
     syncDualSlider('#slider-restituicao', '#num-restituicao', (val) => {
         state.restituicao = val;
+        updateVisualScene();
     });
 
     syncDualSlider('#slider-arrasto', '#num-arrasto', (val) => {
         state.arrasto = val;
+        updateVisualScene();
     });
 
     syncDualSlider('#slider-massa', '#num-massa', (val) => {
         state.massa = val;
+        state.raio = Math.max(16, Math.min(45, Math.round(28 * Math.cbrt(state.massa / 2.0))));
+        const w = getCanvasLogicalWidth();
+        const h = getCanvasLogicalHeight();
+        ball.x = Math.max(state.raio, Math.min(w - state.raio, ball.x));
+        ball.y = Math.max(state.raio, Math.min(h - state.raio, ball.y));
+        updateVisualScene();
     });
 
     // Navegação de Abas via Design System
@@ -428,35 +556,31 @@ let lastTime = performance.now();
 function animate(currentTime) {
     requestAnimationFrame(animate);
 
+    // Otimização de Abas em Background
+    if (document.hidden) {
+        lastTime = currentTime;
+        return;
+    }
+
     const dt = Math.min((currentTime - lastTime) / 1000, 0.05);
     lastTime = currentTime;
 
+    // REGRA DE OURO: EDO e plotagem executam estritamente quando rodando
     if (state.isRunning) {
         stepPhysics(dt * state.speed);
         state.time += dt * state.speed;
 
         const timerEl = document.getElementById('footer-sim-timer');
         if (timerEl) timerEl.textContent = `t = ${state.time.toFixed(2)}s`;
+
+        const metrics = computeMetrics();
+        if (plotEnergia) {
+            plotEnergia.push(metrics.E);
+        }
     }
 
-    // Renderiza a cena
-    render();
-
-    // Telemetria e HUD
-    const metrics = computeMetrics();
-    const hudVel = document.getElementById('hud-vel');
-    const hudAlt = document.getElementById('hud-altura');
-    const hudEng = document.getElementById('hud-energia');
-    const plotVal = document.getElementById('plot-valor-e');
-
-    if (hudVel) hudVel.textContent = `${metrics.velM.toFixed(1)} m/s`;
-    if (hudAlt) hudAlt.textContent = `${metrics.alturaM.toFixed(1)} m`;
-    if (hudEng) hudEng.textContent = `${metrics.E.toFixed(1)} J`;
-    if (plotVal) plotVal.textContent = `${metrics.E.toFixed(1)} J`;
-
-    if (plotEnergia && state.isRunning) {
-        plotEnergia.push(metrics.E);
-    }
+    // Pass de Apresentação Gráfica e Leituras Numéricas
+    updateVisualScene();
 }
 
 // =============================================================================
@@ -465,10 +589,14 @@ function animate(currentTime) {
 window.addEventListener('DOMContentLoaded', () => {
     inlineSVGImages();
     resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('resize', () => {
+        resizeCanvas();
+        updateVisualScene();
+    });
     setupPointerEvents();
     setupUI();
     resetBall();
+    updateVisualScene();
     initKaTeXAutoRender(document.body);
     requestAnimationFrame(animate);
 });

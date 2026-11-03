@@ -54,11 +54,17 @@
         <div class="canvas-area">
             <div id="three-container"></div>
 
-            <!-- Barra Flutuante em Modo Foco (Design System 2.0 Mirror) -->
-            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            <!-- Pilha Vertical Automática no Canto Superior Esquerdo -->
+            <div class="canvas-top-left-stack">
+                <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            </div>
 
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
+                <button id="btn-open-onboarding" class="canvas-btn-floating" title="Instruções e Guia Rápido">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span class="btn-label-text">Instruções</span>
+                </button>
                 <button id="btn-quick-autorotate" class="canvas-btn-floating" title="Alternar Rotação da Câmera">
                     <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Rotação">
                     <span class="btn-label-text">Rotação</span>
@@ -67,12 +73,6 @@
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
                 </button>
-            </div>
-
-            <!-- Dica Interativa Flutuante -->
-            <div class="interactive-hint">
-                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dica">
-                Arraste para orbitar a nuvem de probabilidade ou use F para alternar o modo foco.
             </div>
         </div>
 
@@ -340,6 +340,58 @@
 
         </aside>
     </main>
+
+    <!-- Modal de Instruções Iniciais / Guia Rápido (.modal-onboarding) -->
+    <div id="modal-onboarding" class="sim-modal-overlay modal-onboarding hidden" aria-hidden="true" role="dialog">
+        <div class="sim-modal-container">
+            <div class="sim-modal-header">
+                <div class="sim-modal-title">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span>Átomo de Hidrogênio — Guia Rápido</span>
+                </div>
+                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+            </div>
+            <div class="sim-modal-body">
+                <p class="onboarding-intro">
+                    Explore a distribuição espacial da função de onda $\Psi_{n,l,m_l}(r,\theta,\phi)$ do elétron no potencial coulombiano via amostragem 3D de Monte Carlo.
+                </p>
+                <div class="onboarding-grid">
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/orbital.svg" class="icon-svg" alt="">
+                            <span>1. Números Quânticos</span>
+                        </div>
+                        <p class="onboarding-card-text">Configure o nível principal ($n$), momento angular azimutal ($l$) e projeção magnética ($m_l$) para selecionar o autoestado de Schrödinger.</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="">
+                            <span>2. Densidade $|\Psi|^2$</span>
+                        </div>
+                        <p class="onboarding-card-text">A densidade de pontos no espaço representa a probabilidade de encontrar o elétron, evidenciando nós radiais e angulares.</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/prism.svg" class="icon-svg" alt="">
+                            <span>3. Fase Quântica & Cores</span>
+                        </div>
+                        <p class="onboarding-card-text">Alterne entre o mapa da fase complexa $\arg(\Psi)$ (cores do espectro contínuo) e a densidade de probabilidade $|\Psi|^2$.</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/mouse-left.svg" class="icon-svg" alt="">
+                            <span>4. Navegação 3D & Modo Foco</span>
+                        </div>
+                        <p class="onboarding-card-text">Arraste para orbitar, use o scroll para zoom, ative a autorrotação ou use a tecla <kbd>F</kbd> para imersão em tela cheia.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="sim-modal-footer">
+                <span class="sim-modal-hint">Clique fora ou pressione <kbd>Esc</kbd> para fechar</span>
+                <button class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Script da Simulação -->
     <script type="module" src="scripts/atomo_de_hidrogenio.js"></script>

@@ -55,26 +55,29 @@
         <div class="canvas-area">
             <div id="three-container"></div>
 
-            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            <!-- Pilha Vertical no Topo Esquerdo -->
+            <div class="canvas-top-left-stack">
+                <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
 
-            <!-- Barra de Ferramentas Flutuante no Topo Esquerdo (Opções de Exibição / Camadas) -->
-            <div class="canvas-toolbar pos-top-left" id="display-toolbar">
-                <button id="btn-toggle-layers-popover" class="toolbar-btn" title="Menu de Camadas & Exibição">
-                    <img src="../assets/icons/globe.svg" class="icon-svg" alt="Exibição">
-                    <span>Exibição</span>
-                </button>
-                <div class="toolbar-divider"></div>
-                <button id="btn-quick-generators" class="toolbar-btn active"
-                    title="Alternar Pontos Geradores (Centros)">
-                    <span class="btn-label-text">Centros</span>
-                </button>
-                <button id="btn-quick-wireframe" class="toolbar-btn active"
-                    title="Alternar Linhas das Células (Wireframe)">
-                    <span class="btn-label-text">Wireframe</span>
-                </button>
-                <button id="btn-quick-graticule" class="toolbar-btn active" title="Alternar Equador & Linhas de Grade">
-                    <span class="btn-label-text">Grade</span>
-                </button>
+                <!-- Barra de Ferramentas Flutuante no Topo Esquerdo (Opções de Exibição / Camadas) -->
+                <div class="canvas-toolbar pos-top-left" id="display-toolbar">
+                    <button id="btn-toggle-layers-popover" class="toolbar-btn" title="Menu de Camadas & Exibição">
+                        <img src="../assets/icons/globe.svg" class="icon-svg" alt="Exibição">
+                        <span>Exibição</span>
+                    </button>
+                    <div class="toolbar-divider"></div>
+                    <button id="btn-quick-generators" class="toolbar-btn active"
+                        title="Alternar Pontos Geradores (Centros)">
+                        <span class="btn-label-text">Centros</span>
+                    </button>
+                    <button id="btn-quick-wireframe" class="toolbar-btn active"
+                        title="Alternar Linhas das Células (Wireframe)">
+                        <span class="btn-label-text">Wireframe</span>
+                    </button>
+                    <button id="btn-quick-graticule" class="toolbar-btn active" title="Alternar Equador & Linhas de Grade">
+                        <span class="btn-label-text">Grade</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Popover de Opções de Exibição (Pequeno Menu Flutuante) -->
@@ -116,6 +119,10 @@
 
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
+                <button id="btn-open-onboarding" class="canvas-btn-floating" title="Instruções e Guia Rápido">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span class="btn-label-text">Instruções</span>
+                </button>
                 <button id="btn-quick-autorotate" class="canvas-btn-floating" title="Alternar Rotação Axial da Terra">
                     <img src="../assets/icons/rotate.svg" class="icon-svg icon-spin" alt="Rotação">
                     <span class="btn-label-text" id="label-quick-autorotate">Rotação da Terra</span>
@@ -174,13 +181,6 @@
                     <span class="hud-label">Exagero Vertical:</span>
                     <span class="hud-val" id="stat-exaggeration" style="color: #a855f7;">-</span>
                 </div>
-            </div>
-
-            <!-- Dica Interativa Flutuante -->
-            <div class="interactive-hint" id="canvas-interactive-hint">
-                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dica">
-                <span>Arraste para girar a esfera e passe o cursor sobre as células para inspecionar topologia e
-                    clima.</span>
             </div>
         </div>
 
@@ -732,6 +732,68 @@
             <div class="sim-modal-footer">
                 <span class="sim-modal-hint">Pressione <kbd>Esc</kbd> para fechar</span>
                 <button class="btn-primary" data-modal-close style="min-width: 100px;">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- MODAL DE INSTRUÇÕES INICIAIS / GUIA RÁPIDO (.modal-onboarding) -->
+    <!-- ============================================================= -->
+    <div id="modal-onboarding" class="sim-modal-overlay modal-onboarding hidden" aria-hidden="true" role="dialog">
+        <div class="sim-modal-container">
+            <div class="sim-modal-header">
+                <div class="sim-modal-title">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span>Tesselação de Voronoi & Clima Planetário — Guia Rápido</span>
+                </div>
+                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+            </div>
+            <div class="sim-modal-body">
+                <p class="onboarding-intro">
+                    Explore a geração de malhas geodésicas esféricas por Voronoi (SCVT), a escala geométrica real da atmosfera terrestre, a mecânica celeste das estações do ano e os padrões de circulação e ventos globais.
+                </p>
+                <div class="onboarding-grid">
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/particle-grid.svg" class="icon-svg" alt="Voronoi">
+                            <span>1. Voronoi Esférico & Relaxamento de Lloyd</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            A distribuição aleatória inicial converge iterativamente para uma Tesselação Centroide de Voronoi Esférica (SCVT). Pela característica de Euler ($\chi = 2$), a malha estabiliza com exatamente 12 pentágonos ($F_5$) entre hexágonos ($F_6$).
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/globe.svg" class="icon-svg" alt="Escala Atmosférica">
+                            <span>2. Troposfera & Escalas Atmosféricas</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Compare a espessura real da troposfera ($\approx 12\text{ km}$) com o raio da Terra ($6371\text{ km}$, apenas $0{,}19\%$). Ajuste o controle de exagero vertical para inspecionar os perfis térmicos e de altitude em 3D.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/sun.svg" class="icon-svg" alt="Estações">
+                            <span>3. Mecânica Celeste, Estações & Insolação</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            A inclinação axial ($\epsilon = 23{,}44^\circ$) dita a variação da declinação solar ($\delta_\odot$) ao longo do ano. Simule os solstícios e equinócios, acompanhando o ponto subsolar e a distribuição zonal de irradiância.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/wind.svg" class="icon-svg" alt="Circulação Global">
+                            <span>4. Circulação Global & Efeito Coriolis</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            O desequilíbrio radiativo equatorial aciona as células convectivas de Hadley, Ferrel e Polar. A aceleração de Coriolis deflete os fluxos, originando os ventos alísios tropicais, ventos de oeste e vórtices ciclônicos.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="sim-modal-footer">
+                <span class="sim-modal-hint">Clique fora ou pressione <kbd>Esc</kbd> para fechar</span>
+                <button class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
             </div>
         </div>
     </div>

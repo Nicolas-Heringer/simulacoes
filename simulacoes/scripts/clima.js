@@ -13,6 +13,7 @@ import {
     initFocusMirrorToolbar,
     syncDualSlider,
     initModal,
+    initOnboardingModal,
     inlineSVGImages,
     initKaTeXAutoRender
 } from './sim-ui.js';
@@ -1288,6 +1289,8 @@ let lastFrameTimestamp = 0;
 function animate(timestamp) {
     requestAnimationFrame(animate);
 
+    if (document.hidden) return;
+
     const dt = Math.min(0.1, (timestamp - (lastFrameTimestamp || timestamp)) / 1000.0);
     lastFrameTimestamp = timestamp;
 
@@ -1725,6 +1728,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     initFocusMirrorToolbar({
         toolbarTarget: '#focus-context-toolbar',
         scopeSelector: '.controls-panel'
+    });
+
+    initOnboardingModal('#modal-onboarding', {
+        triggerSelector: '#btn-open-onboarding'
     });
 
     const modalTeoria = initModal('#modal-teoria');

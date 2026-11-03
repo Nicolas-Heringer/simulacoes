@@ -59,7 +59,7 @@ export class ModoDinamico {
                 d: parseFloat(dynM22.value) || 0
             };
             this.updateClassification();
-            this.plano.draw();
+            this.drawDynamicScene();
         };
 
         [dynM11, dynM12, dynM21, dynM22].forEach(inp => {
@@ -74,7 +74,7 @@ export class ModoDinamico {
 
         // Transporte
         if (btnPlayDyn) {
-            initToggleButton(btnPlayDyn, (isActive) => {
+            this.playToggleControl = initToggleButton(btnPlayDyn, (isActive) => {
                 this.isPlaying = isActive;
                 if (this.isPlaying) {
                     this.lastTime = performance.now();
@@ -87,7 +87,10 @@ export class ModoDinamico {
 
         if (btnStepDyn) {
             btnStepDyn.addEventListener('click', () => {
+                const wasPlaying = this.isPlaying;
+                this.isPlaying = true;
                 this.stepPhysics(0.05);
+                this.isPlaying = wasPlaying;
                 this.drawDynamicScene();
             });
         }
@@ -271,14 +274,16 @@ export class ModoDinamico {
             seed.x += (dt / 6) * (k1.vx + 2 * k2.vx + 2 * k3.vx + k4.vx);
             seed.y += (dt / 6) * (k1.vy + 2 * k2.vy + 2 * k3.vy + k4.vy);
 
-            seed.trail.push({ x: seed.x, y: seed.y });
-            if (seed.trail.length > this.maxTrailLength) {
-                seed.trail.shift();
+            if (this.isPlaying) {
+                seed.trail.push({ x: seed.x, y: seed.y });
+                if (seed.trail.length > this.maxTrailLength) {
+                    seed.trail.shift();
+                }
             }
         });
 
         // Telemetria da primeira semente ativa
-        if (this.telemetryPlot && this.seeds.length > 0) {
+        if (this.isPlaying && this.telemetryPlot && this.seeds.length > 0) {
             const primary = this.seeds[0];
             const r = Math.hypot(primary.x, primary.y);
             this.telemetryPlot.push(r);
@@ -287,14 +292,15 @@ export class ModoDinamico {
 
     loop() {
         if (!this.isPlaying) return;
+        this.animRequestId = requestAnimationFrame(() => this.loop());
+        if (document.hidden) return;
+
         const now = performance.now();
         const delta = Math.min((now - this.lastTime) / 1000, 0.05);
         this.lastTime = now;
 
         this.stepPhysics(delta);
         this.drawDynamicScene();
-
-        this.animRequestId = requestAnimationFrame(() => this.loop());
     }
 
     drawDynamicScene() {
@@ -499,6 +505,7 @@ export class ModoDinamico {
 
     mount() {
         this.isActive = true;
+        this.isPlaying = false;
         this.plano.showVVec = false;
         this.plano.showVPrime = false;
         this.plano.showDisplacementVec = false;
@@ -522,5 +529,8 @@ export class ModoDinamico {
         this.isActive = false;
         this.isPlaying = false;
         cancelAnimationFrame(this.animRequestId);
+        if (this.playToggleControl && this.playToggleControl.isActive()) {
+            this.playToggleControl.setState(0);
+        }
     }
 }

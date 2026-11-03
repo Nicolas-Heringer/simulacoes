@@ -44,8 +44,17 @@
         <div class="canvas-area">
             <canvas id="myCanvas"></canvas>
 
+            <!-- Pilha Vertical Automática no Canto Superior Esquerdo -->
+            <div class="canvas-top-left-stack">
+                <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+            </div>
+
             <!-- Grupo de Ações do Topo Direito -->
             <div class="canvas-top-actions">
+                <button id="btn-open-onboarding" class="canvas-btn-floating" title="Instruções e Guia Rápido">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span class="btn-label-text">Instruções</span>
+                </button>
                 <button id="btn-quick-pulse" class="canvas-btn-floating" title="Excitação Térmica Central">
                     <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="Pulso">
                     <span class="btn-label-text">Pulso Central</span>
@@ -56,29 +65,24 @@
                 </button>
             </div>
 
-            <!-- Barra Flutuante de Contexto para Modo Foco -->
-            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
-
-            <!-- HUD de Telemetria no Canto Inferior Esquerdo -->
-            <div class="sim-hud" id="sim-hud">
-                <div class="hud-item">
-                    <span class="hud-label">Partículas:</span>
-                    <span class="hud-val" id="hud-particulas">0</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Molas:</span>
-                    <span class="hud-val" id="hud-molas">0</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Energia Cinética:</span>
-                    <span class="hud-val" id="hud-energia">0.0 u</span>
-                </div>
-            </div>
-
-            <!-- Dica Interativa Centralizada no Fundo (Desktop) -->
-            <div class="interactive-hint">
-                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dica">
-                Arraste sobre a rede com o mouse ou dedo para excitar ondas de fônons mecânicas.
+            <!-- Barra Flutuante de Transporte / Playback -->
+            <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
+                <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
+                        data-state="0" data-text-idle="Executar" data-text-active="Pausar"
+                        data-icon-idle="play" data-icon-active="pause" title="Executar / Pausar">
+                    <img src="../assets/icons/play.svg" class="icon-svg" alt="Executar">
+                    <span class="btn-text">Executar</span>
+                </button>
+                <button class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
+                    <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
+                </button>
+                <button class="toolbar-btn" id="btn-reset-sim" title="Zerar Vibrações (t = 0)">
+                    <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
+                </button>
+                <span class="toolbar-divider"></span>
+                <button class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
+                    1.0×
+                </button>
             </div>
         </div>
 
@@ -108,45 +112,10 @@
             <div class="panel-body">
                 <!-- ABA 1: PARÂMETROS -->
                 <div id="panel-tab-params" class="tab-pane active">
-                    <!-- 1. Barra de Transporte / Playback -->
-                    <div class="sim-transport-bar">
-                        <div class="transport-controls-row">
-                            <button class="btn-primary btn-toggle transport-btn-play" id="btn-play-sim"
-                                    data-state="1"
-                                    data-focus-control="toggle"
-                                    data-text-idle="Executar"
-                                    data-text-active="Pausar"
-                                    data-icon-idle="play"
-                                    data-icon-active="pause">
-                                <img src="../assets/icons/pause.svg" class="icon-svg" alt="Play">
-                                <span class="btn-text">Pausar</span>
-                            </button>
-                            <button class="btn-icon" id="btn-step-sim" title="Avançar 1 Passo (Δt)" data-focus-control="action" data-focus-label="Passo">
-                                <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
-                            </button>
-                            <button class="btn-icon" id="btn-reset-sim" title="Zerar Vibrações" data-focus-control="action" data-focus-label="Reset">
-                                <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
-                            </button>
-                        </div>
-
-                        <div class="transport-speed-row">
-                            <span class="transport-speed-label">
-                                <img src="../assets/icons/rotate.svg" class="icon-svg" style="width: 14px; height: 14px;" alt="Velocidade">
-                                Velocidade:
-                            </span>
-                            <div class="transport-speed-pills" id="sim-speed-pills">
-                                <button class="speed-btn" data-speed="0.5">0.5×</button>
-                                <button class="speed-btn active" data-speed="1.0">1.0×</button>
-                                <button class="speed-btn" data-speed="1.5">1.5×</button>
-                                <button class="speed-btn" data-speed="2.5">2.5×</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 2. Configuração da Rede Cristalina -->
+                    <!-- Configuração da Rede Cristalina -->
                     <div class="control-group">
                         <label for="seletor-de-template" class="slider-label">Topologia e Densidade da Rede:</label>
-                        <select id="seletor-de-template" class="sim-control">
+                        <select id="seletor-de-template" class="sim-control" data-focus-control="select" data-focus-label="Rede">
                             <option value="uniforme_10">Monoatômica — Alta Densidade (Espaçamento 10px)</option>
                             <option value="uniforme_20">Monoatômica — Média Densidade (Espaçamento 20px)</option>
                             <option value="uniforme_50" selected>Monoatômica — Baixa Densidade (Espaçamento 50px)</option>
@@ -157,7 +126,7 @@
                         </select>
                     </div>
 
-                    <!-- 3. Sliders Sincronizados de Interação Física -->
+                    <!-- Sliders Sincronizados de Interação Física -->
                     <div class="control-group">
                         <div class="slider-container sim-dual-slider">
                             <div class="slider-header">
@@ -203,7 +172,7 @@
                         </div>
                     </div>
 
-                    <!-- 4. Mini-Gráfico RealtimePlot de Energia Cinética -->
+                    <!-- Mini-Gráfico RealtimePlot de Energia Cinética -->
                     <div class="control-group">
                         <div class="sim-plot-card" id="card-telemetria">
                             <div class="plot-header">
@@ -213,7 +182,7 @@
                                 </div>
                                 <div class="plot-stats">
                                     <span class="plot-stat-label">Atual:</span>
-                                    <span class="plot-stat-val" id="plot-valor-k">0.0 u</span>
+                                    <span class="plot-stat-val" id="plot-valor-k">0.00 u</span>
                                 </div>
                             </div>
                             <div class="plot-canvas-wrapper">
@@ -251,15 +220,70 @@
 
             <!-- Base: Rodapé Fixo de Telemetria -->
             <div class="panel-footer">
-                <div class="sim-badge" id="footer-status-badge">
+                <div class="sim-badge idle" id="footer-status-badge">
                     <span class="status-dot"></span>
-                    <span id="footer-status-text">Rede em Equilíbrio</span>
+                    <span id="footer-status-text">Pausado</span>
                 </div>
                 <span class="footer-meta" id="footer-sim-timer">t = 0.00s</span>
             </div>
         </aside>
     </main>
 
+    <!-- ============================================================= -->
+    <!-- MODAL DE INSTRUÇÕES INICIAIS / GUIA RÁPIDO (.modal-onboarding) -->
+    <!-- ============================================================= -->
+    <div id="modal-onboarding" class="sim-modal-overlay modal-onboarding hidden" aria-hidden="true" role="dialog">
+        <div class="sim-modal-container">
+            <div class="sim-modal-header">
+                <div class="sim-modal-title">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span>Fônons & Dinâmica de Redes Cristalinas — Guia Rápido</span>
+                </div>
+                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+            </div>
+            <div class="sim-modal-body">
+                <p class="onboarding-intro">
+                    Explore a física dos <strong>fônons</strong> (quanta de vibrações elásticas na rede cristalina), modos normais harmônicos e a propagação de ondas acústicas e ópticas em redes atômicas 2D.
+                </p>
+                <div class="onboarding-grid">
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="">
+                            <span>1. Relação de Dispersão $\omega(\vec{k})$</span>
+                        </div>
+                        <p class="onboarding-card-text">Ondas mecânicas propagam-se com velocidade de fase $v = \omega/k$. No limite de grandes comprimentos de onda ($k \to 0$), a dispersão torna-se linear com velocidade acústica $v_s = a\sqrt{K/M}$.</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/particles-opposite.svg" class="icon-svg" alt="">
+                            <span>2. Ramo Acústico vs. Óptico</span>
+                        </div>
+                        <p class="onboarding-card-text">Em redes diatômicas com massas distintas ($M_1 \ne M_2$), surgem modos acústicos (oscilação em fase de átomos vizinhos) e modos ópticos (oposição de fase com gap de frequências proibidas).</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/particle-grid.svg" class="icon-svg" alt="">
+                            <span>3. Vetor de Onda $\vec{k}$ & Zona de Brillouin</span>
+                        </div>
+                        <p class="onboarding-card-text">A periodicidade discreta da rede restringe vetores de onda independentes à 1ª Zona de Brillouin ($|k| \le \pi/a$). Ondas fora da zona são indistinguíveis por aliasing espacial.</p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="">
+                            <span>4. Energia Mecânica da Rede</span>
+                        </div>
+                        <p class="onboarding-card-text">Acompanhe no gráfico em tempo real a energia cinética média $\langle K \rangle$ dos átomos. Use o cursor para excitar vibrações ou dispare o botão <em>Pulso Central</em> para pacotes harmônicos.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="sim-modal-footer">
+                <span class="sim-modal-hint">Clique fora ou pressione <kbd>Esc</kbd> para fechar</span>
+                <button class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Principal da Simulação (ES Module) -->
     <script type="module" src="scripts/fonons.js"></script>
 </body>
 </html>

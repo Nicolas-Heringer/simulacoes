@@ -1,3 +1,10 @@
+/**
+ * =============================================================================
+ * SIMULAÇÃO: FÔNONS & DINÂMICA DE REDES CRISTALINAS 2D
+ * Padrão: Design System 2.0 (ES Modules, Desacoplado, Responsivo)
+ * =============================================================================
+ */
+
 import {
     initToggleButton,
     syncDualSlider,
@@ -7,7 +14,8 @@ import {
     initBottomSheet,
     initTabs,
     initKaTeXAutoRender,
-    inlineSVGImages
+    inlineSVGImages,
+    initOnboardingModal
 } from './sim-ui.js';
 
 // =============================================================================
@@ -24,7 +32,7 @@ const TEMPLATES = {
 };
 
 const state = {
-    isRunning: true,
+    isRunning: false, // Simulação abre pausada conforme padrão DS 2.0
     speed: 1.0,
     time: 0.0,
     templateKey: 'uniforme_50',
@@ -239,6 +247,7 @@ const canvas = document.getElementById('myCanvas');
 const ctx = canvas.getContext('2d');
 const sistema = new SistemaParticulas();
 let plotEnergia = null;
+let playControl = null;
 
 // Ponteiro tátil / mouse
 const pointer = {
@@ -268,7 +277,7 @@ function resizeCanvas() {
         // Regenerar a grade adaptada ao novo tamanho
         const config = TEMPLATES[state.templateKey] || TEMPLATES['uniforme_50'];
         sistema.gerarRede(w, h, config);
-        atualizarHUDInfo();
+        render();
     }
 }
 
@@ -310,7 +319,7 @@ function render() {
     }
     ctx.stroke();
 
-    // 2. Partículas atômicas
+    // 2. Partículas atômicas (tamanho proporcional à massa da base cristalina)
     for (let i = 0; i < sistema.particulas.length; i++) {
         const p = sistema.particulas[i];
         const raio = 3.2 * Math.pow(p.massa, 0.38);
@@ -364,6 +373,7 @@ function setupPointerEvents() {
         pointer.prevX = pos.x;
         pointer.prevY = pos.y;
         canvas.setPointerCapture(e.pointerId);
+        render();
     });
 
     canvas.addEventListener('pointermove', (e) => {
@@ -394,14 +404,20 @@ function setupPointerEvents() {
                 const peso = Math.pow(1 - dist / rInf, 1.5);
                 p.vx += deltaX * intensidade * peso;
                 p.vy += deltaY * intensidade * peso;
+                // Deslocamento imediato para feedback tátil mesmo com a simulação pausada
+                p.x += deltaX * peso * 0.15;
+                p.y += deltaY * peso * 0.15;
             }
         }
+
+        render();
     });
 
     const endPointer = (e) => {
         if (e.pointerId === pointer.id) {
             pointer.isDown = false;
             pointer.id = null;
+            render();
         }
     };
 
@@ -412,13 +428,6 @@ function setupPointerEvents() {
 // =============================================================================
 // 5. INTEGRAÇÃO COM DESIGN SYSTEM 2.0 (sim-ui.js)
 // =============================================================================
-function atualizarHUDInfo() {
-    const elPart = document.getElementById('hud-particulas');
-    const elMolas = document.getElementById('hud-molas');
-    if (elPart) elPart.textContent = sistema.particulas.length.toLocaleString('pt-BR');
-    if (elMolas) elMolas.textContent = sistema.molas.length.toLocaleString('pt-BR');
-}
-
 function setupUI() {
     // Modo Foco Desktop (F)
     initSidebarCollapse({
@@ -443,20 +452,41 @@ function setupUI() {
         scopeSelector: '.controls-panel'
     });
 
-    // Barra de Transporte (Play / Pause)
-    const playControl = initToggleButton('#btn-play-sim', (active) => {
+    // Modal de Instruções Iniciais / Guia Rápido
+    initOnboardingModal('#modal-onboarding', {
+        triggerSelector: '#btn-open-onboarding'
+    });
+
+    // Barra de Transporte Flutuante (Play / Pause)
+    playControl = initToggleButton('#btn-play-sim', (active) => {
         state.isRunning = active;
         const statusEl = document.getElementById('footer-status-text');
-        if (statusEl) statusEl.textContent = active ? 'Ondas em Propagação' : 'Pausado';
+        if (statusEl) {
+            statusEl.textContent = active ? 'Ondas em Propagação' : 'Pausado';
+        }
     });
 
-    // Passo Único
+    // Passo Único (Δt)
     document.getElementById('btn-step-sim')?.addEventListener('click', () => {
-        if (state.isRunning) playControl.setState(0);
-        sistema.atualizar(0.016, state.amortecimento);
+        if (state.isRunning && playControl) {
+            playControl.setState(0);
+        }
+        const dtStep = 0.016;
+        sistema.atualizar(dtStep * state.speed, state.amortecimento);
+        state.time += dtStep * state.speed;
+
+        const timerEl = document.getElementById('footer-sim-timer');
+        if (timerEl) timerEl.textContent = `t = ${state.time.toFixed(2)}s`;
+
+        const kMedia = sistema.calcularEnergiaCineticaMedia();
+        const plotVal = document.getElementById('plot-valor-k');
+        if (plotVal) plotVal.textContent = `${kMedia.toFixed(2)} u`;
+        if (plotEnergia) plotEnergia.push(kMedia);
+
+        render();
     });
 
-    // Reset da Rede (Zera velocidades mantendo a estrutura)
+    // Reset da Rede (Zera velocidades mantendo a posição de equilíbrio)
     const handleReset = () => {
         for (let i = 0; i < sistema.particulas.length; i++) {
             const p = sistema.particulas[i];
@@ -470,42 +500,60 @@ function setupUI() {
         state.time = 0;
         const timerEl = document.getElementById('footer-sim-timer');
         if (timerEl) timerEl.textContent = 't = 0.00s';
+
+        const plotVal = document.getElementById('plot-valor-k');
+        if (plotVal) plotVal.textContent = '0.00 u';
+
+        if (plotEnergia) {
+            plotEnergia.data.fill(0);
+            plotEnergia.render();
+        }
+
+        render();
     };
     document.getElementById('btn-reset-sim')?.addEventListener('click', handleReset);
+
+    // Botão Cíclico de Velocidade na Barra Flutuante de Transporte [0.5, 1.0, 2.0, 5.0]×
+    const speedCycleSteps = [0.5, 1.0, 2.0, 5.0];
+    const btnSpeedCycle = document.getElementById('btn-speed-cycle');
+    if (btnSpeedCycle) {
+        btnSpeedCycle.addEventListener('click', () => {
+            const currentIdx = speedCycleSteps.indexOf(state.speed);
+            const nextSpeed = speedCycleSteps[(currentIdx + 1) % speedCycleSteps.length];
+            state.speed = nextSpeed;
+            btnSpeedCycle.dataset.speed = nextSpeed.toFixed(1);
+            btnSpeedCycle.textContent = `${nextSpeed.toFixed(1)}×`;
+        });
+    }
 
     // Botão de Pulso Central Rápido
     document.getElementById('btn-quick-pulse')?.addEventListener('click', () => {
         sistema.aplicarPulsoCentral(state.intensidade * 0.8);
+        render();
     });
 
-    // Seletor de Velocidades
-    document.querySelectorAll('#sim-speed-pills .speed-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('#sim-speed-pills .speed-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            state.speed = parseFloat(btn.dataset.speed || '1.0');
-        });
-    });
-
-    // Seletor de Topologias
+    // Seletor de Topologias de Rede (Monoatômica e Diatômica)
     document.getElementById('seletor-de-template')?.addEventListener('change', (e) => {
         state.templateKey = e.target.value;
         const config = TEMPLATES[state.templateKey] || TEMPLATES['uniforme_50'];
         sistema.gerarRede(getCanvasLogicalWidth(), getCanvasLogicalHeight(), config);
-        atualizarHUDInfo();
+        render();
     });
 
-    // Sliders Sincronizados
+    // Sliders Sincronizados com Atualização Imediata (Presentation Pass)
     syncDualSlider('#slider-raio', '#num-raio', (val) => {
         state.raioInfluencia = val;
+        render();
     });
 
     syncDualSlider('#slider-intensidade', '#num-intensidade', (val) => {
         state.intensidade = val;
+        render();
     });
 
     syncDualSlider('#slider-amortecimento', '#num-amortecimento', (val) => {
         state.amortecimento = val;
+        render();
     });
 
     // Navegação de Abas via Design System
@@ -521,16 +569,23 @@ function setupUI() {
 }
 
 // =============================================================================
-// 6. LOOP PRINCIPAL DE ANIMAÇÃO
+// 6. LOOP PRINCIPAL DE ANIMAÇÃO & DESACOPLAMENTO TEMPORAL
 // =============================================================================
 let lastTime = performance.now();
 
 function animate(currentTime) {
     requestAnimationFrame(animate);
 
+    // Pausa a renderização e o relógio caso a aba esteja oculta para economizar GPU
+    if (document.hidden) {
+        lastTime = currentTime;
+        return;
+    }
+
     const dt = Math.min((currentTime - lastTime) / 1000, 0.05);
     lastTime = currentTime;
 
+    // Desacoplamento Físico Estrito: avanço temporal apenas se a simulação estiver ativa
     if (state.isRunning) {
         sistema.atualizar(dt * state.speed, state.amortecimento);
         state.time += dt * state.speed;
@@ -539,16 +594,15 @@ function animate(currentTime) {
         if (timerEl) timerEl.textContent = `t = ${state.time.toFixed(2)}s`;
     }
 
+    // Presentation Pass: redesenho contínuo da cena física
     render();
 
-    // Telemetria
+    // Telemetria em tempo real
     const kMedia = sistema.calcularEnergiaCineticaMedia();
-    const hudEnergia = document.getElementById('hud-energia');
     const plotVal = document.getElementById('plot-valor-k');
-
-    if (hudEnergia) hudEnergia.textContent = `${kMedia.toFixed(2)} u`;
     if (plotVal) plotVal.textContent = `${kMedia.toFixed(2)} u`;
 
+    // Atualização do buffer do gráfico exclusivamente se a simulação estiver em execução
     if (plotEnergia && state.isRunning) {
         plotEnergia.push(kMedia);
     }
@@ -563,7 +617,6 @@ window.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resizeCanvas);
     setupPointerEvents();
     setupUI();
-    atualizarHUDInfo();
     initKaTeXAutoRender(document.body);
     requestAnimationFrame(animate);
 });

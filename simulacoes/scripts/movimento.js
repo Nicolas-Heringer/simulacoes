@@ -11,6 +11,7 @@ import {
     initSidebarCollapse,
     initBottomSheet,
     initModal,
+    initOnboardingModal,
     inlineSVGImages,
     initFocusMirrorToolbar,
     initTabs,
@@ -23,9 +24,6 @@ class MovimentoSimulation {
         // Elementos do Canvas
         this.canvas = document.getElementById('simCanvas');
         this.ctx = this.canvas.getContext('2d');
-
-        this.canvasHint = document.getElementById('canvasHint');
-        this.canvasHintText = document.getElementById('canvasHintText');
 
         // Botões de Top Actions
         this.btnToggleView = document.getElementById('btn-toggle-view');
@@ -40,7 +38,6 @@ class MovimentoSimulation {
         this.tabBtnTheory = document.getElementById('tab-btn-theory');
 
         // Painéis das Abas
-        this.simTransportBar = document.getElementById('sim-transport-bar');
         this.panelTabManual = document.getElementById('panel-tab-manual');
         this.panelTabEq1 = document.getElementById('panel-tab-eq1');
         this.panelTabEq2 = document.getElementById('panel-tab-eq2');
@@ -239,28 +236,28 @@ class MovimentoSimulation {
             this.reset();
         });
 
-        // 4. Seletor de Velocidade Temporal (Pills)
-        document.querySelectorAll('#sim-speed-pills .speed-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('#sim-speed-pills .speed-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this.simSpeed = parseFloat(btn.dataset.speed || '1.0');
+        // 4. Botão Cíclico de Velocidade Temporal na Barra Flutuante de Transporte
+        const speedCycleSteps = [0.5, 1.0, 2.0, 5.0];
+        const btnSpeedCycle = document.getElementById('btn-speed-cycle');
+        if (btnSpeedCycle) {
+            btnSpeedCycle.addEventListener('click', () => {
+                const currentIdx = speedCycleSteps.indexOf(this.simSpeed);
+                const nextSpeed = speedCycleSteps[(currentIdx + 1) % speedCycleSteps.length];
+                this.simSpeed = nextSpeed;
+                btnSpeedCycle.dataset.speed = nextSpeed.toFixed(1);
+                btnSpeedCycle.textContent = `${nextSpeed.toFixed(1)}×`;
             });
-        });
+        }
 
         // 5. Navegação por Abas Unificada (Design System 2.0)
         initTabs('.controls-panel', (tabId) => {
             if (tabId === 'panel-tab-manual') {
-                this.simTransportBar.style.display = 'block';
                 this.setMotionType('manual');
             } else if (tabId === 'panel-tab-eq1') {
-                this.simTransportBar.style.display = 'block';
                 this.setMotionType('equation_1');
             } else if (tabId === 'panel-tab-eq2') {
-                this.simTransportBar.style.display = 'block';
                 this.setMotionType('equation_2');
             } else if (tabId === 'panel-tab-theory') {
-                this.simTransportBar.style.display = 'none';
                 initKaTeXAutoRender(this.panelTabTheory);
             }
         });
@@ -271,13 +268,16 @@ class MovimentoSimulation {
             scopeSelector: '.controls-panel'
         });
 
-        // 7. Modal de Teoria Didática
+        // 7. Modal de Instruções Iniciais (Onboarding)
+        initOnboardingModal('#modal-onboarding', { triggerSelector: '#btn-open-onboarding' });
+
+        // 8. Modal de Teoria Didática
         const modalTeoria = initModal('#modal-teoria');
         document.getElementById('btn-abrir-modal-teoria')?.addEventListener('click', () => {
             modalTeoria?.open();
         });
 
-        // 8. Modo Foco (Sidebar Collapse)
+        // 9. Modo Foco (Sidebar Collapse)
         initSidebarCollapse({
             layoutSelector: '.sim-layout',
             collapseBtnSelector: '#btn-collapse-sidebar',
@@ -629,6 +629,7 @@ class MovimentoSimulation {
             this.vA = this.v0A;
         }
         this.updateUI();
+        this.render();
     }
 
     onParamChangeB() {
@@ -638,6 +639,7 @@ class MovimentoSimulation {
             this.vB = this.v0B;
         }
         this.updateUI();
+        this.render();
     }
 
     setMotionType(type) {
@@ -672,7 +674,9 @@ class MovimentoSimulation {
             }
         }
 
+        this.updateEquationDisplays();
         this.updateUI();
+        this.render();
     }
 
     updateEquationDisplays() {
@@ -757,6 +761,7 @@ class MovimentoSimulation {
             this.recordCurrentPoint();
         }
         this.updateUI();
+        this.render();
     }
 
     updatePosFromCanvasX(canvasX) {
@@ -786,6 +791,7 @@ class MovimentoSimulation {
             this.recordCurrentPoint();
         }
         this.updateUI();
+        this.render();
     }
 
     pause() {
@@ -793,11 +799,17 @@ class MovimentoSimulation {
         this.footerStatusText.textContent = 'Pausado';
         this.footerStatusBadge.className = 'sim-badge';
         this.updateUI();
+        this.render();
     }
 
     step(dt = 0.1) {
+        if (this.isPlaying) {
+            this.playControl?.setState(0);
+            this.pause();
+        }
         this.advancePhysics(dt);
         this.updateUI();
+        this.render();
     }
 
     reset() {
@@ -831,6 +843,7 @@ class MovimentoSimulation {
         if (this.inputPos) this.inputPos.value = this.xA;
         if (this.lblPosManual) this.lblPosManual.textContent = `${this.xA.toFixed(1)} m`;
         this.updateUI();
+        this.render();
     }
 
     advancePhysics(dt) {
@@ -1003,13 +1016,19 @@ class MovimentoSimulation {
         }
 
         // 2. Dicas da Área do Canvas
-        if (this.mode === '1D') {
-            this.canvasHintText.textContent = isManual
-                ? 'Arraste a esfera livremente na pista para observar a velocidade escalar instantânea.'
-                : isSingle
-                    ? 'Inicie o tempo para ver o móvel se deslocar, os vetores de velocidade/aceleração e as marcas estroboscópicas a cada 1s.'
-                    : 'Observe as duas faixas paralelas: a linha vertical vermelha conecta os móveis no instante exato do encontro!';
+        if (this.canvasHintText) {
+            if (this.mode === '1D') {
+                this.canvasHintText.textContent = isManual
+                    ? 'Arraste a esfera livremente na pista para observar a velocidade escalar instantânea.'
+                    : isSingle
+                        ? 'Inicie o tempo para ver o móvel se deslocar, os vetores de velocidade/aceleração e as marcas estroboscópicas a cada 1s.'
+                        : 'Observe as duas faixas paralelas: a linha vertical vermelha conecta os móveis no instante exato do encontro!';
+            } else {
+                this.canvasHintText.textContent = 'Use o scroll para zoom e arraste a tela para rolar (pan). Clique no gráfico para inspecionar instantes.';
+            }
+        }
 
+        if (this.mode === '1D') {
             this.lblToggleView.textContent = 'Ver Gráfico 2D';
             document.querySelectorAll('.lbl-panel-graph').forEach(el => el.textContent = 'Ver Gráfico Espaço-Tempo (2D)');
             this.btnToggleAxis.style.display = 'none';
@@ -1021,7 +1040,6 @@ class MovimentoSimulation {
                 if (btn) btn.disabled = !hasData;
             });
         } else {
-            this.canvasHintText.textContent = 'Use o scroll para zoom e arraste a tela para rolar (pan). Clique no gráfico para inspecionar instantes.';
             this.lblToggleView.textContent = 'Voltar à Pista 1D';
             document.querySelectorAll('.lbl-panel-graph').forEach(el => el.textContent = 'Voltar à Pista 1D');
             this.btnToggleAxis.style.display = 'flex';
@@ -1037,12 +1055,21 @@ class MovimentoSimulation {
         }
 
         // 3. Telemetria no Rodapé
-        this.footerSimTimer.textContent = `t = ${this.t.toFixed(2)}s`;
+        if (this.footerSimTimer) {
+            this.footerSimTimer.textContent = `t = ${this.t.toFixed(2)}s`;
+        }
     }
 
     loop(timestamp) {
+        requestAnimationFrame((ts) => this.loop(ts));
+
+        if (document.hidden) {
+            this.lastFrameTimestamp = timestamp;
+            return;
+        }
+
         if (!this.lastFrameTimestamp) this.lastFrameTimestamp = timestamp;
-        const dt = ((timestamp - this.lastFrameTimestamp) / 1000) * this.simSpeed;
+        const dt = Math.min(((timestamp - this.lastFrameTimestamp) / 1000) * this.simSpeed, 0.2);
         this.lastFrameTimestamp = timestamp;
 
         if (this.isPlaying && this.mode === '1D') {
@@ -1055,8 +1082,6 @@ class MovimentoSimulation {
 
         this.ctx.clearRect(0, 0, this.width, this.height);
         this.render();
-
-        requestAnimationFrame((ts) => this.loop(ts));
     }
 
     getBallCanvasPos1D(physX, yPos) {
