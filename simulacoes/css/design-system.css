@@ -1747,10 +1747,12 @@ input[type="text"].sim-input:focus {
 }
 
 /* Modificadores de Posição da Toolbar */
-.canvas-toolbar.pos-top-left     { top: 15px; left: 15px; right: auto; bottom: auto; }
-.canvas-toolbar.pos-top-right    { top: 15px; right: 15px; left: auto; bottom: auto; }
-.canvas-toolbar.pos-bottom-left  { bottom: 15px; left: 15px; top: auto; right: auto; }
-.canvas-toolbar.pos-bottom-right { bottom: 15px; right: 15px; top: auto; left: auto; }
+.canvas-toolbar.pos-top-left      { top: 15px; left: 15px; right: auto; bottom: auto; }
+.canvas-toolbar.pos-top-center    { top: 15px; left: 50%; transform: translateX(-50%); right: auto; bottom: auto; }
+.canvas-toolbar.pos-top-right     { top: 15px; right: 15px; left: auto; bottom: auto; }
+.canvas-toolbar.pos-bottom-left   { bottom: 15px; left: 15px; top: auto; right: auto; }
+.canvas-toolbar.pos-bottom-center { bottom: 15px; left: 50%; transform: translateX(-50%); top: auto; right: auto; }
+.canvas-toolbar.pos-bottom-right  { bottom: 15px; right: 15px; top: auto; left: auto; }
 
 .toolbar-divider,
 .theme-bar-divider {
@@ -2211,6 +2213,13 @@ input[type="text"].sim-input:focus {
         font-size: 0.74rem;
         padding: 4px 8px;
         gap: 5px;
+    }
+
+    .canvas-toolbar.pos-bottom-center {
+        top: auto;
+        bottom: 74px;
+        left: 50%;
+        transform: translateX(-50%);
     }
 
     .toolbar-dot,

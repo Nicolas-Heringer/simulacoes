@@ -105,6 +105,7 @@ function setupUI() {
     document.getElementById('btn-step-sim')?.addEventListener('click', () => {
         if (state.isRunning) playControl.setState(0);
         stepPhysics(0.016);
+        updateVisualScene();
     });
 
     // Reset
@@ -112,6 +113,7 @@ function setupUI() {
         if (state.isRunning) playControl.setState(0);
         state.time = 0;
         updateTimerDisplay();
+        updateVisualScene();
     });
 
     // Velocidades
@@ -133,7 +135,7 @@ function setupUI() {
     // Dual Slider
     syncDualSlider('#slider-param1', '#num-param1', (val) => {
         state.param1 = val;
-        mesh.scale.setScalar(val);
+        updateVisualScene();
     });
 
     // Barra Flutuante Espelhada para Modo Foco
@@ -144,11 +146,16 @@ function setupUI() {
     });
 }
 
-// --- 5. Física e Loop Principal ---
+// --- 5. Física, Presentation Pass e Loop Principal ---
 function stepPhysics(dt) {
     state.time += dt * state.speed;
-    mesh.position.y = 1 + Math.sin(state.time * 2) * 0.5;
     updateTimerDisplay();
+}
+
+function updateVisualScene() {
+    mesh.position.y = 1 + Math.sin(state.time * 2) * 0.5;
+    mesh.scale.setScalar(state.param1);
+    renderer.render(scene, camera);
 }
 
 function updateTimerDisplay() {
@@ -175,7 +182,7 @@ function animate(currentTime) {
     }
 
     controls.update();
-    renderer.render(scene, camera);
+    updateVisualScene();
 
     // FPS Meter
     frames++;

@@ -50,6 +50,7 @@ Ao executar este fluxo, consulte obrigatoriamente os arquivos de referência:
    * Crie `simulacoes/scripts/<nome>.js` a partir de [templates/simulacao-template.js](./templates/simulacao-template.js).
    * Importe os controladores necessários de `./sim-ui.js`: `initSidebarCollapse`, `initBottomSheet`, `initTabs`, `initFocusMirrorToolbar`, `initToggleButton`, `syncDualSlider`, `setFieldState`, `RealtimePlot`, `MultiSeriesPlot`, `MatrixTensorEditor`, `initModal`, `inlineSVGImages`, `initKaTeXAutoRender`, `renderMath`.
    * Conecte cada grandeza física com `syncDualSlider('#slider-id', '#num-id', callback)`.
+   * **Desacoplamento Física vs. Apresentação**: Separe estritamente `stepPhysics(dt)` (avanço temporal executado apenas quando `state.isRunning === true`) de `updateVisualScene()` (*Presentation Pass* que sincroniza meshes, `ArrowHelper`, visibilidades e renderiza a cena). Todo listener de controle (`syncDualSlider`, switches, seletores, reset) deve chamar `updateVisualScene()` para atualizar o canvas imediatamente mesmo com a simulação pausada.
    * Utilize `setFieldState(target, state, hintText)` sempre que precisar indicar estados semânticos (`.is-valid`, `.is-warning`, `.is-invalid`, `.is-ready`, `.is-disabled`).
    * Finalize a inicialização chamando `await inlineSVGImages()` e `initKaTeXAutoRender()`.
 

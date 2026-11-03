@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <!-- Metadados da Página -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Da Inércia ao Movimento Circular — Laboratório de Física</title>
+
+    <meta name="description"
+        content="Simulação interativa que explora a 1ª e 2ª Leis de Newton, demonstrando a inércia retilínea e a força centrípeta no movimento circular com trajetórias e silhuetas pontilhadas.">
+    <meta name="author" content="Nicolas Heringer">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+
+    <!-- Design System CSS Modular -->
+    <link rel="stylesheet" href="css/design-system.css">
+
+    <!-- Suporte a Fórmulas Matemáticas com KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+
+    <!-- Three.js via Importmap (ES Modules) -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+
+<body>
+
+    <!-- Cabeçalho da Simulação -->
+    <header class="sim-header">
+        <a href="../index.html#secao-simulacoes" class="btn-back">
+            <img src="../assets/icons/arrow-left.svg" class="icon-svg" alt="Voltar">
+            Voltar ao Hub
+        </a>
+        <h1 class="sim-title">Da Inércia ao Movimento Circular</h1>
+    </header>
+
+    <!-- Layout Grid Principal -->
+    <main class="sim-layout">
+
+        <!-- 1. Área do Canvas 3D / 2D com Menus Flutuantes -->
+        <div class="canvas-area">
+            <!-- Container do Renderizador Three.js -->
+            <div id="three-container" style="width: 100%; height: 100%; position: relative; touch-action: none;"></div>
+
+            <!-- Barra Flutuante de Modo Foco (Design System 2.0 Focus Mirror) -->
+            <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
+
+            <!-- Grupo de Ações Flutuantes no Topo Direito do Canvas -->
+            <div class="canvas-top-actions">
+                <button id="btn-reset-camera" class="canvas-btn-floating" title="Centralizar Visão">
+                    <img src="../assets/icons/camera-reset.svg" class="icon-svg" alt="Câmera">
+                    <span class="btn-label-text">Reset Visão</span>
+                </button>
+                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
+                    <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
+                    <span class="btn-label-text">Controles</span>
+                </button>
+            </div>
+
+            <!-- HUD de Telemetria Flutuante no Canto Inferior Esquerdo -->
+            <div class="sim-hud" id="sim-hud">
+                <div class="hud-item">
+                    <span class="hud-label">Modo:</span>
+                    <span class="hud-val" id="hud-active-mode" style="color: var(--color-cyan);">1. Inércia & Desvio</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Status:</span>
+                    <span class="hud-val" id="hud-status">Pronto</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">FPS:</span>
+                    <span class="hud-val" id="hud-fps" style="color: var(--color-emerald);">60 fps</span>
+                </div>
+            </div>
+
+            <!-- Dica Interativa Flutuante no Fundo Central -->
+            <div class="interactive-hint" style="bottom: 64px;">
+                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dica">
+                Observe a trajetória pontilhada: ela representa o estado inercial onde o corpo estaria sem força resultante.
+            </div>
+
+            <!-- Barra Flutuante de Transporte / Playback -->
+            <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
+                <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
+                        data-state="1"
+                        data-text-idle="Executar"
+                        data-text-active="Pausar"
+                        data-icon-idle="play"
+                        data-icon-active="pause"
+                        title="Executar / Pausar">
+                    <img src="../assets/icons/pause.svg" class="icon-svg" alt="Pausar">
+                    <span class="btn-text">Pausar</span>
+                </button>
+                <button class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
+                    <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
+                </button>
+                <button class="toolbar-btn" id="btn-reset-sim" title="Reiniciar (t = 0)">
+                    <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
+                </button>
+            </div>
+        </div>
+
+        <!-- 2. Menu Lateral de Controles (Desktop Sidebar + Mobile Bottom Sheet) -->
+        <aside class="controls-panel">
+
+            <!-- Alça de Arraste para Mobile / Tablet (Bottom Sheet) -->
+            <div class="sheet-drag-handle" id="sheet-drag-handle" title="Deslize ou toque para expandir/recolher">
+                <div class="sheet-drag-pill"></div>
+            </div>
+
+            <!-- Topo: Barra de Abas Expansíveis com Botão de Modo Foco -->
+            <div class="tab-nav">
+                <button class="tab-btn active" data-tab="panel-tab-params" id="tab-btn-params" title="Parâmetros e Controles">
+                    <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Parâmetros">
+                    <span class="tab-label">Parâmetros</span>
+                </button>
+                <button class="tab-btn" data-tab="panel-tab-theory" id="tab-btn-theory" title="Fundamentação Teórica">
+                    <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
+                    <span class="tab-label">Teoria</span>
+                </button>
+                <button class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
+                    <img src="../assets/icons/collapse.svg" class="icon-svg" alt="Recolher">
+                </button>
+            </div>
+
+            <!-- Centro: Corpo Rolável de Conteúdo -->
+            <div class="panel-body">
+
+                <!-- ABA 1: PARÂMETROS E CONTROLES -->
+                <div class="tab-pane active" id="panel-tab-params">
+                    
+                    <!-- Seletor dos Modos Didáticos -->
+                    <div class="segmented-control" id="mode-selector" style="margin-bottom: 12px;">
+                        <button class="segment-btn active" data-mode="1">
+                            <img src="../assets/icons/motion-oscillate.svg" class="icon-svg" alt=""> 1. Inércia & Desvio
+                        </button>
+                        <button class="segment-btn" data-mode="2">
+                            <img src="../assets/icons/orbital.svg" class="icon-svg" alt=""> 2. Movimento Circular
+                        </button>
+                    </div>
+
+                    <!-- ============================================== -->
+                    <!-- CONTROLES ESPECÍFICOS: MODO 1 (INÉRCIA & DESVIO) -->
+                    <!-- ============================================== -->
+                    <div id="controls-mode-1">
+                        <div class="sim-divider-label"><span>Ação de Força Resultante</span></div>
+
+                        <div style="margin-bottom: 12px;">
+                            <button class="btn-primary tone-rose" id="btn-apply-force-pulse" style="width: 100%; justify-content: center;"
+                                    data-focus-control="action" data-focus-label="Aplicar Força" data-focus-order="4">
+                                <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="">
+                                <span>Aplicar Força Lateral ($\vec{F}$)</span>
+                            </button>
+                        </div>
+
+                        <div class="control-group">
+                            <div class="slider-container sim-dual-slider tone-cyan">
+                                <div class="slider-header">
+                                    <label for="slider-m1-v0" class="slider-label">Velocidade Inicial ($v_0$)</label>
+                                    <div class="dual-input-wrapper">
+                                        <input type="number" class="dual-input-number" id="num-m1-v0"
+                                               min="1.0" max="15.0" step="0.5" value="6.0">
+                                        <span class="dual-input-unit">m/s</span>
+                                    </div>
+                                </div>
+                                <input type="range" class="sim-slider" id="slider-m1-v0"
+                                       min="1.0" max="15.0" step="0.5" value="6.0"
+                                       data-focus-control="slider" data-focus-label="v₀" data-focus-order="5">
+                            </div>
+                            <span class="field-hint">Velocidade do movimento retilíneo uniforme.</span>
+                        </div>
+
+                        <div class="control-group">
+                            <div class="slider-container sim-dual-slider tone-rose">
+                                <div class="slider-header">
+                                    <label for="slider-m1-force" class="slider-label">Intensidade da Força ($F$)</label>
+                                    <div class="dual-input-wrapper">
+                                        <input type="number" class="dual-input-number" id="num-m1-force"
+                                               min="1.0" max="20.0" step="0.5" value="8.0">
+                                        <span class="dual-input-unit">N</span>
+                                    </div>
+                                </div>
+                                <input type="range" class="sim-slider" id="slider-m1-force"
+                                       min="1.0" max="20.0" step="0.5" value="8.0"
+                                       data-focus-control="slider" data-focus-label="F" data-focus-order="6">
+                            </div>
+                            <span class="field-hint">Magnitude da força transversal aplicada no desvio.</span>
+                        </div>
+
+                        <div class="control-group">
+                            <div class="slider-container sim-dual-slider tone-purple">
+                                <div class="slider-header">
+                                    <label for="slider-m1-mass" class="slider-label">Massa do Objeto ($m$)</label>
+                                    <div class="dual-input-wrapper">
+                                        <input type="number" class="dual-input-number" id="num-m1-mass"
+                                               min="0.5" max="5.0" step="0.5" value="1.0">
+                                        <span class="dual-input-unit">kg</span>
+                                    </div>
+                                </div>
+                                <input type="range" class="sim-slider" id="slider-m1-mass"
+                                       min="0.5" max="5.0" step="0.5" value="1.0"
+                                       data-focus-control="slider" data-focus-label="m" data-focus-order="7">
+                            </div>
+                        </div>
+
+                        <div class="sim-divider-label"><span>Visualização Didática</span></div>
+
+                        <div class="switch-container">
+                            <span class="switch-label">Trajetória e Silhueta Inercial</span>
+                            <label class="sim-switch tone-accent">
+                                <input type="checkbox" id="chk-m1-ghost" checked>
+                                <span class="slider-round"></span>
+                            </label>
+                        </div>
+
+                        <div class="switch-container">
+                            <span class="switch-label">Vetores $\vec{v}$ e $\vec{F}$</span>
+                            <label class="sim-switch tone-cyan">
+                                <input type="checkbox" id="chk-m1-vectors" checked>
+                                <span class="slider-round"></span>
+                            </label>
+                        </div>
+
+                        <div class="sim-divider-label"><span>Telemetria Dinâmica</span></div>
+
+                        <div class="sim-readout">
+                            <div class="sim-readout-title">1ª Lei vs 2ª Lei</div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Estado de Força:</span>
+                                <span id="m1-val-force-state" class="sim-readout-value tone-emerald">$\vec{F}_{res} = 0$ (Inércia)</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Aceleração Resultante ($a$):</span>
+                                <span id="m1-val-accel" class="sim-readout-value">0.00 m/s²</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Velocidade Atual ($v$):</span>
+                                <span id="m1-val-speed" class="sim-readout-value tone-cyan">6.00 m/s</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Distância à Linha Inercial:</span>
+                                <span id="m1-val-dist-ghost" class="sim-readout-value tone-rose">0.00 m</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============================================== -->
+                    <!-- CONTROLES ESPECÍFICOS: MODO 2 (MOVIMENTO CIRCULAR) -->
+                    <!-- ============================================== -->
+                    <div id="controls-mode-2" style="display: none;">
+                        <div class="sim-divider-label"><span>Representação da Inércia (Fantasma)</span></div>
+
+                        <!-- Seletor entre Fuga Contínua e Construção Passo a Passo de Newton -->
+                        <div class="segmented-control" id="m2-ghost-mode-selector" style="margin-bottom: 12px;">
+                            <button class="segment-btn active" data-ghost-mode="stream">
+                                <img src="../assets/icons/motion-oscillate.svg" class="icon-svg" alt=""> Fuga Contínua
+                            </button>
+                            <button class="segment-btn" data-ghost-mode="newton">
+                                <img src="../assets/icons/matrix-basis.svg" class="icon-svg" alt=""> Passo de Newton
+                            </button>
+                        </div>
+
+                        <!-- Painel do Passo de Newton (visível apenas no modo newton) -->
+                        <div id="panel-m2-newton" style="display: none; margin-bottom: 12px;">
+                            <button class="btn-primary tone-cyan" id="btn-m2-newton-step" style="width: 100%; justify-content: center; margin-bottom: 10px;">
+                                <img src="../assets/icons/step.svg" class="icon-svg" alt="">
+                                <span>Avançar Passo de Newton ($\Delta t$)</span>
+                            </button>
+                            <div class="control-group">
+                                <div class="slider-container sim-dual-slider tone-cyan">
+                                    <div class="slider-header">
+                                        <label for="slider-m2-dt-step" class="slider-label">Intervalo de Passo ($\Delta t$)</label>
+                                        <div class="dual-input-wrapper">
+                                            <input type="number" class="dual-input-number" id="num-m2-dt-step"
+                                                   min="0.1" max="1.0" step="0.05" value="0.35">
+                                            <span class="dual-input-unit">s</span>
+                                        </div>
+                                    </div>
+                                    <input type="range" class="sim-slider" id="slider-m2-dt-step"
+                                           min="0.1" max="1.0" step="0.05" value="0.35">
+                                </div>
+                                <span class="field-hint">Passos maiores tornam o triângulo $A \to B \to C$ bem visível; passos menores aproximam o círculo suave.</span>
+                            </div>
+                        </div>
+
+                        <div class="sim-divider-label"><span>Dinâmica Centrípeta</span></div>
+
+                        <div style="margin-bottom: 12px;">
+                            <button class="btn-secondary" id="btn-m2-cut-force" style="width: 100%; justify-content: center;"
+                                    data-focus-control="action" data-focus-label="Cortar Força" data-focus-order="4">
+                                <img src="../assets/icons/refresh.svg" class="icon-svg" alt="">
+                                <span id="btn-m2-cut-text">Cortar Força Centrípeta ($\vec{F}_c = 0$)</span>
+                            </button>
+                        </div>
+
+                        <div class="control-group">
+                            <div class="slider-container sim-dual-slider tone-cyan">
+                                <div class="slider-header">
+                                    <label for="slider-m2-radius" class="slider-label">Raio da Órbita ($r$)</label>
+                                    <div class="dual-input-wrapper">
+                                        <input type="number" class="dual-input-number" id="num-m2-radius"
+                                               min="2.0" max="10.0" step="0.5" value="5.0">
+                                        <span class="dual-input-unit">m</span>
+                                    </div>
+                                </div>
+                                <input type="range" class="sim-slider" id="slider-m2-radius"
+                                       min="2.0" max="10.0" step="0.5" value="5.0"
+                                       data-focus-control="slider" data-focus-label="r" data-focus-order="5">
+                            </div>
+                            <span class="field-hint">Distância do centro de rotação ao corpo.</span>
+                        </div>
+
+                        <div class="control-group">
+                            <div class="slider-container sim-dual-slider tone-emerald">
+                                <div class="slider-header">
+                                    <label for="slider-m2-speed" class="slider-label">Velocidade Linear ($v$)</label>
+                                    <div class="dual-input-wrapper">
+                                        <input type="number" class="dual-input-number" id="num-m2-speed"
+                                               min="1.0" max="12.0" step="0.5" value="5.0">
+                                        <span class="dual-input-unit">m/s</span>
+                                    </div>
+                                </div>
+                                <input type="range" class="sim-slider" id="slider-m2-speed"
+                                       min="1.0" max="12.0" step="0.5" value="5.0"
+                                       data-focus-control="slider" data-focus-label="v" data-focus-order="6">
+                            </div>
+                            <span class="field-hint">Módulo da velocidade tangencial constante no MCU.</span>
+                        </div>
+
+                        <div class="control-group">
+                            <div class="slider-container sim-dual-slider tone-purple">
+                                <div class="slider-header">
+                                    <label for="slider-m2-mass" class="slider-label">Massa do Corpo ($m$)</label>
+                                    <div class="dual-input-wrapper">
+                                        <input type="number" class="dual-input-number" id="num-m2-mass"
+                                               min="0.5" max="5.0" step="0.5" value="1.0">
+                                        <span class="dual-input-unit">kg</span>
+                                    </div>
+                                </div>
+                                <input type="range" class="sim-slider" id="slider-m2-mass"
+                                       min="0.5" max="5.0" step="0.5" value="1.0"
+                                       data-focus-control="slider" data-focus-label="m" data-focus-order="7">
+                            </div>
+                        </div>
+
+                        <div class="sim-divider-label"><span>Projeção Inercial & Vetores</span></div>
+
+                        <div class="switch-container">
+                            <span class="switch-label">Projeção Tangente Inercial (Pontilhada)</span>
+                            <label class="sim-switch tone-accent">
+                                <input type="checkbox" id="chk-m2-ghost" checked>
+                                <span class="slider-round"></span>
+                            </label>
+                        </div>
+
+                        <div class="switch-container">
+                            <span class="switch-label">Vetor Velocidade Linear $\vec{v}$ (Verde)</span>
+                            <label class="sim-switch tone-emerald">
+                                <input type="checkbox" id="chk-m2-vec-v" checked>
+                                <span class="slider-round"></span>
+                            </label>
+                        </div>
+
+                        <div class="switch-container">
+                            <span class="switch-label">Vetor Aceleração Centrípeta $\vec{a}_c$ (Laranja)</span>
+                            <label class="sim-switch tone-orange">
+                                <input type="checkbox" id="chk-m2-vec-a" checked>
+                                <span class="slider-round"></span>
+                            </label>
+                        </div>
+
+                        <div class="switch-container">
+                            <span class="switch-label">Vetor Força Centrípeta $\vec{F}_c$ (Rosa)</span>
+                            <label class="sim-switch tone-rose">
+                                <input type="checkbox" id="chk-m2-vec-f" checked>
+                                <span class="slider-round"></span>
+                            </label>
+                        </div>
+
+                        <div class="sim-divider-label"><span>Grandezas Físicas do Movimento</span></div>
+
+                        <div class="sim-readout">
+                            <div class="sim-readout-title">Relações Cinemáticas e Dinâmicas</div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Aceleração Centrípeta ($a_c$):</span>
+                                <span id="m2-val-ac" class="sim-readout-value tone-orange">5.00 m/s²</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Força Centrípeta ($F_c$):</span>
+                                <span id="m2-val-fc" class="sim-readout-value tone-rose">5.00 N</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Velocidade Angular ($\omega$):</span>
+                                <span id="m2-val-omega" class="sim-readout-value tone-cyan">1.00 rad/s</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Período Orbital ($T$):</span>
+                                <span id="m2-val-period" class="sim-readout-value">6.28 s</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ABA 2: TEORIA E DEDUÇÕES -->
+                <div class="tab-pane" id="panel-tab-theory" style="display: none;">
+                    <div class="tab-header">
+                        <div class="tab-header-row">
+                            <h3 class="tab-title">Fundamentação Newtoniana</h3>
+                        </div>
+                        <p class="tab-subtitle">Das leis fundamentais do movimento à necessidade de força centrípeta.</p>
+                    </div>
+
+                    <!-- Card 1: 1ª Lei de Newton -->
+                    <div class="theory-card">
+                        <h4><img src="../assets/icons/book-open.svg" class="icon-svg icon-accent" alt="Teoria"> 1. A Lei da Inércia (1ª Lei de Newton)</h4>
+                        <p>
+                            Todo corpo continua em seu estado de repouso ou de movimento retilíneo uniforme (MRU), 
+                            a menos que seja obrigado a mudar seu estado por forças aplicadas sobre ele:
+                        </p>
+                        $$\sum \vec{F} = 0 \implies \vec{v} = \text{constante} \quad (\text{em módulo, direção e sentido})$$
+                        <p>
+                            Na simulação, a <strong>linha pontilhada cinza e a silhueta fantasma</strong> mostram exatamente 
+                            onde o corpo estaria se nenhuma força tivesse interferido em seu estado de movimento.
+                        </p>
+                    </div>
+
+                    <div class="sim-divider-label"><span>Origem da Mudança de Trajetória</span></div>
+
+                    <!-- Card 2: 2ª Lei de Newton -->
+                    <div class="theory-card">
+                        <h4>2. Mudança de Direção Requer Força (2ª Lei)</h4>
+                        <p>
+                            A aceleração é a taxa temporal de variação do vetor velocidade:
+                        </p>
+                        $$\vec{a} = \frac{d\vec{v}}{dt}, \quad \sum \vec{F} = m \vec{a}$$
+                        <p>
+                            Mesmo quando o <em>módulo</em> da velocidade é constante, qualquer deflexão na <em>direção</em> 
+                            gera aceleração não nula ($\vec{a} \neq 0$), exigindo obrigatoriamente a presença de uma força resultante não nula.
+                        </p>
+                    </div>
+
+                    <div class="sim-divider-label"><span>Movimento Circular</span></div>
+
+                    <!-- Card 3: Força Centrípeta -->
+                    <div class="theory-card">
+                        <h4>3. A Força Centrípeta no Movimento Circular</h4>
+                        <p>
+                            Em uma trajetória circular de raio $r$, a velocidade $\vec{v}$ muda continuamente de direção. 
+                            A aceleração necessária para desviar perpetuamente o corpo em direção ao centro de curvatura é a <strong>aceleração centrípeta</strong>:
+                        </p>
+                        $$a_c = \frac{v^2}{r} = \omega^2 r$$
+                        <p>
+                            Pela 2ª Lei de Newton, essa aceleração é produzida pela <strong>Força Centrípeta</strong>:
+                        </p>
+                        $$F_c = m \cdot a_c = m \frac{v^2}{r}$$
+                        <p>
+                            Se essa força cessar repentinamente, o corpo não é "jogado para fora": ele simplesmente 
+                            segue em linha reta tangencial à trajetória pela 1ª Lei de Newton, como comprovado ao clicar em <em>"Cortar Força Centrípeta"</em>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Base: Rodapé Fixo de Telemetria -->
+            <div class="panel-footer">
+                <div class="sim-badge" id="footer-status-badge">
+                    <span class="status-dot"></span>
+                    <span id="footer-status-text">Simulação Pronta</span>
+                </div>
+                <span class="footer-meta" id="footer-sim-timer" data-focus-control="badge" data-focus-order="10" data-focus-tab="global">t = 0.00s</span>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Script Modular da Simulação -->
+    <script type="module" src="scripts/nova_simulacao.js"></script>
+</body>
+
+</html>
