@@ -37,7 +37,7 @@ Ao executar este fluxo, consulte obrigatoriamente os arquivos de referência:
    * Atualize a tag `<title>`, o cabeçalho `.sim-title` e a importação do script final (`scripts/<nome>.js`).
    * Configure a navegação por abas usando `.tab-nav` com botões `.tab-btn[data-tab="..."]` e painéis `.tab-pane`.
    * Insira os controles necessários baseando-se exclusivamente nas marcações de `simulacoes/ui_lab.html`:
-     - `.sim-transport-bar` para controle temporal (Play/Pause, Passo, Reset e Velocidades).
+     - `.canvas-toolbar.pos-bottom-center` (`#canvas-transport-toolbar`) flutuando na base de `.canvas-area` para controle temporal (Play/Pause, Passo, Reset e Velocidade Cíclica), mantendo o menu lateral limpo.
      - `.sim-dual-slider` para parâmetros numéricos contínuos.
      - `.sim-switch` e `.segmented-control` para opções booleanas ou modos discretos.
      - `.sim-readout` (`.sim-readout-row` + `.tone-*`) para painéis de grandezas calculadas.

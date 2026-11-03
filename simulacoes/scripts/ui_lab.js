@@ -94,7 +94,6 @@ let clickCount = 0;
 let scene, camera, renderer, controls;
 let currentMesh = null, wireMesh = null, pointsMesh = null;
 let testLight = null;
-let autoRotateActive = true;
 
 // Relógio da Simulação e Variáveis de Controle
 let simTime = 0.0;
@@ -197,16 +196,14 @@ function animate() {
 
     if (controls) controls.update();
 
-    // Rotação suave no eixo vertical Y
-    if (autoRotateActive && currentMesh) {
-        currentMesh.rotation.y += 0.005 * simTimeScale;
-        if (wireMesh) wireMesh.rotation.y = currentMesh.rotation.y;
-        if (pointsMesh) pointsMesh.rotation.y = currentMesh.rotation.y;
-    }
-
     // Telemetria do Rodapé e Avanço Temporal
     if (isSimRunning) {
         simTime += 0.016 * simTimeScale;
+        if (currentMesh) {
+            currentMesh.rotation.y += 0.005 * simTimeScale;
+            if (wireMesh) wireMesh.rotation.y = currentMesh.rotation.y;
+            if (pointsMesh) pointsMesh.rotation.y = currentMesh.rotation.y;
+        }
     }
 
     const timerSpan = document.getElementById('footer-sim-timer');
@@ -317,15 +314,6 @@ function setupListeners() {
         }
     });
 
-    // --- BOTÃO FLUTUANTE DE ROTAÇÃO NO CANVAS ---
-    const btnAutoRotate = document.getElementById('btn-quick-autorotate');
-    if (btnAutoRotate) {
-        btnAutoRotate.addEventListener('click', () => {
-            autoRotateActive = !autoRotateActive;
-            btnAutoRotate.classList.toggle('active', autoRotateActive);
-        });
-    }
-
     // --- BARRA DE TEMAS FLUTUANTE (CANVAS) ---
     document.querySelectorAll('.theme-dot-btn').forEach(dot => {
         dot.addEventListener('click', () => {
@@ -412,14 +400,9 @@ function setupListeners() {
         });
     }
 
-    // --- BARRA DE TRANSPORTE / REPRODUÇÃO (ABA 1) ---
+    // --- BARRA FLUTUANTE DE TRANSPORTE / REPRODUÇÃO ---
     playControl = initToggleButton('#btn-demo-primary', (active) => {
         isSimRunning = active;
-        autoRotateActive = active;
-
-        if (btnAutoRotate) {
-            btnAutoRotate.classList.toggle('active', active);
-        }
 
         const headerBadge = document.getElementById('header-status-badge');
         const footerBadge = document.getElementById('footer-status-badge');
@@ -452,8 +435,6 @@ function setupListeners() {
             if (isSimRunning) {
                 if (playControl) playControl.setState(0);
                 isSimRunning = false;
-                autoRotateActive = false;
-                if (btnAutoRotate) btnAutoRotate.classList.remove('active');
             }
             simTime += 0.05 * simTimeScale;
             if (currentMesh) {
@@ -471,8 +452,6 @@ function setupListeners() {
             if (isSimRunning) {
                 if (playControl) playControl.setState(0);
                 isSimRunning = false;
-                autoRotateActive = false;
-                if (btnAutoRotate) btnAutoRotate.classList.remove('active');
             }
             simTime = 0.0;
             if (currentMesh) {
@@ -495,7 +474,32 @@ function setupListeners() {
         });
     }
 
-    // Speed Selector Pills
+    // Botão Cíclico de Velocidade na Barra Flutuante de Transporte
+    const speedCycleSteps = [0.5, 1.0, 2.0, 5.0];
+    const btnSpeedCycle = document.getElementById('btn-speed-cycle');
+    if (btnSpeedCycle) {
+        btnSpeedCycle.addEventListener('click', () => {
+            const currentIdx = speedCycleSteps.indexOf(simTimeScale);
+            const nextSpeed = speedCycleSteps[(currentIdx + 1) % speedCycleSteps.length];
+            simTimeScale = nextSpeed;
+            btnSpeedCycle.dataset.speed = nextSpeed.toFixed(1);
+            btnSpeedCycle.textContent = `${nextSpeed.toFixed(1)}×`;
+        });
+    }
+
+    // Botão de Ação Primária de Demonstração na Aba 1
+    const btnDemoAction = document.getElementById('btn-demo-action');
+    if (btnDemoAction) {
+        btnDemoAction.addEventListener('click', () => {
+            if (currentMesh) {
+                currentMesh.rotation.x += 0.35;
+                if (wireMesh) wireMesh.rotation.x = currentMesh.rotation.x;
+                if (pointsMesh) pointsMesh.rotation.x = currentMesh.rotation.x;
+            }
+        });
+    }
+
+    // Speed Selector Pills (Legado)
     document.querySelectorAll('#transport-speed-pills .speed-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('#transport-speed-pills .speed-btn').forEach(b => b.classList.remove('active'));

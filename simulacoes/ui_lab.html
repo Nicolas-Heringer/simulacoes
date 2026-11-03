@@ -55,26 +55,28 @@
         <div class="canvas-area">
             <div id="three-container"></div>
 
-            <!-- Barra de Ferramentas Flutuante / Seletor Rápido & Popover de Configurações -->
-            <div class="canvas-toolbar pos-top-left" id="theme-selector-bar">
-                <span>🎨 Acento:</span>
-                <div class="toolbar-dot theme-dot-btn active" style="background: #facc15;" data-color="#facc15" title="Amarelo Solar (Padrão)"></div>
-                <div class="toolbar-dot theme-dot-btn" style="background: #38bdf8;" data-color="#38bdf8" title="Azul Ciano Atmosférico"></div>
-                <div class="toolbar-dot theme-dot-btn" style="background: #22c55e;" data-color="#22c55e" title="Verde Esmeralda"></div>
-                <div class="toolbar-dot theme-dot-btn" style="background: #a855f7;" data-color="#a855f7" title="Roxo Cósmico"></div>
-                <div class="toolbar-dot theme-dot-btn" style="background: #f43f5e;" data-color="#f43f5e" title="Rosa Carmim"></div>
-                <div class="toolbar-divider"></div>
-                <button id="btn-toggle-color-tooltip" class="toolbar-btn" title="Personalizar cores por componente">
-                    <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="Customizar">
-                    <span>Componentes</span>
-                </button>
-            </div>
+            <!-- Pilha Vertical Automática no Canto Superior Esquerdo (Sem Sobreposição) -->
+            <div class="canvas-top-left-stack">
+                <!-- Barra de Ferramentas Flutuante / Seletor Rápido & Popover de Configurações -->
+                <div class="canvas-toolbar pos-top-left" id="theme-selector-bar">
+                    <span>🎨 Acento:</span>
+                    <div class="toolbar-dot theme-dot-btn active" style="background: #facc15;" data-color="#facc15" title="Amarelo Solar (Padrão)"></div>
+                    <div class="toolbar-dot theme-dot-btn" style="background: #38bdf8;" data-color="#38bdf8" title="Azul Ciano Atmosférico"></div>
+                    <div class="toolbar-dot theme-dot-btn" style="background: #22c55e;" data-color="#22c55e" title="Verde Esmeralda"></div>
+                    <div class="toolbar-dot theme-dot-btn" style="background: #a855f7;" data-color="#a855f7" title="Roxo Cósmico"></div>
+                    <div class="toolbar-dot theme-dot-btn" style="background: #f43f5e;" data-color="#f43f5e" title="Rosa Carmim"></div>
+                    <div class="toolbar-divider"></div>
+                    <button id="btn-toggle-color-tooltip" class="toolbar-btn" title="Personalizar cores por componente">
+                        <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="Customizar">
+                        <span>Componentes</span>
+                    </button>
+                </div>
 
-            <!-- Barra Flutuante Espelhada do Modo Foco (declarativa via data-focus-control) -->
-            <div id="focus-context-toolbar" class="canvas-toolbar pos-top-left focus-mirror-toolbar" style="top: 56px;"></div>
+                <!-- Barra Flutuante Espelhada do Modo Foco (declarativa via data-focus-control) -->
+                <div id="focus-context-toolbar" class="canvas-toolbar pos-top-left focus-mirror-toolbar"></div>
 
-            <!-- Popover Universal de Configurações / Customização Independente de Cores -->
-            <div id="color-customizer-tooltip" class="sim-popover hidden">
+                <!-- Popover Universal de Configurações / Customização Independente de Cores -->
+                <div id="color-customizer-tooltip" class="sim-popover hidden">
                 <div class="popover-header">
                     <div class="popover-title">
                         <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="Cores">
@@ -197,43 +199,44 @@
                     </button>
                 </div>
             </div>
+            </div>
 
             <!-- Grupo de Ações Flutuantes no Topo Direito do Canvas -->
             <div class="canvas-top-actions">
-                <button id="btn-quick-autorotate" class="canvas-btn-floating active" title="Alternar Rotação 3D">
-                    <img src="../assets/icons/rotate.svg" class="icon-svg icon-spin" alt="Rotação">
-                    <span class="btn-label-text">Rotação 3D</span>
-                </button>
-                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Painel Lateral de Controles">
+                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Painel Lateral de Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
                 </button>
-            </div>
-
-            <!-- HUD de Diagnóstico Flutuante -->
-            <div class="sim-hud" id="hud-test">
-                <div class="hud-item">
-                    <span class="hud-label">Elemento Ativo:</span>
-                    <span class="hud-val" id="hud-active-comp">Botões & Presets</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Cliques Registrados:</span>
-                    <span class="hud-val" id="hud-click-count">0</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Raio da Geometria:</span>
-                    <span class="hud-val" id="hud-sphere-radius" style="color: var(--color-cyan);">1.00</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Status do Render:</span>
-                    <span class="hud-val" id="hud-fps-val" style="color: var(--color-emerald);">60 fps (Ativo)</span>
-                </div>
             </div>
 
             <!-- Dica Interativa -->
             <div class="interactive-hint">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dica">
                 Arraste com o mouse para orbitar a geometria 3D e teste os componentes no painel.
+            </div>
+
+            <!-- Barra Flutuante de Transporte / Playback (Padrão Canônico DS 2.0) -->
+            <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
+                <button class="toolbar-btn btn-toggle tone-accent" id="btn-demo-primary"
+                        data-state="0"
+                        data-text-idle="Executar"
+                        data-text-active="Pausar"
+                        data-icon-idle="play"
+                        data-icon-active="pause"
+                        title="Executar / Pausar">
+                    <img src="../assets/icons/play.svg" class="icon-svg" alt="Play">
+                    <span class="btn-text">Executar</span>
+                </button>
+                <button class="toolbar-btn" id="btn-transport-step" title="Avançar 1 Passo (Δt)">
+                    <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
+                </button>
+                <button class="toolbar-btn" id="btn-demo-secondary" title="Reiniciar Simulação (t = 0)">
+                    <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
+                </button>
+                <span class="toolbar-divider"></span>
+                <button class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
+                    1.0×
+                </button>
             </div>
         </div>
 
@@ -284,57 +287,20 @@
                             <h3 class="tab-title">Controle & Disparadores</h3>
                             <div class="sim-badge" id="header-status-badge"><span class="status-dot"></span><span>Pronto</span></div>
                         </div>
-                        <p class="tab-subtitle">Barra de reprodução temporal, presets de modo e botões utilitários.</p>
+                        <p class="tab-subtitle">Ações primárias, presets de modo e botões utilitários (o controle de reprodução flutua na base do canvas).</p>
                     </div>
 
-                    <!-- 1. Barra de Reprodução Físico-Temporal Integrada -->
-                    <div class="sim-transport-bar">
-                        <div class="transport-controls-row">
-                            <button class="btn-primary btn-toggle transport-btn-play" id="btn-demo-primary"
-                                    data-state="0"
-                                    data-text-idle="Executar"
-                                    data-text-active="Pausar"
-                                    data-icon-idle="play"
-                                    data-icon-active="pause"
-                                    data-focus-control="toggle"
-                                    data-focus-order="1"
-                                    data-focus-tab="global">
-                                <img src="../assets/icons/play.svg" class="icon-svg" alt="Play">
-                                <span class="btn-text">Executar</span>
-                            </button>
-                            <button class="btn-icon" id="btn-transport-step" title="Avançar 1 Passo no Tempo (Δt)"
-                                    data-focus-control="action"
-                                    data-focus-label=""
-                                    data-focus-order="2"
-                                    data-focus-tab="global">
-                                <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
-                            </button>
-                            <button class="btn-icon" id="btn-demo-secondary" title="Reiniciar Simulação (t = 0)"
-                                    data-focus-control="action"
-                                    data-focus-label=""
-                                    data-focus-order="3"
-                                    data-focus-divider="after"
-                                    data-focus-tab="global">
-                                <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
-                            </button>
-                        </div>
-
-                        <div class="transport-speed-row">
-                            <span class="transport-speed-label">
-                                <img src="../assets/icons/rotate.svg" class="icon-svg" style="width: 14px; height: 14px;" alt="Velocidade">
-                                Velocidade:
-                            </span>
-                            <div class="transport-speed-pills" id="transport-speed-pills">
-                                <button class="speed-btn" data-speed="0.5">0.5×</button>
-                                <button class="speed-btn active" data-speed="1.0">1.0×</button>
-                                <button class="speed-btn" data-speed="2.0">2.0×</button>
-                                <button class="speed-btn" data-speed="5.0">5.0×</button>
-                            </div>
-                        </div>
+                    <!-- Botões de Ação Primária e Secundária -->
+                    <div class="control-group">
+                        <button class="btn-primary tone-accent" id="btn-demo-action" style="width: 100%; justify-content: center;"
+                                data-focus-control="action" data-focus-label="Pulso" data-focus-order="1">
+                            <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="Ação">
+                            <span>Disparar Evento Físico (.btn-primary)</span>
+                        </button>
                     </div>
 
                     <!-- Botão de Demonstração Desabilitado -->
-                    <div class="control-group" style="margin-top: 10px;">
+                    <div class="control-group" style="margin-top: 8px;">
                         <button class="btn-primary" disabled style="width: 100%;">
                             Ação Desabilitada (:disabled)
                         </button>

@@ -170,42 +170,34 @@ Obrigatório para todos os parâmetros contínuos:
 </div>
 ```
 
-### 3.2 Transport Bar (`.sim-transport-bar`)
-Obrigatório para simulações com evolução temporal:
+### 3.2 Barra Flutuante de Transporte Temporal (`.canvas-toolbar.pos-bottom-center`)
+Padrão canônico para todas as simulações com evolução temporal. Posicionada dentro de `.canvas-area` (centralizada na base do viewport), mantendo o painel lateral (`.controls-panel`) despoluído e garantindo acesso permanente ao Play/Pause, Passo Único, Reset e Velocidade em qualquer aba ou no Modo Foco:
 ```html
-<div class="sim-transport-bar">
-    <div class="transport-controls-row">
-        <button id="btn-play-pause" class="btn-primary tone-emerald transport-btn-play"
-            data-state="idle"
-            data-text-idle="Simular"
+<div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
+    <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
+            data-state="0"
+            data-text-idle="Executar"
             data-text-active="Pausar"
-            data-icon-idle="play-icon.svg"
-            data-icon-active="pause-icon.svg"
-            data-focus-control="toggle">
-            <img src="../assets/icons/play-icon.svg" class="icon-svg" alt="">
-            <span class="btn-text">Simular</span>
-        </button>
-        <button id="btn-step" class="btn-secondary" title="Avançar 1 Passo (dt)"
-            data-focus-control="action" data-focus-label="Passo">
-            <img src="../assets/icons/step-forward-icon.svg" class="icon-svg" alt="Passo">
-        </button>
-        <button id="btn-restart" class="btn-secondary" title="Reiniciar Tempo (t = 0)"
-            data-focus-control="action" data-focus-label="Reset">
-            <img src="../assets/icons/reset-icon.svg" class="icon-svg" alt="Reset">
-        </button>
-    </div>
-    <div class="transport-speed-row">
-        <span class="transport-speed-label">Velocidade</span>
-        <div class="transport-speed-pills">
-            <button class="speed-btn" data-speed="0.25">0.25x</button>
-            <button class="speed-btn" data-speed="0.5">0.5x</button>
-            <button class="speed-btn active" data-speed="1">1x</button>
-            <button class="speed-btn" data-speed="2">2x</button>
-            <button class="speed-btn" data-speed="4">4x</button>
-        </div>
-    </div>
+            data-icon-idle="play"
+            data-icon-active="pause"
+            title="Executar / Pausar">
+        <img src="../assets/icons/play.svg" class="icon-svg" alt="Play">
+        <span class="btn-text">Executar</span>
+    </button>
+    <button class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
+        <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
+    </button>
+    <button class="toolbar-btn" id="btn-reset-sim" title="Reiniciar (t = 0)">
+        <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
+    </button>
+    <!-- Opcional: Seletor Cíclico de Velocidade -->
+    <span class="toolbar-divider"></span>
+    <button class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
+        1.0×
+    </button>
 </div>
 ```
+*(Nota: A classe `.sim-transport-bar` é mantida no CSS apenas para retrocompatibilidade com simulações legadas).*
 
 ### 3.3 Variantes de Botões e Ações de Canvas
 ```html

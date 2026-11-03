@@ -981,6 +981,48 @@ export function initFocusMirrorToolbar(options = {}) {
         container.classList.add('focus-mirror-only-focus');
     }
 
+    // 1.1 Empilhamento Vertical Automático no Canto Superior Esquerdo (.canvas-top-left-stack)
+    const parentCanvasArea = container.closest('.canvas-area') || document.querySelector('.canvas-area');
+    if (parentCanvasArea) {
+        let topLeftStack = parentCanvasArea.querySelector('.canvas-top-left-stack');
+        if (!topLeftStack) {
+            topLeftStack = document.createElement('div');
+            topLeftStack.className = 'canvas-top-left-stack';
+            parentCanvasArea.insertBefore(topLeftStack, parentCanvasArea.firstChild);
+        }
+
+        // Coleta toolbars fixas do canto superior esquerdo (ex: #theme-selector-bar, #display-toolbar)
+        const fixedTopLeftBars = Array.from(
+            parentCanvasArea.querySelectorAll('.canvas-toolbar.pos-top-left:not(.focus-mirror-toolbar), .theme-selector-bar')
+        );
+        fixedTopLeftBars.forEach(el => {
+            el.style.removeProperty('top');
+            el.style.removeProperty('left');
+            if (el.parentElement !== topLeftStack) {
+                topLeftStack.appendChild(el);
+            }
+        });
+
+        // Posiciona a barra espelhada do Modo Foco logo abaixo das barras fixas
+        container.style.removeProperty('top');
+        container.style.removeProperty('left');
+        if (container.parentElement !== topLeftStack) {
+            topLeftStack.appendChild(container);
+        }
+
+        // Posiciona popovers do canto superior esquerdo (ex: #color-customizer-tooltip) logo abaixo das toolbars
+        const topLeftPopovers = Array.from(
+            parentCanvasArea.querySelectorAll('.sim-popover:not(.pos-top-right):not(.pos-bottom-left):not(.pos-bottom-right), .color-tooltip-popover')
+        );
+        topLeftPopovers.forEach(pop => {
+            pop.style.removeProperty('top');
+            pop.style.removeProperty('left');
+            if (pop.parentElement !== topLeftStack) {
+                topLeftStack.appendChild(pop);
+            }
+        });
+    }
+
     // Pool de MutationObservers ativos para evitar memory leaks
     let activeObservers = [];
 

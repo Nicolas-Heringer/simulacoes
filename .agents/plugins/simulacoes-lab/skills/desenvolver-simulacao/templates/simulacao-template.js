@@ -16,7 +16,6 @@ const state = {
     isRunning: false,
     speed: 1.0,
     time: 0.0,
-    autoRotate: true,
     param1: 1.0
 };
 
@@ -116,20 +115,15 @@ function setupUI() {
         updateVisualScene();
     });
 
-    // Velocidades
-    document.querySelectorAll('#sim-speed-pills .speed-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('#sim-speed-pills .speed-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            state.speed = parseFloat(btn.dataset.speed || '1.0');
-        });
-    });
-
-    // Rotação Automática da Câmera
-    const btnAutoRotate = document.getElementById('btn-quick-autorotate');
-    btnAutoRotate?.addEventListener('click', () => {
-        state.autoRotate = !state.autoRotate;
-        btnAutoRotate.classList.toggle('active', state.autoRotate);
+    // Seletor Cíclico de Velocidade na Barra Flutuante (#btn-speed-cycle)
+    const speedSteps = [0.5, 1.0, 2.0, 5.0];
+    const btnSpeedCycle = document.getElementById('btn-speed-cycle');
+    btnSpeedCycle?.addEventListener('click', () => {
+        const idx = speedSteps.indexOf(state.speed);
+        const nextSpeed = speedSteps[(idx + 1) % speedSteps.length];
+        state.speed = nextSpeed;
+        btnSpeedCycle.dataset.speed = nextSpeed.toFixed(1);
+        btnSpeedCycle.textContent = `${nextSpeed.toFixed(1)}×`;
     });
 
     // Dual Slider
@@ -164,8 +158,6 @@ function updateTimerDisplay() {
 }
 
 let lastTime = performance.now();
-let frames = 0;
-let lastFpsUpdate = performance.now();
 
 function animate(currentTime) {
     requestAnimationFrame(animate);
@@ -177,22 +169,8 @@ function animate(currentTime) {
         stepPhysics(dt);
     }
 
-    if (state.autoRotate) {
-        mesh.rotation.y += 0.01;
-    }
-
     controls.update();
     updateVisualScene();
-
-    // FPS Meter
-    frames++;
-    if (currentTime > lastFpsUpdate + 500) {
-        const fps = Math.round((frames * 1000) / (currentTime - lastFpsUpdate));
-        const fpsEl = document.getElementById('hud-fps');
-        if (fpsEl) fpsEl.textContent = `${fps} fps`;
-        frames = 0;
-        lastFpsUpdate = currentTime;
-    }
 }
 
 // --- 6. Inicialização ---

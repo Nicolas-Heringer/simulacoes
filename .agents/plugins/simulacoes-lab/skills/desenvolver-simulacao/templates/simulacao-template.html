@@ -40,34 +40,47 @@
         <div class="canvas-area">
             <div id="three-container"></div>
 
-            <!-- Grupo de Ações do Topo Direito (Rotação + Reabrir Controles no Modo Foco) -->
+            <!-- Pilha Vertical Automática no Canto Superior Esquerdo -->
+            <div class="canvas-top-left-stack">
+                <div id="focus-context-toolbar" class="canvas-toolbar pos-top-left focus-mirror-toolbar"></div>
+            </div>
+
+            <!-- Grupo de Ações do Topo Direito (Reabrir Controles no Modo Foco) -->
             <div class="canvas-top-actions">
-                <button id="btn-quick-autorotate" class="canvas-btn-floating active" title="Alternar Rotação 3D">
-                    <img src="../assets/icons/rotate.svg" class="icon-svg icon-spin" alt="Rotação">
-                    <span class="btn-label-text">Rotação 3D</span>
-                </button>
                 <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
                 </button>
             </div>
 
-            <!-- HUD de Telemetria no Canto Inferior Esquerdo -->
-            <div class="sim-hud" id="sim-hud">
-                <div class="hud-item">
-                    <span class="hud-label">Status:</span>
-                    <span class="hud-val" id="hud-status">Pronto</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">FPS:</span>
-                    <span class="hud-val" id="hud-fps" style="color: var(--color-emerald);">60 fps</span>
-                </div>
-            </div>
-
             <!-- Dica Interativa Centralizada no Fundo (Desktop) -->
             <div class="interactive-hint">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dica">
                 Arraste para orbitar a cena 3D e use o painel para ajustar os parâmetros.
+            </div>
+
+            <!-- Barra Flutuante de Transporte / Playback (Padrão Canônico DS 2.0) -->
+            <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
+                <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
+                        data-state="0"
+                        data-text-idle="Executar"
+                        data-text-active="Pausar"
+                        data-icon-idle="play"
+                        data-icon-active="pause"
+                        title="Executar / Pausar">
+                    <img src="../assets/icons/play.svg" class="icon-svg" alt="Play">
+                    <span class="btn-text">Executar</span>
+                </button>
+                <button class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
+                    <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
+                </button>
+                <button class="toolbar-btn" id="btn-reset-sim" title="Reiniciar (t = 0)">
+                    <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
+                </button>
+                <span class="toolbar-divider"></span>
+                <button class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
+                    1.0×
+                </button>
             </div>
         </div>
 
@@ -96,54 +109,8 @@
             <!-- Centro: Corpo Rolável de Conteúdo -->
             <div class="panel-body">
                 <div id="panel-tab-params" class="tab-pane active">
-                    <!-- 1. Barra de Transporte / Playback -->
-                    <div class="sim-transport-bar">
-                        <div class="transport-controls-row">
-                            <button class="btn-primary btn-toggle transport-btn-play" id="btn-play-sim"
-                                    data-state="0"
-                                    data-text-idle="Executar"
-                                    data-text-active="Pausar"
-                                    data-icon-idle="play"
-                                    data-icon-active="pause"
-                                    data-focus-control="toggle"
-                                    data-focus-order="1"
-                                    data-focus-tab="global">
-                                <img src="../assets/icons/play.svg" class="icon-svg" alt="Play">
-                                <span class="btn-text">Executar</span>
-                            </button>
-                            <button class="btn-icon" id="btn-step-sim" title="Avançar 1 Passo (Δt)"
-                                    data-focus-control="action"
-                                    data-focus-label=""
-                                    data-focus-order="2"
-                                    data-focus-tab="global">
-                                <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
-                            </button>
-                            <button class="btn-icon" id="btn-reset-sim" title="Reiniciar (t = 0)"
-                                    data-focus-control="action"
-                                    data-focus-label=""
-                                    data-focus-order="3"
-                                    data-focus-divider="after"
-                                    data-focus-tab="global">
-                                <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
-                            </button>
-                        </div>
-
-                        <div class="transport-speed-row">
-                            <span class="transport-speed-label">
-                                <img src="../assets/icons/stopwatch.svg" class="icon-svg" style="width: 14px; height: 14px;" alt="Velocidade">
-                                Velocidade:
-                            </span>
-                            <div class="transport-speed-pills" id="sim-speed-pills">
-                                <button class="speed-btn" data-speed="0.5">0.5×</button>
-                                <button class="speed-btn active" data-speed="1.0">1.0×</button>
-                                <button class="speed-btn" data-speed="2.0">2.0×</button>
-                                <button class="speed-btn" data-speed="5.0">5.0×</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 2. Controles de Parâmetros com Dual Slider -->
-                    <div class="control-group" style="margin-top: 12px;">
+                    <!-- Controles de Parâmetros com Dual Slider -->
+                    <div class="control-group">
                         <div class="slider-container sim-dual-slider">
                             <div class="slider-header">
                                 <label for="slider-param1" class="slider-label">Parâmetro Exemplo ($p_1$)</label>
@@ -157,7 +124,7 @@
                                    min="0.1" max="10.0" step="0.1" value="1.0"
                                    data-focus-control="slider"
                                    data-focus-label="p₁"
-                                   data-focus-order="4">
+                                   data-focus-order="1">
                         </div>
                     </div>
                 </div>

@@ -1101,8 +1101,6 @@ function stepPhysics(dt) {
 }
 
 let lastTime = performance.now();
-let frames = 0;
-let lastFpsUpdate = performance.now();
 
 function animate(currentTime) {
     requestAnimationFrame(animate);
@@ -1117,16 +1115,6 @@ function animate(currentTime) {
 
     controls.update();
     updateVisualScene();
-
-    // Medidor de FPS no HUD
-    frames++;
-    if (currentTime > lastFpsUpdate + 500) {
-        const fps = Math.round((frames * 1000) / (currentTime - lastFpsUpdate));
-        const fpsEl = document.getElementById('hud-fps');
-        if (fpsEl) fpsEl.textContent = `${fps} fps`;
-        frames = 0;
-        lastFpsUpdate = currentTime;
-    }
 }
 
 // =============================================================================

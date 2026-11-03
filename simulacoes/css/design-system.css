@@ -1814,9 +1814,46 @@ input[type="text"].sim-input:focus {
     box-shadow: 0 0 10px color-mix(in srgb, var(--accent-color) 30%, transparent);
 }
 
+/* Botão Cíclico de Velocidade na Barra Flutuante de Transporte */
+.toolbar-btn.speed-cycle-btn {
+    font-family: var(--font-mono);
+    min-width: 44px;
+    justify-content: center;
+}
+
+/* Ajuste automático da dica interativa quando há barra flutuante inferior central */
+.canvas-area:has(.canvas-toolbar.pos-bottom-center) .interactive-hint {
+    bottom: 64px;
+}
+
 /* =============================================================================
-   9.1 BARRA FLUTUANTE DE FOCO REATIVA / ESPELHADA (.focus-mirror-toolbar)
+   9.1 PILHA VERTICAL DO CANTO SUPERIOR ESQUERDO & BARRA DE MODO FOCO
    ============================================================================= */
+
+/* Container que empilha verticalmente toolbars e popovers no canto superior esquerdo sem sobreposição */
+.canvas-top-left-stack {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    right: 150px;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.canvas-top-left-stack > * {
+    pointer-events: auto;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: fit-content;
+    max-width: 100%;
+}
 
 /* Container da Barra Flutuante Espelhada */
 .focus-mirror-toolbar {
@@ -1824,14 +1861,22 @@ input[type="text"].sim-input:focus {
     top: 15px;
     left: 15px;
     z-index: 60;
-    max-width: calc(100% - 170px);
-    overflow-x: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    width: fit-content;
+    max-width: calc(100% - 165px);
+    flex-wrap: wrap;
+    display: none;
     opacity: 0;
     pointer-events: none;
-    transform: translateY(-8px);
+    transform: translateY(-6px);
     transition: opacity var(--trans-normal), transform var(--trans-normal);
+}
+
+.canvas-top-left-stack > .focus-mirror-toolbar {
+    max-width: 100%;
+}
+
+.focus-mirror-toolbar:empty {
+    display: none !important;
 }
 
 .focus-mirror-toolbar::-webkit-scrollbar {
@@ -1839,8 +1884,9 @@ input[type="text"].sim-input:focus {
 }
 
 /* Visibilidade ativada no Modo Foco (.sidebar-collapsed) ou classe forçada */
-.sim-layout.sidebar-collapsed .focus-mirror-toolbar,
-.focus-mirror-toolbar.is-visible {
+.sim-layout.sidebar-collapsed .focus-mirror-toolbar:not(:empty),
+.focus-mirror-toolbar.is-visible:not(:empty) {
+    display: inline-flex;
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);
@@ -2205,6 +2251,13 @@ input[type="text"].sim-input:focus {
     }
 
     /* Barra de ferramentas compacta no topo esquerdo */
+    .canvas-top-left-stack {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        gap: 6px;
+    }
+
     .canvas-toolbar {
         position: absolute;
         top: 10px;
