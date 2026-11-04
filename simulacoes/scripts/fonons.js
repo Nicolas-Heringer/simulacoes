@@ -35,9 +35,9 @@ const state = {
     isRunning: false, // Simulação abre pausada conforme padrão DS 2.0
     speed: 1.0,
     time: 0.0,
-    templateKey: 'uniforme_50',
-    raioInfluencia: 80,
-    intensidade: 250,
+    templateKey: 'uniforme_10',
+    raioInfluencia: 40,
+    intensidade: 150,
     amortecimento: 0.005,
     perturbacao: 'radial'
 };
@@ -322,7 +322,7 @@ function resizeCanvas() {
         ctx.scale(dpr, dpr);
 
         // Regenerar a grade adaptada ao novo tamanho
-        const config = TEMPLATES[state.templateKey] || TEMPLATES['uniforme_50'];
+        const config = TEMPLATES[state.templateKey] || TEMPLATES['uniforme_10'];
         sistema.gerarRede(w, h, config);
         render();
     }
@@ -616,7 +616,7 @@ function setupUI() {
     // Seletor de Topologias de Rede (Monoatômica e Diatômica)
     document.getElementById('seletor-de-template')?.addEventListener('change', (e) => {
         state.templateKey = e.target.value;
-        const config = TEMPLATES[state.templateKey] || TEMPLATES['uniforme_50'];
+        const config = TEMPLATES[state.templateKey] || TEMPLATES['uniforme_10'];
         sistema.gerarRede(getCanvasLogicalWidth(), getCanvasLogicalHeight(), config);
         render();
     });

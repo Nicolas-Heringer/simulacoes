@@ -132,9 +132,9 @@
                     <div class="control-group">
                         <label for="seletor-de-template" class="slider-label">Topologia e Densidade da Rede:</label>
                         <select id="seletor-de-template" class="sim-control" data-focus-control="select" data-focus-label="Rede" data-focus-order="1" title="Topologia da rede">
-                            <option value="uniforme_10" data-focus-short="Mono · 10px">Monoatômica — Alta Densidade (Espaçamento 10px)</option>
+                            <option value="uniforme_10" data-focus-short="Mono · 10px" selected>Monoatômica — Alta Densidade (Espaçamento 10px)</option>
                             <option value="uniforme_20" data-focus-short="Mono · 20px">Monoatômica — Média Densidade (Espaçamento 20px)</option>
-                            <option value="uniforme_50" data-focus-short="Mono · 50px" selected>Monoatômica — Baixa Densidade (Espaçamento 50px)</option>
+                            <option value="uniforme_50" data-focus-short="Mono · 50px">Monoatômica — Baixa Densidade (Espaçamento 50px)</option>
                             <option value="linhas_20" data-focus-short="Linhas · 20px">Diatômica em Linhas (Espaçamento 20px)</option>
                             <option value="linhas_50" data-focus-short="Linhas · 50px">Diatômica em Linhas (Espaçamento 50px)</option>
                             <option value="checkerboard_20" data-focus-short="Xadrez · 20px">Diatômica Xadrez / Checkerboard (Espaçamento 20px)</option>
@@ -165,12 +165,12 @@
                                 <label for="slider-raio" class="slider-label">Raio de Influência do Arrasto ($R$)</label>
                                 <div class="dual-input-wrapper">
                                     <input type="number" class="dual-input-number" id="num-raio"
-                                           min="20" max="250" step="5" value="80">
+                                           min="20" max="250" step="5" value="40">
                                     <span class="dual-input-unit">px</span>
                                 </div>
                             </div>
                             <input type="range" class="sim-slider" id="slider-raio"
-                                   min="20" max="250" step="5" value="80">
+                                   min="20" max="250" step="5" value="40">
                         </div>
                     </div>
 
@@ -180,13 +180,13 @@
                                 <label for="slider-intensidade" class="slider-label">Intensidade de Perturbação ($F$)</label>
                                 <div class="dual-input-wrapper">
                                     <input type="number" class="dual-input-number" id="num-intensidade"
-                                           min="50" max="600" step="10" value="250">
+                                           min="50" max="600" step="10" value="150">
                                     <span class="dual-input-unit">u</span>
                                 </div>
                             </div>
                             <input type="range" class="sim-slider" id="slider-intensidade"
                                    data-focus-control="slider" data-focus-label="F" data-focus-order="4"
-                                   min="50" max="600" step="10" value="250">
+                                   min="50" max="600" step="10" value="150">
                         </div>
                     </div>
 
