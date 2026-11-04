@@ -14,6 +14,7 @@ import {
     syncDualSlider,
     RealtimePlot,
     MultiSeriesPlot,
+    openPlotFullscreenModal,
     initModal,
     initOnboardingModal,
     initOnboardingQRCode,
@@ -46,6 +47,7 @@ export {
     syncDualSlider,
     RealtimePlot,
     MultiSeriesPlot,
+    openPlotFullscreenModal,
     initModal,
     initOnboardingModal,
     initOnboardingQRCode,
@@ -218,7 +220,7 @@ function animate() {
         // 1. Alimentação contínua do Mini-Gráfico Canal Único (RealtimePlot)
         if (plotInstance) {
             const waveVal = Math.sin(simTime * 3) * rad * 0.8 + (Math.cos(simTime * 7) * 0.2);
-            plotInstance.push(waveVal);
+            plotInstance.push(waveVal, simTime);
 
             const valSpan = document.getElementById('plot-current-val');
             if (valSpan) {
@@ -237,7 +239,7 @@ function animate() {
             if (multiPlotInstance.mode === 'phase-space') {
                 multiPlotInstance.pushPhasePoint(x, p);
             } else {
-                multiPlotInstance.push({ K, U, E });
+                multiPlotInstance.push({ K, U, E }, simTime);
             }
 
             const kReadout = document.getElementById('readout-demo-k');

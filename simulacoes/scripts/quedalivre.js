@@ -477,7 +477,7 @@ function setupUI() {
 
         const metrics = computeMetrics();
         if (plotEnergia) {
-            plotEnergia.push(metrics.E);
+            plotEnergia.push(metrics.E, state.time);
         }
         updateVisualScene();
     });
@@ -489,8 +489,7 @@ function setupUI() {
         const timerEl = document.getElementById('footer-sim-timer');
         if (timerEl) timerEl.textContent = 't = 0.00s';
         if (plotEnergia) {
-            plotEnergia.data.fill(0);
-            plotEnergia.render();
+            plotEnergia.clear();
         }
         updateVisualScene();
     };
@@ -544,6 +543,10 @@ function setupUI() {
         maxPoints: 100,
         minVal: 0,
         maxVal: 400,
+        autoScale: true,
+        minSpan: 5.0,
+        maxLabelSelector: '#plot-max-label',
+        minLabelSelector: '#plot-min-label',
         color: '#facc15'
     });
 }
@@ -575,7 +578,7 @@ function animate(currentTime) {
 
         const metrics = computeMetrics();
         if (plotEnergia) {
-            plotEnergia.push(metrics.E);
+            plotEnergia.push(metrics.E, state.time);
         }
     }
 

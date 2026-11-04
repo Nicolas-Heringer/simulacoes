@@ -551,10 +551,8 @@ function setupUI() {
         const timerEl = document.getElementById('footer-sim-timer');
         if (timerEl) timerEl.textContent = `t = ${state.time.toFixed(2)}s`;
 
-        const kMedia = sistema.calcularEnergiaCineticaMedia();
-        const plotVal = document.getElementById('plot-valor-k');
-        if (plotVal) plotVal.textContent = `${kMedia.toFixed(2)} u`;
-        if (plotEnergia) plotEnergia.push(kMedia);
+        const kMedia = updateReadouts();
+        if (plotEnergia) plotEnergia.push(kMedia, state.time);
 
         render();
     });
@@ -574,12 +572,10 @@ function setupUI() {
         const timerEl = document.getElementById('footer-sim-timer');
         if (timerEl) timerEl.textContent = 't = 0.00s';
 
-        const plotVal = document.getElementById('plot-valor-k');
-        if (plotVal) plotVal.textContent = '0.00 u';
+        updateReadouts();
 
         if (plotEnergia) {
-            plotEnergia.data.fill(0);
-            plotEnergia.render();
+            plotEnergia.clear();
         }
 
         render();
@@ -649,6 +645,10 @@ function setupUI() {
         maxPoints: 80,
         minVal: 0,
         maxVal: 15,
+        autoScale: true,
+        minSpan: 0.5,
+        maxLabelSelector: '#plot-max-label',
+        minLabelSelector: '#plot-min-label',
         color: '#38bdf8'
     });
 }
@@ -687,7 +687,7 @@ function animate(currentTime) {
 
     // Atualização do buffer do gráfico exclusivamente se a simulação estiver em execução
     if (plotEnergia && state.isRunning) {
-        plotEnergia.push(kMedia);
+        plotEnergia.push(kMedia, state.time);
     }
 }
 

@@ -23,6 +23,7 @@ export class ModoDinamico {
         this.isPlaying = false;
         this.speed = 1.0;
         this.dt = 0.02;
+        this.simTime = 0.0;
         this.lastTime = 0;
         this.animRequestId = null;
 
@@ -105,6 +106,10 @@ export class ModoDinamico {
         if (btnClearDyn) {
             btnClearDyn.addEventListener('click', () => {
                 this.seeds = [];
+                this.simTime = 0.0;
+                if (this.telemetryPlot) this.telemetryPlot.clear();
+                const valSpan = document.getElementById('dyn-plot-val-r');
+                if (valSpan) valSpan.textContent = '0.00 u';
                 this.drawDynamicScene();
             });
         }
@@ -167,7 +172,18 @@ export class ModoDinamico {
                 maxPoints: 100,
                 minVal: 0,
                 maxVal: 5,
-                color: '#38bdf8'
+                autoScale: true,
+                minSpan: 0.5,
+                maxLabelSelector: '#dyn-plot-max-label',
+                minLabelSelector: '#dyn-plot-min-label',
+                color: '#38bdf8',
+                title: 'Distância à Origem $\\langle r(t) \\rangle$',
+                unit: ' u',
+                onOpenFullscreen: () => {
+                    if (this.isPlaying && this.playToggleControl) {
+                        this.playToggleControl.setState(0);
+                    }
+                }
             });
         }
     }
@@ -245,6 +261,10 @@ export class ModoDinamico {
             s.y = s.initY;
             s.trail = [{ x: s.initX, y: s.initY }];
         });
+        this.simTime = 0.0;
+        if (this.telemetryPlot) this.telemetryPlot.clear();
+        const valSpan = document.getElementById('dyn-plot-val-r');
+        if (valSpan) valSpan.textContent = '0.00 u';
     }
 
     /**
@@ -260,6 +280,7 @@ export class ModoDinamico {
         });
 
         const dt = dtReal * this.speed;
+        this.simTime += dt;
 
         this.seeds.forEach(seed => {
             const x0 = seed.x;
@@ -282,11 +303,16 @@ export class ModoDinamico {
             }
         });
 
-        // Telemetria da primeira semente ativa
+        // Telemetria da distância média das sementes ativas à origem
         if (this.isPlaying && this.telemetryPlot && this.seeds.length > 0) {
-            const primary = this.seeds[0];
-            const r = Math.hypot(primary.x, primary.y);
-            this.telemetryPlot.push(r);
+            let sumR = 0;
+            for (let i = 0; i < this.seeds.length; i++) {
+                sumR += Math.hypot(this.seeds[i].x, this.seeds[i].y);
+            }
+            const avgR = sumR / this.seeds.length;
+            this.telemetryPlot.push(avgR, this.simTime);
+            const valSpan = document.getElementById('dyn-plot-val-r');
+            if (valSpan) valSpan.textContent = `${avgR.toFixed(2)} u`;
         }
     }
 

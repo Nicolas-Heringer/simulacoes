@@ -9,6 +9,7 @@
 import {
     initToggleButton,
     syncDualSlider,
+    RealtimePlot,
     initSidebarCollapse,
     initFocusMirrorToolbar,
     initBottomSheet,
@@ -39,6 +40,7 @@ const readoutVd = document.getElementById('readout-vd') || document.getElementBy
 const readoutVth = document.getElementById('readout-vth') || document.getElementById('hud-vth');
 const readoutEfield = document.getElementById('readout-efield') || document.getElementById('hud-efield');
 const readoutColRate = document.getElementById('readout-col-rate') || document.getElementById('hud-col-rate');
+const plotValorVd = document.getElementById('plot-valor-vd');
 const footerSimInfo = document.getElementById('footer-sim-info');
 const footerStatusText = document.getElementById('footer-status-text');
 const footerStatusBadge = document.getElementById('footer-status-badge');
@@ -56,6 +58,8 @@ let numEletrons = 200;
 let isRunning = false; // Simulação inicia pausada conforme padrão DS 2.0
 let playControl = null;
 let simSpeed = 1.0;
+let simTime = 0.0;
+let plotVd = null;
 const speedCycleSteps = [0.5, 1.0, 2.0, 5.0];
 let showTracer = false;
 let tracerTrail = [];
@@ -471,6 +475,10 @@ function updateHUD() {
         const sign = vd >= 0 ? '+' : '';
         readoutVd.textContent = `v_d = ${sign}${vd.toFixed(2)}`;
     }
+    if (plotValorVd) {
+        const sign = vd >= 0 ? '+' : '';
+        plotValorVd.textContent = `${sign}${vd.toFixed(2)} px/f`;
+    }
     if (readoutVth) {
         readoutVth.textContent = `v_th = ${vth.toFixed(2)}`;
     }
@@ -481,6 +489,7 @@ function updateHUD() {
         const sign = vd >= 0 ? '+' : '';
         footerSimInfo.textContent = `v_d = ${sign}${vd.toFixed(2)} px/s`;
     }
+    return vd;
 }
 
 // =============================================================================
@@ -530,9 +539,13 @@ function loop() {
     if (document.hidden) return;
 
     if (isRunning) {
+        simTime += (1 / 60) * simSpeed;
         updateFisica(simSpeed);
     }
-    updateHUD();
+    const vd = updateHUD();
+    if (plotVd && isRunning) {
+        plotVd.push(vd, simTime);
+    }
     draw();
 }
 
@@ -633,8 +646,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isRunning && playControl) {
                 playControl.setState(0);
             }
+            simTime += (1 / 60) * simSpeed;
             updateFisica(1.0);
-            updateHUD();
+            const vd = updateHUD();
+            if (plotVd) {
+                plotVd.push(vd, simTime);
+            }
             draw();
         });
     }
@@ -645,6 +662,10 @@ document.addEventListener('DOMContentLoaded', () => {
             inicializarEletrons();
             colisoesContador = 0;
             colisoesPorSegundo = 0;
+            simTime = 0.0;
+            if (plotVd) {
+                plotVd.clear();
+            }
             updateHUD();
             draw();
         });
@@ -733,7 +754,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }).observe(canvas.parentElement);
     }
 
-    // 20. Inicialização e Início do Loop
+    // 20. Inicialização do Mini-Gráfico RealtimePlot para Velocidade de Deriva vd
+    const canvasPlotVd = document.getElementById('canvas-plot-vd');
+    if (canvasPlotVd) {
+        plotVd = new RealtimePlot(canvasPlotVd, {
+            maxPoints: 100,
+            minVal: -1.0,
+            maxVal: 1.0,
+            autoScale: true,
+            minSpan: 0.2,
+            maxLabelSelector: '#plot-vd-max-label',
+            minLabelSelector: '#plot-vd-min-label',
+            color: '#38bdf8',
+            title: 'Velocidade de Deriva $\\langle v_d(t) \\rangle$',
+            unit: ' px/f'
+        });
+    }
+
+    // 21. Inicialização e Início do Loop
     resizeCanvas();
     inicializarEletrons();
     atualizarCampo();

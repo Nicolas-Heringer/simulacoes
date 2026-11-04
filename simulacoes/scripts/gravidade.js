@@ -543,7 +543,7 @@ function setupUI() {
                 k: metrics.K,
                 u: metrics.U,
                 e: metrics.E
-            });
+            }, state.time);
         }
         renderScene();
     });
@@ -682,7 +682,7 @@ function animate(currentTime) {
                 k: metrics.K,
                 u: metrics.U,
                 e: metrics.E
-            });
+            }, state.time);
         }
     }
 

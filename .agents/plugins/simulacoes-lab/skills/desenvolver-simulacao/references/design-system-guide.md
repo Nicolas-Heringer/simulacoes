@@ -493,18 +493,23 @@ Sempre importe de `./sim-ui.js`:
   * `state`: `'neutral' | 'valid' | 'invalid' | 'warning' | 'ready' | 'disabled'`
   * Atualiza automaticamente o elemento `.field-hint` adjacente com `hintText`.
 
-### 4.4 Gráficos 2D em Tempo Real e Espaço de Fase
-* **`new RealtimePlot(canvasSelector, { minY, maxY, maxPoints, color, fillAlpha, autoScale })`**:
-  * `.push(value)`: Adiciona ponto na série temporal e redesenha.
-  * `.clear()`: Limpa histórico.
-  * `.setColor(hexColor)`: Atualiza cor da curva.
-* **`new MultiSeriesPlot(canvasSelector, { maxPoints, autoScale, minX, maxX, minY, maxY, mode, showZeroAxes, series })`**:
-  * `mode`: `'time'` (séries temporais múltiplas) ou `'xy'` (retrato de espaço de fase $(x, y)$).
-  * `series`: Array `[{ id: 'ke', label: 'Cinética', color: '#06b6d4' }, ...]`.
-  * `.push(valuesMap)` (no modo `'time'`, ex.: `{ ke: 1.2, pe: 0.8 }`).
-  * `.pushXY(seriesId, x, y)` (no modo `'xy'`, ex.: `plot.pushXY('traj', x, p)`).
-  * `.setData(seriesId, pointsArray)`: Define uma curva inteira `[{x, y}, ...]`.
-  * `.clear(seriesId?)`: Limpa uma série ou todas.
+### 4.4 Gráficos 2D em Tempo Real, Gravação Sob Demanda e Tela Cheia
+Todo `.sim-plot-card` controlado por `RealtimePlot` ou `MultiSeriesPlot` recebe automaticamente o rodapé `.plot-card-footer` com o botão **"Manter registros"** (`.plot-keep-records-btn`) e o botão **"Tela cheia"** (`.plot-expand-btn`), além de permitir clicar diretamente no canvas para abrir o modal `.sim-modal-overlay.modal-plot-viewer` (pausando automaticamente `#btn-play-sim`, exibindo estatísticas Mín/Máx/Média, crosshair interativo e exportação CSV/PNG).
+
+* **`new RealtimePlot(canvasSelector, { minVal, maxVal, maxPoints, color, autoScale, minSpan, maxLabelSelector, minLabelSelector, keepRecords })`**:
+  * `.push(value, time?)`: Adiciona ponto na série temporal (e no histórico completo se `keepRecords` estiver ativo) e redesenha.
+  * `.setKeepRecords(enabled)`: Ativa/desativa a retenção do histórico completo. Quando desativado, restringe aos últimos `maxPoints` (80) pontos.
+  * `.openFullscreen()`: Pausa a simulação e abre o gráfico no modal de tela cheia.
+  * `.clear()`: Limpa a janela e o histórico acumulado.
+* **`new MultiSeriesPlot(canvasSelector, { maxPoints, minVal, maxVal, mode, showLegend, showGrid, series, keepRecords })`**:
+  * `mode`: `'time-series'` (séries temporais múltiplas) ou `'phase-space'` (retrato de espaço de fase $(x, p)$).
+  * `series`: Array `[{ id: 'K', label: 'Cinética', color: '#38bdf8', unit: ' J' }, ...]`.
+  * `.push(valuesMap, time?)`: Adiciona amostra temporal multissérie.
+  * `.pushPhasePoint(x, p)`: Adiciona ponto no espaço de fase.
+  * `.setKeepRecords(enabled)`: Ativa/desativa a retenção de todos os pontos.
+  * `.openFullscreen()`: Pausa a simulação e abre o modal de tela cheia.
+  * `.clear()`: Limpa buffers e histórico.
+* **`openPlotFullscreenModal(plotInstance)`**: Abre programaticamente o modal de inspeção em tela cheia para a instância informada.
 
 ### 4.5 Álgebra Linear e Tensores (`MatrixTensorEditor`)
 * **`new MatrixTensorEditor(containerSelector, { size = 2, initialValues, symmetric = false, symbol = 'T', onChange })`**:

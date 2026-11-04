@@ -252,6 +252,95 @@ export function syncDualSlider(sliderTarget, numTarget, onChangeCallback) {
 /**
  * Classe controladora de Mini-Gráficos de Telemetria 2D em tempo real via HTML5 Canvas
  */
+/**
+ * Compacta um array de registros { t, ... } preservando picos (mínimo e máximo de cada par)
+ * quando o histórico ultrapassa o limite de segurança de memória.
+ */
+function compactPlotHistory(records, valueSelector) {
+    if (!Array.isArray(records) || records.length < 4) return records;
+    const compacted = [];
+    for (let i = 0; i < records.length; i += 2) {
+        if (i + 1 >= records.length) {
+            compacted.push(records[i]);
+            break;
+        }
+        const a = records[i];
+        const b = records[i + 1];
+        const va = valueSelector(a);
+        const vb = valueSelector(b);
+        // Mantém o ponto de maior magnitude relativa no par
+        compacted.push(Math.abs(vb) >= Math.abs(va) ? b : a);
+    }
+    return compacted;
+}
+
+/**
+ * Configura os controles de "Manter registros" e "Tela cheia" dentro do .sim-plot-card
+ * associado a uma instância de RealtimePlot ou MultiSeriesPlot.
+ */
+function attachPlotCardControls(plotInstance) {
+    if (!plotInstance || !plotInstance.canvas || plotInstance.disableFullscreen) return;
+    const card = plotInstance.canvas.closest('.sim-plot-card');
+    const wrapper = plotInstance.canvas.closest('.plot-canvas-wrapper') || plotInstance.canvas.parentElement;
+    plotInstance.card = card;
+
+    if (wrapper && !wrapper.dataset.plotFullscreenBound) {
+        wrapper.dataset.plotFullscreenBound = '1';
+        wrapper.title = wrapper.title || 'Clique para expandir o gráfico em tela cheia';
+        wrapper.addEventListener('click', (e) => {
+            if (e.target.closest('button')) return;
+            plotInstance.openFullscreen();
+        });
+    }
+
+    if (!card) return;
+
+    let footer = card.querySelector('.plot-card-footer');
+    if (!footer) {
+        footer = document.createElement('div');
+        footer.className = 'plot-card-footer';
+        footer.innerHTML = `
+            <button type="button" class="plot-keep-records-btn" aria-pressed="false"
+                    title="Quando ativo, mantém todo o histórico temporal em vez de apenas os últimos pontos">
+                <span class="keep-dot"></span>
+                <span>Manter registros</span>
+                <span class="keep-count"></span>
+            </button>
+            <button type="button" class="plot-expand-btn" title="Abrir gráfico em tela cheia">
+                <img src="../assets/icons/expand.svg" class="icon-svg" alt="">
+                <span>Tela cheia</span>
+            </button>
+        `;
+        card.appendChild(footer);
+        if (typeof inlineSVGImages === 'function') {
+            inlineSVGImages(footer);
+        }
+    }
+
+    const keepBtn = footer.querySelector('.plot-keep-records-btn');
+    const expandBtn = footer.querySelector('.plot-expand-btn');
+    plotInstance._keepBtn = keepBtn;
+    plotInstance._keepCountEl = footer.querySelector('.keep-count');
+
+    if (keepBtn && !keepBtn.dataset.boundKeep) {
+        keepBtn.dataset.boundKeep = '1';
+        keepBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            plotInstance.setKeepRecords(!plotInstance.keepRecords);
+        });
+    }
+
+    if (expandBtn && !expandBtn.dataset.boundExpand) {
+        expandBtn.dataset.boundExpand = '1';
+        expandBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            plotInstance.openFullscreen();
+        });
+    }
+
+    plotInstance._syncKeepUI();
+}
+
 export class RealtimePlot {
     /**
      * @param {HTMLCanvasElement|string} canvasTarget - Elemento canvas ou seletor CSS
@@ -260,6 +349,8 @@ export class RealtimePlot {
      * @param {number} [options.minVal=-1.0] - Limite inferior da escala
      * @param {number} [options.maxVal=1.0] - Limite superior da escala
      * @param {string} [options.color='#38bdf8'] - Cor de fallback
+     * @param {boolean} [options.keepRecords=false] - Se true, inicia mantendo todo o histórico
+     * @param {number} [options.maxHistoryPoints=50000] - Teto de amostras antes de compactação
      */
     constructor(canvasTarget, options = {}) {
         this.canvas = typeof canvasTarget === 'string' ? document.querySelector(canvasTarget) : canvasTarget;
@@ -268,6 +359,18 @@ export class RealtimePlot {
 
         this.maxPoints = options.maxPoints || 80;
         this.data = new Array(this.maxPoints).fill(0);
+        this.timeData = new Array(this.maxPoints).fill(0);
+        this.validCount = 0;
+        this.sampleCounter = 0;
+
+        this.keepRecords = Boolean(options.keepRecords);
+        this.maxHistoryPoints = options.maxHistoryPoints || 50000;
+        this.history = [];
+        this.disableFullscreen = Boolean(options.disableFullscreen);
+        this.onOpenFullscreen = options.onOpenFullscreen || null;
+        this.unit = options.unit || '';
+        this.title = options.title || '';
+
         this.color = options.color || '#38bdf8';
         this.minVal = options.minVal !== undefined ? options.minVal : -1.2;
         this.maxVal = options.maxVal !== undefined ? options.maxVal : 1.2;
@@ -280,11 +383,75 @@ export class RealtimePlot {
             ? (typeof options.minLabelSelector === 'string' ? document.querySelector(options.minLabelSelector) : options.minLabelSelector)
             : null;
 
+        attachPlotCardControls(this);
+
         this.resize();
         window.addEventListener('resize', () => this.resize());
         if (window.ResizeObserver && this.canvas.parentElement) {
             new ResizeObserver(() => this.resize()).observe(this.canvas.parentElement);
         }
+    }
+
+    _syncKeepUI() {
+        if (this._keepBtn) {
+            this._keepBtn.classList.toggle('is-recording', this.keepRecords);
+            this._keepBtn.setAttribute('aria-pressed', this.keepRecords ? 'true' : 'false');
+        }
+        if (this._keepCountEl) {
+            this._keepCountEl.textContent = this.keepRecords ? `(${this.history.length})` : '';
+        }
+    }
+
+    setKeepRecords(enabled) {
+        const next = Boolean(enabled);
+        if (next === this.keepRecords) return;
+        this.keepRecords = next;
+        if (this.keepRecords) {
+            // Copia os pontos válidos já presentes na janela de 80 pontos como base inicial
+            this.history = [];
+            const count = this.validCount;
+            const startIdx = this.data.length - count;
+            for (let i = startIdx; i < this.data.length; i++) {
+                this.history.push({
+                    t: this.timeData[i],
+                    v: this.data[i]
+                });
+            }
+        } else {
+            // Libera o histórico excedente e restringe novamente aos últimos 80 pontos
+            this.history = [];
+        }
+        this._syncKeepUI();
+    }
+
+    getActiveRecords() {
+        if (this.keepRecords && this.history.length > 0) {
+            return this.history;
+        }
+        const count = this.validCount > 0 ? this.validCount : this.data.length;
+        const startIdx = this.data.length - count;
+        const list = [];
+        for (let i = startIdx; i < this.data.length; i++) {
+            list.push({
+                t: this.validCount > 0 ? this.timeData[i] : (i - startIdx),
+                v: this.data[i]
+            });
+        }
+        return list;
+    }
+
+    clear() {
+        this.data.fill(0);
+        this.timeData.fill(0);
+        this.validCount = 0;
+        this.sampleCounter = 0;
+        this.history = [];
+        this._syncKeepUI();
+        this.render();
+    }
+
+    openFullscreen() {
+        openPlotFullscreenModal(this);
     }
 
     resize() {
@@ -301,11 +468,35 @@ export class RealtimePlot {
         this.render();
     }
 
-    push(val) {
-        this.data.push(val);
+    push(val, time) {
+        const numVal = Number(val) || 0;
+        const hasExplicitTime = time !== undefined && time !== null && !Number.isNaN(Number(time));
+        const t = hasExplicitTime ? Number(time) : this.sampleCounter;
+        this.hasExplicitTime = this.hasExplicitTime || hasExplicitTime;
+        this.sampleCounter++;
+
+        this.data.push(numVal);
         if (this.data.length > this.maxPoints) {
             this.data.shift();
         }
+        this.timeData.push(t);
+        if (this.timeData.length > this.maxPoints) {
+            this.timeData.shift();
+        }
+        if (this.validCount < this.maxPoints) {
+            this.validCount++;
+        }
+
+        if (this.keepRecords) {
+            this.history.push({ t, v: numVal });
+            if (this.history.length > this.maxHistoryPoints) {
+                this.history = compactPlotHistory(this.history, (r) => r.v);
+            }
+            if (this._keepCountEl) {
+                this._keepCountEl.textContent = `(${this.history.length})`;
+            }
+        }
+
         this.render();
     }
 
@@ -433,16 +624,96 @@ export class MultiSeriesPlot {
             this.buffers[s.id] = [];
             this.latestValues[s.id] = 0;
         });
+        this.timeBuffer = [];
         this.phaseBuffer = [];
+        this.sampleCounter = 0;
+
+        this.keepRecords = Boolean(options.keepRecords);
+        this.maxHistoryPoints = options.maxHistoryPoints || 50000;
+        this.history = [];
+        this.phaseHistory = [];
+        this.disableFullscreen = Boolean(options.disableFullscreen);
+        this.onOpenFullscreen = options.onOpenFullscreen || null;
+        this.title = options.title || '';
 
         this.width = 0;
         this.height = 0;
+
+        attachPlotCardControls(this);
 
         this.resize();
         window.addEventListener('resize', () => this.resize());
         if (window.ResizeObserver && this.canvas.parentElement) {
             new ResizeObserver(() => this.resize()).observe(this.canvas.parentElement);
         }
+    }
+
+    _syncKeepUI() {
+        const count = this.mode === 'phase-space' ? this.phaseHistory.length : this.history.length;
+        if (this._keepBtn) {
+            this._keepBtn.classList.toggle('is-recording', this.keepRecords);
+            this._keepBtn.setAttribute('aria-pressed', this.keepRecords ? 'true' : 'false');
+        }
+        if (this._keepCountEl) {
+            this._keepCountEl.textContent = this.keepRecords ? `(${count})` : '';
+        }
+    }
+
+    setKeepRecords(enabled) {
+        const next = Boolean(enabled);
+        if (next === this.keepRecords) return;
+        this.keepRecords = next;
+        if (this.keepRecords) {
+            this.history = [];
+            const firstSeries = this.series[0];
+            const len = firstSeries && this.buffers[firstSeries.id] ? this.buffers[firstSeries.id].length : 0;
+            for (let i = 0; i < len; i++) {
+                const values = {};
+                this.series.forEach(s => {
+                    values[s.id] = this.buffers[s.id]?.[i] ?? 0;
+                });
+                this.history.push({
+                    t: this.timeBuffer[i] !== undefined ? this.timeBuffer[i] : i,
+                    values
+                });
+            }
+            this.phaseHistory = this.phaseBuffer.map(pt => ({ x: pt.x, p: pt.p }));
+        } else {
+            this.history = [];
+            this.phaseHistory = [];
+        }
+        this._syncKeepUI();
+    }
+
+    getActiveRecords() {
+        if (this.keepRecords && this.history.length > 0) {
+            return this.history;
+        }
+        const firstSeries = this.series[0];
+        const len = firstSeries && this.buffers[firstSeries.id] ? this.buffers[firstSeries.id].length : 0;
+        const list = [];
+        for (let i = 0; i < len; i++) {
+            const values = {};
+            this.series.forEach(s => {
+                values[s.id] = this.buffers[s.id]?.[i] ?? 0;
+            });
+            list.push({
+                t: this.timeBuffer[i] !== undefined ? this.timeBuffer[i] : i,
+                values
+            });
+        }
+        return list;
+    }
+
+    getActivePhaseRecords() {
+        if (this.keepRecords && this.phaseHistory.length > 0) {
+            return this.phaseHistory;
+        }
+        return this.phaseBuffer;
+    }
+
+    openFullscreen() {
+        openPlotFullscreenModal(this);
     }
 
     resize() {
@@ -459,8 +730,19 @@ export class MultiSeriesPlot {
         this.render();
     }
 
-    push(dataRecord) {
+    push(dataRecord, time) {
         if (!dataRecord) return;
+        const hasExplicitTime = time !== undefined && time !== null && !Number.isNaN(Number(time));
+        const t = hasExplicitTime ? Number(time) : this.sampleCounter;
+        this.hasExplicitTime = this.hasExplicitTime || hasExplicitTime;
+        this.sampleCounter++;
+
+        this.timeBuffer.push(t);
+        if (this.timeBuffer.length > this.maxPoints) {
+            this.timeBuffer.shift();
+        }
+
+        const snap = {};
         this.series.forEach(s => {
             if (dataRecord[s.id] !== undefined) {
                 const val = Number(dataRecord[s.id]);
@@ -470,14 +752,33 @@ export class MultiSeriesPlot {
                     this.buffers[s.id].shift();
                 }
             }
+            snap[s.id] = this.latestValues[s.id] || 0;
         });
+
+        if (this.keepRecords) {
+            this.history.push({ t, values: snap });
+            if (this.history.length > this.maxHistoryPoints) {
+                const primaryId = this.series[0]?.id;
+                this.history = compactPlotHistory(this.history, (r) => r.values[primaryId] || 0);
+            }
+            this._syncKeepUI();
+        }
+
         this.render();
     }
 
     pushPhasePoint(x, p) {
-        this.phaseBuffer.push({ x: Number(x), p: Number(p) });
+        const pt = { x: Number(x), p: Number(p) };
+        this.phaseBuffer.push(pt);
         if (this.phaseBuffer.length > this.maxPoints * 2) {
             this.phaseBuffer.shift();
+        }
+        if (this.keepRecords) {
+            this.phaseHistory.push(pt);
+            if (this.phaseHistory.length > this.maxHistoryPoints) {
+                this.phaseHistory = compactPlotHistory(this.phaseHistory, (r) => Math.hypot(r.x, r.p));
+            }
+            this._syncKeepUI();
         }
         this.render();
     }
@@ -487,7 +788,12 @@ export class MultiSeriesPlot {
             this.buffers[s.id] = [];
             this.latestValues[s.id] = 0;
         });
+        this.timeBuffer = [];
         this.phaseBuffer = [];
+        this.history = [];
+        this.phaseHistory = [];
+        this.sampleCounter = 0;
+        this._syncKeepUI();
         this.render();
     }
 
@@ -673,6 +979,629 @@ export class MultiSeriesPlot {
         ctx.arc(getScreenX(last.x), getScreenY(last.p), 4, 0, Math.PI * 2);
         ctx.fill();
     }
+}
+
+// =============================================================================
+// VISUALIZADOR DE GRÁFICO EM TELA CHEIA (.modal-plot-viewer)
+// =============================================================================
+let _plotViewerModalCtrl = null;
+let _activeViewerPlot = null;
+let _viewerHoverRatio = null;
+
+function pauseSimulationIfRunning(plotInstance) {
+    if (plotInstance && typeof plotInstance.onOpenFullscreen === 'function') {
+        plotInstance.onOpenFullscreen(plotInstance);
+    }
+    const btnPlay = document.getElementById('btn-play-sim');
+    if (btnPlay) {
+        const isRunning = btnPlay.getAttribute('data-state') === '1' || btnPlay.classList.contains('is-active');
+        if (isRunning) {
+            btnPlay.click();
+        }
+    }
+}
+
+function getPlotMetadata(plot) {
+    const card = plot.card || plot.canvas?.closest('.sim-plot-card');
+    const titleEl = card?.querySelector('.plot-title');
+    const titleHtml = plot.title || (titleEl ? titleEl.innerHTML : 'Telemetria em Tempo Real');
+    const titleText = plot.title || (titleEl ? titleEl.textContent.trim() : 'telemetria');
+
+    let unit = plot.unit || '';
+    if (!unit && card) {
+        const statValText = card.querySelector('.plot-stat-val')?.textContent?.trim() || '';
+        const match = statValText.match(/[-+]?\d+(?:[.,]\d+)?\s*(.+)$/);
+        if (match && match[1]) {
+            unit = ` ${match[1].trim()}`;
+        }
+    }
+    return { titleHtml, titleText, unit };
+}
+
+function ensurePlotViewerModal() {
+    if (_plotViewerModalCtrl) return _plotViewerModalCtrl;
+
+    let overlay = document.getElementById('sim-plot-viewer-modal');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'sim-plot-viewer-modal';
+        overlay.className = 'sim-modal-overlay modal-plot-viewer hidden';
+        overlay.setAttribute('aria-hidden', 'true');
+        overlay.setAttribute('role', 'dialog');
+        overlay.innerHTML = `
+            <div class="sim-modal-container">
+                <div class="sim-modal-header">
+                    <div class="plot-viewer-header-meta">
+                        <div class="sim-modal-title">
+                            <img src="../assets/icons/chart-line.svg" class="icon-svg icon-accent" alt="">
+                            <span id="pv-modal-title">Telemetria</span>
+                        </div>
+                        <div class="sim-badge idle" id="pv-modal-badge">
+                            <span class="status-dot"></span>
+                            <span id="pv-modal-badge-text">Últimos 80 pts</span>
+                        </div>
+                    </div>
+                    <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+                </div>
+                <div class="sim-modal-body">
+                    <div class="plot-viewer-stats">
+                        <div class="plot-viewer-stat-box">
+                            <span class="plot-viewer-stat-label">Mínimo</span>
+                            <span class="plot-viewer-stat-val tone-cyan" id="pv-stat-min">0.00</span>
+                        </div>
+                        <div class="plot-viewer-stat-box">
+                            <span class="plot-viewer-stat-label">Máximo</span>
+                            <span class="plot-viewer-stat-val tone-accent" id="pv-stat-max">0.00</span>
+                        </div>
+                        <div class="plot-viewer-stat-box">
+                            <span class="plot-viewer-stat-label">Média</span>
+                            <span class="plot-viewer-stat-val tone-emerald" id="pv-stat-avg">0.00</span>
+                        </div>
+                        <div class="plot-viewer-stat-box">
+                            <span class="plot-viewer-stat-label">Registro</span>
+                            <span class="plot-viewer-stat-val" id="pv-stat-count">0 pts</span>
+                        </div>
+                    </div>
+                    <div class="plot-viewer-canvas-wrap">
+                        <canvas class="plot-viewer-canvas" id="pv-canvas"></canvas>
+                    </div>
+                </div>
+                <div class="sim-modal-footer">
+                    <div class="plot-viewer-footer-left">
+                        <button type="button" class="plot-keep-records-btn" id="pv-btn-keep" aria-pressed="false">
+                            <span class="keep-dot"></span>
+                            <span>Manter registros</span>
+                            <span class="keep-count" id="pv-keep-count"></span>
+                        </button>
+                        <button type="button" class="btn-secondary" id="pv-btn-clear" title="Zerar histórico acumulado">
+                            <img src="../assets/icons/refresh.svg" class="icon-svg" alt="">
+                            <span>Limpar</span>
+                        </button>
+                    </div>
+                    <div class="plot-viewer-footer-right">
+                        <button type="button" class="btn-secondary" id="pv-btn-csv" title="Baixar dados em CSV">
+                            <span>Exportar CSV</span>
+                        </button>
+                        <button type="button" class="btn-secondary" id="pv-btn-png" title="Salvar imagem PNG do gráfico">
+                            <span>Exportar PNG</span>
+                        </button>
+                        <button type="button" class="btn-primary tone-accent" data-modal-close>Fechar</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        if (typeof inlineSVGImages === 'function') {
+            inlineSVGImages(overlay);
+        }
+    }
+
+    const modalCtrl = initModal(overlay);
+    const pvCanvas = overlay.querySelector('#pv-canvas');
+
+    const updateHoverFromEvent = (e) => {
+        if (!pvCanvas || !_activeViewerPlot) return;
+        const rect = pvCanvas.getBoundingClientRect();
+        if (rect.width <= 0) return;
+        const padLeft = 56;
+        const padRight = 20;
+        const plotW = Math.max(1, rect.width - padLeft - padRight);
+        const relX = (e.clientX - rect.left - padLeft) / plotW;
+        _viewerHoverRatio = Math.max(0, Math.min(1, relX));
+        renderPlotViewerCanvas(_activeViewerPlot);
+    };
+
+    if (pvCanvas) {
+        pvCanvas.addEventListener('pointerdown', (e) => {
+            pvCanvas.setPointerCapture?.(e.pointerId);
+            updateHoverFromEvent(e);
+        });
+        pvCanvas.addEventListener('pointermove', (e) => {
+            updateHoverFromEvent(e);
+        });
+        pvCanvas.addEventListener('pointerleave', () => {
+            _viewerHoverRatio = null;
+            if (_activeViewerPlot) renderPlotViewerCanvas(_activeViewerPlot);
+        });
+    }
+
+    overlay.querySelector('#pv-btn-keep')?.addEventListener('click', () => {
+        if (!_activeViewerPlot) return;
+        _activeViewerPlot.setKeepRecords(!_activeViewerPlot.keepRecords);
+        refreshPlotViewerModal(_activeViewerPlot);
+    });
+
+    overlay.querySelector('#pv-btn-clear')?.addEventListener('click', () => {
+        if (!_activeViewerPlot) return;
+        _activeViewerPlot.clear();
+        refreshPlotViewerModal(_activeViewerPlot);
+    });
+
+    overlay.querySelector('#pv-btn-csv')?.addEventListener('click', () => {
+        if (_activeViewerPlot) exportPlotCSV(_activeViewerPlot);
+    });
+
+    overlay.querySelector('#pv-btn-png')?.addEventListener('click', () => {
+        if (_activeViewerPlot) exportPlotPNG(_activeViewerPlot);
+    });
+
+    window.addEventListener('resize', () => {
+        if (_activeViewerPlot && !overlay.classList.contains('hidden')) {
+            renderPlotViewerCanvas(_activeViewerPlot);
+        }
+    });
+
+    _plotViewerModalCtrl = { overlay, modalCtrl };
+    return _plotViewerModalCtrl;
+}
+
+function refreshPlotViewerModal(plot) {
+    const { overlay } = ensurePlotViewerModal();
+    const { titleHtml, unit } = getPlotMetadata(plot);
+
+    const titleEl = overlay.querySelector('#pv-modal-title');
+    if (titleEl) titleEl.innerHTML = titleHtml;
+
+    const isMulti = plot instanceof MultiSeriesPlot;
+    const isPhase = isMulti && plot.mode === 'phase-space';
+    const records = isPhase ? plot.getActivePhaseRecords() : plot.getActiveRecords();
+    const count = records.length;
+
+    const badge = overlay.querySelector('#pv-modal-badge');
+    const badgeText = overlay.querySelector('#pv-modal-badge-text');
+    if (badge && badgeText) {
+        badge.classList.toggle('idle', !plot.keepRecords);
+        badgeText.textContent = plot.keepRecords
+            ? `Histórico Completo · ${count} pts`
+            : `Últimos ${count} pts`;
+    }
+
+    const keepBtn = overlay.querySelector('#pv-btn-keep');
+    const keepCount = overlay.querySelector('#pv-keep-count');
+    if (keepBtn) {
+        keepBtn.classList.toggle('is-recording', plot.keepRecords);
+        keepBtn.setAttribute('aria-pressed', plot.keepRecords ? 'true' : 'false');
+    }
+    if (keepCount) {
+        keepCount.textContent = plot.keepRecords ? `(${count})` : '';
+    }
+
+    // Cálculo de estatísticas (Mínimo, Máximo, Média, Intervalo)
+    let minV = Infinity;
+    let maxV = -Infinity;
+    let sumV = 0;
+    let valCount = 0;
+
+    if (isPhase) {
+        for (let i = 0; i < records.length; i++) {
+            const mag = Math.hypot(records[i].x, records[i].p);
+            if (mag < minV) minV = mag;
+            if (mag > maxV) maxV = mag;
+            sumV += mag;
+            valCount++;
+        }
+    } else if (isMulti) {
+        const primaryId = plot.series[0]?.id;
+        for (let i = 0; i < records.length; i++) {
+            const v = Number(records[i].values?.[primaryId] ?? 0);
+            if (v < minV) minV = v;
+            if (v > maxV) maxV = v;
+            sumV += v;
+            valCount++;
+        }
+    } else {
+        for (let i = 0; i < records.length; i++) {
+            const v = Number(records[i].v ?? 0);
+            if (v < minV) minV = v;
+            if (v > maxV) maxV = v;
+            sumV += v;
+            valCount++;
+        }
+    }
+
+    if (valCount === 0) {
+        minV = 0;
+        maxV = 0;
+    }
+    const avgV = valCount > 0 ? sumV / valCount : 0;
+    const seriesUnit = isMulti ? (plot.series[0]?.unit || unit) : unit;
+
+    const minEl = overlay.querySelector('#pv-stat-min');
+    const maxEl = overlay.querySelector('#pv-stat-max');
+    const avgEl = overlay.querySelector('#pv-stat-avg');
+    const cntEl = overlay.querySelector('#pv-stat-count');
+
+    if (minEl) minEl.textContent = `${minV.toFixed(2)}${seriesUnit}`;
+    if (maxEl) maxEl.textContent = `${maxV.toFixed(2)}${seriesUnit}`;
+    if (avgEl) avgEl.textContent = `${avgV.toFixed(2)}${seriesUnit}`;
+    if (cntEl) {
+        if (!isPhase && records.length >= 2 && plot.hasExplicitTime) {
+            const dtSpan = Math.max(0, records[records.length - 1].t - records[0].t);
+            cntEl.textContent = `${count} pts (${dtSpan.toFixed(1)}s)`;
+        } else {
+            cntEl.textContent = `${count} amostras`;
+        }
+    }
+
+    renderPlotViewerCanvas(plot);
+}
+
+function renderPlotViewerCanvas(plot) {
+    const overlay = document.getElementById('sim-plot-viewer-modal');
+    const canvas = overlay?.querySelector('#pv-canvas');
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+
+    const width = rect.width;
+    const height = rect.height;
+    ctx.clearRect(0, 0, width, height);
+
+    const padLeft = 56;
+    const padRight = 20;
+    const padTop = 24;
+    const padBottom = 32;
+    const plotW = Math.max(10, width - padLeft - padRight);
+    const plotH = Math.max(10, height - padTop - padBottom);
+
+    const isMulti = plot instanceof MultiSeriesPlot;
+    const isPhase = isMulti && plot.mode === 'phase-space';
+
+    if (isPhase) {
+        const pts = plot.getActivePhaseRecords();
+        if (pts.length < 2) return;
+        let minX = Infinity, maxX = -Infinity, minP = Infinity, maxP = -Infinity;
+        for (let i = 0; i < pts.length; i++) {
+            if (pts[i].x < minX) minX = pts[i].x;
+            if (pts[i].x > maxX) maxX = pts[i].x;
+            if (pts[i].p < minP) minP = pts[i].p;
+            if (pts[i].p > maxP) maxP = pts[i].p;
+        }
+        if (minX === maxX) { minX -= 1; maxX += 1; }
+        if (minP === maxP) { minP -= 1; maxP += 1; }
+        const spanX = (maxX - minX) * 1.15;
+        const spanP = (maxP - minP) * 1.15;
+        const midX = (minX + maxX) / 2;
+        const midP = (minP + maxP) / 2;
+
+        const sx = (x) => padLeft + plotW / 2 + ((x - midX) / spanX) * plotW;
+        const sy = (p) => padTop + plotH / 2 - ((p - midP) / spanP) * plotH;
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padLeft, padTop + plotH / 2);
+        ctx.lineTo(padLeft + plotW, padTop + plotH / 2);
+        ctx.moveTo(padLeft + plotW / 2, padTop);
+        ctx.lineTo(padLeft + plotW / 2, padTop + plotH);
+        ctx.stroke();
+
+        for (let i = 1; i < pts.length; i++) {
+            const alpha = 0.2 + 0.8 * (i / pts.length);
+            ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(sx(pts[i - 1].x), sy(pts[i - 1].p));
+            ctx.lineTo(sx(pts[i].x), sy(pts[i].p));
+            ctx.stroke();
+        }
+        return;
+    }
+
+    const records = plot.getActiveRecords();
+    if (!records || records.length === 0) return;
+
+    // Escala vertical automática sobre todo o registro exibido
+    let dMin = Infinity;
+    let dMax = -Infinity;
+    if (isMulti) {
+        plot.series.forEach(s => {
+            for (let i = 0; i < records.length; i++) {
+                const v = Number(records[i].values?.[s.id] ?? 0);
+                if (v < dMin) dMin = v;
+                if (v > dMax) dMax = v;
+            }
+        });
+    } else {
+        for (let i = 0; i < records.length; i++) {
+            const v = Number(records[i].v ?? 0);
+            if (v < dMin) dMin = v;
+            if (v > dMax) dMax = v;
+        }
+    }
+
+    if (!Number.isFinite(dMin) || !Number.isFinite(dMax)) {
+        dMin = 0;
+        dMax = 1;
+    }
+    const minSpan = plot.minSpan || 0.2;
+    let yMin = dMin;
+    let yMax = dMax;
+    if (plot.minVal === 0 && dMin >= 0) {
+        yMin = 0;
+        yMax = Math.max(minSpan, dMax * 1.15);
+    } else {
+        const span = Math.max(minSpan, dMax - dMin);
+        yMin = dMin - span * 0.12;
+        yMax = dMax + span * 0.12;
+    }
+    const yRange = (yMax - yMin) || 1;
+
+    const getX = (idx) => padLeft + (records.length > 1 ? (idx / (records.length - 1)) * plotW : plotW / 2);
+    const getY = (val) => padTop + plotH - ((val - yMin) / yRange) * plotH;
+
+    // 1. Grade horizontal e vertical + rótulos Y
+    ctx.font = '11px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+
+    const hSteps = 4;
+    for (let i = 0; i <= hSteps; i++) {
+        const ratio = i / hSteps;
+        const y = padTop + ratio * plotH;
+        const val = yMax - ratio * yRange;
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.07)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padLeft, y);
+        ctx.lineTo(padLeft + plotW, y);
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+        ctx.fillText(val.toFixed(Math.abs(yMax) >= 10 ? 1 : 2), padLeft - 8, y);
+    }
+
+    const vSteps = 5;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    for (let i = 0; i <= vSteps; i++) {
+        const ratio = i / vSteps;
+        const x = padLeft + ratio * plotW;
+        const idx = Math.min(records.length - 1, Math.round(ratio * (records.length - 1)));
+        const tVal = records[idx]?.t ?? idx;
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.beginPath();
+        ctx.moveTo(x, padTop);
+        ctx.lineTo(x, padTop + plotH);
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+        const label = plot.hasExplicitTime ? `${Number(tVal).toFixed(2)}s` : `#${idx + 1}`;
+        ctx.fillText(label, x, padTop + plotH + 8);
+    }
+
+    // 2. Desenho das curvas
+    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-hud').trim() ||
+                        getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() ||
+                        plot.color || '#38bdf8';
+
+    if (isMulti) {
+        plot.series.forEach(s => {
+            const color = s.color || accentColor;
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2.2;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            for (let i = 0; i < records.length; i++) {
+                const x = getX(i);
+                const y = getY(Number(records[i].values?.[s.id] ?? 0));
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.restore();
+        });
+    } else {
+        ctx.beginPath();
+        for (let i = 0; i < records.length; i++) {
+            const x = getX(i);
+            const y = getY(Number(records[i].v ?? 0));
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+
+        ctx.save();
+        ctx.lineTo(getX(records.length - 1), padTop + plotH);
+        ctx.lineTo(getX(0), padTop + plotH);
+        ctx.closePath();
+        const grad = ctx.createLinearGradient(0, padTop, 0, padTop + plotH);
+        grad.addColorStop(0, accentColor.startsWith('#') ? `${accentColor}44` : 'rgba(56, 189, 248, 0.25)');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.restore();
+
+        ctx.save();
+        ctx.strokeStyle = accentColor;
+        ctx.lineWidth = 2.2;
+        ctx.shadowColor = accentColor;
+        ctx.shadowBlur = 8;
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    // 3. Crosshair interativo de inspeção
+    if (_viewerHoverRatio !== null && records.length > 0) {
+        const idx = Math.max(0, Math.min(records.length - 1, Math.round(_viewerHoverRatio * (records.length - 1))));
+        const cx = getX(idx);
+        const rec = records[idx];
+
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(cx, padTop);
+        ctx.lineTo(cx, padTop + plotH);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        const { unit } = getPlotMetadata(plot);
+        const tLabel = plot.hasExplicitTime ? `t = ${Number(rec.t).toFixed(2)}s` : `Amostra #${idx + 1}`;
+        let infoText = tLabel;
+
+        if (isMulti) {
+            const parts = plot.series.map(s => {
+                const v = Number(rec.values?.[s.id] ?? 0);
+                const y = getY(v);
+                ctx.fillStyle = s.color || accentColor;
+                ctx.beginPath();
+                ctx.arc(cx, y, 4.5, 0, Math.PI * 2);
+                ctx.fill();
+                return `${s.label}: ${v.toFixed(2)}${s.unit || ''}`;
+            });
+            infoText = `${tLabel}  |  ${parts.join(' · ')}`;
+        } else {
+            const v = Number(rec.v ?? 0);
+            const cy = getY(v);
+            ctx.fillStyle = accentColor;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+            ctx.fill();
+            infoText = `${tLabel}  |  Valor: ${v.toFixed(3)}${unit}`;
+        }
+
+        ctx.font = '600 11px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
+        const textW = ctx.measureText(infoText).width + 18;
+        const boxX = Math.max(padLeft + 4, Math.min(padLeft + plotW - textW - 4, cx - textW / 2));
+        const boxY = padTop + 6;
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, textW, 24, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(infoText, boxX + 9, boxY + 12);
+        ctx.restore();
+    }
+}
+
+function slugifyPlotTitle(text) {
+    return (text || 'telemetria')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'telemetria';
+}
+
+function exportPlotCSV(plot) {
+    const { titleText } = getPlotMetadata(plot);
+    const slug = slugifyPlotTitle(titleText);
+    const isMulti = plot instanceof MultiSeriesPlot;
+    const isPhase = isMulti && plot.mode === 'phase-space';
+
+    const lines = [];
+    if (isPhase) {
+        const pts = plot.getActivePhaseRecords();
+        lines.push('amostra,x,p');
+        pts.forEach((pt, i) => {
+            lines.push(`${i + 1},${pt.x},${pt.p}`);
+        });
+    } else if (isMulti) {
+        const records = plot.getActiveRecords();
+        const headers = ['amostra', plot.hasExplicitTime ? 'tempo_s' : 'indice', ...plot.series.map(s => s.id)];
+        lines.push(headers.join(','));
+        records.forEach((rec, i) => {
+            const row = [i + 1, rec.t, ...plot.series.map(s => rec.values?.[s.id] ?? 0)];
+            lines.push(row.join(','));
+        });
+    } else {
+        const records = plot.getActiveRecords();
+        lines.push(`amostra,${plot.hasExplicitTime ? 'tempo_s' : 'indice'},valor`);
+        records.forEach((rec, i) => {
+            lines.push(`${i + 1},${rec.t},${rec.v}`);
+        });
+    }
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${slug}-registro.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+}
+
+function exportPlotPNG(plot) {
+    const { titleText } = getPlotMetadata(plot);
+    const slug = slugifyPlotTitle(titleText);
+    const pvCanvas = document.querySelector('#sim-plot-viewer-modal #pv-canvas');
+    if (!pvCanvas) return;
+
+    const outCanvas = document.createElement('canvas');
+    outCanvas.width = pvCanvas.width;
+    outCanvas.height = pvCanvas.height;
+    const outCtx = outCanvas.getContext('2d');
+
+    const bgMain = getComputedStyle(document.documentElement).getPropertyValue('--bg-main').trim() || '#09090d';
+    outCtx.fillStyle = bgMain;
+    outCtx.fillRect(0, 0, outCanvas.width, outCanvas.height);
+    outCtx.drawImage(pvCanvas, 0, 0);
+
+    const a = document.createElement('a');
+    a.href = outCanvas.toDataURL('image/png');
+    a.download = `${slug}-grafico.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+}
+
+export function openPlotFullscreenModal(plotInstance) {
+    if (!plotInstance) return;
+    pauseSimulationIfRunning(plotInstance);
+
+    _activeViewerPlot = plotInstance;
+    _viewerHoverRatio = null;
+
+    const { modalCtrl } = ensurePlotViewerModal();
+    if (modalCtrl) {
+        modalCtrl.open();
+    }
+    requestAnimationFrame(() => {
+        refreshPlotViewerModal(plotInstance);
+    });
 }
 
 /**

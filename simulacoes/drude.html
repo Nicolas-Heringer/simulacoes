@@ -152,6 +152,27 @@
                         </div>
                     </div>
 
+                    <!-- Mini-Gráfico RealtimePlot: Velocidade de Deriva vd(t) -->
+                    <div class="control-group">
+                        <div class="sim-plot-card" id="card-telemetria-vd">
+                            <div class="plot-header">
+                                <div class="plot-title-group">
+                                    <span class="plot-dot"></span>
+                                    <span class="plot-title">Velocidade de Deriva $\langle v_d(t) \rangle$</span>
+                                </div>
+                                <div class="plot-stats">
+                                    <span class="plot-stat-label">Média:</span>
+                                    <span class="plot-stat-val" id="plot-valor-vd">0.00 px/f</span>
+                                </div>
+                            </div>
+                            <div class="plot-canvas-wrapper">
+                                <canvas class="sim-plot-canvas" id="canvas-plot-vd"></canvas>
+                                <span class="plot-axis-label plot-axis-max" id="plot-vd-max-label">+1.0</span>
+                                <span class="plot-axis-label plot-axis-min" id="plot-vd-min-label">-1.0</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="sim-divider-label"><span>Campo Elétrico Externo</span></div>
 
                     <!-- Sentido do Campo Elétrico -->

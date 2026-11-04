@@ -576,12 +576,22 @@
                         </div>
 
                         <!-- Telemetria de Raio / Energia da Órbita -->
-                        <div class="sim-plot-card telemetry-container">
+                        <div class="sim-plot-card telemetry-container" id="card-telemetria-dyn">
                             <div class="plot-header telemetry-header">
-                                <span>Distância à Origem $r(t) = \|\vec{x}(t)\|$</span>
-                                <span class="sim-readout-value readout-value tone-cyan">Telemetria Realtime</span>
+                                <div class="plot-title-group">
+                                    <span class="plot-dot"></span>
+                                    <span class="plot-title">Distância à Origem $\langle r(t) \rangle$</span>
+                                </div>
+                                <div class="plot-stats">
+                                    <span class="plot-stat-label">Média:</span>
+                                    <span class="plot-stat-val" id="dyn-plot-val-r">0.00 u</span>
+                                </div>
                             </div>
-                            <div class="plot-canvas-wrapper"><canvas id="dynTelemetryCanvas" class="sim-plot-canvas telemetry-canvas"></canvas></div>
+                            <div class="plot-canvas-wrapper">
+                                <canvas id="dynTelemetryCanvas" class="sim-plot-canvas telemetry-canvas"></canvas>
+                                <span class="plot-axis-label plot-axis-max" id="dyn-plot-max-label">+5.0</span>
+                                <span class="plot-axis-label plot-axis-min" id="dyn-plot-min-label">0.0</span>
+                            </div>
                         </div>
 
                         <div class="control-group">

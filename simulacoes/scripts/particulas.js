@@ -483,12 +483,10 @@ function reiniciarSistema(novoTemplate = 'none') {
     if (footerTimer) footerTimer.textContent = 't = 0.00s';
 
     if (plotEnergia) {
-        plotEnergia.data.fill(0);
-        plotEnergia.render();
+        plotEnergia.clear();
     }
     if (plotTemp) {
-        plotTemp.data.fill(0);
-        plotTemp.render();
+        plotTemp.clear();
     }
 
     updateStatusBadges();
@@ -698,10 +696,10 @@ function setupEventListeners() {
             const temperatura = calcularTemperatura(particles);
 
             if (plotEnergia) {
-                plotEnergia.push(energiaTotal);
+                plotEnergia.push(energiaTotal, simTime);
             }
             if (plotTemp) {
-                plotTemp.push(temperatura);
+                plotTemp.push(temperatura, simTime);
             }
 
             updateStatusBadges();
@@ -874,10 +872,10 @@ function anima() {
         const temperatura = calcularTemperatura(particles);
 
         if (plotEnergia) {
-            plotEnergia.push(energiaTotal);
+            plotEnergia.push(energiaTotal, simTime);
         }
         if (plotTemp) {
-            plotTemp.push(temperatura);
+            plotTemp.push(temperatura, simTime);
         }
     }
 

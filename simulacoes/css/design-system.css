@@ -2961,3 +2961,196 @@ button:disabled,
     font-family: var(--font-mono);
 }
 
+/* =============================================================================
+   GRAVAÇÃO SOB DEMANDA E INSPEÇÃO DE GRÁFICOS EM TELA CHEIA (.modal-plot-viewer)
+   ============================================================================= */
+.sim-plot-card .plot-canvas-wrapper {
+    cursor: pointer;
+    transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
+}
+
+.sim-plot-card .plot-canvas-wrapper:hover {
+    border-color: color-mix(in srgb, var(--accent-color) 55%, transparent);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--accent-color) 18%, transparent);
+}
+
+.plot-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-top: 2px;
+}
+
+.plot-keep-records-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 4px 9px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+    transition: all var(--trans-fast);
+}
+
+.plot-keep-records-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.plot-keep-records-btn .keep-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: background var(--trans-fast), box-shadow var(--trans-fast);
+}
+
+.plot-keep-records-btn.is-recording {
+    color: var(--text-primary);
+    border-color: color-mix(in srgb, var(--color-emerald) 55%, transparent);
+    background: color-mix(in srgb, var(--color-emerald) 10%, var(--bg-surface));
+}
+
+.plot-keep-records-btn.is-recording .keep-dot {
+    background: var(--color-emerald);
+    box-shadow: 0 0 6px var(--color-emerald);
+}
+
+.plot-keep-records-btn .keep-count {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--color-emerald);
+}
+
+.plot-expand-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--trans-fast);
+}
+
+.plot-expand-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-surface);
+    border-color: var(--border-subtle);
+}
+
+.plot-expand-btn .icon-svg {
+    width: 13px;
+    height: 13px;
+}
+
+/* Modal de Inspeção de Gráfico em Tela Cheia */
+.sim-modal-overlay.modal-plot-viewer .sim-modal-container {
+    max-width: 920px;
+    width: 94vw;
+}
+
+.plot-viewer-header-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.plot-viewer-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.plot-viewer-stat-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.plot-viewer-stat-label {
+    font-size: 0.70rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.plot-viewer-stat-val {
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.plot-viewer-canvas-wrap {
+    position: relative;
+    width: 100%;
+    height: 340px;
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    touch-action: none;
+}
+
+.plot-viewer-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+}
+
+.plot-viewer-footer-left,
+.plot-viewer-footer-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+    .sim-modal-overlay.modal-plot-viewer {
+        padding: 12px;
+    }
+
+    .sim-modal-overlay.modal-plot-viewer .sim-modal-container {
+        width: calc(100vw - 24px);
+        max-height: 90dvh;
+    }
+
+    .plot-viewer-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .plot-viewer-canvas-wrap {
+        height: 240px;
+    }
+
+    .sim-modal-overlay.modal-plot-viewer .sim-modal-footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .plot-viewer-footer-left,
+    .plot-viewer-footer-right {
+        justify-content: space-between;
+    }
+}
+
+
