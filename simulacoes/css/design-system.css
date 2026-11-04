@@ -60,6 +60,8 @@
     /* Bordas & Divisores */
     --border-color: rgba(255, 255, 255, 0.10);
     --border-subtle: rgba(255, 255, 255, 0.06);
+    --border-focus: var(--accent-btn, var(--accent-color));
+    --header-height: 52px;
 
     /* Raios de Arredondamento */
     --radius-xs: 4px;
@@ -127,8 +129,9 @@ body {
 .sim-header {
     display: flex;
     align-items: center;
-    padding: 0 24px;
-    height: 54px;
+    justify-content: space-between;
+    padding: 10px 20px;
+    height: var(--header-height, 52px);
     flex-shrink: 0;
     background-color: var(--bg-surface);
     border-bottom: 1px solid var(--border-color);
@@ -145,7 +148,6 @@ body {
     font-size: 0.88rem;
     font-weight: 500;
     transition: color var(--trans-fast), transform var(--trans-fast);
-    margin-right: 20px;
 }
 
 .btn-back:hover {
@@ -153,11 +155,30 @@ body {
     transform: translateX(-2px);
 }
 
-.sim-title {
-    font-size: 1.15rem;
+.sim-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-header-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 6px 12px;
+    font-size: 0.80rem;
     font-weight: 600;
-    letter-spacing: -0.01em;
     color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--trans-fast);
+}
+
+.btn-header-action:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--border-focus);
 }
 
 /* Layout Grid da Simulação (Canvas à esquerda + Painel à direita com trava e colapso) */
@@ -167,8 +188,8 @@ body {
     flex: 1;
     gap: 16px;
     padding: 16px;
-    height: calc(100vh - 54px);
-    max-height: calc(100vh - 54px);
+    height: calc(100vh - var(--header-height, 52px));
+    max-height: calc(100vh - var(--header-height, 52px));
     overflow: hidden;
     min-height: 0;
     transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1), gap 0.3s cubic-bezier(0.4, 0, 0.2, 1);

@@ -1,97 +1,23 @@
 /* =============================================================================
-   Estilos da Simulação de Áudio e Processamento de Sinais
+   Laboratório de Áudio e Análise Espectral — Design System 2.0
+   Estilos específicos do domínio acústico, osciloscópio e espectro FFT
    ============================================================================= */
 
+/* --- ÁREA PRINCIPAL DO CANVAS --- */
 .canvas-area {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 15px;
-    background-color: rgba(10, 15, 29, 0.6);
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
     position: relative;
     overflow: hidden;
     height: 100%;
+    min-height: 0;
+    padding: 14px;
+    background-color: var(--bg-surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
 }
 
-/* --- HUD DE MÉTRICAS FLUTUANTE --- */
-.audio-hud {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    width: 100%;
-    background: rgba(15, 23, 42, 0.9);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 8px;
-    padding: 8px 16px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    z-index: 10;
-    flex-shrink: 0;
-}
-
-.hud-item {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.hud-label {
-    font-size: 0.70rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-}
-
-.hud-value {
-    font-size: 0.90rem;
-    color: #38bdf8;
-    font-weight: 700;
-    font-family: 'Courier New', monospace, sans-serif;
-}
-
-.hud-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-.status-idle {
-    background: rgba(148, 163, 184, 0.15);
-    color: #94a3b8;
-    border: 1px solid rgba(148, 163, 184, 0.3);
-}
-
-.status-live {
-    background: rgba(239, 68, 68, 0.2);
-    color: #f87171;
-    border: 1px solid #ef4444;
-    animation: pulseBadge 1.5s infinite;
-}
-
-.status-frozen {
-    background: rgba(56, 189, 248, 0.2);
-    color: #38bdf8;
-    border: 1px solid #38bdf8;
-    box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
-}
-
-@keyframes pulseBadge {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.55; }
-}
-
-/* --- PALCO DE VISUALIZAÇÃO E LAYOUT PIP --- */
+/* --- PALCO DE VISUALIZAÇÃO DOS GRÁFICOS --- */
 .canvas-stage {
     position: relative;
     width: 100%;
@@ -99,80 +25,103 @@
     min-height: 0;
     display: flex;
     overflow: hidden;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
+    background-color: #030712;
 }
 
+/* Container Individual de Cada Canvas */
 .audio-canvas-container {
     display: flex;
     flex-direction: column;
     background-color: #030712;
     overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.25s ease,
+                box-shadow 0.25s ease;
 }
 
-/* Canvas em Destaque Principal */
+/* --- CANVAS PRINCIPAL EM DESTAQUE --- */
 .audio-canvas-container.canvas-main {
     position: relative;
     width: 100%;
     height: 100%;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
     z-index: 1;
 }
 
-/* Canvas em Miniatura (Picture-in-Picture) */
+/* --- CANVAS EM MINIATURA FLUTUANTE (PICTURE-IN-PICTURE) --- */
 .audio-canvas-container.canvas-pip {
     position: absolute;
-    bottom: 12px;
-    right: 12px;
-    width: 270px;
-    height: 152px;
-    background: rgba(3, 7, 18, 0.88);
-    border: 1.5px solid rgba(56, 189, 248, 0.45);
-    border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.85), 0 0 15px rgba(56, 189, 248, 0.2);
-    z-index: 5;
-    backdrop-filter: blur(10px);
+    bottom: 68px; /* Posicionado acima da barra de transporte central */
+    right: 14px;
+    width: 320px;
+    height: 185px;
+    background: rgba(10, 15, 29, 0.94);
+    border: 1.5px solid rgba(250, 204, 21, 0.5);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg), 0 0 18px rgba(250, 204, 21, 0.15);
+    z-index: 12;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    cursor: pointer;
 }
 
 .audio-canvas-container.canvas-pip:hover {
-    border-color: #38bdf8;
-    background: rgba(3, 7, 18, 0.95);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.95), 0 0 20px rgba(56, 189, 248, 0.35);
+    border-color: var(--accent-color);
+    background: rgba(10, 15, 29, 0.98);
+    box-shadow: var(--shadow-xl), 0 0 24px rgba(250, 204, 21, 0.3);
     transform: translateY(-2px);
 }
 
+/* Indicador Discreto no Rodapé da Miniatura */
+.canvas-pip::after {
+    content: "Clique para alternar";
+    position: absolute;
+    bottom: 4px;
+    left: 8px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: rgba(0, 0, 0, 0.6);
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.canvas-pip:hover::after {
+    opacity: 1;
+}
+
+/* --- BARRA DE CABEÇALHO DO CANVAS --- */
 .canvas-header-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 8px;
     padding: 6px 12px;
-    background: rgba(15, 23, 42, 0.85);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    font-size: 0.8rem;
+    background: rgba(15, 23, 42, 0.88);
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 0.80rem;
     color: var(--text-secondary);
     user-select: none;
     flex-shrink: 0;
 }
 
-/* Header em Overlay Flutuante na Miniatura PIP */
+/* Na miniatura PiP no desktop, cabeçalho compacto */
 .canvas-pip .canvas-header-bar {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    background: transparent;
-    border-bottom: none;
-    padding: 0;
-    z-index: 10;
-    pointer-events: auto;
+    padding: 4px 8px;
+    background: rgba(15, 23, 42, 0.92);
 }
 
 .canvas-pip .canvas-header-title {
-    display: none;
+    font-size: 0.74rem;
 }
 
 .canvas-header-title {
-    font-weight: 500;
+    font-weight: 600;
     color: var(--text-primary);
     display: flex;
     align-items: center;
@@ -182,52 +131,79 @@
     white-space: nowrap;
 }
 
+.canvas-header-title .icon-svg {
+    width: 16px;
+    height: 16px;
+}
+
 .canvas-header-controls {
     display: flex;
+    align-items: center;
     gap: 6px;
     flex-shrink: 0;
 }
 
+/* No Desktop, reserva margem à direita no cabeçalho do canvas principal apenas no Modo Foco quando o botão de expandir sidebar aparece */
+.canvas-main .canvas-header-controls {
+    margin-right: 0;
+    transition: margin-right var(--trans-normal);
+}
+
+.sidebar-collapsed .canvas-main .canvas-header-controls {
+    margin-right: 110px;
+}
+
+/* Pílula de Métrica Embutida no Cabeçalho */
+.canvas-metric-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+}
+
+.canvas-metric-badge.tone-accent {
+    color: var(--accent-color);
+    border-color: rgba(250, 204, 21, 0.35);
+    background: rgba(250, 204, 21, 0.1);
+}
+
+/* Botões do Cabeçalho do Canvas */
 .badge-btn {
     background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid var(--border-color);
     color: var(--text-secondary);
     padding: 3px 8px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     font-size: 0.72rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .badge-btn:hover {
     background: rgba(255, 255, 255, 0.12);
     color: var(--text-primary);
+    border-color: var(--border-focus);
 }
 
 .badge-btn.active {
-    background: rgba(14, 165, 233, 0.2);
-    border-color: #38bdf8;
-    color: #38bdf8;
-    box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+    background: var(--accent-subtle);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    box-shadow: 0 0 8px rgba(250, 204, 21, 0.25);
 }
 
-.badge-btn.btn-swap-focus {
-    background: rgba(56, 189, 248, 0.15);
-    border-color: rgba(56, 189, 248, 0.4);
-    color: #38bdf8;
-}
 
-.badge-btn.btn-swap-focus:hover {
-    background: #0284c7;
-    color: #ffffff;
-}
-
-/* O botão de alternar foco só deve existir dentro da miniatura PIP */
-.canvas-main .btn-swap-focus {
-    display: none;
-}
-
+/* Elementos Canvas 2D */
 .audio-canvas-container canvas {
     width: 100% !important;
     height: 100% !important;
@@ -240,221 +216,206 @@
     touch-action: none;
 }
 
-/* --- CONTROLE SEGMENTADO (CHAVE DE 2 POSIÇÕES) --- */
-.segmented-control {
-    display: flex;
-    background: rgba(15, 23, 42, 0.8);
+/* Pílula Flutuante de Inspeção sob o Cursor/Touch */
+.canvas-inspect-pill {
+    position: absolute;
+    top: 42px;
+    left: 14px;
+    padding: 4px 10px;
+    background: rgba(15, 23, 42, 0.90);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 3px;
-    gap: 4px;
-}
-
-.segment-btn {
-    flex: 1;
-    padding: 7px 10px;
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    font-size: 0.82rem;
+    border-radius: var(--radius-full);
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
     font-weight: 600;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
+    color: var(--color-cyan);
+    pointer-events: none;
+    z-index: 10;
+    box-shadow: var(--shadow-sm);
+    transition: opacity 0.2s ease;
 }
 
-.segment-btn:hover {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.segment-btn.active {
-    background: var(--accent-color);
-    color: var(--bg-main);
-    font-weight: 600;
-    box-shadow: 0 2px 8px rgba(250, 204, 21, 0.25);
-}
-
-/* --- CONTEÚDO DAS ABAS NO PANEL-BODY --- */
-.tab-header {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border-subtle);
-}
-
-.tab-header h3 {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 2px;
-}
-
-.tab-description {
-    font-size: 0.82rem;
-    color: var(--text-secondary);
-    line-height: 1.45;
-}
-
-.tab-content {
+.canvas-inspect-pill.hidden {
+    opacity: 0;
     display: none;
-    flex-direction: column;
-    gap: 14px;
-    width: 100%;
 }
 
-.tab-content.active {
-    display: flex;
+/* --- ELEMENTOS DE GAVETA MOBILE (DRAWER) --- */
+.drawer-header-mobile,
+.mobile-drawer-backdrop {
+    display: none;
 }
 
-/* --- BOTÕES DO PAINEL (Estilo Snell: Fundo Transparente com Borda Colorida) --- */
-.actions-group {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 8px;
-}
-
-.sim-btn--primary {
-    background-color: transparent;
-    border: 1px solid var(--accent-color);
-    color: var(--accent-color);
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.92rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.sim-btn--primary:hover:not(:disabled) {
-    background-color: var(--accent-color);
-    color: var(--bg-main);
-    box-shadow: 0 4px 15px rgba(250, 204, 21, 0.3);
-}
-
-.sim-btn--freeze {
-    background-color: transparent;
-    border: 1px solid #f59e0b;
-    color: #f59e0b;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.92rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.sim-btn--freeze:hover:not(:disabled) {
-    background-color: #f59e0b;
-    color: var(--bg-main);
-    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
-}
-
-.sim-btn--secondary {
-    background-color: transparent;
-    padding: 10px 16px;
-    font-size: 0.85rem;
-    border: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.sim-btn--secondary:hover:not(:disabled) {
-    background-color: rgba(255, 255, 255, 0.08);
-    border-color: var(--text-secondary);
-    color: var(--text-primary);
-}
-
-.sim-btn:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-    border-color: rgba(255, 255, 255, 0.08);
-    color: var(--text-secondary);
-    background: transparent;
-    box-shadow: none;
-}
-
-.controls-divider {
-    height: 1px;
-    background: var(--border-color);
-    margin: 10px 0;
-}
-
-.placeholder-card {
-    background: rgba(15, 23, 42, 0.5);
-    border: 1px dashed rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    padding: 25px 15px;
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-}
-
-.equation {
-    text-align: center;
-    margin: 8px 0;
-}
-
-.biblio-ref {
-    margin-top: 10px;
-    padding: 8px;
-    background: rgba(56, 189, 248, 0.08);
-    border-left: 3px solid #38bdf8;
-    border-radius: 4px;
-    font-size: 0.8rem !important;
-}
-
+/* =============================================================================
+   RESPONSIVIDADE: MOBILE E TELAS TÁTEIS (<= 900px)
+   Dois gráficos empilhados verticalmente e gaveta sob demanda
+   ============================================================================= */
 @media (max-width: 900px) {
+    /* 1. O Canvas ocupa a área útil inteira sem sobreposição de bottom sheet */
+    .canvas-area {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        min-height: 100%;
+        padding: 10px;
+        padding-bottom: 0;
+        border-radius: 0;
+        border: none;
+    }
+
+    /* 2. Palco dos Canvases: Empilhado Verticalmente (50% / 50%) */
+    .canvas-stage {
+        flex-direction: column !important;
+        gap: 8px !important;
+        padding-bottom: 64px !important; /* Espaço seguro garantido para a barra de transporte */
+        background: transparent !important;
+    }
+
+    /* Ambos os containers tornam-se cartões normais no fluxo da coluna */
+    .audio-canvas-container.canvas-main,
     .audio-canvas-container.canvas-pip {
-        width: 170px;
-        height: 105px;
-        bottom: 8px;
-        right: 8px;
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        width: 100% !important;
+        flex: 1 1 0 !important;
+        min-height: 135px !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: var(--radius-md) !important;
+        box-shadow: var(--shadow-sm) !important;
+        transform: none !important;
+        cursor: default !important;
+        background-color: #030712 !important;
+    }
+
+    /* Oculta a indicação de clique do PiP no mobile */
+    .canvas-pip::after {
+        display: none !important;
+    }
+
+    /* Cabeçalho dos gráficos em duas linhas (wrap) no mobile:
+       Linha 1: Título com ícone
+       Linha 2: Métricas e Controles essenciais em largura total */
+    .canvas-header-bar {
+        flex-wrap: wrap !important;
+        gap: 4px 8px !important;
+        padding: 6px 10px !important;
+        background: rgba(15, 23, 42, 0.90) !important;
+        border-bottom: 1px solid var(--border-subtle) !important;
+    }
+
+    .canvas-header-title {
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        font-size: 0.78rem !important;
+        gap: 6px !important;
+    }
+
+    .canvas-header-controls {
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        margin-right: 0 !important;
+        gap: 6px !important;
+    }
+
+    .canvas-metric-badge {
+        font-size: 0.68rem;
+        padding: 2px 6px;
+    }
+
+    /* 3. Barra Flutuante de Transporte na Base */
+    .canvas-toolbar.pos-bottom-center {
+        bottom: 10px !important;
+        z-index: 30 !important;
+    }
+
+    /* 4. Drawer Lateral sob Demanda (Substitui o Bottom Sheet) */
+    .controls-panel {
+        position: fixed !important;
+        top: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        left: auto !important;
+        width: 320px !important;
+        max-width: 86vw !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+        transform: translateX(100%);
+        transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        z-index: 1000 !important;
+        border-radius: var(--radius-xl) 0 0 var(--radius-xl) !important;
+        border: none !important;
+        border-left: 1px solid var(--border-color) !important;
+        background: rgba(15, 23, 42, 0.96) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        box-shadow: -12px 0 35px rgba(0, 0, 0, 0.75) !important;
+    }
+
+    .controls-panel.mobile-drawer-open {
+        transform: translateX(0) !important;
+    }
+
+    .sheet-drag-handle {
+        display: none !important;
+    }
+
+    /* Cabeçalho do Drawer com botão de Fechar */
+    .drawer-header-mobile {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-subtle);
+        background: rgba(15, 23, 42, 0.6);
+    }
+
+    .drawer-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+    }
+
+    #btn-close-drawer {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius-full);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    /* Backdrop para fechar o Drawer ao tocar fora */
+    .mobile-drawer-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        z-index: 998;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.28s ease;
+    }
+
+    .mobile-drawer-backdrop.active {
+        opacity: 1;
+        pointer-events: auto;
     }
 }
-
-/* Estado Recolhido / Minimizado da Miniatura PiP (Garante Visão Desobstruída no Mobile) */
-.audio-canvas-container.canvas-pip.pip-minimized {
-    width: auto !important;
-    height: auto !important;
-    min-height: 0 !important;
-    padding: 4px 8px;
-    background: rgba(3, 7, 18, 0.95);
-    border: 1px solid rgba(56, 189, 248, 0.5);
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-}
-
-.audio-canvas-container.canvas-pip.pip-minimized canvas {
-    display: none !important;
-}
-
-.audio-canvas-container.canvas-pip.pip-minimized .canvas-header-bar {
-    position: static;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 0;
-    background: transparent;
-}
-
-.audio-canvas-container.canvas-pip.pip-minimized .canvas-header-title {
-    display: inline-block;
-    font-size: 0.72rem;
-    color: var(--text-secondary);
-}
-

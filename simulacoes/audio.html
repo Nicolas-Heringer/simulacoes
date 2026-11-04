@@ -8,7 +8,7 @@
     <title>Laboratório de Áudio e Análise Espectral - Plataforma Científica</title>
 
     <meta name="description"
-        content="Laboratório interativo de física acústica: captura de som via microfone, osciloscópio no tempo, espectro FFT com congelamento de tela para análise didática.">
+        content="Laboratório interativo de física acústica: captura de som via microfone, osciloscópio no tempo com trigger zero-crossing e espectro FFT com congelamento de tela.">
     <meta name="keywords"
         content="áudio, osciloscópio, FFT, microfone, física acústica, transformada de fourier, espectrograma, som, frequência">
     <meta name="author" content="Nicolas Heringer">
@@ -31,70 +31,49 @@
             <img src="../assets/icons/arrow-left.svg" class="icon-svg" alt="Voltar">
             Voltar ao Hub
         </a>
-        <h1 class="sim-title">Laboratório de Áudio: Análise Espectral & Ondas</h1>
+
+        <div class="sim-header-actions">
+            <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
+                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                <span class="btn-label-text">Instruções</span>
+            </button>
+        </div>
     </header>
 
-    <!-- Conteúdo Principal -->
+    <!-- Layout Principal -->
     <main class="sim-layout">
-        <!-- Área de Visualização (Canvas Principal em Destaque + Miniatura PIP Alternável) -->
+        <!-- Backdrop para Drawer Lateral no Mobile -->
+        <div class="mobile-drawer-backdrop" id="mobileDrawerBackdrop"></div>
+
+        <!-- Área de Visualização (Canvases de Tempo e Frequência) -->
         <div class="canvas-area">
             <!-- Pilha Vertical no Canto Superior Esquerdo (Barra de Modo Foco) -->
             <div class="canvas-top-left-stack">
                 <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
             </div>
 
-            <!-- Ações do Topo Direito (Modo Foco e Ajuda) -->
+            <!-- Ações do Topo Direito (Modo Foco) -->
             <div class="canvas-top-actions">
-                <button id="btn-open-onboarding" class="canvas-btn-floating" title="Instruções e Guia Rápido">
-                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
-                    <span class="btn-label-text">Instruções</span>
-                </button>
-                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
-                    <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
+                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Alternar Painel de Controles (F)">
+                    <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Controles">
                     <span class="btn-label-text">Controles</span>
                 </button>
             </div>
 
-            <!-- HUD de Métricas Físicas e Inspeção -->
-            <div id="audioMetricsHud" class="audio-hud">
-                <div class="hud-item">
-                    <span class="hud-label">Pico / Fundamental</span>
-                    <span class="hud-value" id="hudPeakFreq">--- Hz</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Nota Musical</span>
-                    <span class="hud-value" id="hudMusicalNote">---</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Nível RMS</span>
-                    <span class="hud-value" id="hudRmsLevel">-∞ dBFS</span>
-                </div>
-                <div class="hud-item" id="hudInspectorItem">
-                    <span class="hud-label">Cursor no Gráfico</span>
-                    <span class="hud-value" id="hudInspectorValue">Passe o mouse no gráfico</span>
-                </div>
-                <div class="hud-item hud-item--status">
-                    <span class="hud-label">Status</span>
-                    <span class="hud-badge status-idle" id="hudStatusBadge">Pronto</span>
-                </div>
-            </div>
-
-            <!-- Palco de Visualização dos Canvases -->
+            <!-- Palco de Visualização dos Canvases (Desktop: PiP | Mobile: Stack Vertical) -->
             <div class="canvas-stage" id="canvasStage">
                 <!-- Container 1: Osciloscópio (Tempo) -->
-                <div class="audio-canvas-container canvas-pip" id="timeCanvasContainer">
+                <div class="audio-canvas-container canvas-pip" id="timeCanvasContainer" title="Clique para alternar o foco para o gráfico principal">
                     <div class="canvas-header-bar">
-                        <span class="canvas-header-title" id="timeCanvasTitle">Osciloscópio — Tempo $x(t)$</span>
+                        <span class="canvas-header-title">
+                            <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="">
+                            <span>Osciloscópio</span>
+                        </span>
                         <div class="canvas-header-controls">
+                            <span class="canvas-metric-badge" id="timeRmsBadge">RMS: -∞ dBFS</span>
                             <button type="button" id="btnToggleTrigger" class="badge-btn active"
-                                title="Ativar/Desativar estabilização do osciloscópio">Trigger</button>
-                            <button type="button" class="badge-btn btn-swap-focus"
-                                title="Alternar foco com o gráfico principal">
-                                <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Alternar"> Alternar
-                            </button>
-                            <button type="button" class="badge-btn btn-toggle-pip"
-                                title="Recolher / Expandir Miniatura">
-                                <img src="../assets/icons/collapse.svg" class="icon-svg" alt="Minimizar"> Min
+                                    title="Ativar/Desativar estabilização do osciloscópio (Zero-Crossing)">
+                                Trigger
                             </button>
                         </div>
                     </div>
@@ -102,140 +81,211 @@
                 </div>
 
                 <!-- Container 2: Espectro FFT (Frequência) -->
-                <div class="audio-canvas-container canvas-main" id="freqCanvasContainer">
+                <div class="audio-canvas-container canvas-main" id="freqCanvasContainer" title="Clique para alternar o foco para o gráfico principal">
                     <div class="canvas-header-bar">
-                        <span class="canvas-header-title" id="freqCanvasTitle">Espectro de Frequência — $|X(f)|$ (FFT)</span>
+                        <span class="canvas-header-title">
+                            <img src="../assets/icons/fft-bars.svg" class="icon-svg" alt="">
+                            <span>Espectro</span>
+                        </span>
                         <div class="canvas-header-controls">
-                            <button type="button" class="badge-btn btn-swap-focus"
-                                title="Alternar foco com a miniatura">
-                                <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Alternar"> Alternar
-                            </button>
-                            <button type="button" class="badge-btn btn-toggle-pip"
-                                title="Recolher / Expandir Miniatura">
-                                <img src="../assets/icons/collapse.svg" class="icon-svg" alt="Minimizar"> Min
+                            <span class="canvas-metric-badge tone-accent" id="freqPeakBadge">Pico: --- Hz</span>
+                            <button type="button" id="btnToggleScale" class="badge-btn"
+                                    title="Alternar entre Escala Logarítmica e Linear">
+                                Escala: Log
                             </button>
                         </div>
                     </div>
                     <canvas id="freqCanvas"></canvas>
+                    <div class="canvas-inspect-pill hidden" id="canvasInspectPill">
+                        <span id="canvasInspectText">---</span>
+                    </div>
                 </div>
+            </div>
+
+            <!-- Barra Flutuante de Transporte na Base (Padrão DS 2.0) -->
+            <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
+                <button class="toolbar-btn btn-toggle tone-accent" id="btn-transport-play"
+                        data-state="0"
+                        data-text-idle="Capturar Áudio"
+                        data-text-active="Congelar Tela"
+                        data-icon-idle="play"
+                        data-icon-active="pause"
+                        title="Capturar Microfone / Congelar Tela (Espaço)">
+                    <img src="../assets/icons/play.svg" class="icon-svg" alt="Play">
+                    <span class="btn-text">Capturar Áudio</span>
+                </button>
+                <button class="toolbar-btn" id="btn-transport-reset" title="Limpar buffers de áudio">
+                    <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
+                </button>
+                <span class="toolbar-divider"></span>
+                <button class="toolbar-btn" id="btn-transport-trigger" title="Estabilização Zero-Crossing (Osciloscópio)">
+                    <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="Trigger">
+                    <span class="btn-text" id="transportTriggerText">Trigger: On</span>
+                </button>
+                <button class="toolbar-btn" id="btn-transport-scale" title="Alternar Escala FFT (Logarítmica / Linear)">
+                    <img src="../assets/icons/fft-bars.svg" class="icon-svg" alt="Escala">
+                    <span class="btn-text" id="transportScaleText">Log</span>
+                </button>
             </div>
         </div>
 
-        <!-- 2. Painel Lateral de Controles (Bottom Sheet no Mobile) -->
+        <!-- Painel Lateral de Controles (Desktop: Sidebar | Mobile: Drawer Lateral sob demanda) -->
         <aside class="controls-panel" id="controls-panel">
-            <!-- Alça de Arraste para Mobile / Tablet -->
-            <div class="sheet-drag-handle" id="sheet-drag-handle" title="Deslize ou toque para expandir/recolher">
-                <div class="sheet-drag-pill"></div>
+            <!-- Cabeçalho do Drawer para Mobile -->
+            <div class="drawer-header-mobile">
+                <div class="drawer-title">
+                    <img src="../assets/icons/sliders.svg" class="icon-svg icon-accent" alt="">
+                    <span>Ajustes & Teoria</span>
+                </div>
+                <button id="btn-close-drawer" class="btn-icon" title="Fechar Menu">✕</button>
             </div>
 
             <!-- Topo: Barra de Abas Expansíveis -->
             <div class="tab-nav">
-                <button class="tab-btn active" data-tab="tab-mic" id="tabBtnMic" title="Microfone">
-                    <img src="../assets/icons/fft-bars.svg" class="icon-svg" alt="Microfone">
-                    <span class="tab-label">Microfone</span>
+                <button class="tab-btn active" data-tab="tab-mic" id="tabBtnMic" title="Captura e Gráficos">
+                    <img src="../assets/icons/fft-bars.svg" class="icon-svg" alt="">
+                    <span class="tab-label">Microfone & FFT</span>
                 </button>
-                <button class="tab-btn" data-tab="tab-waves" id="tabBtnWaves" title="Ondas">
-                    <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="Ondas">
-                    <span class="tab-label">Ondas</span>
-                </button>
-                <button class="tab-btn" data-tab="tab-beats" id="tabBtnBeats" title="Batimento">
-                    <img src="../assets/icons/motion-oscillate.svg" class="icon-svg" alt="Batimento">
-                    <span class="tab-label">Batimento</span>
-                </button>
-                <button class="tab-btn" data-tab="tab-theory" id="tabBtnTheory" title="Teoria">
-                    <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
+                <button class="tab-btn" data-tab="tab-theory" id="tabBtnTheory" title="Teoria e Deduções">
+                    <img src="../assets/icons/book-open.svg" class="icon-svg" alt="">
                     <span class="tab-label">Teoria</span>
                 </button>
-                <button class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
+                <button class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Recolher Painel (F)">
                     <img src="../assets/icons/collapse.svg" class="icon-svg" alt="Recolher">
                 </button>
             </div>
 
             <!-- Centro: Corpo Rolável de Conteúdo -->
             <div class="panel-body">
-                <!-- CONTEÚDO DA ABA 1: MICROFONE & ANÁLISE AO VIVO -->
+                <!-- CONTEÚDO DA ABA 1: MICROFONE & FFT -->
                 <div id="tab-mic" class="tab-pane active">
                     <div class="tab-header">
-                        <h3>Captura e Análise de Microfone</h3>
-                        <p class="tab-description">
-                            Capture o áudio ambiente em tempo real. Você pode <strong>congelar a tela</strong> a qualquer momento para inspeção harmônica detalhada.
+                        <div class="tab-header-row">
+                            <h3 class="tab-title">Captura & Análise</h3>
+                            <div class="sim-badge idle" id="headerStatusBadge">
+                                <span class="status-dot"></span>
+                                <span id="headerStatusText">Pronto</span>
+                            </div>
+                        </div>
+                        <p class="tab-subtitle">
+                            Capture o som do ambiente via microfone em tempo real e congele a tela a qualquer instante para inspeção detalhada de harmônicos.
                         </p>
                     </div>
 
-                    <!-- Botão de Ação da Captura -->
+                    <!-- Feedback de Conexão do Microfone -->
+                    <div class="field-hint" id="micFieldHint" style="margin-bottom: 6px;"></div>
+
+                    <!-- Divisor de Ajustes Gráficos -->
+                    <div class="sim-divider-label"><span>Ajustes dos Gráficos</span></div>
+
+                    <!-- Dual Slider: Ganho Visual do Osciloscópio -->
                     <div class="control-group">
-                        <button type="button" id="btnMicStart" class="btn-primary btn-toggle" style="width: 100%;"
-                                data-focus-control="toggle"
-                                data-state="0"
-                                data-text-idle="Iniciar Captura"
-                                data-text-active="Pausar / Congelar"
-                                data-icon-idle="play"
-                                data-icon-active="pause">
-                            <img src="../assets/icons/play.svg" class="icon-svg" alt="Captura">
-                            <span id="btnMicStartText" class="btn-text">Iniciar Captura</span>
-                        </button>
+                        <div class="slider-container sim-dual-slider">
+                            <div class="slider-header">
+                                <label for="slider-visual-gain" class="slider-label">Ganho Visual (Osciloscópio)</label>
+                                <div class="dual-input-wrapper">
+                                    <input type="number" class="dual-input-number" id="input-visual-gain"
+                                           min="0.5" max="5.0" step="0.25" value="1.00">
+                                    <span class="dual-input-unit">×</span>
+                                </div>
+                            </div>
+                            <input type="range" class="sim-slider" id="slider-visual-gain"
+                                   min="0.5" max="5.0" step="0.25" value="1.00"
+                                   data-focus-control="slider" data-focus-label="Ganho" data-focus-order="2">
+                        </div>
                     </div>
 
-                    <!-- Chave de 2 posições para Escala de Frequência -->
+                    <!-- Dual Slider: Suavização FFT -->
                     <div class="control-group">
-                        <label class="control-label" style="font-size: 0.82rem; color: var(--text-secondary); font-weight: 500;">Escala de Frequência:</label>
+                        <div class="slider-container sim-dual-slider">
+                            <div class="slider-header">
+                                <label for="slider-fft-smoothing" class="slider-label">Suavização Espectral (FFT)</label>
+                                <div class="dual-input-wrapper">
+                                    <input type="number" class="dual-input-number" id="input-fft-smoothing"
+                                           min="0.00" max="0.95" step="0.05" value="0.75">
+                                    <span class="dual-input-unit">u</span>
+                                </div>
+                            </div>
+                            <input type="range" class="sim-slider" id="slider-fft-smoothing"
+                                   min="0.00" max="0.95" step="0.05" value="0.75">
+                        </div>
+                    </div>
+
+                    <!-- Chave Segmentada: Escala de Frequência -->
+                    <div class="control-group">
+                        <label style="font-size: 0.82rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 6px; display: block;">Escala do Eixo de Frequências:</label>
                         <div class="segmented-control" id="scaleControl">
-                            <button type="button" class="segment-btn active" data-scale="log">Logarítmica</button>
-                            <button type="button" class="segment-btn" data-scale="linear">Linear</button>
+                            <button type="button" class="segment-btn active" data-scale="log">Logarítmica (Oitavas)</button>
+                            <button type="button" class="segment-btn" data-scale="linear">Linear (Hz)</button>
+                        </div>
+                    </div>
+
+                    <!-- Divisor de Telemetria -->
+                    <div class="sim-divider-label"><span>Telemetria em Tempo Real</span></div>
+
+                    <div class="control-group">
+                        <div class="sim-readout">
+                            <div class="sim-readout-title">
+                                <img src="../assets/icons/gauge.svg" class="icon-svg icon-accent" alt="">
+                                <span>Métricas Acústicas & Harmônicas</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Frequência Fundamental ($f_0$):</span>
+                                <span class="sim-readout-value tone-accent" id="readoutPeakFreq">--- Hz</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Nota Musical Estimada:</span>
+                                <span class="sim-readout-value tone-cyan" id="readoutMusicalNote">---</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Intensidade Sonora (RMS):</span>
+                                <span class="sim-readout-value tone-rose" id="readoutRms">-∞ dBFS</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Resolução por Bin ($\Delta f$):</span>
+                                <span class="sim-readout-value tone-emerald" id="readoutResolution">~21.5 Hz</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Taxa de Amostragem ($f_s$):</span>
+                                <span class="sim-readout-value" id="readoutSampleRate">44.1 kHz</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- CONTEÚDO DA ABA 2: ONDAS -->
-                <div id="tab-waves" class="tab-pane" style="display: none;">
-                    <div class="tab-header">
-                        <h3>Fontes de Onda & Decomposição</h3>
-                    </div>
-                    <div class="placeholder-card">
-                        <span>Módulo de síntese senoidal e harmônicos em desenvolvimento.</span>
-                    </div>
-                </div>
-
-                <!-- CONTEÚDO DA ABA 3: BATIMENTO ACÚSTICO -->
-                <div id="tab-beats" class="tab-pane" style="display: none;">
-                    <div class="tab-header">
-                        <h3>Batimento Acústico</h3>
-                    </div>
-                    <div class="placeholder-card">
-                        <span>Módulo de interferência e frequência de batimento $f_b = |f_1 - f_2|$ em desenvolvimento.</span>
-                    </div>
-                </div>
-
-                <!-- CONTEÚDO DA ABA 4: TEORIA & FOURIER -->
+                <!-- CONTEÚDO DA ABA 2: TEORIA & FOURIER -->
                 <div id="tab-theory" class="tab-pane" style="display: none;">
-                    <div class="theory-article">
-                        <h3>Análise de Fourier & Física Acústica</h3>
+                    <div class="theory-card">
+                        <h4><img src="../assets/icons/book-open.svg" class="icon-svg icon-accent" alt=""> Análise de Fourier & Física Acústica</h4>
                         <p>
                             Qualquer sinal acústico contínuo no tempo $x(t)$ pode ser decomposto em uma superposição de oscilações senoidais harmônicas através da <strong>Transformada de Fourier</strong>:
                         </p>
-                        <div class="katex-display">
-                            $$X(f) = \int_{-\infty}^{\infty} x(t) e^{-i 2\pi f t} \, dt$$
-                        </div>
+                        $$X(f) = \int_{-\infty}^{\infty} x(t) e^{-i 2\pi f t} \, dt$$
                         <p>
-                            No domínio discreto amostrado digitalmente (via Web Audio API a $44{,}1\text{ kHz}$ ou $48\text{ kHz}$), utiliza-se o algoritmo da <strong>Fast Fourier Transform (FFT)</strong>:
+                            No domínio discreto amostrado digitalmente via Web Audio API, o processamento executa o algoritmo da <strong>Fast Fourier Transform (FFT)</strong>:
                         </p>
-                        <div class="katex-display">
-                            $$X[k] = \sum_{n=0}^{N-1} x[n] \cdot e^{-i \frac{2\pi}{N} k n}$$
-                        </div>
-                        <h4>Escala Logarítmica e Percepção Humana</h4>
+                        $$X[k] = \sum_{n=0}^{N-1} x[n] \cdot e^{-i \frac{2\pi}{N} k n}$$
                         <p>
                             O ouvido humano percebe frequências e notas musicais segundo uma escala exponencialmente proporcional (relação de oitavas onde cada duplicação de frequência corresponde a um intervalo musical de $12$ semitons):
                         </p>
-                        <div class="katex-display">
-                            $$f(n) = 440 \cdot 2^{\frac{n - 69}{12}} \text{ Hz}$$
-                        </div>
+                        $$f(n) = 440 \cdot 2^{\frac{n - 69}{12}} \text{ Hz}$$
+                        <p>
+                            Pelo <strong>Teorema de Nyquist-Shannon</strong>, a máxima frequência mensurável sem aliasing é metade da taxa de amostragem ($f_{\text{Nyquist}} = f_s / 2$).
+                        </p>
+
+                        <button class="btn-secondary" id="btn-open-theory-modal-inner" style="width: 100%; margin-top: 10px;">
+                            <img src="../assets/icons/book-open.svg" class="icon-svg" alt=""> Ver Dedução Completa em Modal
+                        </button>
                     </div>
                 </div>
             </div>
 
             <!-- Rodapé Fixo do Painel -->
             <div class="panel-footer">
-                <span class="footer-meta">FFT: 1024 bins</span>
+                <div class="sim-badge idle" id="footer-status-badge">
+                    <span class="status-dot"></span>
+                    <span id="footer-status-text">Simulação Pronta</span>
+                </div>
                 <span class="footer-meta">Modo Foco: [F]</span>
             </div>
         </aside>
@@ -255,7 +305,7 @@
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
-                    Explore a física acústica e o processamento de sinais sonoros em tempo real através da <strong>Web Audio API</strong>, decompondo sinais acústicos em suas componentes espectrais harmônicas.
+                    Explore a física acústica e o processamento de sinais sonoros em tempo real através da <strong>Web Audio API</strong>, decompondo sinais sonoros em suas componentes espectrais harmônicas.
                 </p>
                 <div class="onboarding-grid">
                     <div class="onboarding-card">
@@ -263,34 +313,86 @@
                             <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="">
                             <span>1. Domínio do Tempo & Osciloscópio</span>
                         </div>
-                        <p class="onboarding-card-text">Visualize a forma de onda $x(t)$ em tempo real. O algoritmo de <strong>Trigger por Passagem por Zero</strong> (<em>zero-crossing</em>) sincroniza a amostragem contínua, estabilizando ondas periódicas na tela para medição precisa de período e amplitude.</p>
+                        <p class="onboarding-card-text">Visualize a forma de onda $x(t)$ em tempo real. O algoritmo de <strong>Trigger por Passagem por Zero</strong> sincroniza a amostragem contínua, estabilizando ondas periódicas na tela para medição precisa de período e amplitude.</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
                             <img src="../assets/icons/fft-bars.svg" class="icon-svg" alt="">
-                            <span>2. Domínio da Frequência & Transformada de Fourier</span>
+                            <span>2. Domínio da Frequência & FFT</span>
                         </div>
                         <p class="onboarding-card-text">A <strong>Transformada Rápida de Fourier (FFT)</strong> calcula o espectro de magnitudes $|X(f)|$ de 20 Hz a 20 kHz. Identifique a fundamental, séries de sobretons harmônicos e a intensidade sonora em dBFS nas escalas logarítmica ou linear.</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/sliders.svg" class="icon-svg" alt="">
-                            <span>3. Fontes de Áudio</span>
+                            <img src="../assets/icons/rotate.svg" class="icon-svg" alt="">
+                            <span>3. Alternância e Visualização Dupla</span>
                         </div>
-                        <p class="onboarding-card-text">Capture áudio em tempo real via <strong>microfone do dispositivo</strong> (sem retorno de saída para prevenir microfonia e realimentação acústica) ou explore as abas de síntese de ondas harmônicas e fenômenos de batimento acústico.</p>
+                        <p class="onboarding-card-text">No Desktop, clique em qualquer ponto da miniatura Picture-in-Picture (PiP) para alternar o foco do gráfico principal. No celular, os dois gráficos se alinham verticalmente para máxima clareza simultânea.</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/rotate.svg" class="icon-svg" alt="">
-                            <span>4. Modo PiP e Congelamento (Freeze)</span>
+                            <img src="../assets/icons/play.svg" class="icon-svg" alt="">
+                            <span>4. Congelamento (Freeze) & Inspeção</span>
                         </div>
-                        <p class="onboarding-card-text">Use o botão <strong>Alternar</strong> no topo dos gráficos para trocar qual visualização ocupa o Canvas Principal e qual fica em Picture-in-Picture (PiP). Acione <strong>Pausar / Congelar</strong> para congelar a tela e inspecionar frequências e notas com o cursor.</p>
+                        <p class="onboarding-card-text">Acione <strong>Congelar Tela</strong> na barra de transporte ou com a tecla <kbd>Espaço</kbd> para pausar a amostragem e inspecionar livremente frequências e intensidades passando o cursor ou tocando no gráfico.</p>
                     </div>
                 </div>
             </div>
             <div class="sim-modal-footer">
                 <span class="sim-modal-hint">Clique fora ou pressione <kbd>Esc</kbd> para fechar</span>
                 <button class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- MODAL DIDÁTICO DE TEORIA & FOURIER (.sim-modal)                -->
+    <!-- ============================================================= -->
+    <div id="modal-theory" class="sim-modal-overlay hidden" aria-hidden="true" role="dialog">
+        <div class="sim-modal-container">
+            <div class="sim-modal-header">
+                <div class="sim-modal-title">
+                    <img src="../assets/icons/book-open.svg" class="icon-svg icon-accent" alt="Teoria">
+                    <span>Fundamentação Teórica: Decomposição de Fourier & Acústica</span>
+                </div>
+                <button class="sim-modal-close" data-modal-close title="Fechar Modal (Esc)">✕</button>
+            </div>
+            <div class="sim-modal-body">
+                <div class="theory-section">
+                    <h4>1. Série e Transformada de Fourier</h4>
+                    <p>
+                        Jean-Baptiste Joseph Fourier demonstrou que qualquer função periódica contínua pode ser expressa como a soma infinita ponderada de harmônicos senoidais puros. A Transformada Contínua de Fourier generaliza esse resultado para sinais aperiódicos no tempo:
+                    </p>
+                    $$X(f) = \int_{-\infty}^{\infty} x(t) e^{-i 2\pi f t} \, dt$$
+                </div>
+
+                <div class="theory-callout">
+                    <strong>💡 Interpretação Física dos Domínios:</strong>
+                    <ul>
+                        <li><strong>Domínio do Tempo $x(t)$</strong>: Mostra a variação instantânea da pressão do ar sobre a membrana do microfone em milissegundos.</li>
+                        <li><strong>Domínio da Frequência $|X(f)|$</strong>: Mostra a distribuição de energia espectral para cada frequência em Hertz (timbre sonoro).</li>
+                    </ul>
+                </div>
+
+                <div class="theory-section">
+                    <h4>2. Processamento Digital e FFT (Fast Fourier Transform)</h4>
+                    <p>
+                        Computadores operam sobre amostras discretas a intervalos regulares $T_s = 1/f_s$. A Transformada Discreta de Fourier (DFT) requer ordem de complexidade $\mathcal{O}(N^2)$. O algoritmo FFT (Cooley-Tukey) reduz essa complexidade para $\mathcal{O}(N \log N)$, permitindo processamento em tempo real a 60 FPS:
+                    </p>
+                    $$X[k] = \sum_{n=0}^{N-1} x[n] \cdot e^{-i \frac{2\pi}{N} k n}, \quad k = 0, 1, \dots, N-1$$
+                </div>
+
+                <div class="theory-section">
+                    <h4>3. Percepção Auditiva e Escala Musical Temperada</h4>
+                    <p>
+                        A cóclea humana responde proporcionalmente à razão entre frequências em vez de diferenças lineares. Na afinação igual contemporânea (temperamento igual, $A_4 = 440\text{ Hz}$), a razão de frequência de cada semitom é $2^{1/12} \approx 1{,}05946$:
+                    </p>
+                    $$f(n) = 440 \cdot 2^{\frac{n - 69}{12}} \text{ Hz}$$
+                </div>
+            </div>
+            <div class="sim-modal-footer">
+                <span class="sim-modal-hint">Pressione <kbd>Esc</kbd> para fechar</span>
+                <button class="btn-primary tone-accent" data-modal-close style="min-width: 100px;">Entendido</button>
             </div>
         </div>
     </div>

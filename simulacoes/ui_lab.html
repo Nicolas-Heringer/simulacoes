@@ -44,8 +44,17 @@
 
     <!-- Cabeçalho da Simulação -->
     <header class="sim-header">
-        <a href="../index.html#secao-simulacoes" class="btn-back">← Voltar ao Hub</a>
-        <span class="sim-title">Design System & Laboratório de Interface (UI Sandbox)</span>
+        <a href="../index.html#secao-simulacoes" class="btn-back">
+            <img src="../assets/icons/arrow-left.svg" class="icon-svg" alt="Voltar">
+            Voltar ao Hub
+        </a>
+
+        <div class="sim-header-actions">
+            <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
+                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                <span class="btn-label-text">Instruções</span>
+            </button>
+        </div>
     </header>
 
     <!-- Layout Principal -->
@@ -203,10 +212,6 @@
 
             <!-- Grupo de Ações Flutuantes no Topo Direito do Canvas -->
             <div class="canvas-top-actions">
-                <button id="btn-open-onboarding" class="canvas-btn-floating" title="Instruções e Dicas de Uso">
-                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Dicas">
-                    <span class="btn-label-text">Dicas</span>
-                </button>
                 <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Painel Lateral de Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>

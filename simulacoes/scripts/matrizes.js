@@ -227,21 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 8. Botão de Modo Foco no Cabeçalho
-    const btnFocus = document.getElementById('btn-focus-mode');
-    if (btnFocus) {
-        btnFocus.addEventListener('click', () => {
-            const layout = document.querySelector('.sim-layout');
-            const isCollapsed = layout?.classList.contains('sidebar-collapsed');
-            if (isCollapsed) {
-                document.getElementById('btn-expand-sidebar')?.click();
-            } else {
-                document.getElementById('btn-collapse-sidebar')?.click();
-            }
-        });
-    }
-
-    // 9. Modal Didático de Teoria Completa
+    // 8. Modal Didático de Teoria Completa
     const modalTeoria = initModal('#modal-theory-matrizes');
     const btnAbrirModal = document.getElementById('btn-abrir-modal-teoria');
     if (btnAbrirModal && modalTeoria) {

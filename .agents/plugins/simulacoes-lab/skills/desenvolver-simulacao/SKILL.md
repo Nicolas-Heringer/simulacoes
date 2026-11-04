@@ -34,7 +34,7 @@ Ao executar este fluxo, consulte obrigatoriamente os arquivos de referência:
 
 1. **Consulta ao Catálogo (`ui_lab.html`) e Scaffold do HTML**:
    * Crie o arquivo `simulacoes/<nome>.html` copiando a estrutura de [templates/simulacao-template.html](./templates/simulacao-template.html).
-   * Atualize a tag `<title>`, o cabeçalho `.sim-title` e a importação do script final (`scripts/<nome>.js`).
+   * Atualize a tag `<title>` e a importação do script final (`scripts/<nome>.js`). O cabeçalho `.sim-header` contém apenas `.btn-back` à esquerda e `.sim-header-actions` com `#btn-open-onboarding` (`.btn-header-action`) à direita (sem título no header).
    * Configure a navegação por abas usando `.tab-nav` com botões `.tab-btn[data-tab="..."]` e painéis `.tab-pane`.
    * Insira os controles necessários baseando-se exclusivamente nas marcações de `simulacoes/ui_lab.html`:
      - `.canvas-toolbar.pos-bottom-center` (`#canvas-transport-toolbar`) flutuando na base de `.canvas-area` para controle temporal (Play/Pause, Passo, Reset e Velocidade Cíclica), mantendo o menu lateral limpo.
@@ -65,7 +65,7 @@ Ao executar este fluxo, consulte obrigatoriamente os arquivos de referência:
 Para atualizar uma simulação existente que ainda não segue o Design System 2.0:
 
 1. **Substituição do Layout HTML**:
-   * Migrar `<header>` para a estrutura `.sim-header` com `.btn-back` e `.sim-title`.
+   * Migrar `<header>` para a estrutura `.sim-header` com `.btn-back` à esquerda e `.sim-header-actions` (`#btn-open-onboarding`) à direita.
    * Envolver a área visual e controles em `<main class="sim-layout">`.
    * Envolver o canvas em `<div class="canvas-area">` com `#three-container` (ou `<canvas>`) e as ações flutuantes (`.canvas-top-actions`).
    * Substituir barras laterais antigas por `<aside class="controls-panel">` contendo:

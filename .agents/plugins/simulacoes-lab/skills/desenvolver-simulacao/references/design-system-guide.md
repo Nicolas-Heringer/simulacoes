@@ -37,31 +37,31 @@ Nunca codifique cores hexadecimais soltas para elementos de UI. Utilize os token
 ### 2.1 Esqueleto Principal da Simulação
 ```html
 <header class="sim-header">
-    <div class="header-left">
-        <a href="../simulacoes.html" class="back-link">
-            <img src="../assets/icons/arrow-left-icon.svg" class="icon-svg" alt="Voltar">
-            Simulações
-        </a>
-        <span class="header-Separator">/</span>
-        <span class="sim-title">Título da Simulação</span>
-    </div>
-    <div class="header-right">
-        <div id="status-badge" class="sim-badge">
-            <span class="status-dot"></span>
-            <span id="status-text">Executando</span>
-        </div>
+    <a href="../index.html#secao-simulacoes" class="btn-back">
+        <img src="../assets/icons/arrow-left.svg" class="icon-svg" alt="Voltar">
+        Voltar ao Hub
+    </a>
+
+    <div class="sim-header-actions">
+        <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
+            <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+            <span class="btn-label-text">Instruções</span>
+        </button>
     </div>
 </header>
 
 <main class="sim-layout">
     <!-- Área do Canvas (Esquerda no Desktop / Topo no Mobile) -->
     <div class="canvas-area">
-        <div id="canvas-container" style="width:100%; height:100%; position:relative; touch-action:none;"></div>
+        <div id="three-container" style="width:100%; height:100%; position:relative; touch-action:none;"></div>
 
         <!-- Botão para reabrir painel quando recolhido em Modo Foco -->
-        <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Painel (F)">
-            <img src="../assets/icons/sidebar-expand-icon.svg" class="icon-svg" alt="Expandir">
-        </button>
+        <div class="canvas-top-actions">
+            <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Painel (F)">
+                <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
+                <span class="btn-label-text">Controles</span>
+            </button>
+        </div>
 
         <!-- Barra Flutuante Automática do Modo Foco -->
         <div id="focus-context-toolbar" class="canvas-toolbar pos-bottom-center" style="display: none;"></div>

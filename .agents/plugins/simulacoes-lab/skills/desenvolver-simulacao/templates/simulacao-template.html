@@ -31,7 +31,13 @@
             <img src="../assets/icons/arrow-left.svg" class="icon-svg" alt="Voltar">
             Voltar ao Hub
         </a>
-        <h1 class="sim-title">{{TITULO_SIMULACAO}}</h1>
+
+        <div class="sim-header-actions">
+            <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
+                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                <span class="btn-label-text">Instruções</span>
+            </button>
+        </div>
     </header>
 
     <!-- Layout Grid Principal -->
@@ -45,12 +51,8 @@
                 <div id="focus-context-toolbar" class="canvas-toolbar pos-top-left focus-mirror-toolbar"></div>
             </div>
 
-            <!-- Grupo de Ações do Topo Direito (Instruções e Reabrir Controles no Modo Foco) -->
+            <!-- Grupo de Ações do Topo Direito (Reabrir Controles no Modo Foco) -->
             <div class="canvas-top-actions">
-                <button id="btn-open-onboarding" class="canvas-btn-expand-sidebar is-visible" title="Guia Rápido e Instruções">
-                    <img src="../assets/icons/help-circle.svg" class="icon-svg" alt="Ajuda">
-                    <span class="btn-label-text">Instruções</span>
-                </button>
                 <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
