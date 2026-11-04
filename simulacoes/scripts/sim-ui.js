@@ -738,11 +738,176 @@ export function initModal(modalTarget, options = {}) {
  * @param {string} [options.storageKey]
  */
 export function initOnboardingModal(modalTarget = '#modal-onboarding', options = {}) {
-    return initModal(modalTarget, {
+    const modalCtrl = initModal(modalTarget, {
         triggerSelector: '#btn-open-onboarding',
         autoOpenFirstSession: true,
         ...options
     });
+
+    const modal = typeof modalTarget === 'string' ? document.querySelector(modalTarget) : modalTarget;
+    if (modal) {
+        initOnboardingQRCode(modal, options);
+    }
+
+    return modalCtrl;
+}
+
+/**
+ * Retorna a URL pública canônica (GitHub Pages) da simulação atual.
+ * Mesmo quando executado localmente (localhost, 127.0.0.1 ou protocolo file:),
+ * garante que o QR Code e o botão de cópia apontem para a versão online hospedada,
+ * permitindo que estudantes e dispositivos móveis escaneiem e acessem a página de imediato.
+ * Se a simulação não tiver link explicitamente definido, redireciona para a home
+ * do portal de simulações (https://nicolas-heringer.github.io/simulacoes/).
+ * @param {string} [overrideUrl] - URL customizada opcional
+ * @returns {string} URL pública canônica
+ */
+export function getCanonicalSimulationUrl(overrideUrl = '') {
+    if (overrideUrl) return overrideUrl;
+    const HOME_URL = 'https://nicolas-heringer.github.io/simulacoes/';
+    if (typeof window === 'undefined') return HOME_URL;
+
+    // Catálogo explícito de simulações homologadas
+    const KNOWN_SIMULATIONS = new Set([
+        'atomo_de_hidrogenio.html',
+        'audio.html',
+        'clima.html',
+        'drude.html',
+        'estacionarias2d.html',
+        'fonons.html',
+        'gravidade.html',
+        'matrizes.html',
+        'movimento.html',
+        'nova_simulacao.html',
+        'particulas.html',
+        'quedalivre.html',
+        'snell.html',
+        'tensor_de_inercia.html',
+        'ui_lab.html'
+    ]);
+
+    const pathname = window.location.pathname || '';
+    const filename = pathname.split('/').filter(Boolean).pop() || '';
+
+    // Se for uma simulação com link explicitamente definido
+    if (filename && KNOWN_SIMULATIONS.has(filename)) {
+        return `https://nicolas-heringer.github.io/simulacoes/simulacoes/${filename}`;
+    }
+
+    // Se for a página inicial na raiz
+    if (filename === 'index.html' || filename === '') {
+        return HOME_URL;
+    }
+
+    // Fallback para qualquer página não explicitamente definida
+    return HOME_URL;
+}
+
+/**
+ * Inicializa o recurso de geração dinâmica de QR Code para compartilhamento com alunos em sala de aula.
+ * Carrega o motor de QR Code sob demanda (lazy loading) apenas quando solicitado pelo professor/usuário.
+ * @param {HTMLElement|string} modalTarget - Elemento ou seletor do modal
+ * @param {Object} [options]
+ * @param {string} [options.url] - URL a ser codificada (padrão: URL canônica do GitHub Pages via getCanonicalSimulationUrl)
+ * @returns {Object|null}
+ */
+export function initOnboardingQRCode(modalTarget, options = {}) {
+    const modal = typeof modalTarget === 'string' ? document.querySelector(modalTarget) : modalTarget;
+    if (!modal) return null;
+
+    const btnToggle = modal.querySelector('#btn-toggle-onboarding-qr, [data-qr-toggle]');
+    const panel = modal.querySelector('#onboarding-qr-panel, [data-qr-panel]');
+    if (!btnToggle || !panel) return null;
+
+    const canvas = modal.querySelector('#onboarding-qr-canvas, [data-qr-canvas]');
+    const inputUrl = modal.querySelector('#onboarding-qr-url, [data-qr-url]');
+    const btnCopy = modal.querySelector('#btn-copy-qr-url, [data-qr-copy]');
+    const copyLabel = modal.querySelector('#btn-copy-qr-label, [data-qr-copy-label]');
+    const btnToggleText = modal.querySelector('#btn-toggle-onboarding-qr-text, [data-qr-toggle-text]');
+
+    const targetUrl = getCanonicalSimulationUrl(options.url);
+    let isRendered = false;
+
+    if (inputUrl && targetUrl) {
+        inputUrl.value = targetUrl;
+        inputUrl.addEventListener('click', () => inputUrl.select());
+    }
+
+    const renderQR = async () => {
+        if (isRendered || !canvas || !targetUrl) return;
+        try {
+            const { renderQRCodeToCanvas } = await import('./qr-generator.js');
+            renderQRCodeToCanvas(canvas, targetUrl, {
+                errorCorrectionLevel: 'M',
+                margin: 4,
+                size: 180,
+                darkColor: '#030712',
+                lightColor: '#ffffff'
+            });
+            isRendered = true;
+        } catch (err) {
+            console.error('[sim-ui] Erro ao carregar motor de QR Code:', err);
+        }
+    };
+
+    const togglePanel = () => {
+        const isHidden = panel.classList.contains('hidden');
+        if (isHidden) {
+            panel.classList.remove('hidden');
+            btnToggle.classList.add('is-active');
+            if (btnToggleText) {
+                btnToggleText.textContent = 'Ocultar QR Code';
+            }
+            renderQR();
+            setTimeout(() => {
+                panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 50);
+        } else {
+            panel.classList.add('hidden');
+            btnToggle.classList.remove('is-active');
+            if (btnToggleText) {
+                btnToggleText.textContent = 'Conectar Alunos (QR Code)';
+            }
+        }
+    };
+
+    btnToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        togglePanel();
+    });
+
+    if (btnCopy) {
+        btnCopy.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (!targetUrl) return;
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(targetUrl);
+                } else if (inputUrl) {
+                    inputUrl.select();
+                    document.execCommand('copy');
+                }
+                if (copyLabel) copyLabel.textContent = 'Copiado! ✓';
+                btnCopy.classList.add('tone-emerald');
+                setTimeout(() => {
+                    if (copyLabel) copyLabel.textContent = 'Copiar Link';
+                    btnCopy.classList.remove('tone-emerald');
+                }, 2000);
+            } catch (err) {
+                console.warn('[sim-ui] Falha ao copiar URL:', err);
+                if (inputUrl) {
+                    inputUrl.select();
+                    document.execCommand('copy');
+                }
+            }
+        });
+    }
+
+    return {
+        show: () => { if (panel.classList.contains('hidden')) togglePanel(); },
+        hide: () => { if (!panel.classList.contains('hidden')) togglePanel(); },
+        toggle: togglePanel
+    };
 }
 
 /**

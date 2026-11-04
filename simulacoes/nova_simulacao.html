@@ -515,10 +515,42 @@
                         <p class="onboarding-card-text">Pause a simulação na barra inferior e altere massas, raios ou vetores para inspecionar o quadro congelado.</p>
                     </div>
                 </div>
+
+                <!-- Painel Dinâmico de QR Code para Sala de Aula -->
+                <div id="onboarding-qr-panel" class="onboarding-qr-panel hidden">
+                    <div class="onboarding-qr-card">
+                        <div class="onboarding-qr-preview">
+                            <canvas id="onboarding-qr-canvas" class="onboarding-qr-canvas" aria-label="QR Code para acesso de alunos"></canvas>
+                            <span class="onboarding-qr-scan-badge">
+                                <img src="../assets/icons/smartphone.svg" class="icon-svg" alt="">
+                                Aponte a câmera
+                            </span>
+                        </div>
+                        <div class="onboarding-qr-info">
+                            <div class="onboarding-qr-title">
+                                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="">
+                                <span>Acesso Direto para a Turma</span>
+                            </div>
+                            <p class="onboarding-qr-desc">
+                                Projete esta tela na lousa. Os estudantes podem escanear o código da carteira para abrir esta simulação instantaneamente no celular.
+                            </p>
+                            <div class="onboarding-qr-url-row">
+                                <input type="text" id="onboarding-qr-url" class="onboarding-qr-url-input" readonly aria-label="URL da simulação">
+                                <button type="button" class="btn-secondary" id="btn-copy-qr-url" title="Copiar link direto">
+                                    <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="">
+                                    <span id="btn-copy-qr-label">Copiar Link</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="sim-modal-footer">
-                <span class="sim-modal-hint">Clique fora ou pressione <kbd>Esc</kbd> para iniciar</span>
-                <button class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
+                <button type="button" class="btn-secondary" id="btn-toggle-onboarding-qr" title="Exibir QR Code para compartilhar com a turma">
+                    <img src="../assets/icons/smartphone.svg" class="icon-svg" alt="">
+                    <span id="btn-toggle-onboarding-qr-text">Conectar Alunos (QR Code)</span>
+                </button>
+                <button type="button" class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
             </div>
         </div>
     </div>

@@ -604,6 +604,13 @@ button.btn-outline:hover:not(:disabled) {
     transform: translateY(-1px);
 }
 
+button.btn-secondary.is-active,
+button.btn-outline.is-active {
+    background-color: color-mix(in srgb, var(--accent-color) 18%, transparent);
+    border-color: var(--accent-color);
+    color: #ffffff;
+}
+
 button.btn-secondary:disabled,
 button.btn-outline:disabled {
     opacity: 0.35;
@@ -1659,9 +1666,141 @@ input[type="text"].sim-input:focus {
     margin: 0;
 }
 
+/* Painel Dinâmico de QR Code para Compartilhamento em Aula (.onboarding-qr-panel) */
+.onboarding-qr-panel {
+    margin-top: 10px;
+    animation: fadeIn var(--trans-fast) ease-out;
+}
+
+.onboarding-qr-panel.hidden {
+    display: none;
+}
+
+.onboarding-qr-card {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+}
+
+.onboarding-qr-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.onboarding-qr-canvas {
+    background: #ffffff;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    image-rendering: pixelated;
+    display: block;
+}
+
+.onboarding-qr-scan-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.onboarding-qr-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.onboarding-qr-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.onboarding-qr-title .icon-svg {
+    width: 16px;
+    height: 16px;
+}
+
+.onboarding-qr-desc {
+    font-size: 0.80rem;
+    line-height: 1.45;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.onboarding-qr-url-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.onboarding-qr-url-input {
+    flex: 1;
+    min-width: 0;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    padding: 7px 10px;
+    outline: none;
+    user-select: all;
+    transition: border-color var(--trans-fast), color var(--trans-fast);
+}
+
+.onboarding-qr-url-input:focus {
+    border-color: var(--accent-color);
+    color: var(--text-primary);
+}
+
 @media (max-width: 560px) {
     .onboarding-grid {
         grid-template-columns: 1fr;
+    }
+
+    .onboarding-qr-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 14px;
+    }
+
+    .onboarding-qr-title {
+        justify-content: center;
+    }
+
+    .onboarding-qr-url-row {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .onboarding-qr-url-input {
+        width: 100%;
+        text-align: center;
+    }
+
+    .sim-modal-footer {
+        flex-direction: column-reverse;
+        gap: 10px;
+        align-items: stretch;
+    }
+
+    .sim-modal-footer > button {
+        width: 100%;
+        justify-content: center;
     }
 }
 
