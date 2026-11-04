@@ -104,8 +104,9 @@ Sempre que uma simulação demandar um componente inédito que ainda não exista
 Antes de concluir qualquer tarefa de simulação ou UI, verifique os seguintes pontos:
 - [ ] Todos os componentes utilizados na simulação existem e seguem a marcação canônica de `simulacoes/ui_lab.html`.
 - [ ] Se algum componente ou ícone novo foi criado no projeto, ele foi adicionado ao `ui_lab.html` / `ui_lab.js` e ao catálogo do plugin.
-- [ ] O layout possui as duas experiências: Desktop (com modo foco `F`) e Mobile (Bottom Sheet deslizante).
-- [ ] A alça `.sheet-drag-handle` está presente no topo do `.controls-panel`.
+- [ ] O layout possui as duas experiências: Desktop (com modo foco `F`) e Mobile (Painel Flutuante acionado por `#btn-mobile-settings`).
+- [ ] A `<meta name="viewport">` inclui `viewport-fit=cover, interactive-widget=resizes-content` e não há uso de `vh` puro em regras de layout (utiliza `var(--app-height)` e `var(--safe-bottom)`).
+- [ ] O botão de engrenagem `#btn-mobile-settings` está presente no canto inferior direito de `.canvas-area` (ou injetado automaticamente via `initBottomSheet()`).
 - [ ] A navegação de abas utiliza `initTabs()` (ou mapeamento equivalente sem conflitos) e re-renderiza fórmulas KaTeX.
 - [ ] Os controles vitais para Modo Foco possuem `data-focus-control` e são sincronizados via `initFocusMirrorToolbar()`.
 - [ ] Os sliders de parâmetros físicos estão sincronizados bidirecionalmente com os inputs numéricos via `syncDualSlider()`.

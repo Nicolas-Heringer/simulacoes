@@ -29,6 +29,9 @@ Nunca codifique cores hexadecimais soltas para elementos de UI. Utilize os token
 * **Classes de Tom (`Tone Classes`)**:
   Aplicáveis em `.sim-dual-slider`, `.sim-switch`, `.btn-primary`, `.btn-preset`, `.sim-badge` ou containers:
   `.tone-accent`, `.tone-cyan`, `.tone-emerald`, `.tone-purple`, `.tone-pink`, `.tone-rose`, `.tone-orange`.
+* **Viewport Dinâmico e Safe Areas Mobile**:
+  * `--app-height`: `100dvh` (com fallback `100vh` via `@supports` e `visualViewport` via JS). Nunca utilize `vh` puro em alturas de layout.
+  * `--safe-top`, `--safe-bottom`, `--safe-left`, `--safe-right`: Mapeiam `env(safe-area-inset-*, 0px)` (requer `viewport-fit=cover` na meta viewport). Todo elemento ancorado na base deve somar `var(--safe-bottom)`.
 
 ---
 
@@ -65,12 +68,15 @@ Nunca codifique cores hexadecimais soltas para elementos de UI. Utilize os token
 
         <!-- Barra Flutuante Automática do Modo Foco -->
         <div id="focus-context-toolbar" class="canvas-toolbar pos-bottom-center" style="display: none;"></div>
+
+        <!-- Botão de Configurações Mobile (Canto Inferior Direito) -->
+        <button type="button" id="btn-mobile-settings" class="canvas-btn-settings" title="Configurações e Parâmetros" aria-label="Configurações e Parâmetros">
+            <img src="../assets/icons/gear.svg" class="icon-svg" alt="Configurações">
+        </button>
     </div>
 
-    <!-- Painel Lateral / Bottom Sheet -->
+    <!-- Painel Lateral / Card Flutuante no Mobile -->
     <aside class="controls-panel">
-        <div class="sheet-drag-handle"><div class="sheet-handle-bar"></div></div>
-
         <nav class="tab-nav">
             <button class="tab-btn active" data-tab="tab-controls">Controles</button>
             <button class="tab-btn" data-tab="tab-analysis">Análise</button>
@@ -474,8 +480,10 @@ Sempre importe de `./sim-ui.js`:
   Gerencia o Modo Foco no desktop (tecla `F` ou `[`). Dispara o evento customizado `sim-focus-change` em `window` com `{ detail: { collapsed: boolean } }`.
 * **`initFocusMirrorToolbar({ toolbarSelector = '#focus-context-toolbar', panelSelector = '.controls-panel' })`**:
   Espelha automaticamente na barra flutuante todos os controles marcados com `data-focus-control` (`action`, `toggle`, `select`, `slider`, `badge`) quando o painel lateral é recolhido, mantendo sincronização bidirecional.
-* **`initBottomSheet(panelSelector = '.controls-panel', handleSelector = '.sheet-drag-handle')`**:
-  Habilita o arrasto vertical (peek / half / full) em telas `<= 900px`.
+* **`initBottomSheet(panelSelector = '.controls-panel', triggerSelector = '#btn-mobile-settings')`**:
+  Habilita o Painel Flutuante sob demanda em telas `<= 900px` acionado pelo botão de engrenagem no canto inferior direito (fechando ao tocar fora no canvas, no ⚙ ou com `Escape`), e invoca automaticamente `initViewportFix()`. Mantém o nome `initBottomSheet` para compatibilidade total.
+* **`initViewportFix(onUpdate = null)`**:
+  Monitora `window.visualViewport`, detecta abertura do teclado virtual (aplicando `.is-keyboard-open` em `<html>` para ocultar toolbars secundárias), atualiza `--app-height` como fallback em navegadores sem `100dvh` (ou com `.vv-force-height`) e retorna `{ getMetrics(), update() }`.
 * **`initModal(modalTarget, options = {})`**:
   Inicializa um modal `.sim-modal-overlay` (fechando em `.sim-modal-close`, `.sim-modal-close-btn`, clique no backdrop ou `Escape`). Aceita `{ triggerSelector, autoOpenFirstSession, storageKey }` e retorna `{ open, close }`.
 * **`initOnboardingModal(modalTarget = '#modal-onboarding', options = {})`**:

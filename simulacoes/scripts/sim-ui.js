@@ -2023,120 +2023,193 @@ export function initTabs(root = document, onTabChange = null) {
     });
 }
 
+let viewportFixController = null;
+
 /**
- * Inicializa o componente Bottom Sheet para telas móveis e tablets (<= 900px)
- * Gerencia snap points ('peek', 'half', 'expanded'), gestos touch e cliques nas abas.
- * @param {Object|string} [opts] - Opções ou seletor CSS do painel
- * @param {string} [opts.panelSelector='.controls-panel']
- * @param {string} [opts.handleSelector='.sheet-drag-handle']
- * @param {string} [opts.tabNavSelector='.tab-nav']
- * @param {string} [opts.collapseBtnSelector='.btn-collapse-sidebar']
- * @param {string} [opts.defaultState='peek'] - 'peek' | 'half' | 'expanded'
- * @param {Function} [opts.onStateChange] - Callback: (state) => void
- * @returns {Object} Controlador com .setState(state), .getState(), .toggle()
+ * Inicializa o monitoramento enxuto de Viewport Mobile (visualViewport API)
+ * Detecta abertura do teclado virtual (adicionando .is-keyboard-open no <html>),
+ * aplica fallback de --app-height em navegadores sem suporte a 100dvh (ou com .vv-force-height)
+ * e fornece métricas em tempo real de dvh, safe-area-inset e visualViewport.
+ * @param {Function} [onUpdate] - Callback opcional: (metrics) => void
+ * @returns {Object} Controlador com .getMetrics(), .update()
  */
-export function initBottomSheet(opts = {}) {
-    const options = typeof opts === 'string' ? { panelSelector: opts } : (opts || {});
-    const {
-        panelSelector = '.controls-panel',
-        handleSelector = '.sheet-drag-handle',
-        tabNavSelector = '.tab-nav',
-        collapseBtnSelector = '.btn-collapse-sidebar',
-        defaultState = 'peek',
-        onStateChange
-    } = options;
-    const panel = document.querySelector(panelSelector);
-    const handle = document.querySelector(handleSelector);
-    const tabNav = document.querySelector(tabNavSelector);
-    const collapseBtn = document.querySelector(collapseBtnSelector);
-    if (!panel) return null;
+export function initViewportFix(onUpdate = null) {
+    const root = document.documentElement;
+    const vv = window.visualViewport;
+    const supportsDvh = typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('height', '100dvh');
 
-    let currentState = defaultState;
+    const getMetrics = () => {
+        const innerH = window.innerHeight;
+        const innerW = window.innerWidth;
+        const vvH = vv ? Math.round(vv.height) : innerH;
+        const vvW = vv ? Math.round(vv.width) : innerW;
+        const keyboardOpen = Boolean(vv && vv.height < innerH * 0.75);
+        const cs = getComputedStyle(root);
+        const safeBottom = cs.getPropertyValue('--safe-bottom').trim() || '0px';
+        const safeTop = cs.getPropertyValue('--safe-top').trim() || '0px';
+        return {
+            innerWidth: innerW,
+            innerHeight: innerH,
+            visualWidth: vvW,
+            visualHeight: vvH,
+            supportsDvh,
+            keyboardOpen,
+            safeBottom,
+            safeTop
+        };
+    };
 
-    const applyState = (state) => {
-        if (window.innerWidth > 900) return;
-        currentState = state;
-        panel.classList.remove('sheet-peek', 'sheet-half', 'sheet-expanded');
-        panel.classList.add(`sheet-${state}`);
-
-        if (typeof onStateChange === 'function') {
-            onStateChange(state);
+    const update = () => {
+        const metrics = getMetrics();
+        root.classList.toggle('is-keyboard-open', metrics.keyboardOpen);
+        if (!supportsDvh || root.classList.contains('vv-force-height')) {
+            root.style.setProperty('--app-height', `${metrics.visualHeight}px`);
+        }
+        if (typeof onUpdate === 'function') {
+            onUpdate(metrics);
         }
     };
 
-    // Configura estado inicial se estiver em tela mobile
+    if (!viewportFixController) {
+        if (vv) {
+            vv.addEventListener('resize', update);
+            vv.addEventListener('scroll', update);
+        }
+        window.addEventListener('resize', update);
+        window.addEventListener('orientationchange', () => setTimeout(update, 200));
+        viewportFixController = { getMetrics, update };
+    } else if (typeof onUpdate === 'function') {
+        if (vv) vv.addEventListener('resize', () => onUpdate(getMetrics()));
+        window.addEventListener('resize', () => onUpdate(getMetrics()));
+    }
+
+    update();
+    return { getMetrics, update };
+}
+
+/**
+ * Inicializa o Painel Flutuante de Configurações para telas móveis e tablets (<= 900px)
+ * Acionado pelo botão de engrenagem (#btn-mobile-settings / .canvas-btn-settings) no canto inferior direito,
+ * fechando ao clicar novamente na engrenagem, clicar fora (no canvas) ou pressionar Escape.
+ * Mantém a assinatura initBottomSheet para retrocompatibilidade com todas as simulações.
+ * @param {Object|string} [opts] - Opções ou seletor CSS do painel
+ * @param {string} [opts.panelSelector='.controls-panel']
+ * @param {string} [opts.triggerSelector='#btn-mobile-settings']
+ * @param {string} [opts.defaultState='peek'] - 'peek' (fechado) | 'open' / 'half' (aberto)
+ * @param {Function} [opts.onStateChange] - Callback: (state) => void ('peek' quando fechado, 'half' quando aberto)
+ * @returns {Object} Controlador com .setState(state), .getState(), .toggle(), .open(), .close(), .isOpen()
+ */
+export function initBottomSheet(opts = {}) {
+    initViewportFix();
+    const options = typeof opts === 'string' ? { panelSelector: opts } : (opts || {});
+    const {
+        panelSelector = '.controls-panel',
+        triggerSelector = '#btn-mobile-settings',
+        defaultState = 'peek',
+        onStateChange
+    } = options;
+
+    const panel = document.querySelector(panelSelector);
+    if (!panel) return null;
+
+    // Localiza ou injeta automaticamente o botão de engrenagem dentro de .canvas-area
+    let settingsBtn = document.querySelector(triggerSelector) || document.querySelector('.canvas-btn-settings');
+    const canvasArea = document.querySelector('.canvas-area');
+    if (!settingsBtn && canvasArea) {
+        settingsBtn = document.createElement('button');
+        settingsBtn.type = 'button';
+        settingsBtn.id = 'btn-mobile-settings';
+        settingsBtn.className = 'canvas-btn-settings';
+        settingsBtn.title = 'Configurações e Parâmetros';
+        settingsBtn.setAttribute('aria-label', 'Configurações e Parâmetros');
+        settingsBtn.setAttribute('aria-expanded', 'false');
+        settingsBtn.innerHTML = '<img src="../assets/icons/gear.svg" class="icon-svg" alt="Configurações">';
+        canvasArea.appendChild(settingsBtn);
+        setElementIcon(settingsBtn, 'gear');
+    }
+
+    let isOpen = defaultState === 'open' || defaultState === 'half' || defaultState === 'expanded';
+    let currentState = isOpen ? 'half' : 'peek';
+
+    const applyState = (state) => {
+        if (window.innerWidth > 900) return;
+        isOpen = state === 'open' || state === 'half' || state === 'expanded' || state === true;
+        currentState = isOpen ? 'half' : 'peek';
+
+        panel.classList.remove('sheet-peek', 'sheet-half', 'sheet-expanded');
+        panel.classList.toggle('mobile-panel-open', isOpen);
+
+        if (settingsBtn) {
+            settingsBtn.classList.toggle('is-active', isOpen);
+            settingsBtn.setAttribute('aria-expanded', `${isOpen}`);
+        }
+
+        if (isOpen) {
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 60);
+        }
+
+        if (typeof onStateChange === 'function') {
+            onStateChange(currentState);
+        }
+    };
+
+    // Estado inicial em tela mobile (fechado por padrão)
     if (window.innerWidth <= 900) {
         applyState(defaultState);
     }
 
-    // Ao clicar na alça de arraste: alterna entre peek e half
-    if (handle) {
-        handle.addEventListener('click', () => {
+    // Ao clicar no botão de engrenagem: abre ou fecha o painel flutuante
+    if (settingsBtn && !settingsBtn.dataset.mobileSettingsBound) {
+        settingsBtn.dataset.mobileSettingsBound = '1';
+        settingsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             if (window.innerWidth > 900) return;
-            const nextState = currentState === 'peek' ? 'half' : 'peek';
-            applyState(nextState);
+            applyState(isOpen ? 'peek' : 'half');
         });
     }
 
-    // Ao clicar em qualquer aba no mobile: se estiver em peek, abre automaticamente para half
-    if (tabNav) {
-        tabNav.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (window.innerWidth <= 900 && currentState === 'peek') {
-                    applyState('half');
-                }
-            });
+    // Fechar ao clicar/tocar fora do painel (no canvas) quando aberto no mobile
+    if (!panel.dataset.outsideDismissBound) {
+        panel.dataset.outsideDismissBound = '1';
+        document.addEventListener('pointerdown', (e) => {
+            if (window.innerWidth > 900 || !isOpen) return;
+            const target = e.target;
+            if (!target) return;
+            if (
+                panel.contains(target) ||
+                (settingsBtn && settingsBtn.contains(target)) ||
+                target.closest('#canvas-transport-toolbar') ||
+                target.closest('.sim-modal-overlay')
+            ) {
+                return;
+            }
+            applyState('peek');
         });
-    }
 
-    // Botão de recolher/minimizar na barra de abas
-    if (collapseBtn) {
-        collapseBtn.addEventListener('click', (e) => {
-            if (window.innerWidth <= 900) {
-                e.stopPropagation();
-                const nextState = currentState === 'peek' ? 'half' : 'peek';
-                applyState(nextState);
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && window.innerWidth <= 900 && isOpen) {
+                applyState('peek');
             }
         });
-    }
-
-    // Suporte a Touch Swipe Vertical na alça de arraste
-    if (handle) {
-        let touchStartY = 0;
-        handle.addEventListener('touchstart', (e) => {
-            touchStartY = e.touches[0].clientY;
-        }, { passive: true });
-
-        handle.addEventListener('touchend', (e) => {
-            const touchEndY = e.changedTouches[0].clientY;
-            const diffY = touchEndY - touchStartY;
-            // Se arrastar para cima mais de 30px: abre
-            if (diffY < -30) {
-                applyState(currentState === 'peek' ? 'half' : 'expanded');
-            }
-            // Se arrastar para baixo mais de 30px: fecha
-            else if (diffY > 30) {
-                applyState(currentState === 'expanded' ? 'half' : 'peek');
-            }
-        }, { passive: true });
     }
 
     // Listener de redimensionamento de janela
     window.addEventListener('resize', () => {
         if (window.innerWidth > 900) {
-            panel.classList.remove('sheet-peek', 'sheet-half', 'sheet-expanded');
-        } else if (!panel.classList.contains('sheet-peek') && !panel.classList.contains('sheet-half') && !panel.classList.contains('sheet-expanded')) {
-            applyState(currentState);
+            panel.classList.remove('sheet-peek', 'sheet-half', 'sheet-expanded', 'mobile-panel-open');
+            if (settingsBtn) settingsBtn.classList.remove('is-active');
         }
     });
 
     return {
         setState: applyState,
         getState: () => currentState,
-        toggle: () => {
-            const next = currentState === 'peek' ? 'half' : 'peek';
-            applyState(next);
-        }
+        isOpen: () => isOpen,
+        open: () => applyState('half'),
+        close: () => applyState('peek'),
+        toggle: () => applyState(isOpen ? 'peek' : 'half')
     };
 }
 

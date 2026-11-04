@@ -22,6 +22,19 @@
 
     /* Fontes Seguras */
     --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    /* Viewport Dinâmico & Safe Areas Mobile */
+    --app-height: 100vh;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+}
+
+@supports (height: 100dvh) {
+    :root {
+        --app-height: 100dvh;
+    }
 }
 
 * {
@@ -35,7 +48,7 @@ body {
     color: var(--text-primary);
     font-family: var(--font-family);
     display: flex;
-    min-height: 100vh;
+    min-height: var(--app-height);
     overflow-x: hidden;
 }
 
@@ -55,7 +68,7 @@ p {
 .sidebar {
     width: 250px;
     background-color: var(--bg-sidebar);
-    height: 100vh;
+    height: var(--app-height);
     position: fixed;
     left: 0;
     top: 0;
@@ -844,7 +857,7 @@ p {
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        padding: 0 16px;
+        padding: 0 max(16px, var(--safe-right)) 0 max(16px, var(--safe-left));
         border-right: none;
         border-bottom: 1px solid var(--border-color);
         background: rgba(15, 23, 42, 0.94);
@@ -909,7 +922,7 @@ p {
     .main-content {
         margin-left: 0;
         width: 100%;
-        padding: 20px 16px 40px 16px;
+        padding: 20px max(16px, var(--safe-right)) calc(40px + var(--safe-bottom)) max(16px, var(--safe-left));
     }
 
     .section > h2 {

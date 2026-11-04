@@ -4,7 +4,8 @@
 <head>
     <!-- Metadados da Página -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="theme-color" content="#0f172a">
     <title>Modelo de Drude — Condução Elétrica em Redes Cristalinas</title>
 
     <meta name="description"
@@ -85,15 +86,15 @@
                     1.0×
                 </button>
             </div>
+
+            <!-- Botão de Configurações Mobile (Canto Inferior Direito) -->
+            <button type="button" id="btn-mobile-settings" class="canvas-btn-settings" title="Configurações e Parâmetros" aria-label="Configurações e Parâmetros" aria-expanded="false">
+                <img src="../assets/icons/gear.svg" class="icon-svg" alt="Configurações">
+            </button>
         </div>
 
-        <!-- 2. Painel Lateral de Controles (Layout Tripartido / Bottom Sheet no Mobile) -->
+        <!-- 2. Painel Lateral de Controles (Card Flutuante no Mobile) -->
         <aside class="controls-panel">
-
-            <!-- Alça de Arraste para Mobile / Tablet (Bottom Sheet) -->
-            <div class="sheet-drag-handle" id="sheet-drag-handle" title="Deslize ou toque para expandir/recolher">
-                <div class="sheet-drag-pill"></div>
-            </div>
 
             <!-- Topo: Barra de Abas Expansíveis -->
             <div class="tab-nav">

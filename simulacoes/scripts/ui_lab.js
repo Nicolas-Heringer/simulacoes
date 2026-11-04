@@ -21,6 +21,7 @@ import {
     getCanonicalSimulationUrl,
     initSidebarCollapse,
     initTabs,
+    initViewportFix,
     initBottomSheet,
     initFocusMirrorToolbar,
     renderMath,
@@ -54,6 +55,7 @@ export {
     getCanonicalSimulationUrl,
     initSidebarCollapse,
     initTabs,
+    initViewportFix,
     initBottomSheet,
     initFocusMirrorToolbar,
     renderMath,
@@ -72,10 +74,10 @@ export {
 
 // Catálogo Canônico Completo: 73 Ícones Vetoriais SVG em assets/icons/
 const ICONS_LIST = [
-    // Transporte, Navegação & UI (18)
+    // Transporte, Navegação & UI (19)
     'play', 'pause', 'step', 'refresh', 'refresh-cw', 'rotate',
     'camera-reset', 'stopwatch', 'collapse', 'expand', 'focus',
-    'arrow-left', 'chevron-right', 'sliders', 'toggle-switch',
+    'arrow-left', 'chevron-right', 'sliders', 'gear', 'toggle-switch',
     'chart-line', 'book-open', 'book',
     // Auxiliares & Presets (3)
     'sparkles', 'lightbulb', 'dice',
@@ -300,6 +302,27 @@ function setupListeners() {
         tabNavSelector: '.tab-nav',
         collapseBtnSelector: '#btn-collapse-sidebar',
         defaultState: 'peek'
+    });
+
+    // --- DIAGNÓSTICO DE VIEWPORT MOBILE EM TEMPO REAL (ABA 4) ---
+    initViewportFix((metrics) => {
+        const elInner = document.getElementById('vp-diag-inner');
+        const elVisual = document.getElementById('vp-diag-visual');
+        const elDvh = document.getElementById('vp-diag-dvh');
+        const elSafeBottom = document.getElementById('vp-diag-safe-bottom');
+        const elKeyboard = document.getElementById('vp-diag-keyboard');
+
+        if (elInner) elInner.textContent = `${metrics.innerWidth} × ${metrics.innerHeight} px`;
+        if (elVisual) elVisual.textContent = `${metrics.visualWidth} × ${metrics.visualHeight} px`;
+        if (elDvh) {
+            elDvh.textContent = metrics.supportsDvh ? 'Suportado (100dvh ativo)' : 'Fallback JS (--app-height)';
+            elDvh.className = `sim-readout-value ${metrics.supportsDvh ? 'tone-emerald' : 'tone-orange'}`;
+        }
+        if (elSafeBottom) elSafeBottom.textContent = metrics.safeBottom || '0px';
+        if (elKeyboard) {
+            elKeyboard.textContent = metrics.keyboardOpen ? 'Aberto (.is-keyboard-open)' : 'Recolhido';
+            elKeyboard.className = `sim-readout-value ${metrics.keyboardOpen ? 'tone-orange' : 'tone-emerald'}`;
+        }
     });
 
     // --- NAVEGAÇÃO ENTRE ABAS DO LABORATÓRIO (via initTabs) ---

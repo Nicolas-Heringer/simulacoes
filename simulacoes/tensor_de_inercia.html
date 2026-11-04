@@ -3,7 +3,8 @@
 <head>
     <!-- Metadados da Página -->
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="theme-color" content="#0f172a">
     <title>Tensor de Inércia — Visualização Interativa</title>
 
     <meta name="description"
@@ -75,14 +76,15 @@
                     <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                 </button>
             </div>
+
+            <!-- Botão de Configurações Mobile (Canto Inferior Direito) -->
+            <button type="button" id="btn-mobile-settings" class="canvas-btn-settings" title="Configurações e Parâmetros" aria-label="Configurações e Parâmetros" aria-expanded="false">
+                <img src="../assets/icons/gear.svg" class="icon-svg" alt="Configurações">
+            </button>
         </div>
 
-        <!-- Painel de Controles e Teoria -->
+        <!-- Painel de Controles e Teoria (Card Flutuante no Mobile) -->
         <aside class="controls-panel" id="controls-panel">
-            <!-- Alça para Bottom Sheet Mobile -->
-            <div class="sheet-drag-handle">
-                <div class="sheet-drag-pill"></div>
-            </div>
 
             <!-- Navegação por Abas -->
             <nav class="tab-nav">

@@ -16,7 +16,7 @@ Todos os **71 ícones vetoriais** estão disponíveis em `assets/icons/` e adapt
 
 ## Tabela Completa dos 71 Ícones por Categoria
 
-### 1. Transporte, Navegação & Interface (18 ícones)
+### 1. Transporte, Navegação & Interface (19 ícones)
 | Nome do Ícone | Arquivo | Finalidade Sugerida |
 | :--- | :--- | :--- |
 | `play` | `play.svg` | Executar, Iniciar simulação |
@@ -33,6 +33,7 @@ Todos os **71 ícones vetoriais** estão disponíveis em `assets/icons/` e adapt
 | `arrow-left` | `arrow-left.svg` | Voltar ao Hub, Retornar |
 | `chevron-right` | `chevron-right.svg` | Avançar item, Indicador de expansão |
 | `sliders` | `sliders.svg` | Aba de parâmetros e ajustes |
+| `gear` | `gear.svg` | Configurações mobile, Parâmetros sob demanda |
 | `toggle-switch` | `toggle-switch.svg` | Aba de interruptores e opções |
 | `chart-line` | `chart-line.svg` | Telemetria, Gráficos em tempo real |
 | `book-open` | `book-open.svg` | Teoria aberta, Deduções matemáticas |

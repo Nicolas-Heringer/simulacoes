@@ -38,9 +38,11 @@ Este conjunto de regras define os padrões de arquitetura, interface e performan
 
 ---
 
-## 4. Responsividade e Telas Táteis
+## 4. Responsividade, Viewport Dinâmico e Telas Táteis
+* **Meta Viewport Obrigatória**: Toda página HTML DEVE incluir `<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">` e `<meta name="theme-color" content="#0f172a">`.
+* **Proibição de `vh` Puro e Uso Obrigatório de Safe Areas**: É proibido utilizar `100vh` ou unidades `vh` puras em alturas de containers estruturais (`.sim-layout`, `.controls-panel`, modais), pois barras inferiores de navegadores mobile (ex.: Microsoft Edge, Chrome, Safari) ocultam o fundo de `100vh`. Utilize estritamente `var(--app-height)` (`100dvh` com fallback automático) ou porcentagens da área útil, e some obrigatoriamente `var(--safe-bottom)` (`env(safe-area-inset-bottom, 0px)`) na base e `bottom` de todos os elementos ancorados na borda inferior (`#canvas-transport-toolbar`, `.canvas-btn-settings`, `.sim-hud`).
 * **Desktop**: Suporte a Modo Foco com recolhimento lateral via `initSidebarCollapse()` e atalho de teclado `F` (ou `[`).
-* **Mobile / Tablet (<= 900px)**: Suporte obrigatório a Bottom Sheet com alça `.sheet-drag-handle` e `initBottomSheet()`.
+* **Mobile / Tablet (<= 900px)**: Suporte obrigatório a Painel Flutuante sob demanda acionado pelo botão de engrenagem `#btn-mobile-settings` (`.canvas-btn-settings`) no canto inferior direito via `initBottomSheet()` (que inicializa automaticamente `initViewportFix()` para monitorar `visualViewport` e teclado virtual `.is-keyboard-open`, fechando ao tocar no canvas ou no ⚙).
 * **Canvas 3D e 2D**: O container do canvas DEVE possuir a propriedade CSS `touch-action: none;` e utilizar eventos unificados de ponteiro (`pointerdown`, `pointermove`, `pointerup`) para prevenir que gestos de pinça, arraste ou órbita capturem a rolagem nativa do navegador.
 
 ---

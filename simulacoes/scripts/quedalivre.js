@@ -50,22 +50,29 @@ let playControl = null;
 // =============================================================================
 function resizeCanvas() {
     if (!canvas || !canvas.parentElement) return;
+    const prevH = getCanvasLogicalHeight();
     const rect = canvas.parentElement.getBoundingClientRect();
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     const w = Math.floor(rect.width);
     const h = Math.floor(rect.height);
 
-    if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+    if (w > 0 && h > 0 && (canvas.width !== w * dpr || canvas.height !== h * dpr)) {
+        const wasOnGround = prevH > 0 && Math.abs(ball.y - (prevH - state.raio)) <= 2 && Math.abs(ball.vy) < 1;
+
         canvas.width = w * dpr;
         canvas.height = h * dpr;
         canvas.style.width = `${w}px`;
         canvas.style.height = `${h}px`;
-        ctx.scale(dpr, dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-        // Manter a bola dentro dos limites válidos após resize
+        // Manter a bola dentro dos limites válidos (e colada ao solo se já estava em repouso no chão)
         ball.x = Math.max(state.raio, Math.min(w - state.raio, ball.x));
-        ball.y = Math.max(state.raio, Math.min(h - state.raio, ball.y));
+        if (wasOnGround) {
+            ball.y = h - state.raio;
+        } else {
+            ball.y = Math.max(state.raio, Math.min(h - state.raio, ball.y));
+        }
     }
 }
 
@@ -596,6 +603,12 @@ window.addEventListener('DOMContentLoaded', () => {
         resizeCanvas();
         updateVisualScene();
     });
+    if (typeof ResizeObserver !== 'undefined' && canvas?.parentElement) {
+        new ResizeObserver(() => {
+            resizeCanvas();
+            updateVisualScene();
+        }).observe(canvas.parentElement);
+    }
     setupPointerEvents();
     setupUI();
     resetBall();

@@ -81,6 +81,19 @@
     --trans-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     --trans-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     --trans-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Viewport Dinâmico & Safe Areas Mobile (DS 2.0) */
+    --app-height: 100vh;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+}
+
+@supports (height: 100dvh) {
+    :root {
+        --app-height: 100dvh;
+    }
 }
 
 /* =============================================================================
@@ -98,7 +111,7 @@ body {
     background-color: var(--bg-main);
     color: var(--text-primary);
     font-family: var(--font-sans);
-    min-height: 100vh;
+    min-height: var(--app-height);
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
@@ -130,7 +143,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 20px;
+    padding: 10px max(20px, var(--safe-right)) 10px max(20px, var(--safe-left));
     height: var(--header-height, 52px);
     flex-shrink: 0;
     background-color: var(--bg-surface);
@@ -188,8 +201,8 @@ body {
     flex: 1;
     gap: 16px;
     padding: 16px;
-    height: calc(100vh - var(--header-height, 52px));
-    max-height: calc(100vh - var(--header-height, 52px));
+    height: calc(var(--app-height) - var(--header-height, 52px));
+    max-height: calc(var(--app-height) - var(--header-height, 52px));
     overflow: hidden;
     min-height: 0;
     transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1), gap 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1488,7 +1501,7 @@ input[type="text"].sim-input:focus {
     border-radius: var(--radius-xl);
     width: 100%;
     max-width: 680px;
-    max-height: 85vh;
+    max-height: calc(var(--app-height) * 0.85);
     display: flex;
     flex-direction: column;
     box-shadow: var(--shadow-popover);
@@ -2462,49 +2475,32 @@ input[type="text"].sim-input:focus {
 }
 
 /* =============================================================================
-   10. RESPONSIVIDADE (MOBILE & TABLET - NATIVE BOTTOM SHEET)
+   10. RESPONSIVIDADE (MOBILE & TABLET - PAINEL FLUTUANTE DE CONFIGURAÇÕES)
    ============================================================================= */
 
-/* Alça de Arraste do Bottom Sheet (Oculto no Desktop) */
+/* Alça de Arraste (Legado - Oculta Globalmente) */
 .sheet-drag-handle {
+    display: none !important;
+}
+
+/* Botão Flutuante de Configurações Mobile (Oculto no Desktop) */
+.canvas-btn-settings {
     display: none;
-    width: 100%;
-    height: 40px;
-    min-height: 40px;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    touch-action: none;
-    user-select: none;
-    padding: 12px 0;
-}
-
-.sheet-drag-pill {
-    width: 36px;
-    height: 5px;
-    background: rgba(255, 255, 255, 0.35);
-    border-radius: 999px;
-    transition: background 0.2s ease, width 0.2s ease;
-}
-
-.sheet-drag-handle:hover .sheet-drag-pill,
-.sheet-drag-handle:active .sheet-drag-pill {
-    background: var(--accent-color);
-    width: 48px;
 }
 
 @media (max-width: 900px) {
-    /* Layout Mobile com Canvas em Fullscreen relativo e Painel em Bottom Sheet */
+    /* Layout Mobile com Canvas em Fullscreen relativo e Painel Flutuante sob demanda */
     .sim-layout {
         position: relative;
         grid-template-columns: 1fr;
         grid-template-rows: 1fr;
-        height: calc(100vh - var(--header-height, 48px));
-        max-height: none;
+        padding: 0;
+        height: calc(var(--app-height) - var(--header-height, 52px));
+        max-height: calc(var(--app-height) - var(--header-height, 52px));
         overflow: hidden;
     }
 
-    /* O Canvas 3D ocupa 100% da área útil do viewport */
+    /* O Canvas 3D/2D ocupa 100% da área útil do viewport */
     .canvas-area {
         position: absolute;
         inset: 0;
@@ -2522,26 +2518,68 @@ input[type="text"].sim-input:focus {
     /* Barra de ferramentas compacta no topo esquerdo */
     .canvas-top-left-stack {
         top: 10px;
-        left: 10px;
-        right: 10px;
+        left: max(10px, var(--safe-left));
+        right: max(10px, var(--safe-right));
         gap: 6px;
     }
 
     .canvas-toolbar {
         position: absolute;
         top: 10px;
-        left: 10px;
+        left: max(10px, var(--safe-left));
         z-index: 30;
         font-size: 0.74rem;
         padding: 4px 8px;
         gap: 5px;
     }
 
+    /* Barra de transporte na base central (alinhada ao botão de engrenagem) */
     .canvas-toolbar.pos-bottom-center {
         top: auto;
-        bottom: 74px;
+        bottom: calc(12px + var(--safe-bottom));
         left: 50%;
         transform: translateX(-50%);
+        z-index: 65;
+    }
+
+    /* Botão de Configurações (Engrenagem) no Canto Inferior Direito */
+    .canvas-btn-settings {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        bottom: calc(12px + var(--safe-bottom));
+        right: max(12px, var(--safe-right));
+        width: 38px;
+        height: 38px;
+        border-radius: var(--radius-pill);
+        background: rgba(15, 23, 42, 0.88);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        color: var(--text-primary);
+        box-shadow: var(--shadow-md);
+        cursor: pointer;
+        z-index: 65;
+        transition: all var(--trans-fast);
+    }
+
+    .canvas-btn-settings .icon-svg {
+        width: 18px;
+        height: 18px;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .canvas-btn-settings:hover,
+    .canvas-btn-settings.is-active {
+        border-color: var(--accent-btn, var(--accent-color));
+        color: var(--accent-btn, var(--accent-color));
+        background: color-mix(in srgb, var(--accent-btn, var(--accent-color)) 18%, rgba(15, 23, 42, 0.94));
+        box-shadow: 0 0 14px color-mix(in srgb, var(--accent-btn, var(--accent-color)) 35%, transparent);
+    }
+
+    .canvas-btn-settings.is-active .icon-svg {
+        transform: rotate(60deg);
     }
 
     .toolbar-dot,
@@ -2554,7 +2592,7 @@ input[type="text"].sim-input:focus {
     .canvas-top-actions {
         position: absolute;
         top: 10px;
-        right: 10px;
+        right: max(10px, var(--safe-right));
         z-index: 30;
         gap: 4px;
     }
@@ -2586,11 +2624,11 @@ input[type="text"].sim-input:focus {
         display: none !important;
     }
 
-    /* HUD de diagnóstico compacto acima do Bottom Sheet */
+    /* HUD de diagnóstico compacto acima da barra inferior */
     .sim-hud {
         position: absolute;
-        bottom: 74px;
-        left: 10px;
+        bottom: calc(58px + var(--safe-bottom));
+        left: max(10px, var(--safe-left));
         right: auto;
         max-width: calc(100vw - 20px);
         padding: 6px 10px;
@@ -2608,63 +2646,60 @@ input[type="text"].sim-input:focus {
     .sim-popover {
         position: absolute;
         top: 48px;
-        left: 10px;
-        right: 10px;
+        left: max(10px, var(--safe-left));
+        right: max(10px, var(--safe-right));
         width: auto;
         max-width: 360px;
         z-index: 100;
     }
 
-    /* O Painel de Controles vira um Bottom Sheet Ancorado na Base */
+    /* O Painel de Controles vira um Card Inferior Flutuante sob demanda (acima da barra inferior) */
     .controls-panel {
         position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        width: 100%;
-        max-width: 100%;
-        max-height: 88vh;
-        z-index: 50;
-        border-radius: 20px 20px 0 0;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-bottom: none;
-        background: rgba(15, 23, 42, 0.94);
+        bottom: calc(58px + var(--safe-bottom));
+        left: max(10px, var(--safe-left));
+        right: max(10px, var(--safe-right));
+        width: auto;
+        max-width: none;
+        height: 54%;
+        max-height: calc(100% - 70px - var(--safe-bottom));
+        padding: 10px 12px;
+        z-index: 60;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(15, 23, 42, 0.95);
         backdrop-filter: blur(18px);
         -webkit-backdrop-filter: blur(18px);
-        box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.65);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.75);
         display: flex;
         flex-direction: column;
-        transition: height 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
         overflow: hidden;
+        transform: translateY(calc(100% + 74px));
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                    opacity 0.22s ease,
+                    visibility 0.28s;
     }
 
-    /* Exibe a Alça de Arraste */
-    .sheet-drag-handle {
-        display: flex;
+    /* Estado Aberto do Painel Flutuante Mobile */
+    .controls-panel.mobile-panel-open {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
     }
 
-    /* Estado 1: Peek (Recolhido / Mostra apenas as abas) */
-    .controls-panel.sheet-peek {
-        height: 64px;
-    }
-    .controls-panel.sheet-peek .panel-body,
-    .controls-panel.sheet-peek .panel-footer {
+    /* Oculta elementos flutuantes secundários quando o teclado virtual estiver aberto */
+    .is-keyboard-open #canvas-transport-toolbar,
+    .is-keyboard-open .sim-hud {
         display: none !important;
     }
 
-    /* Estado 2: Half (Meia Tela / 50vh) */
-    .controls-panel.sheet-half {
-        height: 52vh;
-    }
-
-    /* Estado 3: Expanded (Tela Cheia / 85vh) */
-    .controls-panel.sheet-expanded {
-        height: 85vh;
-    }
-
-    /* Ajuste da Barra de Abas no Mobile */
+    /* Ajuste da Barra de Abas no Mobile (sem botão redundante de fechar) */
     .tab-nav {
-        padding: 2px 8px 6px 8px;
+        padding: 2px 4px 8px 4px;
         flex-shrink: 0;
         gap: 4px;
         overflow-x: auto;
@@ -2675,9 +2710,9 @@ input[type="text"].sim-input:focus {
         font-size: 0.8rem;
     }
 
-    /* Botão de recolher vira botão de minimizar/expandir no mobile */
+    /* Oculta o botão de recolher sidebar no mobile (fechamento via engrenagem ou toque fora) */
     .btn-collapse-sidebar {
-        display: flex;
+        display: none !important;
     }
 }
 

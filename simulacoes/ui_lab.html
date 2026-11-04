@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="theme-color" content="#0f172a">
     <title>Design System & Laboratório de Interface (UI Lab)</title>
 
     <meta name="description" content="Ambiente controlado para desenvolvimento, teste e padronização de componentes de interface, botões, sliders, switches, HUDs e catálogo de ícones vetoriais.">
@@ -241,15 +242,15 @@
                     1.0×
                 </button>
             </div>
+
+            <!-- Botão de Configurações Mobile (Canto Inferior Direito) -->
+            <button type="button" id="btn-mobile-settings" class="canvas-btn-settings" title="Configurações e Parâmetros" aria-label="Configurações e Parâmetros" aria-expanded="false">
+                <img src="../assets/icons/gear.svg" class="icon-svg" alt="Configurações">
+            </button>
         </div>
 
-        <!-- Painel Lateral de Controles e Demonstração -->
+        <!-- Painel Lateral de Controles e Demonstração (Card Flutuante no Mobile) -->
         <aside class="controls-panel">
-
-            <!-- Alça de Arraste para Mobile / Tablet (Bottom Sheet) -->
-            <div class="sheet-drag-handle" id="sheet-drag-handle" title="Deslize ou toque para expandir/recolher">
-                <div class="sheet-drag-pill"></div>
-            </div>
 
             <!-- Navegação por Abas de Componentes (Design Deslizante Expansível) -->
             <div class="tab-nav">
@@ -578,6 +579,34 @@
                         <div class="sim-readout-row">
                             <span class="sim-readout-label">Estabilidade Numérica:</span>
                             <span class="sim-readout-value tone-emerald">Conservada ($\Delta E < 10^{-6}$)</span>
+                        </div>
+                    </div>
+
+                    <!-- Diagnóstico em Tempo Real de Viewport Mobile (dvh, visualViewport, Safe Area) -->
+                    <div class="sim-readout" id="viewport-diag-readout" style="margin-top: 8px;">
+                        <div class="sim-readout-title">
+                            <img src="../assets/icons/smartphone.svg" class="icon-svg icon-accent" alt="Viewport">
+                            <span>Diagnóstico de Viewport Mobile (initViewportFix)</span>
+                        </div>
+                        <div class="sim-readout-row">
+                            <span class="sim-readout-label">Layout (innerWidth × innerHeight):</span>
+                            <span class="sim-readout-value tone-cyan" id="vp-diag-inner">-- × -- px</span>
+                        </div>
+                        <div class="sim-readout-row">
+                            <span class="sim-readout-label">Visual Viewport (visível real):</span>
+                            <span class="sim-readout-value tone-accent" id="vp-diag-visual">-- × -- px</span>
+                        </div>
+                        <div class="sim-readout-row">
+                            <span class="sim-readout-label">Unidade Dinâmica (100dvh):</span>
+                            <span class="sim-readout-value tone-emerald" id="vp-diag-dvh">Verificando...</span>
+                        </div>
+                        <div class="sim-readout-row">
+                            <span class="sim-readout-label">Safe Area Inferior (--safe-bottom):</span>
+                            <span class="sim-readout-value tone-purple" id="vp-diag-safe-bottom">0px</span>
+                        </div>
+                        <div class="sim-readout-row">
+                            <span class="sim-readout-label">Teclado Virtual:</span>
+                            <span class="sim-readout-value tone-emerald" id="vp-diag-keyboard">Recolhido</span>
                         </div>
                     </div>
                 </div>

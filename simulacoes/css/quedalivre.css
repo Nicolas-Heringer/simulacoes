@@ -10,3 +10,12 @@
     background-color: var(--bg-main, #09090d);
     touch-action: none;
 }
+
+/* No mobile, respeita apenas a safe-area inferior do sistema para que o solo fique visível na base */
+@media (max-width: 900px) {
+    .canvas-area {
+        bottom: var(--safe-bottom, 0px);
+        height: calc(100% - var(--safe-bottom, 0px));
+        min-height: 0;
+    }
+}

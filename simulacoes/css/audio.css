@@ -333,7 +333,7 @@
 
     /* 3. Barra Flutuante de Transporte na Base */
     .canvas-toolbar.pos-bottom-center {
-        bottom: 10px !important;
+        bottom: calc(10px + var(--safe-bottom, 0px)) !important;
         z-index: 30 !important;
     }
 
@@ -346,8 +346,9 @@
         left: auto !important;
         width: 320px !important;
         max-width: 86vw !important;
-        height: 100vh !important;
-        max-height: 100vh !important;
+        height: var(--app-height, 100dvh) !important;
+        max-height: var(--app-height, 100dvh) !important;
+        padding-bottom: calc(12px + var(--safe-bottom, 0px)) !important;
         transform: translateX(100%);
         transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1) !important;
         z-index: 1000 !important;
