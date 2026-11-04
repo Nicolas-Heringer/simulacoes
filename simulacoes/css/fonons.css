@@ -11,3 +11,41 @@
     touch-action: none;
     cursor: crosshair;
 }
+
+/* HUD simplificado: não intercepta o arraste sobre a rede */
+.fonons-hud {
+    pointer-events: none;
+    min-width: 170px;
+}
+
+.fonons-colormap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Escala de domínio: espelha velocidadeParaCor() em fonons.js (hue 220 → 60) */
+.fonons-colormap-bar {
+    height: 8px;
+    border-radius: var(--radius-sm, 4px);
+    background: linear-gradient(90deg,
+        hsl(220, 40%, 35%),
+        hsl(270, 55%, 45%),
+        hsl(320, 70%, 52%),
+        hsl(10, 85%, 58%),
+        hsl(60, 100%, 65%));
+}
+
+.fonons-colormap-ticks {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+}
+
+/* Mobile / Tablet: HUD oculto para não bloquear o canvas tátil */
+@media (max-width: 900px) {
+    .fonons-hud {
+        display: none;
+    }
+}

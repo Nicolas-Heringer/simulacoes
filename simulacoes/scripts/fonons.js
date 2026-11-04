@@ -38,8 +38,20 @@ const state = {
     templateKey: 'uniforme_50',
     raioInfluencia: 80,
     intensidade: 250,
-    amortecimento: 0.005
+    amortecimento: 0.005,
+    perturbacao: 'radial'
 };
+
+/** Atualiza leituras numéricas (gráfico + HUD) a partir do estado físico atual. */
+function updateReadouts() {
+    const kMedia = sistema.calcularEnergiaCineticaMedia();
+    const txt = `${kMedia.toFixed(2)} u`;
+    const plotVal = document.getElementById('plot-valor-k');
+    if (plotVal && plotVal.textContent !== txt) plotVal.textContent = txt;
+    const hudVal = document.getElementById('hud-k');
+    if (hudVal && hudVal.textContent !== txt) hudVal.textContent = txt;
+    return kMedia;
+}
 
 // =============================================================================
 // 2. CLASSES FÍSICAS (PARTÍCULA, MOLA & REDE CRISTALINA)
@@ -222,6 +234,41 @@ class SistemaParticulas {
                     p.vy += f;
                     p.y += f * 0.04;
                 }
+            }
+        }
+    }
+
+    /**
+     * Excita uma frente de onda plana numa faixa estreita próxima à borda esquerda.
+     * @param {number} forcaMax - Amplitude da velocidade inicial
+     * @param {'longitudinal'|'transversal'} polarizacao - Direção do deslocamento
+     */
+    aplicarFrentePlanar(forcaMax, polarizacao = 'longitudinal') {
+        let minX = Infinity;
+        let px = 0;
+        for (let i = 0; i < this.particulas.length; i++) {
+            minX = Math.min(minX, this.particulas[i].origX);
+        }
+        // Espaçamento estimado entre colunas
+        for (let i = 0; i < this.particulas.length; i++) {
+            const d = this.particulas[i].origX - minX;
+            if (d > 0.5 && (px === 0 || d < px)) px = d;
+        }
+        const largura = Math.max(px * 2.5, 30);
+
+        for (let i = 0; i < this.particulas.length; i++) {
+            const p = this.particulas[i];
+            if (p.fixa) continue;
+            const d = p.origX - minX;
+            if (d > largura) continue;
+            const peso = Math.cos((d / largura) * Math.PI / 2);
+            const f = peso * forcaMax;
+            if (polarizacao === 'transversal') {
+                p.vy += f;
+                p.y += f * 0.04;
+            } else {
+                p.vx += f;
+                p.x += f * 0.04;
             }
         }
     }
@@ -447,10 +494,36 @@ function setupUI() {
     });
 
     // Barra flutuante de contexto para Modo Foco
+    const focusToolbar = document.getElementById('focus-context-toolbar');
+    const mqMobile = window.matchMedia('(max-width: 900px)');
+
+    // No mobile não existe .sidebar-collapsed: a barra é forçada visível via .is-visible
+    const syncFocusToolbarVisibility = () => {
+        if (focusToolbar) focusToolbar.classList.toggle('is-visible', mqMobile.matches);
+    };
+
+    // Rótulos compactos: substitui o texto das opções clonadas por data-focus-short
+    const compactFocusToolbar = (ctx, toolbarEl) => {
+        toolbarEl.querySelectorAll('select.focus-mirror-select').forEach((sel) => {
+            const orig = document.querySelector(`.controls-panel select[title="${sel.title}"]`);
+            if (!orig) return;
+            Array.from(sel.options).forEach((opt, i) => {
+                const short = orig.options[i]?.dataset.focusShort;
+                if (short) opt.textContent = short;
+            });
+        });
+        syncFocusToolbarVisibility();
+    };
+
     initFocusMirrorToolbar({
         toolbarTarget: '#focus-context-toolbar',
-        scopeSelector: '.controls-panel'
+        scopeSelector: '.controls-panel',
+        layoutSelector: '.sim-layout',
+        onRebuild: compactFocusToolbar
     });
+
+    syncFocusToolbarVisibility();
+    mqMobile.addEventListener('change', syncFocusToolbarVisibility);
 
     // Modal de Instruções Iniciais / Guia Rápido
     initOnboardingModal('#modal-onboarding', {
@@ -526,10 +599,22 @@ function setupUI() {
         });
     }
 
-    // Botão de Pulso Central Rápido
-    document.getElementById('btn-quick-pulse')?.addEventListener('click', () => {
-        sistema.aplicarPulsoCentral(state.intensidade * 0.8);
+    // Disparo de Perturbação conforme o modo selecionado (radial / planar / transversal)
+    document.getElementById('btn-perturbar')?.addEventListener('click', () => {
+        const forca = state.intensidade * 0.8;
+        if (state.perturbacao === 'planar') {
+            sistema.aplicarFrentePlanar(forca, 'longitudinal');
+        } else if (state.perturbacao === 'transversal') {
+            sistema.aplicarFrentePlanar(forca, 'transversal');
+        } else {
+            sistema.aplicarPulsoCentral(forca);
+        }
+        updateReadouts();
         render();
+    });
+
+    document.getElementById('seletor-perturbacao')?.addEventListener('change', (e) => {
+        state.perturbacao = e.target.value;
     });
 
     // Seletor de Topologias de Rede (Monoatômica e Diatômica)
@@ -597,10 +682,8 @@ function animate(currentTime) {
     // Presentation Pass: redesenho contínuo da cena física
     render();
 
-    // Telemetria em tempo real
-    const kMedia = sistema.calcularEnergiaCineticaMedia();
-    const plotVal = document.getElementById('plot-valor-k');
-    if (plotVal) plotVal.textContent = `${kMedia.toFixed(2)} u`;
+    // Telemetria em tempo real (painel + HUD)
+    const kMedia = updateReadouts();
 
     // Atualização do buffer do gráfico exclusivamente se a simulação estiver em execução
     if (plotEnergia && state.isRunning) {

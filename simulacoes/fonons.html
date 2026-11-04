@@ -55,12 +55,24 @@
                 <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
             </div>
 
-            <!-- Grupo de Ações do Topo Direito -->
+            <!-- HUD simplificado: escala de cores + leitura essencial (oculto no mobile) -->
+            <div class="sim-hud fonons-hud" id="fonons-hud">
+                <div class="hud-item">
+                    <span class="hud-label">$\langle K \rangle$:</span>
+                    <span class="hud-val tone-cyan" id="hud-k">0.00 u</span>
+                </div>
+                <div class="fonons-colormap">
+                    <span class="hud-label">Velocidade atômica $|\vec{v}|$</span>
+                    <div class="fonons-colormap-bar"></div>
+                    <div class="fonons-colormap-ticks">
+                        <span>repouso</span>
+                        <span>alta</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topo Direito: apenas reabertura do painel -->
             <div class="canvas-top-actions">
-                <button id="btn-quick-pulse" class="canvas-btn-floating" title="Excitação Térmica Central">
-                    <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="Pulso">
-                    <span class="btn-label-text">Pulso Central</span>
-                </button>
                 <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
@@ -117,15 +129,31 @@
                     <!-- Configuração da Rede Cristalina -->
                     <div class="control-group">
                         <label for="seletor-de-template" class="slider-label">Topologia e Densidade da Rede:</label>
-                        <select id="seletor-de-template" class="sim-control" data-focus-control="select" data-focus-label="Rede">
-                            <option value="uniforme_10">Monoatômica — Alta Densidade (Espaçamento 10px)</option>
-                            <option value="uniforme_20">Monoatômica — Média Densidade (Espaçamento 20px)</option>
-                            <option value="uniforme_50" selected>Monoatômica — Baixa Densidade (Espaçamento 50px)</option>
-                            <option value="linhas_20">Diatômica em Linhas (Espaçamento 20px)</option>
-                            <option value="linhas_50">Diatômica em Linhas (Espaçamento 50px)</option>
-                            <option value="checkerboard_20">Diatômica Xadrez / Checkerboard (Espaçamento 20px)</option>
-                            <option value="checkerboard_50">Diatômica Xadrez / Checkerboard (Espaçamento 50px)</option>
+                        <select id="seletor-de-template" class="sim-control" data-focus-control="select" data-focus-label="Rede" data-focus-order="1" title="Topologia da rede">
+                            <option value="uniforme_10" data-focus-short="Mono · 10px">Monoatômica — Alta Densidade (Espaçamento 10px)</option>
+                            <option value="uniforme_20" data-focus-short="Mono · 20px">Monoatômica — Média Densidade (Espaçamento 20px)</option>
+                            <option value="uniforme_50" data-focus-short="Mono · 50px" selected>Monoatômica — Baixa Densidade (Espaçamento 50px)</option>
+                            <option value="linhas_20" data-focus-short="Linhas · 20px">Diatômica em Linhas (Espaçamento 20px)</option>
+                            <option value="linhas_50" data-focus-short="Linhas · 50px">Diatômica em Linhas (Espaçamento 50px)</option>
+                            <option value="checkerboard_20" data-focus-short="Xadrez · 20px">Diatômica Xadrez / Checkerboard (Espaçamento 20px)</option>
+                            <option value="checkerboard_50" data-focus-short="Xadrez · 50px">Diatômica Xadrez / Checkerboard (Espaçamento 50px)</option>
                         </select>
+                    </div>
+
+                    <!-- Modo de Perturbação + Disparo -->
+                    <div class="control-group">
+                        <label for="seletor-perturbacao" class="slider-label">Modo de Perturbação:</label>
+                        <select id="seletor-perturbacao" class="sim-control" data-focus-control="select" data-focus-order="2" title="Modo de perturbação">
+                            <option value="radial" data-focus-short="Radial" selected>Pulso Radial (centro)</option>
+                            <option value="planar" data-focus-short="Planar ∥">Frente Planar (onda plana em x)</option>
+                            <option value="transversal" data-focus-short="Transv. ⊥">Cisalhamento Transversal (onda plana em y)</option>
+                        </select>
+                        <button type="button" class="btn-secondary" id="btn-perturbar" style="margin-top: 8px; width: 100%;"
+                                data-focus-control="action" data-focus-label="" data-focus-order="3"
+                                title="Perturbar a rede">
+                            <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="">
+                            <span>Perturbar Rede</span>
+                        </button>
                     </div>
 
                     <!-- Sliders Sincronizados de Interação Física -->
@@ -155,6 +183,7 @@
                                 </div>
                             </div>
                             <input type="range" class="sim-slider" id="slider-intensidade"
+                                   data-focus-control="slider" data-focus-label="F" data-focus-order="4"
                                    min="50" max="600" step="10" value="250">
                         </div>
                     </div>
@@ -274,7 +303,7 @@
                             <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="">
                             <span>4. Energia Mecânica da Rede</span>
                         </div>
-                        <p class="onboarding-card-text">Acompanhe no gráfico em tempo real a energia cinética média $\langle K \rangle$ dos átomos. Use o cursor para excitar vibrações ou dispare o botão <em>Pulso Central</em> para pacotes harmônicos.</p>
+                        <p class="onboarding-card-text">Acompanhe no gráfico em tempo real a energia cinética média $\langle K \rangle$ dos átomos. Use o cursor para excitar vibrações ou escolha um <em>Modo de Perturbação</em> e clique em <em>Perturbar Rede</em>.</p>
                     </div>
                 </div>
 
