@@ -27,21 +27,22 @@ const canvas = document.getElementById('myCanvas');
 const ctx = canvas ? canvas.getContext('2d') : null;
 
 let isRunning = false;     // Inicia estritamente pausada por padrão (idle)
-let simSpeed = 1.0;
 let simTime = 0.0;
 let tipoDeInteracao = 'coulomb';
 let interactionEnabled = true;
 let TEMP_LIMIT = 0.10;
 let c = 2.0;               // Velocidade de propagação da onda
 let attenuation = 0.09;    // Taxa de acoplamento do termostato
-let template = 'none';     // Inicia vazia (sem partículas)
+let template = 'none';     // Inicia vazia (aguardando seleção de preset)
 let epsilonCoulomb = 0.10; // Constante de acoplamento da interação coulombiana retardada
+let cursorMode = 'repel';  // 'repel' (divergente) ou 'attract' (convergente)
+let activePointerPos = null; // Coordenadas do clique/toque ativo para feedback visual
 
 let particles = [];
 let circulos = [];
-const waveCache = new Map();
 
 let playControl = null;
+let focusToolbarCtrl = null;
 let plotEnergia = null;
 let plotTemp = null;
 
@@ -103,7 +104,7 @@ class Particle {
     update(canvasEl, waves, interaction) {
         if (interaction === true) {
             // A força causal só atua no instante exato em que a crista da onda retardada atinge a partícula
-            const shellThickness = Math.max(c * simSpeed * 0.9, 3.5);
+            const shellThickness = Math.max(c * 0.9, 3.5);
 
             waves.forEach(wave => {
                 if (wave.emissorId !== this.id) {
@@ -121,8 +122,8 @@ class Particle {
                         const calcular = calculadoresDeInteracao[tipoDeInteracao];
                         if (calcular) {
                             const { fx, fy } = calcular(this, wave, dx, dy, distance, distSq, force);
-                            this.velocityX += (fx / this.mass) * simSpeed;
-                            this.velocityY += (fy / this.mass) * simSpeed;
+                            this.velocityX += (fx / this.mass);
+                            this.velocityY += (fy / this.mass);
                         }
                     }
                 }
@@ -130,8 +131,8 @@ class Particle {
         }
 
         // Atualiza posição
-        this.x += this.velocityX * simSpeed;
-        this.y += this.velocityY * simSpeed;
+        this.x += this.velocityX;
+        this.y += this.velocityY;
 
         // Colisão elástica com as bordas
         if (this.x - this.radius < 0) {
@@ -151,7 +152,7 @@ class Particle {
         }
 
         // Temporizador de emissão de ondas esféricas
-        this.waveTimer += simSpeed;
+        this.waveTimer += 1;
         if (this.waveTimer >= this.waveInterval) {
             this.waveTimer = 0;
             const novaOnda = new Circulo(this.x, this.y, this.charge, this.id);
@@ -236,12 +237,11 @@ const positionGenerators = {
     doubleMoving: {
         num: () => 2,
         generate(cEl, index) {
-            const dist = cEl.width / 12; // Posicionamento mais próximo para rápida interação e dinâmica orbital
+            const dist = cEl.width / 12;
             const x = cEl.width / 2 + (index === 0 ? -dist : dist);
             const y = cEl.height / 2;
             return { x, y };
         },
-        // Esquerda (index 0) move para baixo (+y), Direita (index 1) move para cima (-y)
         velocity: (index) => ({ x: 0, y: index === 0 ? 1.0 : -1.0 }),
         radius: () => 6,
         color: (type, index) => index === 0 ? '#fb923c' : '#38bdf8',
@@ -302,13 +302,12 @@ const positionGenerators = {
     },
     NaCl: {
         num: () => 64,
-        generate(cEl, index, total) {
+        generate(cEl, index) {
             const cols = 8;
-            const rows = 8;
             const gridX = index % cols;
             const gridY = Math.floor(index / cols);
             const spacingX = cEl.width / (cols + 1);
-            const spacingY = cEl.height / (rows + 1);
+            const spacingY = cEl.height / (cols + 1);
             return {
                 x: (gridX + 1) * spacingX,
                 y: (gridY + 1) * spacingY,
@@ -317,7 +316,7 @@ const positionGenerators = {
         },
         velocity: () => ({ x: (Math.random() - 0.5) * 0.2, y: (Math.random() - 0.5) * 0.2 }),
         radius: (type) => (type === 'Na' ? 3.5 : 6),
-        color: (type) => (type === 'Na' ? '#fb923c' : '#38bdf8'), // Laranja Na+, Ciano Cl-
+        color: (type) => (type === 'Na' ? '#fb923c' : '#38bdf8'),
         mass: (type) => (type === 'Na' ? 2 : 4),
         charge: (type) => (type === 'Na' ? 1 : -1),
     },
@@ -349,59 +348,8 @@ function createParticles(canvasEl, templateName = 'NaCl') {
 }
 
 // =============================================================================
-// 4. CACHE DE SPRITES E CLASSE CIRCULO (PROPAGAÇÃO DE ONDAS)
+// 4. CLASSE CIRCULO (PROPAGAÇÃO DE ONDAS RETARDADAS)
 // =============================================================================
-function criarWaveSpritePorRaio(charge, raio) {
-    const r = Math.max(1, Math.round(raio));
-    const padding = 2;
-    const size = (r + padding) * 2;
-    const offCanvas = document.createElement('canvas');
-    offCanvas.width = size;
-    offCanvas.height = size;
-    const offCtx = offCanvas.getContext('2d');
-
-    const center = size / 2;
-    const innerRadius = Math.max(0, r - r * 0.25);
-    const outerRadius = r + r * 0.25;
-
-    const grad = offCtx.createRadialGradient(
-        center, center, innerRadius,
-        center, center, outerRadius
-    );
-
-    let rgb;
-    if (charge > 0) {
-        rgb = '251, 146, 60';   // Laranja (Na+)
-    } else if (charge < 0) {
-        rgb = '56, 189, 248';   // Ciano (Cl-)
-    } else {
-        rgb = '250, 204, 21';   // Amarelo solar
-    }
-
-    grad.addColorStop(0, `rgba(${rgb}, 0.8)`);
-    grad.addColorStop(1, `rgba(${rgb}, 0)`);
-
-    offCtx.beginPath();
-    offCtx.arc(center, center, r, 0, Math.PI * 2);
-    offCtx.lineWidth = 1;
-    offCtx.strokeStyle = grad;
-    offCtx.stroke();
-    offCtx.closePath();
-
-    return offCanvas;
-}
-
-function getWaveSprite(charge, raio) {
-    const rKey = Math.round(raio);
-    const key = `${charge}_${rKey}`;
-    let sprite = waveCache.get(key);
-    if (!sprite) {
-        sprite = criarWaveSpritePorRaio(charge, rKey);
-        waveCache.set(key, sprite);
-    }
-    return sprite;
-}
-
 class Circulo {
     constructor(x, y, charge = 0, emissorId = null) {
         this.x = x;
@@ -413,7 +361,7 @@ class Circulo {
     }
 
     propagaCampo(speedC) {
-        this.raio += speedC * simSpeed;
+        this.raio += speedC;
         if (canvas && this.raio > Math.hypot(canvas.width, canvas.height)) {
             this.aSerRemovido = true;
         }
@@ -421,7 +369,7 @@ class Circulo {
 
     static intensidade(r) {
         // Lei do inverso do quadrado para a intensidade da frente de onda: I(r) = 1 / (1 + (r / r0)^2)
-        const r0 = 85; // Escala característica de decaimento em pixels
+        const r0 = 85;
         return 1.0 / (1.0 + (r / r0) ** 2);
     }
 
@@ -524,7 +472,6 @@ function reiniciarSistema(novoTemplate = 'none') {
     circulos = [];
     particles = [];
     Particle.nextId = 0;
-    waveCache.clear();
     template = novoTemplate;
     simTime = 0.0;
 
@@ -548,9 +495,8 @@ function reiniciarSistema(novoTemplate = 'none') {
     updateVisualScene();
 }
 
-function stepPhysics(dt = 0.016 * simSpeed) {
-    if (!canvas) return;
-
+function stepPhysics() {
+    // 1. Propaga frentes de onda e remove as que saíram do canvas em O(1) com Swap-and-Pop
     for (let i = circulos.length - 1; i >= 0; i--) {
         const circulo = circulos[i];
         circulo.propagaCampo(c);
@@ -560,10 +506,12 @@ function stepPhysics(dt = 0.016 * simSpeed) {
         }
     }
 
+    // 2. Atualiza partículas e calcula forças de interação causal
     particles.forEach(particle => {
         particle.update(canvas, circulos, interactionEnabled);
     });
 
+    // 3. Termostato de acoplamento com banho térmico
     const temperatura = calcularTemperatura(particles);
     if (temperatura > TEMP_LIMIT) {
         particles.forEach(p => p.reduceSpeed(attenuation));
@@ -622,14 +570,50 @@ function updateVisualScene() {
     ctx.fillStyle = '#070b16';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Renderiza frentes de onda esféricas
+    // Renderiza frentes de onda esféricas (traçado vetorial limpo e exato)
     circulos.forEach(circulo => circulo.mostra(ctx));
 
     // Renderiza partículas
     particles.forEach(particle => particle.draw(ctx));
 
+    // Halo visual de interação radial quando o usuário clica/arrasta no canvas
+    if (activePointerPos) {
+        const isAttract = cursorMode === 'attract';
+        const ringColor = isAttract ? '56, 189, 248' : '250, 204, 21';
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(activePointerPos.x, activePointerPos.y, 120, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${ringColor}, 0.25)`;
+        ctx.lineWidth = 1.2;
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.beginPath();
+        ctx.arc(activePointerPos.x, activePointerPos.y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${ringColor}, 0.85)`;
+        ctx.fill();
+        ctx.restore();
+    }
+
     // Atualiza leituras de telemetria
     updateReadouts();
+}
+
+function syncContextualControlsVisibility() {
+    const groupPotential = document.getElementById('group-potential-select');
+    const groupEpsilon = document.getElementById('group-epsilon');
+
+    if (groupPotential) {
+        groupPotential.hidden = !interactionEnabled;
+    }
+    if (groupEpsilon) {
+        groupEpsilon.hidden = !interactionEnabled || tipoDeInteracao !== 'coulomb';
+    }
+
+    if (focusToolbarCtrl && typeof focusToolbarCtrl.rebuild === 'function') {
+        focusToolbarCtrl.rebuild();
+    }
 }
 
 // =============================================================================
@@ -669,7 +653,7 @@ function setupEventListeners() {
     });
 
     // --- BARRA DE CONTEXTO EM MODO FOCO ---
-    initFocusMirrorToolbar({
+    focusToolbarCtrl = initFocusMirrorToolbar({
         toolbarTarget: '#focus-context-toolbar',
         scopeSelector: '.controls-panel'
     });
@@ -707,8 +691,8 @@ function setupEventListeners() {
                 playControl.setState(0);
             }
             isRunning = false;
-            simTime += 0.016 * simSpeed;
-            stepPhysics(0.016 * simSpeed);
+            simTime += 0.016;
+            stepPhysics();
 
             const energiaTotal = calcularEnergiaCinetica(particles);
             const temperatura = calcularTemperatura(particles);
@@ -725,7 +709,7 @@ function setupEventListeners() {
         });
     }
 
-    // Botões de Reset: Reiniciam o preset ativo para o estado inicial sem perder a seleção
+    // Botão de Reset na Barra Flutuante
     const resetAction = () => {
         if (isRunning && playControl) {
             playControl.setState(0);
@@ -739,22 +723,7 @@ function setupEventListeners() {
     };
 
     const btnReset = document.getElementById('btn-reset-sim');
-    const btnQuickReset = document.getElementById('btn-quick-reset');
     if (btnReset) btnReset.addEventListener('click', resetAction);
-    if (btnQuickReset) btnQuickReset.addEventListener('click', resetAction);
-
-    // Botão Cíclico de Velocidade na Barra Flutuante [0.5, 1.0, 2.0, 5.0]×
-    const speedCycleSteps = [0.5, 1.0, 2.0, 5.0];
-    const btnSpeedCycle = document.getElementById('btn-speed-cycle');
-    if (btnSpeedCycle) {
-        btnSpeedCycle.addEventListener('click', () => {
-            const currentIdx = speedCycleSteps.indexOf(simSpeed);
-            const nextSpeed = speedCycleSteps[(currentIdx + 1) % speedCycleSteps.length];
-            simSpeed = nextSpeed;
-            btnSpeedCycle.dataset.speed = nextSpeed.toFixed(1);
-            btnSpeedCycle.textContent = `${nextSpeed.toFixed(1)}×`;
-        });
-    }
 
     // --- PRESETS DE CONFIGURAÇÃO DE PARTÍCULAS ---
     const presetBtns = document.querySelectorAll('.control-grid-2x2 .btn-preset');
@@ -769,11 +738,23 @@ function setupEventListeners() {
         });
     });
 
+    // --- SELETOR DE MODO DE CLIQUE NO CANVAS (REPULSÃO / ATRAÇÃO RADIAL) ---
+    const cursorModeBtns = document.querySelectorAll('#cursor-mode-selector .segment-btn');
+    cursorModeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            cursorModeBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            cursorMode = btn.dataset.cursorMode || 'repel';
+            updateVisualScene();
+        });
+    });
+
     // --- SWITCH DE INTERAÇÃO & TIPO DE POTENCIAL ---
     const switchInteracao = document.getElementById('switch-interacao');
     if (switchInteracao) {
         switchInteracao.addEventListener('change', (e) => {
             interactionEnabled = e.target.checked;
+            syncContextualControlsVisibility();
             updateVisualScene();
         });
     }
@@ -782,9 +763,12 @@ function setupEventListeners() {
     if (selectPotencial) {
         selectPotencial.addEventListener('change', (e) => {
             tipoDeInteracao = e.target.value;
+            syncContextualControlsVisibility();
             updateVisualScene();
         });
     }
+
+    syncContextualControlsVisibility();
 
     // --- SLIDERS SINCRONIZADOS (DUAL-INPUT) ---
     syncDualSlider('#slider-temp', '#num-temp', (val) => {
@@ -794,7 +778,6 @@ function setupEventListeners() {
 
     syncDualSlider('#slider-wave-speed', '#num-wave-speed', (val) => {
         c = val;
-        waveCache.clear();
         updateVisualScene();
     });
 
@@ -826,7 +809,19 @@ function setupEventListeners() {
         });
 
         window.addEventListener('pointerup', () => {
-            isPointerDown = false;
+            if (isPointerDown) {
+                isPointerDown = false;
+                activePointerPos = null;
+                updateVisualScene();
+            }
+        });
+
+        window.addEventListener('pointercancel', () => {
+            if (isPointerDown) {
+                isPointerDown = false;
+                activePointerPos = null;
+                updateVisualScene();
+            }
         });
 
         canvas.addEventListener('pointermove', (e) => {
@@ -843,12 +838,15 @@ function aplicarImpulsoCursor(e) {
     const mx = (e.clientX - rect.left) * scaleX;
     const my = (e.clientY - rect.top) * scaleY;
 
+    activePointerPos = { x: mx, y: my };
+    const sign = cursorMode === 'attract' ? -1 : 1;
+
     particles.forEach(p => {
         const dx = p.x - mx;
         const dy = p.y - my;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < 120 && dist > 1) {
-            const force = ((120 - dist) / 120) * 0.8;
+            const force = ((120 - dist) / 120) * 0.8 * sign;
             p.velocityX += (dx / dist) * force;
             p.velocityY += (dy / dist) * force;
         }
@@ -869,8 +867,8 @@ function anima() {
 
     // REGRA DE OURO: EDO e plotagem executam estritamente quando rodando
     if (isRunning) {
-        simTime += 0.016 * simSpeed;
-        stepPhysics(0.016 * simSpeed);
+        simTime += 0.016;
+        stepPhysics();
 
         const energiaTotal = calcularEnergiaCinetica(particles);
         const temperatura = calcularTemperatura(particles);
@@ -900,13 +898,17 @@ window.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
     reiniciarSistema('none');
 
-    // Inicializa os Mini-Gráficos de Telemetria
+    // Inicializa os Mini-Gráficos de Telemetria com Escala Dinâmica Automática
     const canvasPlotK = document.getElementById('canvas-plot-k');
     if (canvasPlotK) {
         plotEnergia = new RealtimePlot(canvasPlotK, {
             maxPoints: 80,
             minVal: 0.0,
             maxVal: 20.0,
+            autoScale: true,
+            minSpan: 1.0,
+            maxLabelSelector: '#axis-k-max',
+            minLabelSelector: '#axis-k-min',
             color: '#22c55e'
         });
     }
@@ -917,6 +919,10 @@ window.addEventListener('DOMContentLoaded', async () => {
             maxPoints: 80,
             minVal: 0.0,
             maxVal: 2.0,
+            autoScale: true,
+            minSpan: 0.2,
+            maxLabelSelector: '#axis-t-max',
+            minLabelSelector: '#axis-t-min',
             color: '#facc15'
         });
     }

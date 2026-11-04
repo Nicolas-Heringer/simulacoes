@@ -271,6 +271,14 @@ export class RealtimePlot {
         this.color = options.color || '#38bdf8';
         this.minVal = options.minVal !== undefined ? options.minVal : -1.2;
         this.maxVal = options.maxVal !== undefined ? options.maxVal : 1.2;
+        this.autoScale = Boolean(options.autoScale);
+        this.minSpan = options.minSpan !== undefined ? options.minSpan : 0.1;
+        this.maxLabelEl = options.maxLabelSelector
+            ? (typeof options.maxLabelSelector === 'string' ? document.querySelector(options.maxLabelSelector) : options.maxLabelSelector)
+            : null;
+        this.minLabelEl = options.minLabelSelector
+            ? (typeof options.minLabelSelector === 'string' ? document.querySelector(options.minLabelSelector) : options.minLabelSelector)
+            : null;
 
         this.resize();
         window.addEventListener('resize', () => this.resize());
@@ -315,8 +323,37 @@ export class RealtimePlot {
         ctx.lineTo(width, height / 2);
         ctx.stroke();
 
-        const currentMin = this.minVal;
-        const currentMax = this.maxVal;
+        let currentMin = this.minVal;
+        let currentMax = this.maxVal;
+
+        if (this.autoScale && data.length > 0) {
+            let dMin = Infinity;
+            let dMax = -Infinity;
+            for (let i = 0; i < data.length; i++) {
+                const v = data[i];
+                if (v < dMin) dMin = v;
+                if (v > dMax) dMax = v;
+            }
+            if (this.minVal === 0 && dMin >= 0) {
+                currentMin = 0;
+                currentMax = Math.max(this.minSpan, dMax * 1.18);
+            } else {
+                const span = Math.max(this.minSpan, dMax - dMin);
+                currentMin = dMin - span * 0.12;
+                currentMax = dMax + span * 0.12;
+            }
+        }
+
+        if (this.maxLabelEl) {
+            const prefix = currentMax > 0 ? '+' : '';
+            const decimals = currentMax >= 10 ? 1 : 2;
+            this.maxLabelEl.textContent = `${prefix}${currentMax.toFixed(decimals)}`;
+        }
+        if (this.minLabelEl) {
+            const decimals = Math.abs(currentMin) >= 10 ? 1 : (currentMin === 0 ? 1 : 2);
+            this.minLabelEl.textContent = currentMin.toFixed(decimals);
+        }
+
         const range = (currentMax - currentMin) || 1;
         const getY = (v) => height - ((v - currentMin) / range) * height;
         const stepX = width / (data.length - 1);
@@ -1347,6 +1384,24 @@ export function initFocusMirrorToolbar(options = {}) {
     };
 
     /**
+     * Verifica se um elemento ou um de seus ancestrais está oculto via display:none ou [hidden]
+     * (exceto se o ocultamento vier apenas de uma aba inativa .tab-pane / .tab-content)
+     */
+    const isEffectivelyHidden = (el) => {
+        let cur = el;
+        while (cur && cur !== document.body) {
+            if (cur.classList?.contains('tab-pane') || cur.classList?.contains('tab-content')) {
+                break;
+            }
+            if (cur.hasAttribute?.('hidden') || cur.classList?.contains('hidden') || cur.style?.display === 'none') {
+                return true;
+            }
+            cur = cur.parentElement;
+        }
+        return false;
+    };
+
+    /**
      * Reconstrói a barra de ferramentas flutuante para o contexto especificado
      */
     const rebuild = async (targetContext = null) => {
@@ -1360,8 +1415,9 @@ export function initFocusMirrorToolbar(options = {}) {
         // Coleta todos os elementos declarados com [data-focus-control]
         const allCandidates = Array.from(scope.querySelectorAll('[data-focus-control]'));
         
-        // Filtra os que pertencem ao contexto ativo ou são globais
+        // Filtra os que pertencem ao contexto ativo (ou globais) e não estão ocultos
         const matched = allCandidates.filter(el => {
+            if (isEffectivelyHidden(el)) return false;
             const ctx = getElementContext(el);
             return isContextMatching(ctx, activeCtx);
         });

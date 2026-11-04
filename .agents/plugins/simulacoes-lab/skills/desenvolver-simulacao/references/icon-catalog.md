@@ -103,7 +103,7 @@ Todos os **71 ícones vetoriais** estão disponíveis em `assets/icons/` e adapt
 | `matrix-basis` | `matrix-basis.svg` | Transformações lineares, Vetores da base ($\hat{i}, \hat{j}$) |
 | `chladni-plate` | `chladni-plate.svg` | Modos normais 2D, Placas de Chladni |
 
-### 7. Dinâmica de Partículas & Redes Cristalinas (8 ícones)
+### 7. Dinâmica de Partículas & Redes Cristalinas (10 ícones)
 | Nome do Ícone | Arquivo | Finalidade Sugerida |
 | :--- | :--- | :--- |
 | `particle-single` | `particle-single.svg` | 1 Partícula estática isolada |
@@ -114,3 +114,5 @@ Todos os **71 ícones vetoriais** estão disponíveis em `assets/icons/` e adapt
 | `particle-circle` | `particle-circle.svg` | Anel circular de partículas |
 | `particle-grid` | `particle-grid.svg` | Rede periódica $3\times 3$ / Cristal |
 | `salt-nacl` | `salt-nacl.svg` | Rede iônica ($\text{Na}^+\text{Cl}^-$) |
+| `radial-inward` | `radial-inward.svg` | Campo/Impulso radial convergente (Atração para o centro) |
+| `radial-outward` | `radial-outward.svg` | Campo/Impulso radial divergente (Repulsão a partir do centro) |

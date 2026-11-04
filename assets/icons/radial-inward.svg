@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Ponto de convergência central -->
+  <circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none" class="particle-dot"/>
+  <!-- Seta Noroeste -> Centro -->
+  <line x1="4" y1="4" x2="9" y2="9"/>
+  <polyline points="5.5 9 9 9 9 5.5"/>
+  <!-- Seta Nordeste -> Centro -->
+  <line x1="20" y1="4" x2="15" y2="9"/>
+  <polyline points="15 5.5 15 9 18.5 9"/>
+  <!-- Seta Sudoeste -> Centro -->
+  <line x1="4" y1="20" x2="9" y2="15"/>
+  <polyline points="9 18.5 9 15 5.5 15"/>
+  <!-- Seta Sudeste -> Centro -->
+  <line x1="20" y1="20" x2="15" y2="15"/>
+  <polyline points="18.5 15 15 15 15 18.5"/>
+</svg>

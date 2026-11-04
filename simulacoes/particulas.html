@@ -56,10 +56,6 @@
 
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
-                <button id="btn-quick-reset" class="canvas-btn-floating" title="Reiniciar sistema de partículas">
-                    <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
-                    <span class="btn-label-text">Reiniciar</span>
-                </button>
                 <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Painel de Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
@@ -70,7 +66,7 @@
             <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
                 <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
                         data-state="0" data-text-idle="Executar" data-text-active="Pausar"
-                        data-icon-idle="play" data-icon-active="pause" title="Executar / Pausar">
+                        data-icon-idle="play" data-icon-active="pause" title="Executar / Pausar (Espaço)">
                     <img src="../assets/icons/play.svg" class="icon-svg" alt="Executar">
                     <span class="btn-text">Executar</span>
                 </button>
@@ -79,10 +75,6 @@
                 </button>
                 <button class="toolbar-btn" id="btn-reset-sim" title="Reiniciar Sistema (t = 0)">
                     <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
-                </button>
-                <span class="toolbar-divider"></span>
-                <button class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
-                    1.0×
                 </button>
             </div>
         </div>
@@ -132,32 +124,69 @@
 
                     <div class="sim-divider-label"><span>Seletores de Presets</span></div>
 
-                    <!-- Grade Completa de Presets de Configuração -->
+                    <!-- Grade Completa de Presets de Configuração (com espelhamento de ícones no Modo Foco) -->
                     <div class="control-group">
                         <div class="control-grid-2x2">
-                            <button class="btn-preset" id="preset-single-static" data-template="singleStatic">
+                            <button class="btn-preset" id="preset-single-static" data-template="singleStatic"
+                                    data-focus-control="action" data-focus-label="" data-focus-order="1"
+                                    data-focus-tooltip="1 Partícula (Parada)">
                                 <img src="../assets/icons/particle-single.svg" class="icon-svg" alt="1 Parada"> 1 Partícula (Parada)
                             </button>
-                            <button class="btn-preset" id="preset-single-moving" data-template="singleMoving">
+                            <button class="btn-preset" id="preset-single-moving" data-template="singleMoving"
+                                    data-focus-control="action" data-focus-label="" data-focus-order="2"
+                                    data-focus-tooltip="1 Partícula (Móvel)">
                                 <img src="../assets/icons/particle-moving.svg" class="icon-svg" alt="1 Móvel"> 1 Partícula (Móvel)
                             </button>
-                            <button class="btn-preset" id="preset-double-static" data-template="double">
+                            <button class="btn-preset" id="preset-double-static" data-template="double"
+                                    data-focus-control="action" data-focus-label="" data-focus-order="3"
+                                    data-focus-tooltip="2 Partículas (Paradas)">
                                 <img src="../assets/icons/particles-double.svg" class="icon-svg" alt="2 Paradas"> 2 Partículas (Paradas)
                             </button>
-                            <button class="btn-preset" id="preset-double-moving" data-template="doubleMoving">
+                            <button class="btn-preset" id="preset-double-moving" data-template="doubleMoving"
+                                    data-focus-control="action" data-focus-label="" data-focus-order="4"
+                                    data-focus-tooltip="2 Partículas (Opostas)">
                                 <img src="../assets/icons/particles-opposite.svg" class="icon-svg" alt="2 Opostas"> 2 Partículas (Opostas)
                             </button>
-                            <button class="btn-preset" id="preset-many" data-template="many">
+                            <button class="btn-preset" id="preset-many" data-template="many"
+                                    data-focus-control="action" data-focus-label="" data-focus-order="5"
+                                    data-focus-tooltip="3 Corpos (3)">
                                 <img src="../assets/icons/particles-three.svg" class="icon-svg" alt="3 Corpos"> 3 Corpos (3)
                             </button>
-                            <button class="btn-preset" id="preset-circular" data-template="circular">
+                            <button class="btn-preset" id="preset-circular" data-template="circular"
+                                    data-focus-control="action" data-focus-label="" data-focus-order="6"
+                                    data-focus-tooltip="Anel Circular (12)">
                                 <img src="../assets/icons/particle-circle.svg" class="icon-svg" alt="Anel"> Anel Circular (12)
                             </button>
-                            <button class="btn-preset" id="preset-grid" data-template="grid">
+                            <button class="btn-preset" id="preset-grid" data-template="grid"
+                                    data-focus-control="action" data-focus-label="" data-focus-order="7"
+                                    data-focus-tooltip="Grade 6×6 (36)">
                                 <img src="../assets/icons/particle-grid.svg" class="icon-svg" alt="Grade"> Grade $6\times 6$ (36)
                             </button>
-                            <button class="btn-preset" id="preset-nacl" data-template="NaCl">
+                            <button class="btn-preset" id="preset-nacl" data-template="NaCl"
+                                    data-focus-control="action" data-focus-label="" data-focus-order="8"
+                                    data-focus-divider="after" data-focus-tooltip="Sal NaCl (64)">
                                 <img src="../assets/icons/salt-nacl.svg" class="icon-svg" alt="NaCl"> Sal $\text{NaCl}$ (64)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="sim-divider-label"><span>Interação por Clique / Toque</span></div>
+
+                    <!-- Seletor de Modo de Impulso no Canvas (Repulsão vs. Atração Radial) -->
+                    <div class="control-group">
+                        <label>Ação ao Clicar / Arrastar no Canvas:</label>
+                        <div class="segmented-control" id="cursor-mode-selector">
+                            <button type="button" class="segment-btn active" id="btn-cursor-repel" data-cursor-mode="repel"
+                                    data-focus-control="action" data-focus-label="" data-focus-order="9"
+                                    data-focus-tooltip="Clique no Canvas: Repulsão Radial">
+                                <img src="../assets/icons/radial-outward.svg" class="icon-svg" alt="Repulsão">
+                                <span>Repulsão</span>
+                            </button>
+                            <button type="button" class="segment-btn" id="btn-cursor-attract" data-cursor-mode="attract"
+                                    data-focus-control="action" data-focus-label="" data-focus-order="10"
+                                    data-focus-divider="after" data-focus-tooltip="Clique no Canvas: Atração Radial">
+                                <img src="../assets/icons/radial-inward.svg" class="icon-svg" alt="Atração">
+                                <span>Atração</span>
                             </button>
                         </div>
                     </div>
@@ -175,15 +204,31 @@
                         </div>
                     </div>
 
-                    <!-- Seletor de Tipo de Potencial -->
-                    <div class="control-group">
+                    <!-- Seletor de Tipo de Potencial (Oculto quando interação desligada) -->
+                    <div class="control-group" id="group-potential-select">
                         <label for="selector-de-tipo-de-interacao">Modelo de Força / Potencial:</label>
-                        <select id="selector-de-tipo-de-interacao" class="sim-control" data-focus-control="select">
+                        <select id="selector-de-tipo-de-interacao" class="sim-control" data-focus-control="select" data-focus-order="11">
                             <option value="coulomb" selected>Interação Coulombiana Retardada (Cargas ±q)</option>
                             <option value="lennardJones">Potencial de Lennard-Jones 12-6</option>
                             <option value="atracao">Apenas Atração ($F \propto 1/r$)</option>
                             <option value="repulsao">Apenas Repulsão ($F \propto -1/r$)</option>
                         </select>
+                    </div>
+
+                    <!-- Slider 4: Acoplamento Coulombiano (Exibido apenas quando potencial = coulomb e interação ligada) -->
+                    <div class="control-group" id="group-epsilon">
+                        <div class="slider-container sim-dual-slider">
+                            <div class="slider-header">
+                                <label for="slider-epsilon" class="slider-label">Acoplamento de Cargas ($\varepsilon_C$)</label>
+                                <div class="dual-input-wrapper">
+                                    <input type="number" class="dual-input-number" id="num-epsilon"
+                                           min="0.01" max="1.00" step="0.01" value="0.10">
+                                    <span class="dual-input-unit">a.u.</span>
+                                </div>
+                            </div>
+                            <input type="range" class="sim-slider" id="slider-epsilon"
+                                   min="0.01" max="1.00" step="0.01" value="0.10">
+                        </div>
                     </div>
 
                     <div class="sim-divider-label"><span>Parâmetros Termodinâmicos & de Onda</span></div>
@@ -200,6 +245,7 @@
                                 </div>
                             </div>
                             <input type="range" class="sim-slider" id="slider-temp" data-focus-control="slider"
+                                   data-focus-label="T" data-focus-order="12"
                                    min="0.001" max="10.0" step="0.01" value="0.10">
                         </div>
                     </div>
@@ -236,22 +282,6 @@
                         </div>
                     </div>
 
-                    <!-- Slider 4: Acoplamento Coulombiano -->
-                    <div class="control-group">
-                        <div class="slider-container sim-dual-slider">
-                            <div class="slider-header">
-                                <label for="slider-epsilon" class="slider-label">Acoplamento de Cargas ($\varepsilon_C$)</label>
-                                <div class="dual-input-wrapper">
-                                    <input type="number" class="dual-input-number" id="num-epsilon"
-                                           min="0.01" max="1.00" step="0.01" value="0.10">
-                                    <span class="dual-input-unit">a.u.</span>
-                                </div>
-                            </div>
-                            <input type="range" class="sim-slider" id="slider-epsilon"
-                                   min="0.01" max="1.00" step="0.01" value="0.10">
-                        </div>
-                    </div>
-
                 </div>
 
                 <!-- ABA 2: TELEMETRIA EM TEMPO REAL -->
@@ -280,7 +310,7 @@
                             <div class="plot-canvas-wrapper">
                                 <canvas class="sim-plot-canvas" id="canvas-plot-k"></canvas>
                                 <span class="plot-axis-label plot-axis-max" id="axis-k-max">+20.0</span>
-                                <span class="plot-axis-label plot-axis-min">0.0</span>
+                                <span class="plot-axis-label plot-axis-min" id="axis-k-min">0.0</span>
                             </div>
                         </div>
                     </div>
@@ -301,7 +331,7 @@
                             <div class="plot-canvas-wrapper">
                                 <canvas class="sim-plot-canvas" id="canvas-plot-t"></canvas>
                                 <span class="plot-axis-label plot-axis-max" id="axis-t-max">+2.0</span>
-                                <span class="plot-axis-label plot-axis-min">0.0</span>
+                                <span class="plot-axis-label plot-axis-min" id="axis-t-min">0.0</span>
                             </div>
                         </div>
                     </div>
@@ -559,7 +589,7 @@
     </div>
 
     <!-- Script Principal da Simulação (ES Module com Cache-Buster) -->
-    <script type="module" src="scripts/particulas.js?v=2.0"></script>
+    <script type="module" src="scripts/particulas.js?v=2.4"></script>
 </body>
 
 </html>

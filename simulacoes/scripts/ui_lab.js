@@ -68,7 +68,7 @@ export {
     setFieldState
 };
 
-// Catálogo Canônico Completo: 71 Ícones Vetoriais SVG em assets/icons/
+// Catálogo Canônico Completo: 73 Ícones Vetoriais SVG em assets/icons/
 const ICONS_LIST = [
     // Transporte, Navegação & UI (18)
     'play', 'pause', 'step', 'refresh', 'refresh-cw', 'rotate',
@@ -91,9 +91,10 @@ const ICONS_LIST = [
     'electron-drift', 'orbital',
     // Álgebra Linear, Tensores & Geometria (4)
     'compass', 'axis-3d', 'matrix-basis', 'chladni-plate',
-    // Dinâmica de Partículas & Redes Cristalinas (8)
+    // Dinâmica de Partículas & Redes Cristalinas (10)
     'particle-single', 'particle-moving', 'particles-double', 'particles-opposite',
-    'particles-three', 'particle-circle', 'particle-grid', 'salt-nacl'
+    'particles-three', 'particle-circle', 'particle-grid', 'salt-nacl',
+    'radial-inward', 'radial-outward'
 ];
 
 let clickCount = 0;
