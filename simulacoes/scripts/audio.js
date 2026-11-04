@@ -369,11 +369,11 @@ function drawTimeDomain() {
             ctx.fillText(amp.toFixed(1), ML - (4 * dpr), y);
         });
 
-        // Escala de tempo (ms)
+        // Escala de tempo fisicamente calibrada (ms)
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         const sampleRate = audioCtx ? audioCtx.sampleRate : 44100;
-        const totalTimeMs = (DW / sampleRate) * 1000 * 2;
+        const totalTimeMs = (DW / sampleRate) * 1000;
 
         const timeSteps = isMobile ? 3 : 5;
         for (let s = 0; s <= timeSteps; s++) {
@@ -664,8 +664,8 @@ function startAnimationLoop() {
 // 9. EVENTOS DE INTERFACE E CONTROLADORES
 // =============================================================================
 
-function toggleScale() {
-    isLogScale = !isLogScale;
+function setScale(logScale) {
+    isLogScale = Boolean(logScale);
     const label = isLogScale ? 'Log' : 'Lin';
 
     if (btnToggleScale) btnToggleScale.textContent = `Escala: ${label}`;
@@ -676,6 +676,10 @@ function toggleScale() {
     });
 
     renderFrame();
+}
+
+function toggleScale() {
+    setScale(!isLogScale);
 }
 
 function toggleTrigger() {
@@ -806,8 +810,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     scaleBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const scale = btn.getAttribute('data-scale');
-            isLogScale = (scale === 'log');
-            toggleScale();
+            setScale(scale === 'log');
         });
     });
 
@@ -866,6 +869,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     window.addEventListener('resize', () => {
         applyPipState();
         renderFrame();
+    });
+
+    // Libera a faixa de microfone imediatamente ao navegar para fora da página
+    window.addEventListener('pagehide', () => {
+        stopMicrophone(false);
     });
 
     await inlineSVGImages();

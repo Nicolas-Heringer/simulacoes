@@ -21,7 +21,8 @@
     <!-- Suporte a LaTeX com KaTeX -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -54,7 +55,8 @@
 
             <!-- Ações do Topo Direito (Modo Foco) -->
             <div class="canvas-top-actions">
-                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Alternar Painel de Controles (F)">
+                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar"
+                    title="Alternar Painel de Controles (F)">
                     <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Controles">
                     <span class="btn-label-text">Controles</span>
                 </button>
@@ -63,7 +65,8 @@
             <!-- Palco de Visualização dos Canvases (Desktop: PiP | Mobile: Stack Vertical) -->
             <div class="canvas-stage" id="canvasStage">
                 <!-- Container 1: Osciloscópio (Tempo) -->
-                <div class="audio-canvas-container canvas-pip" id="timeCanvasContainer" title="Clique para alternar o foco para o gráfico principal">
+                <div class="audio-canvas-container canvas-pip" id="timeCanvasContainer"
+                    title="Clique para alternar o foco para o gráfico principal">
                     <div class="canvas-header-bar">
                         <span class="canvas-header-title">
                             <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="">
@@ -72,7 +75,7 @@
                         <div class="canvas-header-controls">
                             <span class="canvas-metric-badge" id="timeRmsBadge">RMS: -∞ dBFS</span>
                             <button type="button" id="btnToggleTrigger" class="badge-btn active"
-                                    title="Ativar/Desativar estabilização do osciloscópio (Zero-Crossing)">
+                                title="Ativar/Desativar estabilização do osciloscópio (Zero-Crossing)">
                                 Trigger
                             </button>
                         </div>
@@ -81,7 +84,8 @@
                 </div>
 
                 <!-- Container 2: Espectro FFT (Frequência) -->
-                <div class="audio-canvas-container canvas-main" id="freqCanvasContainer" title="Clique para alternar o foco para o gráfico principal">
+                <div class="audio-canvas-container canvas-main" id="freqCanvasContainer"
+                    title="Clique para alternar o foco para o gráfico principal">
                     <div class="canvas-header-bar">
                         <span class="canvas-header-title">
                             <img src="../assets/icons/fft-bars.svg" class="icon-svg" alt="">
@@ -90,7 +94,7 @@
                         <div class="canvas-header-controls">
                             <span class="canvas-metric-badge tone-accent" id="freqPeakBadge">Pico: --- Hz</span>
                             <button type="button" id="btnToggleScale" class="badge-btn"
-                                    title="Alternar entre Escala Logarítmica e Linear">
+                                title="Alternar entre Escala Logarítmica e Linear">
                                 Escala: Log
                             </button>
                         </div>
@@ -104,13 +108,9 @@
 
             <!-- Barra Flutuante de Transporte na Base (Padrão DS 2.0) -->
             <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
-                <button class="toolbar-btn btn-toggle tone-accent" id="btn-transport-play"
-                        data-state="0"
-                        data-text-idle="Capturar Áudio"
-                        data-text-active="Congelar Tela"
-                        data-icon-idle="play"
-                        data-icon-active="pause"
-                        title="Capturar Microfone / Congelar Tela (Espaço)">
+                <button class="toolbar-btn btn-toggle tone-accent" id="btn-transport-play" data-state="0"
+                    data-text-idle="Capturar Áudio" data-text-active="Congelar Tela" data-icon-idle="play"
+                    data-icon-active="pause" title="Capturar Microfone / Congelar Tela (Espaço)">
                     <img src="../assets/icons/play.svg" class="icon-svg" alt="Play">
                     <span class="btn-text">Capturar Áudio</span>
                 </button>
@@ -118,7 +118,8 @@
                     <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                 </button>
                 <span class="toolbar-divider"></span>
-                <button class="toolbar-btn" id="btn-transport-trigger" title="Estabilização Zero-Crossing (Osciloscópio)">
+                <button class="toolbar-btn" id="btn-transport-trigger"
+                    title="Estabilização Zero-Crossing (Osciloscópio)">
                     <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="Trigger">
                     <span class="btn-text" id="transportTriggerText">Trigger: On</span>
                 </button>
@@ -168,7 +169,8 @@
                             </div>
                         </div>
                         <p class="tab-subtitle">
-                            Capture o som do ambiente via microfone em tempo real e congele a tela a qualquer instante para inspeção detalhada de harmônicos.
+                            Capture o som do ambiente via microfone em tempo real e congele a tela a qualquer instante
+                            para inspeção detalhada de harmônicos.
                         </p>
                     </div>
 
@@ -184,14 +186,14 @@
                             <div class="slider-header">
                                 <label for="slider-visual-gain" class="slider-label">Ganho Visual (Osciloscópio)</label>
                                 <div class="dual-input-wrapper">
-                                    <input type="number" class="dual-input-number" id="input-visual-gain"
-                                           min="0.5" max="5.0" step="0.25" value="1.00">
+                                    <input type="number" class="dual-input-number" id="input-visual-gain" min="0.5"
+                                        max="5.0" step="0.25" value="1.00">
                                     <span class="dual-input-unit">×</span>
                                 </div>
                             </div>
-                            <input type="range" class="sim-slider" id="slider-visual-gain"
-                                   min="0.5" max="5.0" step="0.25" value="1.00"
-                                   data-focus-control="slider" data-focus-label="Ganho" data-focus-order="2">
+                            <input type="range" class="sim-slider" id="slider-visual-gain" min="0.5" max="5.0"
+                                step="0.25" value="1.00" data-focus-control="slider" data-focus-label="Ganho"
+                                data-focus-order="2">
                         </div>
                     </div>
 
@@ -199,23 +201,27 @@
                     <div class="control-group">
                         <div class="slider-container sim-dual-slider">
                             <div class="slider-header">
-                                <label for="slider-fft-smoothing" class="slider-label">Suavização Espectral (FFT)</label>
+                                <label for="slider-fft-smoothing" class="slider-label">Suavização Espectral
+                                    (FFT)</label>
                                 <div class="dual-input-wrapper">
-                                    <input type="number" class="dual-input-number" id="input-fft-smoothing"
-                                           min="0.00" max="0.95" step="0.05" value="0.75">
+                                    <input type="number" class="dual-input-number" id="input-fft-smoothing" min="0.00"
+                                        max="0.95" step="0.05" value="0.75">
                                     <span class="dual-input-unit">u</span>
                                 </div>
                             </div>
-                            <input type="range" class="sim-slider" id="slider-fft-smoothing"
-                                   min="0.00" max="0.95" step="0.05" value="0.75">
+                            <input type="range" class="sim-slider" id="slider-fft-smoothing" min="0.00" max="0.95"
+                                step="0.05" value="0.75">
                         </div>
                     </div>
 
                     <!-- Chave Segmentada: Escala de Frequência -->
                     <div class="control-group">
-                        <label style="font-size: 0.82rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 6px; display: block;">Escala do Eixo de Frequências:</label>
+                        <label
+                            style="font-size: 0.82rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 6px; display: block;">Escala
+                            do Eixo de Frequências:</label>
                         <div class="segmented-control" id="scaleControl">
-                            <button type="button" class="segment-btn active" data-scale="log">Logarítmica (Oitavas)</button>
+                            <button type="button" class="segment-btn active" data-scale="log">Logarítmica
+                                (Oitavas)</button>
                             <button type="button" class="segment-btn" data-scale="linear">Linear (Hz)</button>
                         </div>
                     </div>
@@ -256,25 +262,33 @@
                 <!-- CONTEÚDO DA ABA 2: TEORIA & FOURIER -->
                 <div id="tab-theory" class="tab-pane" style="display: none;">
                     <div class="theory-card">
-                        <h4><img src="../assets/icons/book-open.svg" class="icon-svg icon-accent" alt=""> Análise de Fourier & Física Acústica</h4>
+                        <h4><img src="../assets/icons/book-open.svg" class="icon-svg icon-accent" alt=""> Análise de
+                            Fourier & Física Acústica</h4>
                         <p>
-                            Qualquer sinal acústico contínuo no tempo $x(t)$ pode ser decomposto em uma superposição de oscilações senoidais harmônicas através da <strong>Transformada de Fourier</strong>:
+                            Qualquer sinal acústico contínuo no tempo $x(t)$ pode ser decomposto em uma superposição de
+                            oscilações senoidais harmônicas através da <strong>Transformada de Fourier</strong>:
                         </p>
                         $$X(f) = \int_{-\infty}^{\infty} x(t) e^{-i 2\pi f t} \, dt$$
                         <p>
-                            No domínio discreto amostrado digitalmente via Web Audio API, o processamento executa o algoritmo da <strong>Fast Fourier Transform (FFT)</strong>:
+                            No domínio discreto amostrado digitalmente via Web Audio API, o processamento executa o
+                            algoritmo da <strong>Fast Fourier Transform (FFT)</strong>:
                         </p>
                         $$X[k] = \sum_{n=0}^{N-1} x[n] \cdot e^{-i \frac{2\pi}{N} k n}$$
                         <p>
-                            O ouvido humano percebe frequências e notas musicais segundo uma escala exponencialmente proporcional (relação de oitavas onde cada duplicação de frequência corresponde a um intervalo musical de $12$ semitons):
+                            O ouvido humano percebe frequências e notas musicais segundo uma escala exponencialmente
+                            proporcional (relação de oitavas onde cada duplicação de frequência corresponde a um
+                            intervalo musical de $12$ semitons):
                         </p>
                         $$f(n) = 440 \cdot 2^{\frac{n - 69}{12}} \text{ Hz}$$
                         <p>
-                            Pelo <strong>Teorema de Nyquist-Shannon</strong>, a máxima frequência mensurável sem aliasing é metade da taxa de amostragem ($f_{\text{Nyquist}} = f_s / 2$).
+                            Pelo <strong>Teorema de Nyquist-Shannon</strong>, a máxima frequência mensurável sem
+                            aliasing é metade da taxa de amostragem ($f_{\text{Nyquist}} = f_s / 2$).
                         </p>
 
-                        <button class="btn-secondary" id="btn-open-theory-modal-inner" style="width: 100%; margin-top: 10px;">
-                            <img src="../assets/icons/book-open.svg" class="icon-svg" alt=""> Ver Dedução Completa em Modal
+                        <button class="btn-secondary" id="btn-open-theory-modal-inner"
+                            style="width: 100%; margin-top: 10px;">
+                            <img src="../assets/icons/book-open.svg" class="icon-svg" alt=""> Ver Dedução Completa em
+                            Modal
                         </button>
                     </div>
                 </div>
@@ -305,36 +319,44 @@
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
-                    Explore a física acústica e o processamento de sinais sonoros em tempo real através da <strong>Web Audio API</strong>, decompondo sinais sonoros em suas componentes espectrais harmônicas.
+                    Explore a física acústica em tempo real decompondo sinais sonoros em suas componentes harmônicas fundamentais.
                 </p>
                 <div class="onboarding-grid">
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="">
-                            <span>1. Domínio do Tempo & Osciloscópio</span>
+                            <img src="../assets/icons/play.svg" class="icon-svg icon-accent" alt="">
+                            <span>1. Permissão de Microfone & Início</span>
                         </div>
-                        <p class="onboarding-card-text">Visualize a forma de onda $x(t)$ em tempo real. O algoritmo de <strong>Trigger por Passagem por Zero</strong> sincroniza a amostragem contínua, estabilizando ondas periódicas na tela para medição precisa de período e amplitude.</p>
+                        <p class="onboarding-card-text">
+                            Clique em <strong>Capturar Áudio</strong> na barra inferior (ou pressione <kbd>Espaço</kbd>) e <strong>permita o acesso ao microfone</strong> no navegador. O processamento é realizado 100% localmente no seu dispositivo, sem qualquer gravação externa.
+                        </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/fft-bars.svg" class="icon-svg" alt="">
-                            <span>2. Domínio da Frequência & FFT</span>
+                            <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="">
+                            <span>2. Osciloscópio & Espectro FFT</span>
                         </div>
-                        <p class="onboarding-card-text">A <strong>Transformada Rápida de Fourier (FFT)</strong> calcula o espectro de magnitudes $|X(f)|$ de 20 Hz a 20 kHz. Identifique a fundamental, séries de sobretons harmônicos e a intensidade sonora em dBFS nas escalas logarítmica ou linear.</p>
+                        <p class="onboarding-card-text">
+                            O <strong>Osciloscópio</strong> estabiliza a forma de onda periódica no tempo via <em>zero-crossing</em>. O <strong>Espectro</strong> exibe a intensidade de cada harmônico de 20 Hz a 20 kHz e detecta a nota musical correspondente.
+                        </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
                             <img src="../assets/icons/rotate.svg" class="icon-svg" alt="">
-                            <span>3. Alternância e Visualização Dupla</span>
+                            <span>3. Visualização PiP & Mobile</span>
                         </div>
-                        <p class="onboarding-card-text">No Desktop, clique em qualquer ponto da miniatura Picture-in-Picture (PiP) para alternar o foco do gráfico principal. No celular, os dois gráficos se alinham verticalmente para máxima clareza simultânea.</p>
+                        <p class="onboarding-card-text">
+                            No Desktop, <strong>clique em qualquer ponto da miniatura</strong> para alternar qual gráfico fica em destaque. No smartphone, os dois gráficos ficam alinhados verticalmente para visualização simultânea.
+                        </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/play.svg" class="icon-svg" alt="">
-                            <span>4. Congelamento (Freeze) & Inspeção</span>
+                            <img src="../assets/icons/pause.svg" class="icon-svg" alt="">
+                            <span>4. Congelar (Freeze) & Inspecionar</span>
                         </div>
-                        <p class="onboarding-card-text">Acione <strong>Congelar Tela</strong> na barra de transporte ou com a tecla <kbd>Espaço</kbd> para pausar a amostragem e inspecionar livremente frequências e intensidades passando o cursor ou tocando no gráfico.</p>
+                        <p class="onboarding-card-text">
+                            Clique em <strong>Congelar Tela</strong> para pausar a onda e o espectro a qualquer momento. Passe o cursor ou deslize o dedo sobre a FFT para ler as frequências e potências exatas com o retículo.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -361,7 +383,9 @@
                 <div class="theory-section">
                     <h4>1. Série e Transformada de Fourier</h4>
                     <p>
-                        Jean-Baptiste Joseph Fourier demonstrou que qualquer função periódica contínua pode ser expressa como a soma infinita ponderada de harmônicos senoidais puros. A Transformada Contínua de Fourier generaliza esse resultado para sinais aperiódicos no tempo:
+                        Jean-Baptiste Joseph Fourier demonstrou que qualquer função periódica contínua pode ser expressa
+                        como a soma infinita ponderada de harmônicos senoidais puros. A Transformada Contínua de Fourier
+                        generaliza esse resultado para sinais aperiódicos no tempo:
                     </p>
                     $$X(f) = \int_{-\infty}^{\infty} x(t) e^{-i 2\pi f t} \, dt$$
                 </div>
@@ -369,15 +393,20 @@
                 <div class="theory-callout">
                     <strong>💡 Interpretação Física dos Domínios:</strong>
                     <ul>
-                        <li><strong>Domínio do Tempo $x(t)$</strong>: Mostra a variação instantânea da pressão do ar sobre a membrana do microfone em milissegundos.</li>
-                        <li><strong>Domínio da Frequência $|X(f)|$</strong>: Mostra a distribuição de energia espectral para cada frequência em Hertz (timbre sonoro).</li>
+                        <li><strong>Domínio do Tempo $x(t)$</strong>: Mostra a variação instantânea da pressão do ar
+                            sobre a membrana do microfone em milissegundos.</li>
+                        <li><strong>Domínio da Frequência $|X(f)|$</strong>: Mostra a distribuição de energia espectral
+                            para cada frequência em Hertz (timbre sonoro).</li>
                     </ul>
                 </div>
 
                 <div class="theory-section">
                     <h4>2. Processamento Digital e FFT (Fast Fourier Transform)</h4>
                     <p>
-                        Computadores operam sobre amostras discretas a intervalos regulares $T_s = 1/f_s$. A Transformada Discreta de Fourier (DFT) requer ordem de complexidade $\mathcal{O}(N^2)$. O algoritmo FFT (Cooley-Tukey) reduz essa complexidade para $\mathcal{O}(N \log N)$, permitindo processamento em tempo real a 60 FPS:
+                        Computadores operam sobre amostras discretas a intervalos regulares $T_s = 1/f_s$. A
+                        Transformada Discreta de Fourier (DFT) requer ordem de complexidade $\mathcal{O}(N^2)$. O
+                        algoritmo FFT (Cooley-Tukey) reduz essa complexidade para $\mathcal{O}(N \log N)$, permitindo
+                        processamento em tempo real a 60 FPS:
                     </p>
                     $$X[k] = \sum_{n=0}^{N-1} x[n] \cdot e^{-i \frac{2\pi}{N} k n}, \quad k = 0, 1, \dots, N-1$$
                 </div>
@@ -385,7 +414,9 @@
                 <div class="theory-section">
                     <h4>3. Percepção Auditiva e Escala Musical Temperada</h4>
                     <p>
-                        A cóclea humana responde proporcionalmente à razão entre frequências em vez de diferenças lineares. Na afinação igual contemporânea (temperamento igual, $A_4 = 440\text{ Hz}$), a razão de frequência de cada semitom é $2^{1/12} \approx 1{,}05946$:
+                        A cóclea humana responde proporcionalmente à razão entre frequências em vez de diferenças
+                        lineares. Na afinação igual contemporânea (temperamento igual, $A_4 = 440\text{ Hz}$), a razão
+                        de frequência de cada semitom é $2^{1/12} \approx 1{,}05946$:
                     </p>
                     $$f(n) = 440 \cdot 2^{\frac{n - 69}{12}} \text{ Hz}$$
                 </div>
