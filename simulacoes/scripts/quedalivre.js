@@ -15,6 +15,7 @@ import {
 // 1. CONFIGURAÇÕES & ESTADO FÍSICO
 // =============================================================================
 const PIXELS_POR_METRO = 50; // Escala: 50px = 1 metro
+const ESCALA_FORCA_PX_POR_N = 5.0; // Escala unificada: 5px por Newton para forças físicas (P e F_arrasto)
 
 const state = {
     isRunning: false,    // Inicia estritamente pausada (idle)
@@ -229,41 +230,52 @@ function render() {
     ctx.fillStyle = `rgba(0, 0, 0, ${shadowAlpha.toFixed(2)})`;
     ctx.fill();
 
-    // 4. Vetores Físicos (Peso e Arrasto)
+    // 4. Vetores Físicos (Peso, Arrasto e Velocidade)
+    // O comprimento total é sempre Raio (r) + Módulo do vetor, garantindo visibilidade além da borda da esfera
     const velM_x = ball.vx / PIXELS_POR_METRO;
     const velM_y = ball.vy / PIXELS_POR_METRO;
 
-    // Força Peso: P = m * g (orientada para baixo)
+    // Força Peso: P = m * g (orientada verticalmente para baixo, θ = π/2)
     const Fg = state.massa * state.g;
     if (Fg > 0.01) {
-        const fgArrowLen = Math.min(140, Math.max(16, Fg * 3.5));
-        drawArrow(ctx, ball.x, ball.y, ball.x, ball.y + fgArrowLen, '#f43f5e', 2.5, 8);
+        const fgMag = Math.min(150, Fg * ESCALA_FORCA_PX_POR_N);
+        const totalFgLen = r + fgMag;
+        const targetY = ball.y + totalFgLen;
+        const fgHeadLen = Math.min(8, Math.max(4, fgMag * 0.6));
+        drawArrow(ctx, ball.x, ball.y, ball.x, targetY, '#f43f5e', 2.5, fgHeadLen);
         ctx.fillStyle = '#f43f5e';
         ctx.font = '11px monospace';
-        ctx.fillText(`P = ${Fg.toFixed(1)} N`, ball.x + 8, ball.y + fgArrowLen);
+        ctx.fillText(`P = ${Fg.toFixed(1)} N`, ball.x + 8, targetY);
     }
 
-    // Força de Arrasto: F_drag = -b * v (sentido oposto ao vetor velocidade)
+    // Força de Arrasto: F_arrasto = -b * v (sentido oposto ao vetor velocidade, calculado via atan2)
+    // Compartilha rigorosamente a mesma constante ESCALA_FORCA_PX_POR_N do peso para fidelidade na 1ª Lei de Newton
     const Fdrag_x = -state.arrasto * velM_x;
     const Fdrag_y = -state.arrasto * velM_y;
     const FdragMag = Math.hypot(Fdrag_x, Fdrag_y);
 
     if (FdragMag > 0.005) {
-        const dragScale = 220;
-        const dragArrowX = ball.x + Math.max(-140, Math.min(140, Fdrag_x * dragScale));
-        const dragArrowY = ball.y + Math.max(-140, Math.min(140, Fdrag_y * dragScale));
-        drawArrow(ctx, ball.x, ball.y, dragArrowX, dragArrowY, '#38bdf8', 2.5, 8);
+        const angleDrag = Math.atan2(Fdrag_y, Fdrag_x);
+        const dragMag = Math.min(150, FdragMag * ESCALA_FORCA_PX_POR_N);
+        const totalDragLen = r + dragMag;
+        const dragArrowX = ball.x + totalDragLen * Math.cos(angleDrag);
+        const dragArrowY = ball.y + totalDragLen * Math.sin(angleDrag);
+        const dragHeadLen = Math.min(8, Math.max(4, dragMag * 0.6));
+        drawArrow(ctx, ball.x, ball.y, dragArrowX, dragArrowY, '#38bdf8', 2.5, dragHeadLen);
         ctx.fillStyle = '#38bdf8';
         ctx.font = '11px monospace';
-        ctx.fillText(`F_drag = ${FdragMag.toFixed(2)} N`, dragArrowX + 6, dragArrowY - 4);
+        ctx.fillText(`F_arrasto = ${FdragMag.toFixed(2)} N`, dragArrowX + 6, dragArrowY - 4);
     }
 
-    // Vetor Velocidade (Amarelo)
-    if (!ball.isDragging && (Math.abs(ball.vx) > 5 || Math.abs(ball.vy) > 5)) {
-        const arrowScale = 0.15;
-        const arrowX = ball.x + ball.vx * arrowScale;
-        const arrowY = ball.y + ball.vy * arrowScale;
-        drawArrow(ctx, ball.x, ball.y, arrowX, arrowY, 'rgba(250, 204, 21, 0.85)', 2, 7);
+    // Vetor Velocidade (Amarelo, na direção e sentido do vetor velocidade instantâneo)
+    const speed = Math.hypot(ball.vx, ball.vy);
+    if (!ball.isDragging && speed > 5) {
+        const angleVel = Math.atan2(ball.vy, ball.vx);
+        const velMag = Math.min(140, Math.max(14, speed * 0.15));
+        const totalVelLen = r + velMag;
+        const velArrowX = ball.x + totalVelLen * Math.cos(angleVel);
+        const velArrowY = ball.y + totalVelLen * Math.sin(angleVel);
+        drawArrow(ctx, ball.x, ball.y, velArrowX, velArrowY, 'rgba(250, 204, 21, 0.85)', 2, 7);
     }
 
     // 5. Renderização da Esfera Física com Efeito Glow
