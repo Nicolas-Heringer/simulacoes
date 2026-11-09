@@ -2,28 +2,28 @@
 // Autor: Nicolas Heringer
 // Projeto: Simulações Matemáticas & Científicas (Design System 2.0)
 // Arquivo: matrizes-modo-construir.js
-// Modo 2: Construir a Matriz a partir de Imagens de Vetores e Acompanhar v -> v'
+// Modo 2: Construir a Matriz em 3 Etapas (Espaço Inicial -> Transformado -> Evolução)
 // =============================================================================
 
 import { setFieldState, eigen2x2, renderMath } from '../sim-ui.js';
 
 export class ModoConstruir {
     /**
-     * @param {PlanoCartesiano} planoLeft - Canvas do espaço inicial
-     * @param {PlanoCartesiano} planoRight - Canvas do espaço transformado
+     * @param {PlanoCartesiano} plano - Canvas único em tela cheia
      * @param {Object} domElements
      */
-    constructor(planoLeft, planoRight, domElements) {
-        this.planoLeft = planoLeft;
-        this.planoRight = planoRight;
+    constructor(plano, domElements) {
+        this.plano = plano;
         this.dom = domElements;
 
-        // Base inicial
-        this.baseInitLocked = true; // Começa fixo na base canônica
+        // Etapa ativa: 1 (Espaço Inicial), 2 (Espaço Transformado), 3 (Evolução)
+        this.currentStep = 1;
+
+        // Base inicial (Etapa 1)
         this.iHatInit = { x: 1, y: 0 };
         this.jHatInit = { x: 0, y: 1 };
 
-        // Base transformada
+        // Base transformada (Etapa 2)
         this.iHatPrime = { x: 1.5, y: 0.5 };
         this.jHatPrime = { x: -0.5, y: 1.5 };
 
@@ -31,8 +31,7 @@ export class ModoConstruir {
         this.vVec = { x: 2, y: 1 };
 
         // Matriz M calculada
-        this.M = { a: 1, b: 0, c: 0, d: 1 };
-        this.invInit = null;
+        this.M = { a: 1.5, b: -0.5, c: 0.5, d: 1.5 };
 
         this.isAnimating = false;
         this.animRequestId = null;
@@ -41,127 +40,179 @@ export class ModoConstruir {
     }
 
     initDOM() {
-        const { chkLockInitialBase, chkShowEigenModo2, chkShowGhostModo2, btnAnimateModo2, btnResetModo2 } = this.dom;
+        const {
+            chkShowDisplacement,
+            chkShowEigenModo2,
+            chkShowGhostModo2,
+            btnAnimateModo2,
+            btnResetModo2,
+            stepperToolbar
+        } = this.dom;
 
-        if (chkLockInitialBase) {
-            chkLockInitialBase.addEventListener('change', (e) => {
-                this.baseInitLocked = e.target.checked;
-                this.updatePlanoLeftDragPermissions();
-                const hintEl = document.getElementById('construir-base-lock-hint');
-                if (hintEl) {
-                    hintEl.textContent = this.baseInitLocked
-                        ? 'Base inicial travada na canônica (1,0) e (0,1)'
-                        : 'Base inicial liberada! Arraste i e j livremente à esquerda';
+        // Botões das 3 Etapas no Topo do Canvas
+        if (stepperToolbar) {
+            stepperToolbar.querySelectorAll('.stepper-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const step = parseInt(btn.dataset.step, 10);
+                    this.setStep(step, step === 3);
+                });
+            });
+        }
+
+        if (chkShowDisplacement) {
+            chkShowDisplacement.addEventListener('change', (e) => {
+                if (this.currentStep === 3) {
+                    this.plano.showDisplacementVec = e.target.checked;
+                    this.plano.draw();
                 }
             });
         }
 
         if (chkShowEigenModo2) {
             chkShowEigenModo2.addEventListener('change', (e) => {
-                const show = e.target.checked;
-                this.planoLeft.showEigen = show;
-                this.planoRight.showEigen = show;
-                this.planoLeft.draw();
-                this.planoRight.draw();
+                if (this.currentStep >= 2) {
+                    this.plano.showEigen = e.target.checked;
+                    this.plano.draw();
+                }
             });
         }
 
         if (chkShowGhostModo2) {
             chkShowGhostModo2.addEventListener('change', (e) => {
-                this.planoRight.showGhostGrid = e.target.checked;
-                this.planoRight.draw();
+                const checked = e.target.checked;
+                this.plano.showGhostGrid = checked;
+                if (this.currentStep >= 2) {
+                    this.plano.showGhostBasisVectors = checked;
+                }
+                this.plano.draw();
             });
         }
 
+        // Botão Animar v -> v' na barra inferior
         if (btnAnimateModo2) {
             btnAnimateModo2.addEventListener('click', () => {
-                this.triggerAnimation();
+                if (this.currentStep !== 3) {
+                    this.setStep(3, true);
+                } else {
+                    this.triggerAnimation();
+                }
             });
         }
 
+        // Botão Resetar na barra inferior
         if (btnResetModo2) {
             btnResetModo2.addEventListener('click', () => {
-                this.resetDefaults();
+                if (this.currentStep === 3) {
+                    // Na Etapa 3, retorna suavemente o espaço visual para o Espaço Inicial
+                    // preservando o operador M configurado (igual à Aba 1)
+                    this.animateBackToInitialSpace();
+                } else {
+                    this.resetDefaults();
+                }
             });
         }
 
-        // Conectar callbacks do canvas esquerdo (inicial)
-        this.planoLeft.onTargetChange = (target, pos) => {
-            if (target.type === 'i') {
-                this.iHatInit = { ...pos };
-            } else if (target.type === 'j') {
-                this.jHatInit = { ...pos };
-            } else if (target.type === 'v') {
-                this.vVec = { ...pos };
-            }
-            this.recalculateTransformation();
-        };
-
-        // Conectar callbacks do canvas direito (transformado)
-        this.planoRight.onTargetChange = (target, pos) => {
-            if (target.type === 'i') {
-                this.iHatPrime = { ...pos };
+        // Callback de arraste no canvas único
+        this.handleTargetChange = (target, pos) => {
+            if (this.currentStep === 1) {
+                if (target.type === 'i') {
+                    this.iHatInit = { ...pos };
+                } else if (target.type === 'j') {
+                    this.jHatInit = { ...pos };
+                } else if (target.type === 'v') {
+                    this.vVec = { ...pos };
+                }
                 this.recalculateTransformation();
-            } else if (target.type === 'j') {
-                this.jHatPrime = { ...pos };
-                this.recalculateTransformation();
-            } else if (target.type === 'vPrime') {
-                // Ao arrastar v', recalculamos v se M for inversível
-                const detM = this.M.a * this.M.d - this.M.b * this.M.c;
-                if (Math.abs(detM) > 1e-4) {
-                    const invDet = 1 / detM;
-                    const vx = invDet * (this.M.d * pos.x - this.M.b * pos.y);
-                    const vy = invDet * (-this.M.c * pos.x + this.M.a * pos.y);
-                    this.vVec = { x: Math.round(vx * 20) / 20, y: Math.round(vy * 20) / 20 };
-                    this.planoLeft.vVec = { ...this.vVec };
-                    this.planoLeft.draw();
+            } else {
+                if (target.type === 'i') {
+                    this.iHatPrime = { ...pos };
                     this.recalculateTransformation();
+                } else if (target.type === 'j') {
+                    this.jHatPrime = { ...pos };
+                    this.recalculateTransformation();
+                } else if (target.type === 'vPrime') {
+                    const detM = this.M.a * this.M.d - this.M.b * this.M.c;
+                    if (Math.abs(detM) > 1e-4) {
+                        const invDet = 1 / detM;
+                        const vx = invDet * (this.M.d * pos.x - this.M.b * pos.y);
+                        const vy = invDet * (-this.M.c * pos.x + this.M.a * pos.y);
+                        this.vVec = { x: Math.round(vx * 20) / 20, y: Math.round(vy * 20) / 20 };
+                        this.recalculateTransformation();
+                    }
                 }
             }
         };
     }
 
-    toggleBaseLock() {
-        this.baseInitLocked = !this.baseInitLocked;
-        if (this.dom.chkLockInitialBase) {
-            this.dom.chkLockInitialBase.checked = this.baseInitLocked;
+    /**
+     * Alterna entre as 3 etapas do Modo Construir
+     * @param {number} step - 1, 2 ou 3
+     * @param {boolean} [autoAnimate=false]
+     */
+    setStep(step, autoAnimate = false) {
+        if (this.isAnimating) {
+            cancelAnimationFrame(this.animRequestId);
+            this.isAnimating = false;
         }
-        this.updatePlanoLeftDragPermissions();
-        const hintEl = document.getElementById('construir-base-lock-hint');
-        if (hintEl) {
-            hintEl.textContent = this.baseInitLocked
-                ? 'Base inicial travada na canônica (1,0) e (0,1)'
-                : 'Base inicial liberada! Arraste i e j livremente à esquerda';
-        }
-        const focusLockText = document.getElementById('focus-lock-text');
-        if (focusLockText) {
-            focusLockText.textContent = this.baseInitLocked ? 'Base Canônica (Fixa)' : 'Base Livre (Móvel)';
-        }
-        this.planoLeft.draw();
-        return this.baseInitLocked;
-    }
 
-    updatePlanoLeftDragPermissions() {
-        this.planoLeft.allowedDragTargets = this.baseInitLocked ? ['v'] : ['i', 'j', 'v'];
-    }
+        this.currentStep = step;
 
-    resetDefaults() {
-        this.iHatInit = { x: 1, y: 0 };
-        this.jHatInit = { x: 0, y: 1 };
-        this.iHatPrime = { x: 1.5, y: 0.5 };
-        this.jHatPrime = { x: -0.5, y: 1.5 };
-        this.vVec = { x: 2, y: 1 };
-
-        if (this.dom.chkLockInitialBase) {
-            this.dom.chkLockInitialBase.checked = true;
-            this.baseInitLocked = true;
+        if (this.dom.stepperToolbar) {
+            this.dom.stepperToolbar.querySelectorAll('.stepper-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.step, 10) === step);
+            });
         }
-        this.updatePlanoLeftDragPermissions();
+
+        const showGhost = this.dom.chkShowGhostModo2 ? this.dom.chkShowGhostModo2.checked : true;
+        const showEigen = this.dom.chkShowEigenModo2 ? this.dom.chkShowEigenModo2.checked : true;
+        const showDisp = this.dom.chkShowDisplacement ? this.dom.chkShowDisplacement.checked : true;
+
+        this.plano.showGhostGrid = showGhost;
+
+        if (step === 1) {
+            // Etapa 1: Espaço Inicial (ajusta î, ĵ e v)
+            this.plano.basisLabels = { i: 'î', j: 'ĵ' };
+            this.plano.iHatStart = { x: 1, y: 0 };
+            this.plano.jHatStart = { x: 0, y: 1 };
+            this.plano.showGhostBasisVectors = false;
+            this.plano.showVVec = true;
+            this.plano.showVPrime = false;
+            this.plano.showDisplacementVec = false;
+            this.plano.showEigen = false;
+            this.plano.allowedDragTargets = ['i', 'j', 'v'];
+        } else if (step === 2) {
+            // Etapa 2: Espaço Transformado (ajusta î' e ĵ' com referência fantasma de î, ĵ)
+            this.plano.basisLabels = { i: "î'", j: "ĵ'" };
+            this.plano.iHatStart = { ...this.iHatInit };
+            this.plano.jHatStart = { ...this.jHatInit };
+            this.plano.showGhostBasisVectors = showGhost;
+            this.plano.showVVec = false;
+            this.plano.showVPrime = true;
+            this.plano.showDisplacementVec = false;
+            this.plano.showEigen = showEigen;
+            this.plano.allowedDragTargets = ['i', 'j', 'vPrime'];
+        } else {
+            // Etapa 3: Evolução & Animação (v -> v' e deslocamento d = v' - v)
+            this.plano.basisLabels = { i: "î'", j: "ĵ'" };
+            this.plano.iHatStart = { ...this.iHatInit };
+            this.plano.jHatStart = { ...this.jHatInit };
+            this.plano.showGhostBasisVectors = showGhost;
+            this.plano.showVVec = false;
+            this.plano.showVPrime = true;
+            this.plano.showDisplacementVec = showDisp;
+            this.plano.showEigen = showEigen;
+            this.plano.allowedDragTargets = ['i', 'j', 'vPrime'];
+        }
+
         this.recalculateTransformation();
+
+        if (autoAnimate && step === 3) {
+            this.triggerAnimation();
+        }
     }
 
     /**
-     * Calcula M = [i' j'] * [i j]^(-1)
+     * Calcula M = [i' j'] * [i j]^(-1) e atualiza o plano de acordo com a etapa ativa
      */
     recalculateTransformation() {
         const B = {
@@ -175,12 +226,14 @@ export class ModoConstruir {
         const baseBox = document.getElementById('construir-system-card');
 
         if (Math.abs(detB) < 1e-4) {
-            // Base inicial degenerada
-            setFieldState(baseBox, 'invalid', 'Base inicial degenerada: î e ĵ são colineares (det = 0). O operador não pode ser determinado.');
+            setFieldState(baseBox, 'invalid', 'Base inicial degenerada: î e ĵ são colineares (det = 0).');
+            this.plano.iHat = { ...this.iHatInit };
+            this.plano.jHat = { ...this.jHatInit };
+            this.plano.vVec = { ...this.vVec };
+            this.plano.draw();
             return;
         }
 
-        // Inversa da base inicial
         const invDetB = 1 / detB;
         const invB = {
             a: B.d * invDetB,
@@ -189,7 +242,6 @@ export class ModoConstruir {
             d: B.a * invDetB
         };
 
-        // Matriz das imagens [i' j']
         const P = {
             a: this.iHatPrime.x,
             b: this.jHatPrime.x,
@@ -206,7 +258,7 @@ export class ModoConstruir {
         };
         this.M = M;
 
-        // V' = M * v
+        // v' = M * v
         const vPrime = {
             x: M.a * this.vVec.x + M.b * this.vVec.y,
             y: M.c * this.vVec.x + M.d * this.vVec.y
@@ -218,64 +270,50 @@ export class ModoConstruir {
             y: vPrime.y - this.vVec.y
         };
 
-        // Análise espectral
         const analysis = eigen2x2(M);
+        this.plano.currentAnalysis = analysis;
+        this.plano.vVec = { ...this.vVec };
+        this.plano.vPrime = { ...vPrime };
 
-        // Atualizar estado visual no Plano Left
-        this.planoLeft.iHat = { ...this.iHatInit };
-        this.planoLeft.jHat = { ...this.jHatInit };
-        this.planoLeft.vVec = { ...this.vVec };
-        this.planoLeft.currentAnalysis = analysis;
+        if (this.currentStep === 1) {
+            this.plano.iHat = { ...this.iHatInit };
+            this.plano.jHat = { ...this.jHatInit };
+        } else {
+            this.plano.iHatStart = { ...this.iHatInit };
+            this.plano.jHatStart = { ...this.jHatInit };
+            this.plano.iHat = { ...this.iHatPrime };
+            this.plano.jHat = { ...this.jHatPrime };
+        }
 
-        // Atualizar estado visual no Plano Right
-        this.planoRight.iHat = { ...this.iHatPrime };
-        this.planoRight.jHat = { ...this.jHatPrime };
-        this.planoRight.iHatStart = { ...this.iHatInit };
-        this.planoRight.jHatStart = { ...this.jHatInit };
-        this.planoRight.vVec = { ...this.vVec };
-        this.planoRight.vPrime = { ...vPrime };
-        this.planoRight.currentAnalysis = analysis;
-
-        this.updateMathDisplays(M, detB, vPrime, dVec, analysis);
+        this.updateMathDisplays(M, vPrime, dVec);
 
         const detM = M.a * M.d - M.b * M.c;
         if (Math.abs(detM) < 1e-4) {
-            setFieldState(baseBox, 'warning', 'Operador singular: colapsa o espaço (área = 0). O vetor v\' não pode ser invertido.');
+            setFieldState(baseBox, 'warning', 'Operador singular: colapsa o espaço (det = 0).');
         } else {
-            setFieldState(baseBox, 'valid', 'Sistema linear determinado! Operador M construído com sucesso.');
+            setFieldState(baseBox, null, '');
         }
 
-        this.planoLeft.draw();
-        this.planoRight.draw();
+        this.plano.draw();
     }
 
-    updateMathDisplays(M, detB, vPrime, dVec, analysis) {
-        const katexSystem = document.getElementById('construir-katex-system');
+    updateMathDisplays(M, vPrime, dVec) {
         const katexMatrix = document.getElementById('construir-katex-matrix');
-        const katexEvolution = document.getElementById('construir-katex-evolution');
-
         if (katexMatrix) {
             const mTex = `M = \\begin{bmatrix} ${M.a.toFixed(2)} & ${M.b.toFixed(2)} \\\\ ${M.c.toFixed(2)} & ${M.d.toFixed(2)} \\end{bmatrix}`;
             renderMath(katexMatrix, mTex, { displayMode: true });
         }
 
-        if (katexSystem) {
-            const sysTex = `M\\hat{i} = \\begin{bmatrix} ${this.iHatPrime.x.toFixed(1)} \\\\ ${this.iHatPrime.y.toFixed(1)} \\end{bmatrix}, \\quad M\\hat{j} = \\begin{bmatrix} ${this.jHatPrime.x.toFixed(1)} \\\\ ${this.jHatPrime.y.toFixed(1)} \\end{bmatrix}`;
-            renderMath(katexSystem, sysTex, { displayMode: false });
-        }
-
-        if (katexEvolution) {
-            const evTex = `\\vec{v}' = \\begin{bmatrix} ${vPrime.x.toFixed(2)} \\\\ ${vPrime.y.toFixed(2)} \\end{bmatrix}, \\quad \\vec{d} = \\vec{v}' - \\vec{v} = \\begin{bmatrix} ${dVec.x.toFixed(2)} \\\\ ${dVec.y.toFixed(2)} \\end{bmatrix}`;
-            renderMath(katexEvolution, evTex, { displayMode: false });
-        }
-
-        // Leitura do vetor v' e vetor deslocamento d
+        const valVx = document.getElementById('construir-val-vx');
+        const valVy = document.getElementById('construir-val-vy');
         const valVxP = document.getElementById('construir-val-vpx');
         const valVyP = document.getElementById('construir-val-vpy');
         const valDx = document.getElementById('construir-val-dx');
         const valDy = document.getElementById('construir-val-dy');
         const valDetM = document.getElementById('construir-val-detm');
 
+        if (valVx) valVx.textContent = this.vVec.x.toFixed(2);
+        if (valVy) valVy.textContent = this.vVec.y.toFixed(2);
         if (valVxP) valVxP.textContent = vPrime.x.toFixed(2);
         if (valVyP) valVyP.textContent = vPrime.y.toFixed(2);
         if (valDx) valDx.textContent = dVec.x.toFixed(2);
@@ -284,21 +322,15 @@ export class ModoConstruir {
             const det = M.a * M.d - M.b * M.c;
             valDetM.textContent = det.toFixed(2);
         }
-
-        const focusBadge2 = document.getElementById('focus-badge-det2');
-        if (focusBadge2) {
-            const det = M.a * M.d - M.b * M.c;
-            focusBadge2.textContent = `det(M) = ${det.toFixed(2)}`;
-        }
     }
 
     /**
-     * Animação que leva suavemente a base e v da posição inicial à posição final
+     * Anima suavemente do Espaço Inicial (iHatInit, jHatInit, v) até o Espaço Transformado (iHatPrime, jHatPrime, v')
      */
     triggerAnimation() {
         if (this.isAnimating) cancelAnimationFrame(this.animRequestId);
 
-        const duration = 1200;
+        const duration = 900;
         const startTime = performance.now();
         this.isAnimating = true;
 
@@ -306,31 +338,31 @@ export class ModoConstruir {
         const startJ = { ...this.jHatInit };
         const targetI = { ...this.iHatPrime };
         const targetJ = { ...this.jHatPrime };
-        const vInit = { ...this.vVec };
+        const vStart = { ...this.vVec };
+        const vEnd = {
+            x: this.M.a * this.vVec.x + this.M.b * this.vVec.y,
+            y: this.M.c * this.vVec.x + this.M.d * this.vVec.y
+        };
 
         const animateStep = (now) => {
             const elapsed = now - startTime;
             const p = Math.min(elapsed / duration, 1.0);
             const eased = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
 
-            const currI = {
+            this.plano.iHat = {
                 x: startI.x + (targetI.x - startI.x) * eased,
                 y: startI.y + (targetI.y - startI.y) * eased
             };
-            const currJ = {
+            this.plano.jHat = {
                 x: startJ.x + (targetJ.x - startJ.x) * eased,
                 y: startJ.y + (targetJ.y - startJ.y) * eased
             };
+            this.plano.vPrime = {
+                x: vStart.x + (vEnd.x - vStart.x) * eased,
+                y: vStart.y + (vEnd.y - vStart.y) * eased
+            };
 
-            this.planoRight.iHat = currI;
-            this.planoRight.jHat = currJ;
-
-            // v viaja continuamente
-            const curVx = vInit.x * currI.x + vInit.y * currJ.x;
-            const curVy = vInit.x * currI.y + vInit.y * currJ.y;
-            this.planoRight.vPrime = { x: curVx, y: curVy };
-
-            this.planoRight.draw();
+            this.plano.draw();
 
             if (p < 1.0) {
                 this.animRequestId = requestAnimationFrame(animateStep);
@@ -343,40 +375,132 @@ export class ModoConstruir {
         this.animRequestId = requestAnimationFrame(animateStep);
     }
 
+    /**
+     * Na Etapa 3, retorna suavemente a visualização para o Espaço Inicial sem apagar M
+     */
+    animateBackToInitialSpace() {
+        if (this.isAnimating) cancelAnimationFrame(this.animRequestId);
+
+        const duration = 700;
+        const startTime = performance.now();
+        this.isAnimating = true;
+
+        const startI = { ...this.plano.iHat };
+        const startJ = { ...this.plano.jHat };
+        const startVp = this.plano.vPrime ? { ...this.plano.vPrime } : { ...this.vVec };
+
+        const destI = { ...this.iHatInit };
+        const destJ = { ...this.jHatInit };
+        const destVp = { ...this.vVec };
+
+        const step = (now) => {
+            const p = Math.min((now - startTime) / duration, 1.0);
+            const eased = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+
+            this.plano.iHat = {
+                x: startI.x + (destI.x - startI.x) * eased,
+                y: startI.y + (destI.y - startI.y) * eased
+            };
+            this.plano.jHat = {
+                x: startJ.x + (destJ.x - startJ.x) * eased,
+                y: startJ.y + (destJ.y - startJ.y) * eased
+            };
+            this.plano.vPrime = {
+                x: startVp.x + (destVp.x - startVp.x) * eased,
+                y: startVp.y + (destVp.y - startVp.y) * eased
+            };
+
+            this.plano.draw();
+
+            if (p < 1.0) {
+                this.animRequestId = requestAnimationFrame(step);
+            } else {
+                this.isAnimating = false;
+            }
+        };
+
+        this.animRequestId = requestAnimationFrame(step);
+    }
+
+    /**
+     * Restaura suavemente os vetores para as posições padrão
+     */
+    resetDefaults() {
+        if (this.isAnimating) cancelAnimationFrame(this.animRequestId);
+
+        const start = {
+            ix: this.iHatInit.x, iy: this.iHatInit.y,
+            jx: this.jHatInit.x, jy: this.jHatInit.y,
+            ipx: this.iHatPrime.x, ipy: this.iHatPrime.y,
+            jpx: this.jHatPrime.x, jpy: this.jHatPrime.y,
+            vx: this.vVec.x, vy: this.vVec.y
+        };
+        const dest = {
+            ix: 1, iy: 0,
+            jx: 0, jy: 1,
+            ipx: 1.5, ipy: 0.5,
+            jpx: -0.5, jpy: 1.5,
+            vx: 2, vy: 1
+        };
+
+        const duration = 650;
+        const startTime = performance.now();
+        this.isAnimating = true;
+
+        const step = (now) => {
+            const p = Math.min((now - startTime) / duration, 1.0);
+            const eased = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+
+            this.iHatInit = {
+                x: start.ix + (dest.ix - start.ix) * eased,
+                y: start.iy + (dest.iy - start.iy) * eased
+            };
+            this.jHatInit = {
+                x: start.jx + (dest.jx - start.jx) * eased,
+                y: start.jy + (dest.jy - start.jy) * eased
+            };
+            this.iHatPrime = {
+                x: start.ipx + (dest.ipx - start.ipx) * eased,
+                y: start.ipy + (dest.ipy - start.ipy) * eased
+            };
+            this.jHatPrime = {
+                x: start.jpx + (dest.jpx - start.jpx) * eased,
+                y: start.jpy + (dest.jpy - start.jpy) * eased
+            };
+            this.vVec = {
+                x: start.vx + (dest.vx - start.vx) * eased,
+                y: start.vy + (dest.vy - start.vy) * eased
+            };
+
+            this.recalculateTransformation();
+
+            if (p < 1.0) {
+                this.animRequestId = requestAnimationFrame(step);
+            } else {
+                this.isAnimating = false;
+            }
+        };
+
+        this.animRequestId = requestAnimationFrame(step);
+    }
+
     mount() {
-        // Configuração do plano inicial (esquerdo)
-        this.planoLeft.showVVec = true;
-        this.planoLeft.showVPrime = false;
-        this.planoLeft.showDisplacementVec = false;
-        this.planoLeft.showGhostGrid = false;
-        this.planoLeft.showDetArea = false;
-        this.planoLeft.showUnitCircle = false;
-        this.planoLeft.showBasisVectors = true;
-        this.updatePlanoLeftDragPermissions();
+        this.plano.showGrid = false;
+        this.plano.showTransformedGrid = true;
+        this.plano.showDetArea = false;
+        this.plano.showUnitCircle = false;
+        this.plano.showBasisVectors = true;
+        this.plano.customTransformFn = null;
+        this.plano.probeSurfaces = [];
+        this.plano.onTargetChange = this.handleTargetChange;
 
-        // Configuração do plano transformado (direito)
-        this.planoRight.showVVec = true;
-        this.planoRight.showVPrime = true;
-        this.planoRight.showDisplacementVec = true;
-        this.planoRight.showGhostGrid = this.dom.chkShowGhostModo2 ? this.dom.chkShowGhostModo2.checked : true;
-        this.planoRight.showDetArea = false;
-        this.planoRight.showUnitCircle = false;
-        this.planoRight.showBasisVectors = true;
-        this.planoRight.allowedDragTargets = ['i', 'j', 'vPrime'];
-
-        const showEigen = this.dom.chkShowEigenModo2 ? this.dom.chkShowEigenModo2.checked : true;
-        this.planoLeft.showEigen = showEigen;
-        this.planoRight.showEigen = showEigen;
-
-        const focusLockText = document.getElementById('focus-lock-text');
-        if (focusLockText) {
-            focusLockText.textContent = this.baseInitLocked ? 'Base Canônica (Fixa)' : 'Base Livre (Móvel)';
-        }
-
-        this.recalculateTransformation();
+        this.setStep(this.currentStep, false);
     }
 
     unmount() {
         if (this.isAnimating) cancelAnimationFrame(this.animRequestId);
+        this.plano.showGhostBasisVectors = false;
+        this.plano.basisLabels = { i: "î'", j: "ĵ'" };
+        this.plano.onTargetChange = null;
     }
 }

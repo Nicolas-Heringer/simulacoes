@@ -2932,16 +2932,34 @@ button:disabled,
 }
 
 .matrix-bracket {
-    font-family: 'Times New Roman', serif;
-    font-size: 4.8rem;
-    font-weight: 300;
-    color: var(--text-secondary);
-    line-height: 0.82;
+    font-size: 0;
+    color: transparent;
     user-select: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transform: scaleY(1.25) scaleX(0.85);
+    width: 10px;
+    align-self: stretch;
+    margin: 2px 0;
+    border-color: var(--text-secondary);
+    border-style: solid;
+    border-width: 0;
+    opacity: 0.85;
+    flex-shrink: 0;
+    transition: border-color var(--trans-fast), opacity var(--trans-fast);
+}
+
+.matrix-bracket.left {
+    border-left-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+.matrix-bracket.right {
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
 }
 
 .matrix-grid {

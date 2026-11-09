@@ -26,17 +26,19 @@ export class PlanoCartesiano {
         this.showVPrime = false;
         this.showDisplacementVec = false; // Vetor d = v' - v
 
-        // Base inicial de referência (usada para ghost grid no Modo 2)
+        // Base inicial de referência (usada para ghost grid e referência no Modo 2)
         this.iHatStart = { x: 1, y: 0 };
         this.jHatStart = { x: 0, y: 1 };
+        this.showGhostBasisVectors = false;
+        this.basisLabels = { i: "î'", j: "ĵ'" };
 
         // Autovetores e análise espectral
         this.showEigen = false;
         this.currentAnalysis = null;
 
         // Configurações de exibição de grade
-        this.showGrid = true;
-        this.showGhostGrid = true; // Grade fantasma original (canônica)
+        this.showGrid = false;
+        this.showGhostGrid = true; // Grade fantasma de referência (inicial/canônica)
         this.showDetArea = false;
         this.showUnitCircle = false;
         this.showTransformedGrid = true;
@@ -274,24 +276,60 @@ export class PlanoCartesiano {
     }
 
     /**
+     * Retorna o raio máximo visível da tela a partir da origem em unidades matemáticas,
+     * além dos limites dinâmicos para que retas e grades sempre preencham a tela inteira.
+     */
+    getDynamicGridBounds(uVec, vVec) {
+        const w = this.width || 800;
+        const h = this.height || 600;
+        const maxDistPx = Math.hypot(
+            Math.max(this.origin.x, w - this.origin.x),
+            Math.max(this.origin.y, h - this.origin.y)
+        );
+        const maxViewRadius = (maxDistPx / (this.scale || 50)) + 2;
+
+        const normU = Math.hypot(uVec.x, uVec.y);
+        const normV = Math.hypot(vVec.x, vVec.y);
+        const det = Math.abs(uVec.x * vVec.y - uVec.y * vVec.x);
+
+        // Perp spacing: distância entre linhas paralelas a V é det / ||V||
+        // distância entre linhas paralelas a U é det / ||U||
+        const spacingAlongU = det > 1e-3 && normV > 1e-4 ? (det / normV) : Math.max(normU, 0.25);
+        const spacingAlongV = det > 1e-3 && normU > 1e-4 ? (det / normU) : Math.max(normV, 0.25);
+
+        // Quantidade de linhas paralelas necessárias para cobrir o viewport (teto de 65 para evitar saturação visual)
+        const countU = Math.min(65, Math.max(this.gridRange, Math.ceil(maxViewRadius / Math.max(spacingAlongU, 0.12)) + 2));
+        const countV = Math.min(65, Math.max(this.gridRange, Math.ceil(maxViewRadius / Math.max(spacingAlongV, 0.12)) + 2));
+
+        // Alcance de extensão de cada reta (garante que cada reta atravesse toda a tela como reta infinita)
+        const reachU = normU > 1e-4 ? Math.max(countU, Math.ceil((maxViewRadius * 2.5) / normU) + countV) : this.gridRange;
+        const reachV = normV > 1e-4 ? Math.max(countV, Math.ceil((maxViewRadius * 2.5) / normV) + countU) : this.gridRange;
+
+        return { maxViewRadius, countU, countV, reachU, reachV };
+    }
+
+    /**
      * Grade neutra do plano cartesiano
      */
     drawBackgroundGrid() {
         const ctx = this.ctx;
+        const { maxViewRadius } = this.getDynamicGridBounds({ x: 1, y: 0 }, { x: 0, y: 1 });
+        const R = Math.ceil(maxViewRadius);
+
         ctx.save();
         ctx.lineWidth = 1;
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
 
-        for (let i = -this.gridRange; i <= this.gridRange; i++) {
-            const p1 = this.toScreen(i, -this.gridRange);
-            const p2 = this.toScreen(i, this.gridRange);
+        for (let i = -R; i <= R; i++) {
+            const p1 = this.toScreen(i, -R);
+            const p2 = this.toScreen(i, R);
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
             ctx.stroke();
 
-            const p3 = this.toScreen(-this.gridRange, i);
-            const p4 = this.toScreen(this.gridRange, i);
+            const p3 = this.toScreen(-R, i);
+            const p4 = this.toScreen(R, i);
             ctx.beginPath();
             ctx.moveTo(p3.x, p3.y);
             ctx.lineTo(p4.x, p4.y);
@@ -305,23 +343,27 @@ export class PlanoCartesiano {
      */
     drawGhostGrid() {
         const ctx = this.ctx;
+        const { countU, countV, reachU, reachV } = this.getDynamicGridBounds(this.iHatStart, this.jHatStart);
+
         ctx.save();
         ctx.setLineDash([2, 4]);
         ctx.lineWidth = 1;
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
 
-        const R = this.gridRange;
-        for (let i = -R; i <= R; i++) {
-            // Linhas baseadas nos vetores iniciais iHatStart e jHatStart
-            const p1 = this.toScreen(i * this.iHatStart.x - R * this.jHatStart.x, i * this.iHatStart.y - R * this.jHatStart.y);
-            const p2 = this.toScreen(i * this.iHatStart.x + R * this.jHatStart.x, i * this.iHatStart.y + R * this.jHatStart.y);
+        // Retas paralelas a jHatStart (variando ao longo de iHatStart)
+        for (let i = -countU; i <= countU; i++) {
+            const p1 = this.toScreen(i * this.iHatStart.x - reachV * this.jHatStart.x, i * this.iHatStart.y - reachV * this.jHatStart.y);
+            const p2 = this.toScreen(i * this.iHatStart.x + reachV * this.jHatStart.x, i * this.iHatStart.y + reachV * this.jHatStart.y);
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
             ctx.stroke();
+        }
 
-            const p3 = this.toScreen(-R * this.iHatStart.x + i * this.jHatStart.x, -R * this.iHatStart.y + i * this.jHatStart.y);
-            const p4 = this.toScreen(R * this.iHatStart.x + i * this.jHatStart.x, R * this.iHatStart.y + i * this.jHatStart.y);
+        // Retas paralelas a iHatStart (variando ao longo de jHatStart)
+        for (let j = -countV; j <= countV; j++) {
+            const p3 = this.toScreen(-reachU * this.iHatStart.x + j * this.jHatStart.x, -reachU * this.iHatStart.y + j * this.jHatStart.y);
+            const p4 = this.toScreen(reachU * this.iHatStart.x + j * this.jHatStart.x, reachU * this.iHatStart.y + j * this.jHatStart.y);
             ctx.beginPath();
             ctx.moveTo(p3.x, p3.y);
             ctx.lineTo(p4.x, p4.y);
@@ -392,11 +434,13 @@ export class PlanoCartesiano {
         ctx.lineWidth = 1;
 
         if (!isNonLinear) {
-            // Otimização para transformações lineares (duas retas diretas)
-            for (let y = -range; y <= range; y++) {
+            const { countU, countV, reachU, reachV } = this.getDynamicGridBounds(this.iHat, this.jHat);
+
+            // Retas paralelas a iHat (variando y ao longo de jHat)
+            for (let y = -countV; y <= countV; y++) {
                 if (y === 0) continue;
-                const p1 = this.toScreen(-range * this.iHat.x + y * this.jHat.x, -range * this.iHat.y + y * this.jHat.y);
-                const p2 = this.toScreen(range * this.iHat.x + y * this.jHat.x, range * this.iHat.y + y * this.jHat.y);
+                const p1 = this.toScreen(-reachU * this.iHat.x + y * this.jHat.x, -reachU * this.iHat.y + y * this.jHat.y);
+                const p2 = this.toScreen(reachU * this.iHat.x + y * this.jHat.x, reachU * this.iHat.y + y * this.jHat.y);
                 ctx.beginPath();
                 ctx.moveTo(p1.x, p1.y);
                 ctx.lineTo(p2.x, p2.y);
@@ -404,10 +448,11 @@ export class PlanoCartesiano {
                 ctx.stroke();
             }
 
-            for (let x = -range; x <= range; x++) {
+            // Retas paralelas a jHat (variando x ao longo de iHat)
+            for (let x = -countU; x <= countU; x++) {
                 if (x === 0) continue;
-                const p1 = this.toScreen(x * this.iHat.x - range * this.jHat.x, x * this.iHat.y - range * this.jHat.y);
-                const p2 = this.toScreen(x * this.iHat.x + range * this.jHat.x, x * this.iHat.y + range * this.jHat.y);
+                const p1 = this.toScreen(x * this.iHat.x - reachV * this.jHat.x, x * this.iHat.y - reachV * this.jHat.y);
+                const p2 = this.toScreen(x * this.iHat.x + reachV * this.jHat.x, x * this.iHat.y + reachV * this.jHat.y);
                 ctx.beginPath();
                 ctx.moveTo(p1.x, p1.y);
                 ctx.lineTo(p2.x, p2.y);
@@ -416,12 +461,14 @@ export class PlanoCartesiano {
             }
         } else {
             // Amostragem densa para transformações que curvam o espaço
-            const samples = 36;
-            for (let y = -range; y <= range; y += 1) {
+            const { maxViewRadius } = this.getDynamicGridBounds({ x: 1, y: 0 }, { x: 0, y: 1 });
+            const R = Math.max(range, Math.ceil(maxViewRadius));
+            const samples = 44;
+            for (let y = -R; y <= R; y += 1) {
                 if (y === 0) continue;
                 ctx.beginPath();
                 for (let k = 0; k <= samples; k++) {
-                    const mathX = -range + (k / samples) * (2 * range);
+                    const mathX = -R + (k / samples) * (2 * R);
                     const pt = this.transformPoint(mathX, y);
                     const scr = this.toScreen(pt.x, pt.y);
                     if (k === 0) ctx.moveTo(scr.x, scr.y);
@@ -431,11 +478,11 @@ export class PlanoCartesiano {
                 ctx.stroke();
             }
 
-            for (let x = -range; x <= range; x += 1) {
+            for (let x = -R; x <= R; x += 1) {
                 if (x === 0) continue;
                 ctx.beginPath();
                 for (let k = 0; k <= samples; k++) {
-                    const mathY = -range + (k / samples) * (2 * range);
+                    const mathY = -R + (k / samples) * (2 * R);
                     const pt = this.transformPoint(x, mathY);
                     const scr = this.toScreen(pt.x, pt.y);
                     if (k === 0) ctx.moveTo(scr.x, scr.y);
@@ -460,9 +507,11 @@ export class PlanoCartesiano {
         ctx.lineWidth = 2;
 
         if (!isNonLinear) {
+            const { reachU, reachV } = this.getDynamicGridBounds(this.iHat, this.jHat);
+
             // Eixo X (i)
-            let p1 = this.toScreen(-range * this.iHat.x, -range * this.iHat.y);
-            let p2 = this.toScreen(range * this.iHat.x, range * this.iHat.y);
+            let p1 = this.toScreen(-reachU * this.iHat.x, -reachU * this.iHat.y);
+            let p2 = this.toScreen(reachU * this.iHat.x, reachU * this.iHat.y);
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
@@ -470,8 +519,8 @@ export class PlanoCartesiano {
             ctx.stroke();
 
             // Eixo Y (j)
-            p1 = this.toScreen(-range * this.jHat.x, -range * this.jHat.y);
-            p2 = this.toScreen(range * this.jHat.x, range * this.jHat.y);
+            p1 = this.toScreen(-reachV * this.jHat.x, -reachV * this.jHat.y);
+            p2 = this.toScreen(reachV * this.jHat.x, reachV * this.jHat.y);
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
@@ -479,10 +528,12 @@ export class PlanoCartesiano {
             ctx.stroke();
         } else {
             // Eixos curvos amostrados
-            const samples = 48;
+            const { maxViewRadius } = this.getDynamicGridBounds({ x: 1, y: 0 }, { x: 0, y: 1 });
+            const R = Math.max(range, Math.ceil(maxViewRadius));
+            const samples = 56;
             ctx.beginPath();
             for (let k = 0; k <= samples; k++) {
-                const mathX = -range + (k / samples) * (2 * range);
+                const mathX = -R + (k / samples) * (2 * R);
                 const pt = this.transformPoint(mathX, 0);
                 const scr = this.toScreen(pt.x, pt.y);
                 if (k === 0) ctx.moveTo(scr.x, scr.y);
@@ -493,7 +544,7 @@ export class PlanoCartesiano {
 
             ctx.beginPath();
             for (let k = 0; k <= samples; k++) {
-                const mathY = -range + (k / samples) * (2 * range);
+                const mathY = -R + (k / samples) * (2 * R);
                 const pt = this.transformPoint(0, mathY);
                 const scr = this.toScreen(pt.x, pt.y);
                 if (k === 0) ctx.moveTo(scr.x, scr.y);
@@ -511,7 +562,7 @@ export class PlanoCartesiano {
     drawEigenAxes() {
         if (!this.currentAnalysis?.eigenvectors) return;
         const ctx = this.ctx;
-        const R = this.gridRange * 1.5;
+        const { maxViewRadius } = this.getDynamicGridBounds({ x: 1, y: 0 }, { x: 0, y: 1 });
 
         ctx.save();
         ctx.setLineDash([6, 6]);
@@ -520,6 +571,8 @@ export class PlanoCartesiano {
 
         this.currentAnalysis.eigenvectors.forEach(v => {
             if (!v || (v[0] === 0 && v[1] === 0)) return;
+            const norm = Math.hypot(v[0], v[1]) || 1;
+            const R = (maxViewRadius * 1.5) / norm;
             const p1 = this.toScreen(-R * v[0], -R * v[1]);
             const p2 = this.toScreen(R * v[0], R * v[1]);
             ctx.beginPath();
@@ -545,7 +598,7 @@ export class PlanoCartesiano {
             this.ctx.fillStyle = '#f472b6';
             this.ctx.fillText('v⃗', vPx.x + 8, vPx.y - 8);
 
-            if (this.hoverTarget === 'v' || this.draggingTarget === 'v') {
+            if (this.hoverTarget?.type === 'v' || this.draggingTarget?.type === 'v') {
                 this.drawHandle(vPx, '#f472b6');
             }
         }
@@ -553,30 +606,36 @@ export class PlanoCartesiano {
         if (this.showVPrime && this.vPrime) {
             const vpPx = this.toScreen(this.vPrime.x, this.vPrime.y);
 
+            // Se não estiver mostrando v sólido (ex: Etapa 2 e 3), desenha fantasma pontilhado de v quando referência fantasma está ativa
+            if (!this.showVVec && this.vVec && (this.showGhostGrid || this.showDisplacementVec)) {
+                const vOrigPx = this.toScreen(this.vVec.x, this.vVec.y);
+                this.ctx.save();
+                this.ctx.setLineDash([4, 4]);
+                this.ctx.strokeStyle = 'rgba(244, 114, 182, 0.42)';
+                this.ctx.lineWidth = 1.8;
+                this.ctx.beginPath();
+                this.ctx.moveTo(originPx.x, originPx.y);
+                this.ctx.lineTo(vOrigPx.x, vOrigPx.y);
+                this.ctx.stroke();
+                this.ctx.fillStyle = 'rgba(244, 114, 182, 0.6)';
+                this.ctx.font = '600 12px Inter, sans-serif';
+                this.ctx.fillText('v⃗', vOrigPx.x + 6, vOrigPx.y - 6);
+                this.ctx.restore();
+            }
+
             // Vetor v' transformado
             this.drawArrow(originPx, vpPx, '#f472b6', 3.5);
             this.ctx.font = 'bold 13px Inter, sans-serif';
             this.ctx.fillStyle = '#f472b6';
             this.ctx.fillText("v⃗'", vpPx.x + 8, vpPx.y - 8);
 
-            if (this.hoverTarget === 'vPrime' || this.draggingTarget === 'vPrime') {
+            if (this.hoverTarget?.type === 'vPrime' || this.draggingTarget?.type === 'vPrime') {
                 this.drawHandle(vpPx, '#f472b6');
             }
 
             // Vetor deslocamento d = v' - v (da ponta de v até a ponta de v')
             if (this.showDisplacementVec && this.vVec) {
                 const vOrigPx = this.toScreen(this.vVec.x, this.vVec.y);
-
-                // Desenha fantasma pontilhado de v na tela para referência visual direta
-                this.ctx.save();
-                this.ctx.setLineDash([3, 3]);
-                this.ctx.strokeStyle = 'rgba(244, 114, 182, 0.35)';
-                this.ctx.lineWidth = 1.5;
-                this.ctx.beginPath();
-                this.ctx.moveTo(originPx.x, originPx.y);
-                this.ctx.lineTo(vOrigPx.x, vOrigPx.y);
-                this.ctx.stroke();
-                this.ctx.restore();
 
                 // Seta de deslocamento d (Rose #f43f5e)
                 this.drawArrow(vOrigPx, vpPx, '#f43f5e', 3);
@@ -590,20 +649,54 @@ export class PlanoCartesiano {
     }
 
     /**
-     * Vetores da base î e ĵ
+     * Vetores da base î e ĵ (e fantasmas da base inicial quando showGhostBasisVectors = true)
      */
     drawBasisVectors() {
         const originPx = this.toScreen(0, 0);
+
+        // Fantasmas tracejados da base inicial (iHatStart, jHatStart) para referência espacial
+        if (this.showGhostBasisVectors && this.iHatStart && this.jHatStart) {
+            const iStartPx = this.toScreen(this.iHatStart.x, this.iHatStart.y);
+            const jStartPx = this.toScreen(this.jHatStart.x, this.jHatStart.y);
+
+            this.ctx.save();
+            this.ctx.setLineDash([4, 4]);
+            this.ctx.lineWidth = 2;
+
+            // î inicial fantasma
+            this.ctx.strokeStyle = 'rgba(250, 204, 21, 0.38)';
+            this.ctx.beginPath();
+            this.ctx.moveTo(originPx.x, originPx.y);
+            this.ctx.lineTo(iStartPx.x, iStartPx.y);
+            this.ctx.stroke();
+            this.ctx.fillStyle = 'rgba(250, 204, 21, 0.55)';
+            this.ctx.font = '600 12px Inter, sans-serif';
+            this.ctx.fillText('î', iStartPx.x + 6, iStartPx.y - 6);
+
+            // ĵ inicial fantasma
+            this.ctx.strokeStyle = 'rgba(56, 189, 248, 0.38)';
+            this.ctx.beginPath();
+            this.ctx.moveTo(originPx.x, originPx.y);
+            this.ctx.lineTo(jStartPx.x, jStartPx.y);
+            this.ctx.stroke();
+            this.ctx.fillStyle = 'rgba(56, 189, 248, 0.55)';
+            this.ctx.fillText('ĵ', jStartPx.x + 6, jStartPx.y - 6);
+
+            this.ctx.restore();
+        }
+
         const iPx = this.toScreen(this.iHat.x, this.iHat.y);
         const jPx = this.toScreen(this.jHat.x, this.jHat.y);
+        const labelI = this.basisLabels?.i || "î'";
+        const labelJ = this.basisLabels?.j || "ĵ'";
 
         // î (Amarelo)
         this.drawArrow(originPx, iPx, '#facc15', 3.5);
         this.ctx.font = 'bold 14px Inter, sans-serif';
         this.ctx.fillStyle = '#facc15';
-        this.ctx.fillText("î'", iPx.x + 10, iPx.y - 8);
+        this.ctx.fillText(labelI, iPx.x + 10, iPx.y - 8);
 
-        if (this.hoverTarget === 'i' || this.draggingTarget === 'i') {
+        if (this.hoverTarget?.type === 'i' || this.draggingTarget?.type === 'i') {
             this.drawHandle(iPx, '#facc15');
         }
 
@@ -611,9 +704,9 @@ export class PlanoCartesiano {
         this.drawArrow(originPx, jPx, '#38bdf8', 3.5);
         this.ctx.font = 'bold 14px Inter, sans-serif';
         this.ctx.fillStyle = '#38bdf8';
-        this.ctx.fillText("ĵ'", jPx.x + 10, jPx.y - 8);
+        this.ctx.fillText(labelJ, jPx.x + 10, jPx.y - 8);
 
-        if (this.hoverTarget === 'j' || this.draggingTarget === 'j') {
+        if (this.hoverTarget?.type === 'j' || this.draggingTarget?.type === 'j') {
             this.drawHandle(jPx, '#38bdf8');
         }
     }

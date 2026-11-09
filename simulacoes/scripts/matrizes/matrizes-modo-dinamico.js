@@ -5,7 +5,7 @@
 // Modo 4: Sistemas Dinâmicos Contínuos dx/dt = M x, Campo Vetorial e Órbitas
 // =============================================================================
 
-import { setFieldState, initToggleButton, RealtimePlot, eigen2x2, renderMath } from '../sim-ui.js';
+import { initToggleButton, eigen2x2 } from '../sim-ui.js';
 
 export class ModoDinamico {
     /**
@@ -17,7 +17,7 @@ export class ModoDinamico {
         this.dom = domElements;
 
         // Matriz M do sistema dinâmico dx/dt = M x
-        this.M = { a: 0, b: -1, c: 1, d: 0 }; // Inicialmente centro oscilador harmônico
+        this.M = { a: 0, b: -2, c: 2, d: 0 }; // Inicialmente centro oscilador harmônico
 
         // Estado da simulação temporal
         this.isPlaying = false;
@@ -36,9 +36,6 @@ export class ModoDinamico {
         this.showTrajectories = true;
         this.showEigenAxes = true;
 
-        // Telemetria em tempo real
-        this.telemetryPlot = null;
-
         this.initDOM();
     }
 
@@ -49,7 +46,7 @@ export class ModoDinamico {
             btnPlayDyn, btnStepDyn, btnResetDyn, btnClearDyn,
             btnSeedCircle, btnSeedGrid,
             chkVectorField, chkShowEigenDyn,
-            speedPillsDyn
+            btnSpeedCycleDyn
         } = this.dom;
 
         const onInputChange = () => {
@@ -59,6 +56,7 @@ export class ModoDinamico {
                 c: parseFloat(dynM21.value) || 0,
                 d: parseFloat(dynM22.value) || 0
             };
+            this.syncPresetSelectWithMatrix(this.M);
             this.updateClassification();
             this.drawDynamicScene();
         };
@@ -107,9 +105,6 @@ export class ModoDinamico {
             btnClearDyn.addEventListener('click', () => {
                 this.seeds = [];
                 this.simTime = 0.0;
-                if (this.telemetryPlot) this.telemetryPlot.clear();
-                const valSpan = document.getElementById('dyn-plot-val-r');
-                if (valSpan) valSpan.textContent = '0.00 u';
                 this.drawDynamicScene();
             });
         }
@@ -142,13 +137,13 @@ export class ModoDinamico {
             });
         }
 
-        if (speedPillsDyn) {
-            speedPillsDyn.querySelectorAll('.speed-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    speedPillsDyn.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    this.speed = parseFloat(btn.dataset.speed || 1.0);
-                });
+        if (btnSpeedCycleDyn) {
+            const speeds = [0.5, 1.0, 2.0, 4.0];
+            btnSpeedCycleDyn.addEventListener('click', () => {
+                const curIdx = speeds.indexOf(this.speed);
+                this.speed = speeds[(curIdx + 1) % speeds.length];
+                btnSpeedCycleDyn.dataset.speed = this.speed.toFixed(1);
+                btnSpeedCycleDyn.textContent = `${this.speed.toFixed(1)}×`;
             });
         }
 
@@ -164,27 +159,29 @@ export class ModoDinamico {
         };
 
         this.plano.canvas.addEventListener('click', this.canvasClickListener);
+    }
 
-        // Inicializar mini-gráfico de telemetria
-        const plotCanvas = document.getElementById('dynTelemetryCanvas');
-        if (plotCanvas) {
-            this.telemetryPlot = new RealtimePlot(plotCanvas, {
-                maxPoints: 100,
-                minVal: 0,
-                maxVal: 5,
-                autoScale: true,
-                minSpan: 0.5,
-                maxLabelSelector: '#dyn-plot-max-label',
-                minLabelSelector: '#dyn-plot-min-label',
-                color: '#38bdf8',
-                title: 'Distância à Origem $\\langle r(t) \\rangle$',
-                unit: ' u',
-                onOpenFullscreen: () => {
-                    if (this.isPlaying && this.playToggleControl) {
-                        this.playToggleControl.setState(0);
-                    }
-                }
-            });
+    /**
+     * Verifica se a matriz m coincide com algum preset de ponto fixo; caso contrário, seleciona 'custom' (Personalizado / Manual)
+     */
+    syncPresetSelectWithMatrix(m) {
+        const { presetDynSelect } = this.dom;
+        if (!presetDynSelect) return;
+
+        const eq = (x, y) => Math.abs(x - y) < 1e-3;
+        const match = (a, b, c, d) => eq(m.a, a) && eq(m.b, b) && eq(m.c, c) && eq(m.d, d);
+
+        let detected = 'custom';
+        if (match(0, -2, 2, 0)) detected = 'center';
+        else if (match(1.5, 0, 0, -1.5)) detected = 'saddle';
+        else if (match(-0.4, -2.5, 2.5, -0.4)) detected = 'stable-focus';
+        else if (match(0.4, -2.5, 2.5, 0.4)) detected = 'unstable-focus';
+        else if (match(-2.0, 0, 0, -1.0)) detected = 'stable-node';
+        else if (match(1.5, 0, 0, 2.5)) detected = 'unstable-node';
+        else if (match(0, 1.5, 0, 0)) detected = 'shear-flow';
+
+        if (presetDynSelect.value !== detected) {
+            presetDynSelect.value = detected;
         }
     }
 
@@ -262,9 +259,6 @@ export class ModoDinamico {
             s.trail = [{ x: s.initX, y: s.initY }];
         });
         this.simTime = 0.0;
-        if (this.telemetryPlot) this.telemetryPlot.clear();
-        const valSpan = document.getElementById('dyn-plot-val-r');
-        if (valSpan) valSpan.textContent = '0.00 u';
     }
 
     /**
@@ -302,18 +296,6 @@ export class ModoDinamico {
                 }
             }
         });
-
-        // Telemetria da distância média das sementes ativas à origem
-        if (this.isPlaying && this.telemetryPlot && this.seeds.length > 0) {
-            let sumR = 0;
-            for (let i = 0; i < this.seeds.length; i++) {
-                sumR += Math.hypot(this.seeds[i].x, this.seeds[i].y);
-            }
-            const avgR = sumR / this.seeds.length;
-            this.telemetryPlot.push(avgR, this.simTime);
-            const valSpan = document.getElementById('dyn-plot-val-r');
-            if (valSpan) valSpan.textContent = `${avgR.toFixed(2)} u`;
-        }
     }
 
     loop() {
@@ -366,7 +348,8 @@ export class ModoDinamico {
         const { a, b, c, d } = this.M;
 
         const step = 1.2;
-        const R = plano.gridRange * 0.9;
+        const { maxViewRadius } = plano.getDynamicGridBounds({ x: 1, y: 0 }, { x: 0, y: 1 });
+        const R = Math.floor(maxViewRadius / step) * step;
 
         ctx.save();
         for (let x = -R; x <= R; x += step) {
@@ -452,61 +435,46 @@ export class ModoDinamico {
         let stability = '';
 
         if (det < -1e-4) {
-            classification = 'Ponto de Sela (Hiperbólico)';
-            toneClass = 'tone-rose';
-            stability = 'Instável (Autovalores reais com sinais opostos)';
+            classification = 'Ponto de Sela (Instável)';
+            toneClass = 'highlight-rose';
         } else if (Math.abs(det) < 1e-4) {
-            classification = 'Linha de Equilíbrios Degenerada (det = 0)';
-            toneClass = 'tone-purple';
-            stability = 'Neutro (Pelo menos um autovalor nulo)';
+            classification = 'Degenerado (Neutro)';
+            toneClass = 'highlight-purple';
         } else {
             // det > 0
             if (disc < -1e-4) {
-                // Autovalores complexos conjugados
                 if (Math.abs(tr) < 1e-4) {
-                    classification = 'Centro (Oscilador Harmônico)';
-                    toneClass = 'tone-cyan';
-                    stability = 'Marginalmente Estável (Órbitas Elípticas Fechadas)';
+                    classification = 'Centro (Estável)';
+                    toneClass = 'highlight-cyan';
                 } else if (tr < 0) {
-                    classification = 'Foco Atrator (Espiral Estável)';
-                    toneClass = 'tone-emerald';
-                    stability = 'Assintoticamente Estável (Trajetórias convergem em espiral)';
+                    classification = 'Foco Atrator (Estável)';
+                    toneClass = 'highlight-green';
                 } else {
-                    classification = 'Foco Repulsor (Espiral Instável)';
-                    toneClass = 'tone-rose';
-                    stability = 'Instável (Trajetórias divergem em espiral)';
+                    classification = 'Foco Repulsor (Instável)';
+                    toneClass = 'highlight-rose';
                 }
             } else {
-                // Autovalores reais do mesmo sinal
                 if (tr < 0) {
-                    classification = 'Nó Atrator (Poço Estável)';
-                    toneClass = 'tone-emerald';
-                    stability = 'Assintoticamente Estável (Ambos autovalores negativos)';
+                    classification = 'Nó Atrator (Estável)';
+                    toneClass = 'highlight-green';
                 } else if (tr > 0) {
-                    classification = 'Nó Repulsor (Fonte Instável)';
-                    toneClass = 'tone-rose';
-                    stability = 'Instável (Ambos autovalores positivos)';
+                    classification = 'Nó Repulsor (Instável)';
+                    toneClass = 'highlight-rose';
                 } else {
                     classification = 'Ponto Fixo Neutro';
-                    stability = 'Neutro';
+                    toneClass = 'highlight-cyan';
                 }
             }
         }
 
         const elClassif = document.getElementById('dyn-readout-type');
-        const elTr = document.getElementById('dyn-readout-trace');
-        const elDet = document.getElementById('dyn-readout-det');
-        const elDisc = document.getElementById('dyn-readout-disc');
         const elEigen = document.getElementById('dyn-readout-eigen');
-        const elStability = document.getElementById('dyn-readout-stability');
+        const elInvariants = document.getElementById('dyn-readout-invariants');
 
         if (elClassif) {
             elClassif.textContent = classification;
-            elClassif.className = `sim-readout-value ${toneClass}`;
+            elClassif.className = `sim-readout-value readout-value ${toneClass}`;
         }
-        if (elTr) elTr.textContent = tr.toFixed(2);
-        if (elDet) elDet.textContent = det.toFixed(2);
-        if (elDisc) elDisc.textContent = disc.toFixed(2);
 
         if (elEigen) {
             if (analysis.isReal) {
@@ -518,23 +486,19 @@ export class ModoDinamico {
             }
         }
 
-        if (elStability) {
-            elStability.textContent = stability;
-        }
-
-        const katexDyn = document.getElementById('dyn-katex-formula');
-        if (katexDyn) {
-            const tex = `\\dot{\\vec{x}} = \\begin{bmatrix} ${a.toFixed(1)} & ${b.toFixed(1)} \\\\ ${c.toFixed(1)} & ${d.toFixed(1)} \\end{bmatrix} \\vec{x}`;
-            renderMath(katexDyn, tex, { displayMode: true });
+        if (elInvariants) {
+            elInvariants.textContent = `tr = ${tr.toFixed(2)} | det = ${det.toFixed(2)}`;
         }
     }
 
     mount() {
         this.isActive = true;
         this.isPlaying = false;
+        this.plano.showGrid = true;
         this.plano.showVVec = false;
         this.plano.showVPrime = false;
         this.plano.showDisplacementVec = false;
+        this.plano.showGhostBasisVectors = false;
         this.plano.showGhostGrid = false;
         this.plano.showDetArea = false;
         this.plano.showUnitCircle = false;

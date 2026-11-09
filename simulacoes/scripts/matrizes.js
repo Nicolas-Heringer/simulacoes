@@ -11,7 +11,6 @@ import {
     initTabs,
     inlineSVGImages,
     initKaTeXAutoRender,
-    initModal,
     initOnboardingModal,
     initFocusMirrorToolbar
 } from './sim-ui.js';
@@ -25,7 +24,6 @@ import { ModoDinamico } from './matrizes/matrizes-modo-dinamico.js';
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Inicializar subsistemas do Design System 2.0
     inlineSVGImages();
-    initTabs();
     initSidebarCollapse({
         layoutSelector: '.sim-layout',
         collapseBtnSelector: '#btn-collapse-sidebar',
@@ -43,18 +41,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Elementos DOM do Canvas
     const canvasSingleEl = document.getElementById('simCanvas');
-    const canvasLeftEl = document.getElementById('canvasLeft');
-    const canvasRightEl = document.getElementById('canvasRight');
-
-    const containerSingle = document.getElementById('canvas-single-container');
-    const containerSplit = document.getElementById('canvas-split-container');
-
+    const stepperToolbar = document.getElementById('construir-stepper-toolbar');
     const footerStatusText = document.getElementById('footer-status-text');
 
-    // 3. Inicialização dos Planos Cartesianos
+    // 3. Inicialização do Plano Cartesiano Único em Tela Cheia
     const planoSingle = new PlanoCartesiano(canvasSingleEl, { id: 'single' });
-    const planoLeft = new PlanoCartesiano(canvasLeftEl, { id: 'left' });
-    const planoRight = new PlanoCartesiano(canvasRightEl, { id: 'right' });
 
     // 4. Instanciação dos 4 Modos
     const domBase = {
@@ -62,10 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
         m12: document.getElementById('base-m12'),
         m21: document.getElementById('base-m21'),
         m22: document.getElementById('base-m22'),
-        valIx: document.getElementById('base-valIx'),
-        valIy: document.getElementById('base-valIy'),
-        valJx: document.getElementById('base-valJx'),
-        valJy: document.getElementById('base-valJy'),
         presetSelect: document.getElementById('base-presetSelect'),
         rotSlider: document.getElementById('base-rotSlider'),
         btnApply: document.getElementById('base-btnApply'),
@@ -79,11 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const domConstruir = {
-        chkLockInitialBase: document.getElementById('construir-chkLockBase'),
+        chkShowDisplacement: document.getElementById('construir-chkDisplacement'),
         chkShowEigenModo2: document.getElementById('construir-chkEigen'),
         chkShowGhostModo2: document.getElementById('construir-chkGhost'),
         btnAnimateModo2: document.getElementById('construir-btnAnimate'),
-        btnResetModo2: document.getElementById('construir-btnReset')
+        btnResetModo2: document.getElementById('construir-btnReset'),
+        stepperToolbar
     };
 
     const domFuncoes = {
@@ -94,13 +82,13 @@ document.addEventListener('DOMContentLoaded', () => {
         presetFnSelect: document.getElementById('fn-presetSelect'),
         btnAddCircle: document.getElementById('fn-btnAddCircle'),
         btnAddSquare: document.getElementById('fn-btnAddSquare'),
-        btnClearSurfaces: document.getElementById('fn-btnClearSurfaces'),
         btnPlayFn: document.getElementById('fn-btnPlay'),
         btnStepFn: document.getElementById('fn-btnStep'),
         btnResetFn: document.getElementById('fn-btnReset'),
         sliderT: document.getElementById('fn-sliderT'),
         numT: document.getElementById('fn-numT'),
-        speedPills: document.getElementById('fn-speedPills')
+        btnSpeedCycle: document.getElementById('fn-btnSpeedCycle'),
+        chkGhostGrid: document.getElementById('fn-chkGhostGrid')
     };
 
     const domDinamico = {
@@ -117,51 +105,36 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSeedGrid: document.getElementById('dyn-btnSeedGrid'),
         chkVectorField: document.getElementById('dyn-chkVectorField'),
         chkShowEigenDyn: document.getElementById('dyn-chkEigen'),
-        speedPillsDyn: document.getElementById('dyn-speedPills')
+        btnSpeedCycleDyn: document.getElementById('dyn-btnSpeedCycle')
     };
 
     const modos = {
         base: new ModoBase(planoSingle, domBase),
-        construir: new ModoConstruir(planoLeft, planoRight, domConstruir),
+        construir: new ModoConstruir(planoSingle, domConstruir),
         funcoes: new ModoFuncoes(planoSingle, domFuncoes),
         dinamico: new ModoDinamico(planoSingle, domDinamico)
     };
 
-    let activeModeName = 'base';
+    let activeModeName = null;
 
-    // 5. Troca de Modos pelo Seletor Segmentado
+    // 5. Troca de Modos pela Navegação Superior de Abas (.tab-nav)
     function switchMode(newMode) {
         if (!modos[newMode]) return;
 
         // Desmonta modo anterior
-        if (modos[activeModeName]) {
+        if (activeModeName && modos[activeModeName]) {
             modos[activeModeName].unmount();
         }
 
         activeModeName = newMode;
 
-        // Atualizar botões do seletor
-        const modeBtns = document.querySelectorAll('#mode-selector .segment-btn');
-        modeBtns.forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.mode === newMode);
+        // Alternar grupos da barra de transporte inferior (#canvas-transport-toolbar)
+        document.querySelectorAll('[data-transport-mode]').forEach(group => {
+            group.classList.toggle('hidden', group.dataset.transportMode !== newMode);
         });
 
-        // Alternar containers de canvas (Single vs Split)
-        const isSplit = newMode === 'construir';
-        containerSingle.classList.toggle('hidden', isSplit);
-        containerSplit.classList.toggle('hidden', !isSplit);
-
-        // Alternar subpanes de controles
-        document.querySelectorAll('.subpane-controls').forEach(pane => {
-            const matches = pane.id === `subpane-controls-${newMode}`;
-            pane.classList.toggle('hidden', !matches);
-        });
-
-        // Alternar subpanes de teoria
-        document.querySelectorAll('.subpane-theory').forEach(pane => {
-            const matches = pane.id === `subpane-theory-${newMode}`;
-            pane.classList.toggle('hidden', !matches);
-        });
+        // Alternar barra superior de etapas da Aba 2 (Construir)
+        stepperToolbar?.classList.toggle('hidden', newMode !== 'construir');
 
         // Sincronizar painel de ferramentas reativo do Modo Foco
         focusToolbar?.rebuild(newMode);
@@ -180,63 +153,26 @@ document.addEventListener('DOMContentLoaded', () => {
         // Redimensionar e montar o novo modo
         handleGlobalResize();
         modos[newMode].mount();
-
-        // Auto-renderizar KaTeX nas abas recém-exibidas
-        const activeSubpane = document.getElementById(`subpane-controls-${newMode}`);
-        if (activeSubpane) initKaTeXAutoRender(activeSubpane);
     }
 
-    // Eventos do seletor de modos
-    document.querySelectorAll('#mode-selector .segment-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            switchMode(btn.dataset.mode);
-        });
+    // Inicializa as abas padronizadas do Design System 2.0 (dispara switchMode('base') na carga)
+    initTabs('#controls-panel', (tabId) => {
+        const mode = tabId.replace(/^tab-/, '');
+        switchMode(mode);
     });
 
-    // 6. Redimensionamento Global dos Canvases
+    // 6. Redimensionamento Global do Canvas
     function handleGlobalResize() {
-        if (activeModeName === 'construir') {
-            planoLeft.resize();
-            planoRight.resize();
-            planoLeft.draw();
-            planoRight.draw();
-        } else if (activeModeName === 'dinamico') {
-            planoSingle.resize();
+        planoSingle.resize();
+        if (activeModeName === 'dinamico') {
             modos.dinamico.drawDynamicScene();
         } else {
-            planoSingle.resize();
             planoSingle.draw();
         }
     }
 
     window.addEventListener('resize', handleGlobalResize);
 
-    // 7. Ações Flutuantes
-    const btnQuickReset = document.getElementById('btn-quick-reset');
-    if (btnQuickReset) {
-        btnQuickReset.addEventListener('click', () => {
-            if (activeModeName === 'base') {
-                document.getElementById('base-btnReset')?.click();
-            } else if (activeModeName === 'construir') {
-                document.getElementById('construir-btnReset')?.click();
-            } else if (activeModeName === 'funcoes') {
-                document.getElementById('fn-btnReset')?.click();
-            } else if (activeModeName === 'dinamico') {
-                document.getElementById('dyn-btnReset')?.click();
-            }
-        });
-    }
-
-    // 8. Modal Didático de Teoria Completa
-    const modalTeoria = initModal('#modal-theory-matrizes');
-    const btnAbrirModal = document.getElementById('btn-abrir-modal-teoria');
-    if (btnAbrirModal && modalTeoria) {
-        btnAbrirModal.addEventListener('click', () => modalTeoria.open());
-    }
-
-    // 10. Modal de Instruções Iniciais (Guia Rápido)
+    // 7. Modal de Instruções Iniciais (Guia Rápido)
     initOnboardingModal('#modal-onboarding', { triggerSelector: '#btn-open-onboarding' });
-
-    // 11. Inicialização do Modo Padrão
-    switchMode('base');
 });

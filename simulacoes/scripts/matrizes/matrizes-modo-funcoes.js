@@ -47,48 +47,63 @@ export class ModoFuncoes {
         this.recompileAll();
     }
 
-    addCircle() {
-        const nextId = Date.now();
-        this.probeSurfaces.push({
-            id: nextId,
-            type: 'circle',
-            cx: 1.5,
-            cy: 1.5,
-            size: 1.0,
-            color: '#a855f7'
-        });
+    toggleSurface(type) {
+        const existingIdx = this.probeSurfaces.findIndex(s => s.type === type);
+        if (existingIdx !== -1) {
+            this.probeSurfaces.splice(existingIdx, 1);
+        } else {
+            if (type === 'circle') {
+                this.probeSurfaces.push({
+                    id: 'fn-circle',
+                    type: 'circle',
+                    cx: 1.5,
+                    cy: 1.5,
+                    size: 1.0,
+                    color: '#a855f7'
+                });
+            } else if (type === 'square') {
+                this.probeSurfaces.push({
+                    id: 'fn-square',
+                    type: 'square',
+                    cx: -1.8,
+                    cy: 1.2,
+                    size: 1.4,
+                    color: '#22c55e'
+                });
+            }
+        }
+        this.updateSurfaceToggleButtons();
         this.syncSurfacesToPlano();
+        this.updateSurfaceTelemetry();
+        this.plano.draw();
     }
 
-    addSquare() {
-        const nextId = Date.now();
-        this.probeSurfaces.push({
-            id: nextId,
-            type: 'square',
-            cx: -1.8,
-            cy: 1.2,
-            size: 1.4,
-            color: '#22c55e'
-        });
-        this.syncSurfacesToPlano();
-    }
-
-    clearSurfaces() {
-        this.probeSurfaces = [];
-        this.syncSurfacesToPlano();
+    updateSurfaceToggleButtons() {
+        const { btnAddCircle, btnAddSquare } = this.dom;
+        const hasCircle = this.probeSurfaces.some(s => s.type === 'circle');
+        const hasSquare = this.probeSurfaces.some(s => s.type === 'square');
+        if (btnAddCircle) {
+            btnAddCircle.classList.toggle('active', hasCircle);
+            btnAddCircle.classList.toggle('is-active', hasCircle);
+        }
+        if (btnAddSquare) {
+            btnAddSquare.classList.toggle('active', hasSquare);
+            btnAddSquare.classList.toggle('is-active', hasSquare);
+        }
     }
 
     initDOM() {
         const {
             fnM11, fnM12, fnM21, fnM22,
             presetFnSelect,
-            btnAddCircle, btnAddSquare, btnClearSurfaces,
+            btnAddCircle, btnAddSquare,
             btnPlayFn, btnStepFn, btnResetFn,
             sliderT, numT,
-            speedPills
+            btnSpeedCycle,
+            chkGhostGrid
         } = this.dom;
 
-        // Entradas funcionais com validação em tempo real
+        // Entradas funcionais com validação enxuta (apenas em caso de erro)
         const inputs = [
             { key: 'm11', el: fnM11 },
             { key: 'm12', el: fnM12 },
@@ -100,13 +115,8 @@ export class ModoFuncoes {
             if (!el) return;
             el.addEventListener('input', () => {
                 this.exprStrings[key] = el.value.trim();
-                const res = compileExpression(this.exprStrings[key]);
-                if (res.valid) {
-                    this.compiledFns[key] = res.fn;
-                    setFieldState(el, 'valid', res.error || 'Sintaxe válida');
-                } else {
-                    setFieldState(el, 'invalid', res.error || 'Erro de sintaxe');
-                }
+                this.syncPresetSelectWithExprs();
+                this.validateAndCompileInputs();
                 this.updatePlanoTransform();
             });
         });
@@ -118,22 +128,26 @@ export class ModoFuncoes {
             });
         }
 
-        // Adicionar superfícies de prova
+        // Toggle de superfícies de prova (Círculo e Quadrado)
         if (btnAddCircle) {
-            btnAddCircle.addEventListener('click', () => this.addCircle());
+            btnAddCircle.addEventListener('click', () => this.toggleSurface('circle'));
         }
 
         if (btnAddSquare) {
-            btnAddSquare.addEventListener('click', () => this.addSquare());
+            btnAddSquare.addEventListener('click', () => this.toggleSurface('square'));
         }
 
-        if (btnClearSurfaces) {
-            btnClearSurfaces.addEventListener('click', () => this.clearSurfaces());
+        // Switch da grade de referência (fantasma)
+        if (chkGhostGrid) {
+            chkGhostGrid.addEventListener('change', (e) => {
+                this.plano.showGhostGrid = e.target.checked;
+                this.plano.draw();
+            });
         }
 
         // Transporte temporal (Play / Pause / Step / Reset)
         if (btnPlayFn) {
-            initToggleButton(btnPlayFn, (isActive) => {
+            this.playToggleControl = initToggleButton(btnPlayFn, (isActive) => {
                 this.isPlaying = isActive;
                 if (this.isPlaying) {
                     this.lastTime = performance.now();
@@ -168,19 +182,19 @@ export class ModoFuncoes {
             });
         }
 
-        // Pílulas de velocidade
-        if (speedPills) {
-            speedPills.querySelectorAll('.speed-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    speedPills.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    this.speed = parseFloat(btn.dataset.speed || 1.0);
-                });
+        // Botão cíclico de velocidade na barra flutuante
+        if (btnSpeedCycle) {
+            const speeds = [0.5, 1.0, 2.0];
+            btnSpeedCycle.addEventListener('click', () => {
+                const curIdx = speeds.indexOf(this.speed);
+                this.speed = speeds[(curIdx + 1) % speeds.length];
+                btnSpeedCycle.dataset.speed = this.speed.toFixed(1);
+                btnSpeedCycle.textContent = `${this.speed.toFixed(1)}×`;
             });
         }
 
-        // Callbacks de interação do plano para quando arrastar uma superfície
-        this.plano.onTargetChange = () => {
+        // Callback de interação do plano para quando arrastar uma superfície
+        this.handleTargetChange = () => {
             this.updateSurfaceTelemetry();
         };
     }
@@ -208,6 +222,40 @@ export class ModoFuncoes {
         this.animRequestId = requestAnimationFrame(() => this.loop());
     }
 
+    validateAndCompileInputs() {
+        const { fnM11, fnM12, fnM21, fnM22 } = this.dom;
+        const matrixBox = document.getElementById('funcoes-matrix-box');
+        const list = [
+            { key: 'm11', el: fnM11, label: 'M₁₁' },
+            { key: 'm12', el: fnM12, label: 'M₁₂' },
+            { key: 'm21', el: fnM21, label: 'M₂₁' },
+            { key: 'm22', el: fnM22, label: 'M₂₂' }
+        ];
+
+        let firstError = null;
+
+        list.forEach(({ key, el, label }) => {
+            const res = compileExpression(this.exprStrings[key]);
+            if (res.valid) {
+                this.compiledFns[key] = res.fn;
+                if (el) setFieldState(el, null);
+            } else {
+                if (el) setFieldState(el, 'invalid');
+                if (!firstError) {
+                    firstError = `${label}: ${res.error || 'Expressão inválida'}`;
+                }
+            }
+        });
+
+        if (matrixBox) {
+            if (firstError) {
+                setFieldState(matrixBox, 'invalid', firstError);
+            } else {
+                setFieldState(matrixBox, null);
+            }
+        }
+    }
+
     recompileAll() {
         const { fnM11, fnM12, fnM21, fnM22 } = this.dom;
         const list = [
@@ -219,16 +267,42 @@ export class ModoFuncoes {
 
         list.forEach(({ key, el }) => {
             if (el) el.value = this.exprStrings[key];
-            const res = compileExpression(this.exprStrings[key]);
-            if (res.valid) {
-                this.compiledFns[key] = res.fn;
-                if (el) setFieldState(el, 'valid');
-            } else if (el) {
-                setFieldState(el, 'invalid', res.error);
-            }
         });
 
+        this.validateAndCompileInputs();
         this.updatePlanoTransform();
+    }
+
+    /**
+     * Verifica se as expressões atuais correspondem a algum preset; caso contrário, seleciona 'custom' (Personalizado / Manual)
+     */
+    syncPresetSelectWithExprs() {
+        const { presetFnSelect } = this.dom;
+        if (!presetFnSelect) return;
+
+        const norm = (s) => (s || '').replace(/\s+/g, '');
+        const match = (a, b, c, d) =>
+            norm(this.exprStrings.m11) === norm(a) &&
+            norm(this.exprStrings.m12) === norm(b) &&
+            norm(this.exprStrings.m21) === norm(c) &&
+            norm(this.exprStrings.m22) === norm(d);
+
+        let detected = 'custom';
+        if (match('1', '0.3*sin(1.5*y + t)', '0.3*sin(1.5*x + t)', '1') || match('1', '0.2*sin(y + t)', '0.2*sin(x + t)', '1')) {
+            detected = 'wave';
+        } else if (match('cos(0.5*sqrt(x^2 + y^2) - t)', '-sin(0.5*sqrt(x^2 + y^2) - t)', 'sin(0.5*sqrt(x^2 + y^2) - t)', 'cos(0.5*sqrt(x^2 + y^2) - t)')) {
+            detected = 'vortex';
+        } else if (match('1 + 0.3*cos(t)/(1 + 0.1*(x^2 + y^2))', '0', '0', '1 + 0.3*cos(t)/(1 + 0.1*(x^2 + y^2))')) {
+            detected = 'lens';
+        } else if (match('1', '0.15*y*sin(t)', '0', '1')) {
+            detected = 'nonlinear-shear';
+        } else if (match('1 + 0.35*sin(t)', '0', '0', '1 + 0.35*sin(t)')) {
+            detected = 'breathing';
+        }
+
+        if (presetFnSelect.value !== detected) {
+            presetFnSelect.value = detected;
+        }
     }
 
     applyPreset(presetName) {
@@ -310,23 +384,22 @@ export class ModoFuncoes {
     }
 
     /**
-     * Calcula a telemetria local e aproximação linear (Jacobiana) para cada superfície de prova
+     * Calcula a telemetria local e aproximação linear (Jacobiana) para cada superfície de prova ativa
      */
     updateSurfaceTelemetry() {
         const container = document.getElementById('funcoes-surfaces-telemetry');
         if (!container) return;
 
         if (this.probeSurfaces.length === 0) {
-            container.innerHTML = '<p class="sim-readout-row" style="color: var(--text-muted); font-size: 0.78rem;">Nenhuma superfície de prova ativa. Adicione um círculo ou quadrado acima.</p>';
+            container.innerHTML = '';
             return;
         }
 
         const eps = 0.001;
-        const curT = this.t;
         const map = this.plano.customTransformFn || ((x, y) => ({ x, y }));
 
         let html = '';
-        this.probeSurfaces.forEach((surf, idx) => {
+        this.probeSurfaces.forEach((surf) => {
             const cx = surf.cx;
             const cy = surf.cy;
 
@@ -344,12 +417,9 @@ export class ModoFuncoes {
             const absDetJ = Math.abs(detJ);
 
             // Área original
-            let origArea = 0;
-            if (surf.type === 'circle') {
-                origArea = Math.PI * surf.size * surf.size;
-            } else {
-                origArea = surf.size * surf.size;
-            }
+            const origArea = surf.type === 'circle'
+                ? Math.PI * surf.size * surf.size
+                : surf.size * surf.size;
 
             // Estimativa de área deformada via Green/Shoelace sobre a fronteira amostrada
             const steps = 36;
@@ -362,7 +432,6 @@ export class ModoFuncoes {
                     my = cy + surf.size * Math.sin(th);
                 } else {
                     const s = surf.size / 2;
-                    // Amostra do quadrado
                     const u = Math.cos(th);
                     const v = Math.sin(th);
                     const scale = 1 / Math.max(Math.abs(u), Math.abs(v));
@@ -382,28 +451,20 @@ export class ModoFuncoes {
             const areaRatio = origArea > 0 ? transArea / origArea : 1;
 
             const badgeColor = surf.type === 'circle' ? 'var(--color-purple)' : 'var(--color-emerald)';
-            const surfName = surf.type === 'circle' ? 'Círculo' : 'Quadrado';
+            const surfName = surf.type === 'circle' ? '🟣 Círculo' : '🟢 Quadrado';
 
             html += `
-                <div class="sim-readout" style="margin-bottom: 8px; border-left: 3px solid ${badgeColor};">
-                    <div class="sim-readout-title">
-                        <span>${surfName} #${idx + 1} em (${cx.toFixed(1)}, ${cy.toFixed(1)})</span>
+                <div class="sim-readout readout-card" style="margin-bottom: 8px; border-left: 3px solid ${badgeColor};">
+                    <div class="sim-readout-title readout-header">
+                        <span>${surfName} em (${cx.toFixed(1)}, ${cy.toFixed(1)})</span>
                     </div>
-                    <div class="sim-readout-row">
-                        <span class="sim-readout-label">Área Original $A_0$:</span>
-                        <span class="sim-readout-value">${origArea.toFixed(2)} un²</span>
+                    <div class="sim-readout-row readout-item">
+                        <span class="sim-readout-label readout-label">Razão de Área ($A'/A_0$)</span>
+                        <span class="sim-readout-value readout-value highlight-cyan">${areaRatio.toFixed(2)}x (${transArea.toFixed(2)} / ${origArea.toFixed(2)})</span>
                     </div>
-                    <div class="sim-readout-row">
-                        <span class="sim-readout-label">Área Transformada $A'$:</span>
-                        <span class="sim-readout-value tone-cyan">${transArea.toFixed(2)} un²</span>
-                    </div>
-                    <div class="sim-readout-row">
-                        <span class="sim-readout-label">Razão de Área ($A'/A_0$):</span>
-                        <span class="sim-readout-value tone-accent">${areaRatio.toFixed(2)}x</span>
-                    </div>
-                    <div class="sim-readout-row">
-                        <span class="sim-readout-label">Jacobiana Local $|\det(J)|$:</span>
-                        <span class="sim-readout-value tone-rose">${absDetJ.toFixed(2)}x</span>
+                    <div class="sim-readout-row readout-item">
+                        <span class="sim-readout-label readout-label">Jacobiana Local $|\det(J)|$</span>
+                        <span class="sim-readout-value readout-value highlight-yellow">${absDetJ.toFixed(2)}x</span>
                     </div>
                 </div>
             `;
@@ -419,23 +480,34 @@ export class ModoFuncoes {
     }
 
     mount() {
+        this.plano.showGrid = false;
+        this.plano.showTransformedGrid = true;
         this.plano.showVVec = false;
         this.plano.showVPrime = false;
         this.plano.showDisplacementVec = false;
         this.plano.showEigen = false;
-        this.plano.showGhostGrid = true;
+        this.plano.showGhostBasisVectors = false;
+        this.plano.iHatStart = { x: 1, y: 0 };
+        this.plano.jHatStart = { x: 0, y: 1 };
+        this.plano.showGhostGrid = this.dom.chkGhostGrid ? this.dom.chkGhostGrid.checked : true;
         this.plano.showDetArea = false;
         this.plano.showUnitCircle = false;
         this.plano.showBasisVectors = false;
         this.plano.allowedDragTargets = ['surface-center', 'surface-resize'];
+        this.plano.onTargetChange = this.handleTargetChange;
 
+        this.updateSurfaceToggleButtons();
         this.updatePlanoTransform();
     }
 
     unmount() {
         this.isPlaying = false;
         cancelAnimationFrame(this.animRequestId);
+        if (this.playToggleControl && this.playToggleControl.isActive()) {
+            this.playToggleControl.setState(0);
+        }
         this.plano.probeSurfaces = [];
         this.plano.customTransformFn = null;
+        this.plano.onTargetChange = null;
     }
 }

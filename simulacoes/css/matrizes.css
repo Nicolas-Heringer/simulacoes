@@ -3,37 +3,19 @@
    Compatível com o Design System 2.0 e 4 Modos Operacionais
    ============================================================================= */
 
-/* --- SELETOR DE MODOS NO TOPO DO PAINEL --- */
-.mode-selector-wrapper {
-    margin-bottom: 12px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border-subtle);
+/* --- BARRA DE TRANSPORTE POR MODO (#canvas-transport-toolbar) --- */
+.transport-mode-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
-.mode-selector-label {
-    font-size: 0.72rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-    display: block;
+.transport-mode-group.hidden {
+    display: none !important;
 }
 
-#mode-selector .segment-btn {
-    padding: 7px 4px;
-    font-size: 0.72rem;
-    gap: 4px;
-}
-
-#mode-selector .segment-btn .icon-svg {
-    width: 14px;
-    height: 14px;
-}
-
-/* --- CANVAS AREA: SUPORTE A TELA ÚNICA OU DIVIDIDA (SPLIT) --- */
-.canvas-single-container,
-.canvas-split-container {
+/* --- CANVAS AREA & BARRA DE PROGRESSÃO DE ETAPAS (MODO 2) --- */
+.canvas-single-container {
     width: 100%;
     height: 100%;
     position: absolute;
@@ -46,79 +28,60 @@
     display: block;
 }
 
-.canvas-split-container {
-    display: flex;
-    flex-direction: row;
-    background: rgba(0, 0, 0, 0.4);
+.canvas-toolbar.pos-top-center {
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: auto;
+    right: auto;
+    z-index: 62;
 }
 
-.canvas-split-container.hidden {
+.canvas-toolbar.pos-top-center.hidden {
     display: none !important;
 }
 
-.canvas-single-container.hidden {
-    display: none !important;
-}
-
-.canvas-split-pane {
-    flex: 1;
-    height: 100%;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.canvas-split-pane canvas {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
-.canvas-split-divider {
-    width: 2px;
-    background: var(--border-color);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
-    position: relative;
-    z-index: 2;
-    flex-shrink: 0;
-}
-
-.split-pane-tag {
-    position: absolute;
-    top: 14px;
-    left: 14px;
-    z-index: 5;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(8px);
-    border: 1px solid var(--border-color);
+.stepper-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
     border-radius: var(--radius-sm);
-    padding: 4px 10px;
-    font-size: 0.74rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    pointer-events: none;
-    box-shadow: var(--shadow-sm);
+    transition: all var(--trans-fast);
 }
 
-#pane-left .split-pane-tag {
-    border-left: 3px solid var(--accent-color);
+.stepper-badge {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-secondary);
+    font-size: 0.70rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    transition: all var(--trans-fast);
 }
 
-#pane-right .split-pane-tag {
-    border-left: 3px solid var(--color-cyan);
+.stepper-btn.active {
+    background: color-mix(in srgb, var(--accent-color) 18%, transparent);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--accent-color) 25%, transparent);
 }
 
-/* Modo Mobile: empilha as duas telas do Modo 2 verticalmente */
-@media (max-width: 900px) {
-    .canvas-split-container {
-        flex-direction: column;
-    }
+.stepper-btn.active .stepper-badge {
+    background: var(--accent-color);
+    color: var(--bg-main);
+}
 
-    .canvas-split-divider {
-        width: 100%;
-        height: 2px;
-    }
+.stepper-arrow {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    user-select: none;
+    padding: 0 2px;
 }
 
 /* --- MATRIX 2x2 DISPLAY & INPUTS (MODOS 1 E 4) --- */
@@ -137,30 +100,48 @@
     background: rgba(15, 23, 42, 0.6);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    padding: 10px 14px;
-    margin-bottom: 8px;
+    padding: 12px 16px;
+    margin-bottom: 6px;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
     transition: border-color var(--trans-normal), box-shadow var(--trans-normal);
 }
 
 .matrix-bracket {
-    font-family: 'Times New Roman', serif;
-    font-size: 5.8rem;
-    font-weight: 300;
-    color: #94a3b8;
-    line-height: 0.82;
+    font-size: 0;
+    color: transparent;
     user-select: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transform: scaleY(1.35) scaleX(0.85);
+    width: 10px;
+    align-self: stretch;
+    margin: 2px 0;
+    border-color: var(--text-secondary);
+    border-style: solid;
+    border-width: 0;
+    opacity: 0.85;
+    flex-shrink: 0;
+    transition: border-color var(--trans-fast), opacity var(--trans-fast);
+}
+
+.matrix-bracket.left {
+    border-left-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+.matrix-bracket.right {
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
 }
 
 .matrix-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px 12px;
-    padding: 0 10px;
+    gap: 10px 14px;
+    padding: 0 12px;
 }
 
 .matrix-cell {
@@ -169,10 +150,17 @@
     align-items: center;
 }
 
+.matrix-input-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .matrix-cell input[type="number"],
 .matrix-cell input[type="text"] {
-    width: 72px;
-    height: 36px;
+    width: 78px;
+    height: 38px;
     text-align: center;
     background-color: var(--bg-surface);
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -183,6 +171,50 @@
     font-size: 0.95rem;
     outline: none;
     transition: all var(--trans-fast);
+    -moz-appearance: textfield;
+}
+
+.matrix-cell input[type="number"]::-webkit-outer-spin-button,
+.matrix-cell input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.cell-symbol {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    font-family: var(--font-mono);
+    font-size: 0.96rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text-secondary);
+    transition: opacity var(--trans-fast);
+    user-select: none;
+}
+
+.cell-symbol sub {
+    font-size: 0.72em;
+    bottom: -0.2em;
+    position: relative;
+    margin-left: 1px;
+}
+
+.cell-i .cell-symbol {
+    color: color-mix(in srgb, var(--accent-color) 85%, #ffffff);
+}
+
+.cell-j .cell-symbol {
+    color: color-mix(in srgb, var(--color-cyan) 85%, #ffffff);
+}
+
+.matrix-input-wrap input:focus + .cell-symbol,
+.matrix-input-wrap.has-value .cell-symbol {
+    opacity: 0;
+    visibility: hidden;
 }
 
 /* Coluna î (Amarelo) */
@@ -208,36 +240,6 @@
     color: var(--text-secondary);
     margin-top: 2px;
     font-family: var(--font-mono);
-}
-
-/* Badges da base vetorial */
-.basis-info {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-    margin-top: 4px;
-}
-
-.basis-badge {
-    flex: 1;
-    text-align: center;
-    padding: 5px 8px;
-    border-radius: var(--radius-sm);
-    font-size: 0.78rem;
-    font-weight: 600;
-    font-family: var(--font-mono);
-}
-
-.badge-i {
-    background: rgba(250, 204, 21, 0.12);
-    color: var(--accent-color);
-    border: 1px solid rgba(250, 204, 21, 0.28);
-}
-
-.badge-j {
-    background: rgba(56, 189, 248, 0.12);
-    color: var(--color-cyan);
-    border: 1px solid rgba(56, 189, 248, 0.28);
 }
 
 /* --- MATRIZ FUNCIONAL (MODO 3) --- */
@@ -338,6 +340,13 @@
 
 .btn-action.secondary:hover {
     background-color: rgba(255, 255, 255, 0.16);
+}
+
+.btn-action.secondary.active {
+    background-color: color-mix(in srgb, var(--accent-color) 18%, transparent);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--accent-color) 25%, transparent);
 }
 
 /* --- BARRA DE CONTEXTO RÁPIDO NO MODO FOCO (CANTO SUPERIOR ESQUERDO) --- */
