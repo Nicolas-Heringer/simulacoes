@@ -1,12 +1,157 @@
 /* =============================================================================
-   Estilos específicos para Gravitação e Órbitas Planetárias 3D
-   Design System 2.0
+   Estilos específicos para Forças Centrais & Leis de Kepler 2D
+   Design System 2.0 (Token-Driven, sem vh puro e sem cores soltas de UI)
    ============================================================================= */
 
 #simulationCanvas {
     display: block;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at center, #070d1e 0%, #02050f 100%);
+    background: radial-gradient(circle at center, var(--bg-surface) 0%, var(--bg-main) 100%);
     touch-action: none;
+    cursor: grab;
+}
+
+#simulationCanvas.is-hover-handle {
+    cursor: pointer;
+}
+
+#simulationCanvas.is-dragging {
+    cursor: grabbing;
+}
+
+/* Badge de diagnóstico integrado à pilha do canto superior esquerdo (evita sobreposição no Modo Foco) */
+.canvas-top-left-stack .canvas-info-badge {
+    position: static;
+    top: auto;
+    left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 10px;
+    font-size: 0.77rem;
+    max-width: min(355px, calc(100vw - 140px));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.canvas-info-badge .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    box-shadow: 0 0 8px var(--accent-color);
+    flex-shrink: 0;
+}
+
+.canvas-info-badge.is-capturing {
+    border-color: color-mix(in srgb, var(--color-cyan) 65%, transparent);
+}
+
+.canvas-info-badge.is-capturing .badge-dot {
+    background: var(--color-cyan);
+    box-shadow: 0 0 10px var(--color-cyan);
+}
+
+/* Transição suave ao ocultar a dica interativa após a primeira manipulação */
+.interactive-hint {
+    transition: opacity var(--trans-normal), transform var(--trans-normal);
+}
+
+.interactive-hint.is-dismissed {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+}
+
+/* Indicador cromático dos setores da 2ª Lei e registros da 3ª Lei dentro de .sim-readout */
+.sector-row-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sector-swatch-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+    box-shadow: 0 0 6px currentColor;
+}
+
+.readout-empty-note {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    padding: 2px 0;
+}
+
+/* Linha de ações lado a lado em cards de experimento (2ª e 3ª Leis) */
+.action-pair-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.action-pair-row .btn-primary,
+.action-pair-row .btn-secondary {
+    justify-content: center;
+}
+
+/* Ajuste de altura dos wrappers de gráfico no painel lateral */
+.sim-plot-card .plot-canvas-wrapper.plot-tall {
+    height: 132px;
+}
+
+/* Controles contextuais por lei de força */
+.force-param-block.is-hidden {
+    display: none;
+}
+
+/* Seletor rápido de 3 estágios (Referencial) integrado a .canvas-top-actions */
+.canvas-top-actions .frame-switcher-bar {
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    transform: none;
+    padding: 3px;
+    gap: 3px;
+    border-radius: var(--radius-lg);
+}
+
+.canvas-top-actions .frame-switcher-bar .toolbar-btn {
+    padding: 5px 9px;
+    font-size: 0.74rem;
+    white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+    .canvas-top-left-stack .canvas-info-badge {
+        font-size: 0.75rem;
+        padding: 5px 10px;
+        max-width: calc(100vw - 190px);
+    }
+
+    .canvas-top-actions .frame-switcher-bar .toolbar-btn {
+        padding: 4px 7px;
+        font-size: 0.71rem;
+    }
+
+    .interactive-hint {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .frame-step-prefix {
+        display: none;
+    }
+
+    .canvas-top-left-stack .canvas-info-badge {
+        max-width: calc(100vw - 165px);
+    }
 }

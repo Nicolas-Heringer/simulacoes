@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
     <meta name="theme-color" content="#0f172a">
-    <title>Movimento Planetário & Gravitação (Newton e Relatividade Geral) 3D - Plataforma Científica</title>
-    
+    <title>Forças Centrais & Leis de Kepler 2D — Plataforma Científica</title>
+
     <meta name="description"
-        content="Simulação 3D de mecânica orbital, gravitação universal de Newton e correção relativística de Schwarzschild. Acompanhe vetores físicos e telemetria de conservação de energia em tempo real.">
+        content="Laboratório interativo 2D de forças centrais e Leis de Kepler. Explore órbitas sob leis de potência (Teorema de Bertrand), precessão de Schwarzschild, Yukawa e Rutherford, capture setores de áreas iguais em tempos iguais e analise energia e espaço de fase radial.">
     <meta name="keywords"
-        content="gravitação 3D, órbitas keplerianas, leis de kepler, mecânica celeste, conservação de energia, relatividade geral, precessão de schwarzschild, telemetria orbital">
+        content="forças centrais, leis de kepler, lei das áreas, teorema de bertrand, órbitas elípticas, precessão de schwarzschild, potencial de yukawa, espalhamento de rutherford, espaço de fase radial, física clássica">
     <meta name="author" content="Nicolas Heringer">
 
-    <!-- Favicon e Design System CSS -->
+    <!-- Favicon e Design System 2.0 -->
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/gravidade.css">
@@ -40,20 +40,35 @@
 
     <!-- Layout Grid Principal -->
     <main class="sim-layout">
-        <!-- 1. Área do Canvas 3D Interativo -->
+        <!-- 1. Área do Canvas 2D Interativo -->
         <div class="canvas-area">
-            <canvas id="simulationCanvas"></canvas>
+            <canvas id="simulationCanvas" aria-label="Plano orbital interativo de forças centrais e Leis de Kepler"></canvas>
 
-            <!-- Pilha Vertical no Canto Superior Esquerdo -->
+            <!-- Pilha Vertical no Canto Superior Esquerdo (Badge + Barra Espelhada do Modo Foco) -->
             <div class="canvas-top-left-stack">
+                <div class="canvas-info-badge" id="canvas-regime-badge" aria-live="polite">
+                    <span class="badge-dot"></span>
+                    <span id="canvas-regime-text">Elíptica • e = 0.60 • Newton (n = 2.00)</span>
+                </div>
                 <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
             </div>
 
             <!-- Ações Flutuantes do Topo Direito -->
             <div class="canvas-top-actions">
-                <button id="btn-reset-view" class="canvas-btn-floating" title="Resetar Câmera 3D">
-                    <img src="../assets/icons/camera-reset.svg" class="icon-svg" alt="Reset Câmera">
-                    <span class="btn-label-text">Reset Visão</span>
+                <div class="canvas-toolbar frame-switcher-bar" id="canvas-frame-toolbar" role="group" aria-label="Perspectiva do referencial">
+                    <button type="button" class="toolbar-btn active" data-frame="m1" title="Estágio 1: Corpo central (m₁) fixo — órbita e vetores de m₂">
+                        <span class="frame-step-prefix">1. Em </span>m₁
+                    </button>
+                    <button type="button" class="toolbar-btn" data-frame="m2" title="Estágio 2: Corpo menor (m₂) no centro — órbita e vetores de m₁">
+                        <span class="frame-step-prefix">2. Em </span>m₂
+                    </button>
+                    <button type="button" class="toolbar-btn" data-frame="cm" title="Estágio 3: Centro de Massa (CM) — ambos os corpos orbitam o baricentro">
+                        <span class="frame-step-prefix">3. </span>CM
+                    </button>
+                </div>
+                <button id="btn-reset-view" class="canvas-btn-floating" data-camera-mode="fit" aria-pressed="false" title="Alternar Câmera: Enquadrar → Seguir m₁ → Seguir m₂">
+                    <img src="../assets/icons/camera-reset.svg" class="icon-svg" alt="Câmera">
+                    <span class="btn-label-text" id="btn-reset-view-text">Enquadrar</span>
                 </button>
                 <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
@@ -61,11 +76,17 @@
                 </button>
             </div>
 
+            <!-- Dica Interativa Temporária -->
+            <div class="interactive-hint" id="canvas-interactive-hint">
+                <img src="../assets/icons/touch-drag.svg" class="icon-svg icon-accent" alt="Arraste">
+                <span>Arraste o planeta ou a ponta de v₀ • Scroll/Pinça para zoom</span>
+            </div>
+
             <!-- Barra Flutuante de Transporte (#canvas-transport-toolbar) -->
             <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
                 <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
                         data-state="0" data-text-idle="Executar" data-text-active="Pausar"
-                        data-icon-idle="play" data-icon-active="pause" title="Executar / Pausar Órbita">
+                        data-icon-idle="play" data-icon-active="pause" title="Executar / Pausar Órbita (Espaço)">
                     <img src="../assets/icons/play.svg" class="icon-svg" alt="Executar">
                     <span class="btn-text">Executar</span>
                 </button>
@@ -92,11 +113,15 @@
 
             <!-- Topo: Barra de Abas Expansíveis -->
             <div class="tab-nav">
-                <button class="tab-btn active" id="tab-btn-params" data-tab="panel-tab-params">
-                    <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Parâmetros">
-                    <span class="tab-label">Parâmetros</span>
+                <button class="tab-btn active" id="tab-btn-orbit" data-tab="panel-tab-orbit" title="Força Central & Órbita">
+                    <img src="../assets/icons/orbital.svg" class="icon-svg" alt="Órbita">
+                    <span class="tab-label">Força & Órbita</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-theory" data-tab="panel-tab-theory">
+                <button class="tab-btn" id="tab-btn-kepler" data-tab="panel-tab-kepler" title="Leis de Kepler & Gráficos">
+                    <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="Kepler">
+                    <span class="tab-label">Kepler & Gráficos</span>
+                </button>
+                <button class="tab-btn" id="tab-btn-theory" data-tab="panel-tab-theory" title="Teoria & Deduções">
                     <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                     <span class="tab-label">Teoria</span>
                 </button>
@@ -107,219 +132,543 @@
 
             <!-- Centro: Corpo Rolável de Conteúdo -->
             <div class="panel-body">
-                <!-- CONTEÚDO DA ABA 1: PARÂMETROS E TELEMETRIA -->
-                <div class="tab-pane active" id="panel-tab-params">
-                    <!-- Seção de Presets de Órbita -->
-                    <div class="control-section">
-                        <span class="control-label">Regimes Orbitais Pré-configurados:</span>
+
+                <!-- ========================================================= -->
+                <!-- ABA 1: FORÇA CENTRAL & CONDIÇÕES ORBITAIS                 -->
+                <!-- ========================================================= -->
+                <div class="tab-pane active" id="panel-tab-orbit">
+                    <div class="tab-header">
+                        <div class="tab-header-row">
+                            <h3 class="tab-title">Forças Centrais & Órbitas</h3>
+                            <div class="sim-badge idle" id="header-status-badge">
+                                <span class="status-dot"></span>
+                                <span id="header-status-text">Pausado</span>
+                            </div>
+                        </div>
+                        <p class="tab-subtitle">Escolha a lei radial $\vec{F}(r) = f(r)\hat{r}$ ou arraste $\vec{r}_0$ e $\vec{v}_0$ direto no canvas.</p>
+                    </div>
+
+                    <!-- Presets Orbitais Rápidos -->
+                    <div class="control-group">
+                        <label>Regimes Orbitais Pré-configurados</label>
                         <div class="control-grid-2x2">
-                            <button class="btn-preset active" data-preset="circular">Órbita Circular ($e=0$)</button>
-                            <button class="btn-preset" data-preset="eliptica">Elíptica ($e \approx 0.55$)</button>
-                            <button class="btn-preset" data-preset="inclinada">Inclinada 3D ($i=35^\circ$)</button>
-                            <button class="btn-preset" data-preset="escape">Escape / Parabólica</button>
+                            <button class="btn-preset" data-preset="circular">Circular ($e=0$)</button>
+                            <button class="btn-preset active" data-preset="eliptica">Elíptica ($e=0.60$)</button>
+                            <button class="btn-preset" data-preset="cometa">Cometa ($e=0.80$)</button>
+                            <button class="btn-preset" data-preset="escape">Escape / Hipérbole</button>
                         </div>
                     </div>
 
-                    <!-- Card de Telemetria Orbital Instantânea (.sim-readout) -->
-                    <div class="control-section">
-                        <span class="control-label">Telemetria Orbital Instantânea:</span>
-                        <div class="sim-readout">
-                            <div class="sim-readout-title">
-                                <img src="../assets/icons/gauge.svg" class="icon-svg icon-accent" alt="Telemetria">
-                                <span>Diagnóstico do Sistema Central</span>
+                    <div class="sim-divider-label"><span>Perspectiva & Referencial</span></div>
+
+                    <!-- Seletor Progressivo de 3 Estágios (m1 -> m2 -> CM) -->
+                    <div class="control-group">
+                        <div class="segmented-control" id="panel-frame-selector">
+                            <button type="button" class="segment-btn active" data-frame="m1">1. Em $m_1$</button>
+                            <button type="button" class="segment-btn" data-frame="m2">2. Em $m_2$</button>
+                            <button type="button" class="segment-btn" data-frame="cm">3. Centro de Massa</button>
+                        </div>
+                        <div class="field-hint" id="hint-frame" data-for="panel-frame-selector"></div>
+                    </div>
+
+                    <div class="sim-divider-label"><span>Lei de Força Central</span></div>
+
+                    <!-- Seletor de Modelo de Força -->
+                    <div class="control-group">
+                        <label for="select-force-law">Modelo de Interação Radial</label>
+                        <select id="select-force-law" class="sim-control"
+                                data-focus-control="select"
+                                data-focus-label="Força"
+                                data-focus-order="1"
+                                data-focus-tab="global">
+                            <option value="power">Lei de Potência: F(r) = −k / rⁿ (Newton n = 2)</option>
+                            <option value="schwarzschild">Relatividade Geral (Schwarzschild)</option>
+                            <option value="repulsive">Força Repulsiva: F(r) = +k / r² (Rutherford)</option>
+                            <option value="yukawa">Potencial de Yukawa (Blindado)</option>
+                        </select>
+                        <div class="field-hint" id="force-law-hint" data-for="select-force-law"></div>
+                    </div>
+
+                    <!-- Parâmetro Contextual: Lei de Potência (n) + Atalhos de Bertrand -->
+                    <div class="control-group force-param-block" id="param-block-power">
+                        <div class="slider-container sim-dual-slider tone-purple" id="field-exponent">
+                            <div class="slider-header">
+                                <label for="slider-exponent" class="slider-label">Expoente Radial ($n$):</label>
+                                <div class="dual-input-wrapper">
+                                    <input type="number" id="num-exponent" class="dual-input-number" min="-1.0" max="3.5" step="0.05" value="2.00">
+                                    <span class="dual-input-unit">n</span>
+                                </div>
                             </div>
-                            <div class="sim-readout-row">
-                                <span class="sim-readout-label">Raio Orbital ($r$):</span>
-                                <span class="sim-readout-value tone-cyan" id="readout-raio">200.0 u</span>
-                            </div>
-                            <div class="sim-readout-row">
-                                <span class="sim-readout-label">Velocidade ($v$):</span>
-                                <span class="sim-readout-value tone-rose" id="readout-velocidade">2.24 u/s</span>
-                            </div>
-                            <div class="sim-readout-row">
-                                <span class="sim-readout-label">Energia Mecânica ($E$):</span>
-                                <span class="sim-readout-value tone-accent" id="readout-energia-total">-2.5 J</span>
-                            </div>
-                            <div class="sim-readout-row">
-                                <span class="sim-readout-label">Excentricidade ($e$):</span>
-                                <span class="sim-readout-value tone-emerald" id="readout-excentricidade">0.00</span>
-                            </div>
+                            <input type="range" id="slider-exponent" class="sim-slider" min="-1.0" max="3.5" step="0.05" value="2.00"
+                                   data-focus-control="slider"
+                                   data-focus-label="n"
+                                   data-focus-order="3"
+                                   data-focus-tab="global">
+                        </div>
+                        <div class="field-hint" id="hint-exponent" data-for="field-exponent"></div>
+
+                        <div class="control-grid-2x2" style="margin-top: 6px;">
+                            <button class="btn-preset active" data-bertrand="2.00">Newton ($n=2$)</button>
+                            <button class="btn-preset" data-bertrand="-1.00">Hooke ($n=-1$)</button>
+                            <button class="btn-preset" data-bertrand="2.20">Roseta ($n=2.2$)</button>
+                            <button class="btn-preset" data-bertrand="3.00">Instável ($n=3$)</button>
                         </div>
                     </div>
 
-                    <!-- Sliders Numéricos de Gravidade -->
-                    <div class="control-section">
-                        <span class="control-label">Parâmetros Gravitacionais e Iniciais:</span>
-
-                        <div class="slider-container sim-dual-slider" data-focus-control="slider" data-focus-label="Sol" data-focus-order="1">
+                    <!-- Parâmetro Contextual: Schwarzschild (α_GR) -->
+                    <div class="control-group force-param-block hidden" id="param-block-schwarzschild" hidden>
+                        <div class="slider-container sim-dual-slider tone-orange" id="field-gr">
                             <div class="slider-header">
-                                <label for="slider-massa-sol" class="slider-label">Massa do Sol ($M$):</label>
+                                <label for="slider-gr" class="slider-label">Intensidade Relativística ($\alpha_{\text{GR}}$):</label>
                                 <div class="dual-input-wrapper">
-                                    <input type="number" id="num-massa-sol" class="dual-input-number" min="200" max="3000" step="50" value="1000">
-                                    <span class="dual-input-unit">u</span>
+                                    <input type="number" id="num-gr" class="dual-input-number" min="0.0" max="4.0" step="0.1" value="1.2">
+                                    <span class="dual-input-unit">×</span>
                                 </div>
                             </div>
-                            <input type="range" id="slider-massa-sol" class="sim-slider" min="200" max="3000" step="50" value="1000">
+                            <input type="range" id="slider-gr" class="sim-slider" min="0.0" max="4.0" step="0.1" value="1.2">
                         </div>
+                        <div class="field-hint" id="hint-gr" data-for="field-gr"></div>
+                    </div>
 
-                        <div class="slider-container sim-dual-slider">
+                    <!-- Parâmetro Contextual: Yukawa (λ) -->
+                    <div class="control-group force-param-block hidden" id="param-block-yukawa" hidden>
+                        <div class="slider-container sim-dual-slider tone-cyan" id="field-yukawa">
                             <div class="slider-header">
-                                <label for="slider-massa-planeta" class="slider-label">Massa do Planeta ($m$):</label>
+                                <label for="slider-yukawa" class="slider-label">Alcance de Blindagem ($\lambda$):</label>
                                 <div class="dual-input-wrapper">
-                                    <input type="number" id="num-massa-planeta" class="dual-input-number" min="1" max="50" step="1" value="10">
-                                    <span class="dual-input-unit">u</span>
+                                    <input type="number" id="num-yukawa" class="dual-input-number" min="0.50" max="6.00" step="0.10" value="2.20">
+                                    <span class="dual-input-unit">UA</span>
                                 </div>
                             </div>
-                            <input type="range" id="slider-massa-planeta" class="sim-slider" min="1" max="50" step="1" value="10">
+                            <input type="range" id="slider-yukawa" class="sim-slider" min="0.50" max="6.00" step="0.10" value="2.20">
+                        </div>
+                        <div class="field-hint" id="hint-yukawa" data-for="field-yukawa"></div>
+                    </div>
+
+                    <div class="sim-divider-label"><span id="divider-central-param">Condições Iniciais & Massas</span></div>
+
+                    <!-- Sliders Numéricos Fundamentais -->
+                    <div class="control-group">
+                        <div class="slider-container sim-dual-slider">
+                            <div class="slider-header">
+                                <label for="slider-mu" class="slider-label" id="label-central-param"><span id="label-central-param-text">Massa do Corpo 1</span> (<span id="label-central-param-symbol">$m_1$</span>):</label>
+                                <div class="dual-input-wrapper">
+                                    <input type="number" id="num-mu" class="dual-input-number" min="0.20" max="3.00" step="0.05" value="1.00">
+                                    <span class="dual-input-unit" id="unit-central-param">M☉</span>
+                                </div>
+                            </div>
+                            <input type="range" id="slider-mu" class="sim-slider" min="0.20" max="3.00" step="0.05" value="1.00">
                         </div>
 
-                        <div class="slider-container sim-dual-slider">
+                        <div class="slider-container sim-dual-slider tone-cyan" id="field-m2">
+                            <div class="slider-header">
+                                <label for="slider-m2" class="slider-label"><span id="label-m2-text">Massa do Corpo 2</span> (<span id="label-m2-symbol">$m_2$</span>):</label>
+                                <div class="dual-input-wrapper">
+                                    <input type="number" id="num-m2" class="dual-input-number" min="0.00" max="3.00" step="0.02" value="0.00">
+                                    <span class="dual-input-unit" id="unit-m2">M☉</span>
+                                </div>
+                            </div>
+                            <input type="range" id="slider-m2" class="sim-slider" min="0.00" max="3.00" step="0.02" value="0.00">
+                        </div>
+                        <div class="field-hint" id="hint-m2" data-for="field-m2"></div>
+
+                        <div class="control-grid-2x2" style="margin-top: 2px;">
+                            <button type="button" class="btn-preset active" data-mass-ratio="0">Partícula ($m_2 = 0$)</button>
+                            <button type="button" class="btn-preset" data-mass-ratio="0.2">Gigante ($1:5$)</button>
+                            <button type="button" class="btn-preset" data-mass-ratio="0.3333">Duplo ($1:3$)</button>
+                            <button type="button" class="btn-preset" data-mass-ratio="1">Binário ($1:1$)</button>
+                        </div>
+
+                        <div class="slider-container sim-dual-slider tone-emerald">
                             <div class="slider-header">
                                 <label for="slider-distancia" class="slider-label">Distância Inicial ($r_0$):</label>
                                 <div class="dual-input-wrapper">
-                                    <input type="number" id="num-distancia" class="dual-input-number" min="80" max="400" step="5" value="200">
-                                    <span class="dual-input-unit">u</span>
+                                    <input type="number" id="num-distancia" class="dual-input-number" min="0.40" max="3.00" step="0.05" value="1.60">
+                                    <span class="dual-input-unit">UA</span>
                                 </div>
                             </div>
-                            <input type="range" id="slider-distancia" class="sim-slider" min="80" max="400" step="5" value="200">
+                            <input type="range" id="slider-distancia" class="sim-slider" min="0.40" max="3.00" step="0.05" value="1.60">
                         </div>
 
-                        <div class="slider-container sim-dual-slider" data-focus-control="slider" data-focus-label="Velocidade" data-focus-order="2">
+                        <div class="slider-container sim-dual-slider tone-rose" id="field-velocidade">
                             <div class="slider-header">
                                 <label for="slider-velocidade" class="slider-label">Velocidade Inicial ($v_0$):</label>
                                 <div class="dual-input-wrapper">
-                                    <input type="number" id="num-velocidade" class="dual-input-number" min="0.5" max="5.0" step="0.05" value="2.24">
-                                    <span class="dual-input-unit">u/s</span>
+                                    <input type="number" id="num-velocidade" class="dual-input-number" min="0.50" max="14.00" step="0.05" value="3.14">
+                                    <span class="dual-input-unit">UA/a</span>
                                 </div>
                             </div>
-                            <input type="range" id="slider-velocidade" class="sim-slider" min="0.5" max="5.0" step="0.05" value="2.24">
+                            <input type="range" id="slider-velocidade" class="sim-slider" min="0.50" max="14.00" step="0.05" value="3.14"
+                                   data-focus-control="slider"
+                                   data-focus-label="v₀"
+                                   data-focus-order="4"
+                                   data-focus-tab="global">
+                        </div>
+                        <div class="field-hint" id="hint-velocidade" data-for="field-velocidade"></div>
+
+                        <div class="slider-container sim-dual-slider tone-cyan">
+                            <div class="slider-header">
+                                <label for="slider-angulo" class="slider-label">Ângulo de Lançamento ($\gamma$):</label>
+                                <div class="dual-input-wrapper">
+                                    <input type="number" id="num-angulo" class="dual-input-number" min="-75" max="75" step="1" value="0">
+                                    <span class="dual-input-unit">°</span>
+                                </div>
+                            </div>
+                            <input type="range" id="slider-angulo" class="sim-slider" min="-75" max="75" step="1" value="0">
                         </div>
                     </div>
 
-                    <!-- Filtros Visuais de Vetores e Efeitos -->
-                    <div class="control-section">
-                        <span class="control-label">Camadas, Vetores e Relatividade:</span>
+                    <div class="sim-divider-label"><span>Camadas & Vetores no Plano</span></div>
+
+                    <!-- Interruptores Visuais -->
+                    <div class="control-group">
                         <div class="switch-container">
-                            <span class="switch-label">Vetor Posição $\vec{r}$ (Verde)</span>
-                            <label class="sim-switch">
-                                <input type="checkbox" id="show-position" checked>
-                                <span class="slider-round"></span>
-                            </label>
-                        </div>
-                        <div class="switch-container">
-                            <span class="switch-label">Vetor Velocidade $\vec{v}$ (Rosa)</span>
-                            <label class="sim-switch">
+                            <span class="switch-label">Vetor Velocidade $\vec{v}$ (Arrastável)</span>
+                            <label class="sim-switch tone-rose">
                                 <input type="checkbox" id="show-velocity" checked>
                                 <span class="slider-round"></span>
                             </label>
                         </div>
                         <div class="switch-container">
-                            <span class="switch-label">Rastro Histórico da Trajetória</span>
+                            <span class="switch-label">Vetor Força Central $\vec{F}$</span>
+                            <label class="sim-switch tone-orange">
+                                <input type="checkbox" id="show-force" checked>
+                                <span class="slider-round"></span>
+                            </label>
+                        </div>
+                        <div class="switch-container">
+                            <span class="switch-label">Vetor Posição $\vec{r}$</span>
+                            <label class="sim-switch tone-emerald">
+                                <input type="checkbox" id="show-position" checked>
+                                <span class="slider-round"></span>
+                            </label>
+                        </div>
+                        <div class="switch-container">
+                            <span class="switch-label">Pré-visualização da Trajetória</span>
+                            <label class="sim-switch tone-cyan">
+                                <input type="checkbox" id="show-preview" checked>
+                                <span class="slider-round"></span>
+                            </label>
+                        </div>
+                        <div class="switch-container">
+                            <span class="switch-label">Rastro Histórico da Órbita</span>
                             <label class="sim-switch">
                                 <input type="checkbox" id="show-orbit-trail" checked>
                                 <span class="slider-round"></span>
                             </label>
                         </div>
                         <div class="switch-container">
-                            <span class="switch-label">Plano Eclíptico & Eixos 3D</span>
-                            <label class="sim-switch">
-                                <input type="checkbox" id="show-grid-3d" checked>
+                            <span class="switch-label">Rastro Longo (Visualizar Rosetas)</span>
+                            <label class="sim-switch tone-purple">
+                                <input type="checkbox" id="toggle-long-trail">
                                 <span class="slider-round"></span>
                             </label>
                         </div>
                         <div class="switch-container">
-                            <span class="switch-label">Correção Relativística (Schwarzschild)</span>
+                            <span class="switch-label">Grade Polar & Eixos</span>
                             <label class="sim-switch">
-                                <input type="checkbox" id="toggle-relativity">
+                                <input type="checkbox" id="show-grid" checked>
                                 <span class="slider-round"></span>
                             </label>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Card de Telemetria de Conservação de Energia (MultiSeriesPlot) -->
-                    <div class="sim-plot-card">
-                        <div class="plot-header">
-                            <div class="plot-title-group">
-                                <span class="plot-dot"></span>
-                                <span class="plot-title">Conservação de Energia em Tempo Real</span>
+                <!-- ========================================================= -->
+                <!-- ABA 2: LEIS DE KEPLER, SETORES DE ÁREA & GRÁFICOS         -->
+                <!-- ========================================================= -->
+                <div class="tab-pane" id="panel-tab-kepler" style="display: none;">
+                    <div class="tab-header">
+                        <div class="tab-header-row">
+                            <h3 class="tab-title">Leis de Kepler & Telemetria</h3>
+                            <div class="sim-badge" id="kepler-conservation-badge">
+                                <span class="status-dot"></span>
+                                <span>L Conservado</span>
                             </div>
                         </div>
-                        <div class="plot-canvas-wrapper" style="height: 120px;">
-                            <canvas class="sim-plot-canvas" id="canvas-energy-plot"></canvas>
+                        <p class="tab-subtitle">Compare setores varridos no mesmo intervalo $\Delta t$ e acompanhe os invariantes físicos.</p>
+                    </div>
+
+                    <!-- BLOCO A: 2ª LEI DE KEPLER (SETORES DE ÁREAS IGUAIS) -->
+                    <div class="sim-divider-label"><span>2ª Lei — Varredura de Áreas ($\Delta t$)</span></div>
+
+                    <div class="control-group">
+                        <div class="slider-container sim-dual-slider tone-cyan">
+                            <div class="slider-header">
+                                <label for="slider-sector-dt" class="slider-label">Intervalo de Varredura ($\Delta t$):</label>
+                                <div class="dual-input-wrapper">
+                                    <input type="number" id="num-sector-dt" class="dual-input-number" min="0.04" max="0.50" step="0.01" value="0.12">
+                                    <span class="dual-input-unit">ano</span>
+                                </div>
+                            </div>
+                            <input type="range" id="slider-sector-dt" class="sim-slider" min="0.04" max="0.50" step="0.01" value="0.12">
                         </div>
-                        <div class="plot-legend-pills">
-                            <span class="pill-cinetica">● $K$ Cinética</span>
-                            <span class="pill-potencial">● $U$ Potencial</span>
-                            <span class="pill-total">● $E$ Mecânica Total</span>
+
+                        <div class="action-pair-row">
+                            <button type="button" class="btn-primary tone-cyan" id="btn-capture-sector"
+                                    data-focus-control="action"
+                                    data-focus-label="Capturar Setor"
+                                    data-focus-order="2"
+                                    data-focus-tab="global">
+                                <img src="../assets/icons/stopwatch.svg" class="icon-svg" alt="Capturar">
+                                <span id="btn-capture-sector-label">Capturar Setor ($\Delta t$)</span>
+                            </button>
+                            <button type="button" class="btn-secondary" id="btn-clear-sectors" title="Limpar todos os setores">
+                                <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Limpar">
+                            </button>
+                        </div>
+
+                        <div class="switch-container">
+                            <span class="switch-label">Varredura Automática Contínua</span>
+                            <label class="sim-switch tone-cyan">
+                                <input type="checkbox" id="switch-auto-sectors">
+                                <span class="slider-round"></span>
+                            </label>
+                        </div>
+
+                        <!-- Readout Comparativo dos Setores Capturados -->
+                        <div class="sim-readout" id="sectors-comparison-readout">
+                            <div class="sim-readout-title">
+                                <img src="../assets/icons/sparkles.svg" class="icon-svg icon-accent" alt="Setores">
+                                <span>Comparação de Áreas Varridas</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Taxa Areal ($\frac{dA}{dt} = \frac{h}{2}$):</span>
+                                <span class="sim-readout-value tone-cyan" id="readout-areal-rate">2.513 UA²/a</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Área Esperada ($A = \frac{h}{2}\Delta t$):</span>
+                                <span class="sim-readout-value tone-emerald" id="readout-expected-area">0.302 UA²</span>
+                            </div>
+                            <div id="sectors-list-container">
+                                <div class="readout-empty-note">Clique em <strong>Capturar Setor</strong> perto do periélio e novamente perto do afélio para comparar áreas no mesmo $\Delta t$.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico Tempo × Área (MultiSeriesPlot) -->
+                    <div class="control-group">
+                        <div class="segmented-control" id="areaplot-mode-selector">
+                            <button class="segment-btn active" data-area-mode="accumulated">
+                                <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="Área"> Área $A(t) \times t$
+                            </button>
+                            <button class="segment-btn" data-area-mode="rate-vs-speed">
+                                <img src="../assets/icons/gauge.svg" class="icon-svg" alt="Taxa"> $dA/dt$ vs. $v(t)$
+                            </button>
+                        </div>
+                        <div class="sim-plot-card">
+                            <div class="plot-header">
+                                <div class="plot-title-group">
+                                    <span class="plot-dot"></span>
+                                    <span class="plot-title" id="areaplot-title">Relação Tempo × Área: $A(t)$ Linear</span>
+                                </div>
+                            </div>
+                            <div class="plot-canvas-wrapper plot-tall">
+                                <canvas class="sim-plot-canvas" id="canvas-area-plot"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BLOCO B: 1ª & 3ª LEIS DE KEPLER -->
+                    <div class="sim-divider-label"><span>1ª & 3ª Leis — Geometria & Período</span></div>
+
+                    <div class="control-group">
+                        <div class="switch-container">
+                            <span class="switch-label">Geometria da 1ª Lei (Focos $F_1/F_2$, Eixos $a, b$)</span>
+                            <label class="sim-switch tone-accent">
+                                <input type="checkbox" id="show-kepler-geometry" checked>
+                                <span class="slider-round"></span>
+                            </label>
+                        </div>
+                        <div class="switch-container">
+                            <span class="switch-label">Vetor de Laplace-Runge-Lenz ($\vec{e}$)</span>
+                            <label class="sim-switch tone-purple">
+                                <input type="checkbox" id="show-lrl-vector">
+                                <span class="slider-round"></span>
+                            </label>
+                        </div>
+
+                        <!-- Card de Telemetria Orbital & 3ª Lei -->
+                        <div class="sim-readout">
+                            <div class="sim-readout-title">
+                                <img src="../assets/icons/gauge.svg" class="icon-svg icon-accent" alt="Telemetria">
+                                <span>Diagnóstico Orbital & Invariantes</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Raio ($r$) / Velocidade ($v$):</span>
+                                <span class="sim-readout-value tone-cyan" id="readout-rv">1.60 UA • 3.14 UA/a</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Momento Angular ($h = L/m$):</span>
+                                <span class="sim-readout-value tone-emerald" id="readout-angular-momentum">5.027 UA²/a</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Energia Específica ($E/m$):</span>
+                                <span class="sim-readout-value tone-accent" id="readout-energy-total">-19.74</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Excentricidade ($e$) / Semi-eixo ($a$):</span>
+                                <span class="sim-readout-value tone-purple" id="readout-ecc-a">0.60 • 1.00 UA</span>
+                            </div>
+                            <div class="sim-readout-row hidden" id="row-cm-semiaxes" hidden>
+                                <span class="sim-readout-label">Semi-eixos no CM ($a_1 / a_2$):</span>
+                                <span class="sim-readout-value tone-cyan" id="readout-cm-semiaxes">0.00 / 1.00 UA</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Período ($T$) [medido / Kepler]:</span>
+                                <span class="sim-readout-value tone-orange" id="readout-period">-- / 1.000 ano</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Constante 3ª Lei ($T^2 / a^3$):</span>
+                                <span class="sim-readout-value tone-rose" id="readout-third-law">1.000</span>
+                            </div>
+                        </div>
+
+                        <!-- Coletor Experimental da 3ª Lei -->
+                        <div class="action-pair-row">
+                            <button type="button" class="btn-secondary" id="btn-record-third-law">
+                                <img src="../assets/icons/orbital.svg" class="icon-svg icon-accent" alt="Registrar">
+                                <span>Registrar Órbita na 3ª Lei</span>
+                            </button>
+                            <button type="button" class="btn-secondary" id="btn-clear-third-law" title="Limpar registros da 3ª Lei">
+                                <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Limpar">
+                            </button>
+                        </div>
+
+                        <div class="sim-readout" id="third-law-log-readout">
+                            <div class="sim-readout-title">
+                                <img src="../assets/icons/compass.svg" class="icon-svg icon-accent" alt="3ª Lei">
+                                <span>Tabela Experimental ($T^2 / a^3$)</span>
+                            </div>
+                            <div id="third-law-list-container">
+                                <div class="readout-empty-note">Mude $r_0$ ou $v_0$ e clique em <strong>Registrar Órbita</strong> para comparar $T^2/a^3$ entre diferentes órbitas.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BLOCO C: ENERGIA & ESPAÇO DE FASE RADIAL -->
+                    <div class="sim-divider-label"><span>Energia & Espaço de Fase Radial</span></div>
+
+                    <div class="control-group">
+                        <div class="segmented-control" id="energyplot-mode-selector">
+                            <button class="segment-btn active" data-plot-mode="time-series">
+                                <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="Energia"> Energias $K, U, E$
+                            </button>
+                            <button class="segment-btn" data-plot-mode="phase-space">
+                                <img src="../assets/icons/orbital.svg" class="icon-svg" alt="Fase"> Fase Radial $(r, p_r)$
+                            </button>
+                        </div>
+                        <div class="sim-plot-card">
+                            <div class="plot-header">
+                                <div class="plot-title-group">
+                                    <span class="plot-dot"></span>
+                                    <span class="plot-title" id="energyplot-title">Conservação de Energia: $K(t), U(t), E(t)$</span>
+                                </div>
+                            </div>
+                            <div class="plot-canvas-wrapper plot-tall">
+                                <canvas class="sim-plot-canvas" id="canvas-energy-plot"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- CONTEÚDO DA ABA 2: TEORIA & LEIS DE KEPLER -->
+                <!-- ========================================================= -->
+                <!-- ABA 3: TEORIA, FORÇAS CENTRAIS & LEIS DE KEPLER           -->
+                <!-- ========================================================= -->
                 <div class="tab-pane" id="panel-tab-theory" style="display: none;">
                     <div class="theory-card">
-                        <h3>Mecânica Orbital & Gravitação Universal</h3>
+                        <h3>1. Forças Centrais e Confinamento Planar</h3>
                         <p>
-                            A dinâmica dos corpos celestes é governada pela <strong>Lei da Gravitação Universal de Newton</strong>, que estabelece uma força atrativa proporcional ao produto das massas e inversamente proporcional ao quadrado da distância:
+                            Uma força é dita <strong>central</strong> quando aponta exclusivamente ao longo da reta que liga a partícula a um centro fixo e sua magnitude depende apenas da distância $r$:
                         </p>
-                        <div class="katex-display">
-                            $$\vec{F}_g = -G \frac{M m}{r^2} \hat{r} = -G \frac{M m}{r^3} \vec{r}$$
+                        <div class="math-block">
+                            $$\vec{F}(\vec{r}) = f(r)\,\hat{r}, \qquad U(r) = -\int f(r)\,dr$$
                         </div>
                         <p>
-                            Em um campo de força puramente central, o <strong>Momento Angular</strong> $\vec{L} = \vec{r} \times \vec{p}$ é estritamente conservado em magnitude e direção, restringindo o movimento orbital a um plano invariante bidimensional.
+                            Como $\vec{r}$ e $\vec{F}$ são colineares, o torque em relação à origem é identicamente nulo:
                         </p>
-
-                        <h4>As Três Leis de Kepler</h4>
-                        <ol>
-                            <li>
-                                <strong>1ª Lei (Órbitas Elípticas)</strong>: Os planetas descrevem órbitas cônicas em torno do Sol, o qual ocupa um dos focos da elipse.
-                                $$\frac{p}{r} = 1 + e \cos(\theta)$$
-                            </li>
-                            <li>
-                                <strong>2ª Lei (Lei das Áreas)</strong>: O vetor raio varre áreas iguais em tempos iguais, resultante da conservação do momento angular ($\frac{dA}{dt} = \frac{L}{2m} = \text{constante}$).
-                            </li>
-                            <li>
-                                <strong>3ª Lei (Lei dos Períodos)</strong>: O quadrado do período orbital $T^2$ é diretamente proporcional ao cubo do semi-eixo maior $a^3$:
-                                $$T^2 = \frac{4\pi^2}{G(M + m)} a^3$$
-                            </li>
-                        </ol>
-
-                        <h4>Conservação da Energia Mecânica</h4>
-                        <p>
-                            A energia mecânica total de uma partícula em órbita é a soma escalar da energia cinética ($K$) com a energia potencial gravitacional ($U$):
-                        </p>
-                        <div class="katex-display">
-                            $$E = K + U = \frac{1}{2} m v^2 - \frac{G M m}{r} = -\frac{G M m}{2a}$$
+                        <div class="math-block">
+                            $$\vec{\tau} = \vec{r} \times \vec{F} = \vec{0} \implies \frac{d\vec{L}}{dt} = \vec{0} \implies \vec{L} = \vec{r} \times m\vec{v} = \text{constante}$$
                         </div>
                         <p>
-                            O sinal da energia total determina a geometria da trajetória:
+                            Como $\vec{r} \cdot \vec{L} = 0$ em todo instante, toda trajetória sob força central permanece confinada a um <strong>plano invariante bidimensional</strong> perpendicular a $\vec{L}$.
+                        </p>
+                    </div>
+
+                    <div class="theory-card">
+                        <h3>2. A 2ª Lei de Kepler: Universal para Toda Força Central</h3>
+                        <p>
+                            Em um intervalo infinitesimal $dt$, o vetor posição $\vec{r}$ varre um triângulo elementar de área $dA = \frac{1}{2}|\vec{r} \times d\vec{r}| = \frac{1}{2}|\vec{r} \times \vec{v}|\,dt$. Logo:
+                        </p>
+                        <div class="math-block">
+                            $$\frac{dA}{dt} = \frac{|\vec{L}|}{2m} = \frac{h}{2} = \text{constante} \implies A(t) = \frac{h}{2}\,t$$
+                        </div>
+                        <p>
+                            <strong>Resultado fundamental:</strong> a Lei das Áreas <em>não depende</em> da forma $1/r^2$ da gravidade! Ela vale para <strong>qualquer força central</strong> — inclusive leis de potência $1/r^n$, potenciais de Yukawa, correção relativística de Schwarzschild e espalhamento repulsivo de Rutherford. Por isso, o gráfico $A(t) \times t$ é sempre uma reta perfeita e setores capturados no mesmo $\Delta t$ possuem sempre a mesma área.
+                        </p>
+                    </div>
+
+                    <div class="theory-card">
+                        <h3>3. 1ª Lei de Kepler & Teorema de Bertrand</h3>
+                        <p>
+                            Para a interação gravitacional newtoniana ($f(r) = -\frac{GMm}{r^2}$), existe uma simetria dinâmica adicional expressa pela conservação do <strong>vetor de Laplace-Runge-Lenz</strong> (adimensionalizado como vetor excentricidade $\vec{e}$):
+                        </p>
+                        <div class="math-block">
+                            $$\vec{e} = \frac{\vec{v} \times \vec{h}}{GM} - \hat{r}, \qquad r(\theta) = \frac{p}{1 + e\cos(\theta - \varpi)}$$
+                        </div>
+                        <p>
+                            O vetor $\vec{e}$ aponta sempre da origem (foco $F_1$) ao periélio, impedindo a precessão da órbita. Pelo <strong>Teorema de Bertrand</strong>, entre todas as forças centrais atrativas de lei de potência $F(r) = -k/r^n$, apenas dois casos garantem que toda órbita ligada seja fechada:
                         </p>
                         <ul>
-                            <li>$E < 0$: Trajetória fechada limitada (Elipse, $e < 1$ ou Círculo, $e = 0$).</li>
-                            <li>$E = 0$: Trajetória de escape limite (Parábola, $e = 1$).</li>
-                            <li>$E > 0$: Trajetória aberta hiperbólica ($e > 1$).</li>
+                            <li><strong>Newton / Kepler ($n = 2$)</strong>: elipses com o centro de força em um dos <em>focos</em> ($F_1$).</li>
+                            <li><strong>Oscilador Harmônico / Hooke ($n = -1$, $F = -kr$)</strong>: elipses com o centro de força no <em>centro geométrico</em>.</li>
+                            <li><strong>Outros valores ($n \neq 2, -1$)</strong>: a linha dos apsides precessiona formando <em>rosetas</em>; para $n \ge 3$, órbitas circulares tornam-se instáveis.</li>
                         </ul>
+                    </div>
 
-                        <h4>Velocidade Orbital Circular & Escape</h4>
-                        <div class="katex-display">
-                            $$v_{\text{circ}} = \sqrt{\frac{G M}{r}}, \quad v_{\text{esc}} = \sqrt{\frac{2 G M}{r}} = \sqrt{2} \cdot v_{\text{circ}}$$
-                        </div>
-
-                        <h4>Correção Relativística & Precessão de Schwarzschild</h4>
+                    <div class="theory-card">
+                        <h3>4. 3ª Lei de Kepler & Escala Generalizada</h3>
                         <p>
-                            Na <strong>Relatividade Geral de Einstein</strong>, o espaço-tempo em torno de uma massa esférica é descrito pela métrica de Schwarzschild. O potencial efetivo adquire um termo corretivo atrativo de ordem $1/r^3$:
+                            Integrando a taxa areal constante $dA/dt = h/2$ sobre a área total $A_{\text{elipse}} = \pi a b$ de uma órbita newtoniana fechada ($b = a\sqrt{1 - e^2}$ e $h = \sqrt{\mu a(1 - e^2)}$), obtém-se a <strong>Lei Harmônica</strong>:
                         </p>
-                        <div class="katex-display">
-                            $$V_{\text{eff}}(r) = -\frac{G M}{r} + \frac{L^2}{2 m^2 r^2} - \frac{G M L^2}{c^2 m^2 r^3}$$
+                        <div class="math-block">
+                            $$T = \frac{2\pi a b}{h} \implies \frac{T^2}{a^3} = \frac{4\pi^2}{GM} = \text{constante}$$
                         </div>
                         <p>
-                            Esse termo quebra a conservação estrita do vetor de Laplace-Runge-Lenz, provocando o avanço anômalo do periélio (precessão orbital) a cada revolução completa:
+                            Note que o período $T$ depende <em>exclusivamente</em> do semi-eixo maior $a$, e não da excentricidade $e$. Para uma lei de potência geral $F \propto -1/r^n$, a escala se generaliza para $T^2 \propto a^{n+1}$ (no oscilador harmônico $n = -1$, o período é isócrono: $T$ independe de $a$!).
                         </p>
-                        <div class="katex-display">
-                            $$\Delta \phi \approx \frac{6 \pi G M}{c^2 a (1 - e^2)} \quad \text{rad/órbita}$$
+                    </div>
+
+                    <div class="theory-card">
+                        <h3>5. Energia, Espaço de Fase Radial & Extensões</h3>
+                        <p>
+                            A dinâmica radial equivale a uma partícula 1D sob o <strong>potencial efetivo</strong>:
+                        </p>
+                        <div class="math-block">
+                            $$E = \frac{p_r^2}{2m} + U_{\text{eff}}(r), \qquad U_{\text{eff}}(r) = U(r) + \frac{L^2}{2mr^2}$$
                         </div>
+                        <p>
+                            No <strong>espaço de fase radial $(r, p_r)$</strong> (com $p_r = m\dot{r}$), toda órbita ligada descreve um laço fechado entre os pontos de retorno $r_{\min}$ e $r_{\max}$ — mesmo quando a trajetória no plano $(x, y)$ é uma roseta aberta!
+                        </p>
+                        <p>
+                            Na <strong>Relatividade Geral (Schwarzschild)</strong>, o termo adicional $-GML^2/(m c^2 r^3)$ no potencial efetivo gera uma aceleração extra proporcional a $-1/r^4$ que faz $\vec{e}$ girar (avanço do periélio). No <strong>Potencial de Yukawa</strong>, $U(r) = -\frac{k}{r}e^{-r/\lambda}$, a blindagem exponencial também induz precessão; já na <strong>Força Repulsiva ($+k/r^2$)</strong>, todas as trajetórias são hipérboles abertas (espalhamento de Rutherford).
+                        </p>
+                    </div>
+
+                    <div class="theory-card">
+                        <h3>6. Problema de Dois Corpos, Referenciais & Centro de Massa</h3>
+                        <p>
+                            Pela <strong>3ª Lei de Newton</strong>, a interação central é mútua ($\vec{F}_{12} = -\vec{F}_{21}$): o corpo central $m_1$ também sofre aceleração! Definindo a coordenada relativa $\vec{r} = \vec{r}_2 - \vec{r}_1$ e a <strong>massa reduzida</strong> $\mu_{\text{red}} = \frac{m_1 m_2}{m_1 + m_2}$, o movimento se reduz a:
+                        </p>
+                        <div class="math-block">
+                            $$\mu_{\text{red}} \ddot{\vec{r}} = \vec{F}_{12}(r) \implies \vec{r}_1 = -\frac{m_2}{m_1 + m_2}\vec{r}, \qquad \vec{r}_2 = +\frac{m_1}{m_1 + m_2}\vec{r}$$
+                        </div>
+                        <p>
+                            Os referenciais fixos em $m_1$ (Estágio 1) ou em $m_2$ (Estágio 2) são <strong>não-inerciais</strong>, enquanto o referencial do <strong>Centro de Massa (Estágio 3)</strong> é inercial: ambos os corpos descrevem órbitas semelhantes em oposição de fase ao redor do $\text{CM}$ (com semi-eixos $a_1 = \frac{m_2}{m_1+m_2}a$ e $a_2 = \frac{m_1}{m_1+m_2}a$, momento linear total nulo $m_1\vec{v}_1 + m_2\vec{v}_2 = \vec{0}$ e 3ª Lei exata $\frac{T^2}{a^3} = \frac{4\pi^2}{G(m_1 + m_2)}$).
+                        </p>
                     </div>
                 </div>
+
             </div>
 
             <!-- Rodapé Fixo do Painel -->
@@ -328,7 +677,7 @@
                     <span class="status-dot"></span>
                     <span id="footer-status-text">Pausado</span>
                 </div>
-                <span class="footer-meta" id="footer-sim-timer" data-focus-control="badge" data-focus-order="10" data-focus-tab="global">t = 0.00s</span>
+                <span class="footer-meta" id="footer-sim-timer" data-focus-control="badge" data-focus-order="10" data-focus-tab="global">t = 0.00 ano</span>
             </div>
         </aside>
     </main>
@@ -341,49 +690,49 @@
             <div class="sim-modal-header">
                 <div class="sim-modal-title">
                     <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
-                    <span>Órbitas Gravitacionais & Mecânica Celeste — Guia Rápido</span>
+                    <span>Forças Centrais & Leis de Kepler — Guia Rápido</span>
                 </div>
                 <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
-                    Explore a dinâmica orbital em 3D, a conservação de grandezas físicas fundamentais e os regimes gravitacionais clássicos e relativísticos.
+                    Explore como forças puramente radiais moldam as órbitas no plano e teste as três Leis de Kepler de forma visual e quantitativa.
                 </p>
                 <div class="onboarding-grid">
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
-                            <span>1. Gravitação & Leis de Kepler</span>
+                            <img src="../assets/icons/touch-drag.svg" class="icon-svg" alt="">
+                            <span>1. Manipulação Direta no Plano</span>
                         </div>
                         <p class="onboarding-card-text">
-                            O campo central Newtoniano $\vec{F}_g = -G\frac{Mm}{r^2}\hat{r}$ preserva o momento angular e restringe a órbita a um plano bidimensional invariante, com o Sol em um dos focos.
+                            Arraste o <strong>planeta</strong> ou a <strong>ponta do vetor velocidade $\vec{v}_0$</strong> diretamente no canvas para lançar órbitas em qualquer ângulo com pré-visualização instantânea.
+                        </p>
+                    </div>
+                    <div class="onboarding-card">
+                        <div class="onboarding-card-title">
+                            <img src="../assets/icons/stopwatch.svg" class="icon-svg" alt="">
+                            <span>2. Laboratório da 2ª Lei (Áreas Iguais)</span>
+                        </div>
+                        <p class="onboarding-card-text">
+                            Na aba <strong>Kepler & Gráficos</strong>, clique em <strong>Capturar Setor ($\Delta t$)</strong> próximo ao periélio e novamente no afélio para pintar setores de mesma área e observar a reta linear no gráfico Tempo × Área.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
                             <img src="../assets/icons/orbital.svg" class="icon-svg" alt="">
-                            <span>2. Tipos de Órbita & Excentricidade</span>
+                            <span>3. Forças Centrais & Teorema de Bertrand</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Experimente os regimes cônicos: circular ($e = 0$), elíptica ($0 < e < 1$), inclinada 3D e velocidade de escape parabólica ($e = 1$), calculados dinamicamente via vetor de Laplace-Runge-Lenz.
+                            Varie o expoente $n$ em $F(r) = -k/r^n$ (de Hooke $n=-1$ a Newton $n=2$, rosetas e instabilidade $n=3$) ou teste Schwarzschild, Yukawa e Rutherford — verificando que a 2ª Lei continua válida em todos os casos!
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="">
-                            <span>3. Conservação de Energia ($K, U, E$)</span>
+                            <img src="../assets/icons/particles-double.svg" class="icon-svg" alt="">
+                            <span>4. Dois Corpos & Centro de Massa</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Acompanhe no gráfico multissérie a troca contínua entre energia cinética ($K$) e potencial ($U$). O integrador simplético Velocity Verlet preserva estritamente a energia mecânica total ($E = K + U$).
-                        </p>
-                    </div>
-                    <div class="onboarding-card">
-                        <div class="onboarding-card-title">
-                            <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="">
-                            <span>4. Correção Relativística (Schwarzschild)</span>
-                        </div>
-                        <p class="onboarding-card-text">
-                            Em campos gravitacionais intensos da Relatividade Geral, o potencial efetivo recebe uma correção proporcional a $-GML^2 / (c^2 r^3)$, quebrando a simetria clássica e gerando a precessão do periélio.
+                            Alterne entre <strong>1. Em $m_1$</strong>, <strong>2. Em $m_2$</strong> e <strong>3. Centro de Massa</strong> no topo do canvas para revelar a ação-reação ($\vec{F}_{12} = -\vec{F}_{21}$) e ver ambos os corpos orbitarem o baricentro.
                         </p>
                     </div>
                 </div>
