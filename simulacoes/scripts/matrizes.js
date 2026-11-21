@@ -30,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
         expandBtnSelector: '#btn-expand-sidebar',
         onResize: () => handleGlobalResize()
     });
-    initBottomSheet('#controls-panel');
     initKaTeXAutoRender();
 
     // 1.1 Barra Flutuante Reativa no Modo Foco (Zero Duplicação de Código)
@@ -46,6 +45,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Inicialização do Plano Cartesiano Único em Tela Cheia
     const planoSingle = new PlanoCartesiano(canvasSingleEl, { id: 'single' });
+
+    let activeModeName = null;
+    let modos = null;
+
+    // 3.1 Painel Flutuante Mobile: desloca suavemente a origem (0,0) para a área superior visível
+    // quando aberto e retorna ao centro (0.5) quando fechado
+    const redrawActiveMode = () => {
+        if (activeModeName === 'dinamico' && modos?.dinamico) {
+            modos.dinamico.drawDynamicScene();
+        } else {
+            planoSingle.draw();
+        }
+    };
+
+    const bottomSheetCtrl = initBottomSheet({
+        panelSelector: '#controls-panel',
+        onStateChange: (state) => {
+            const isMobileOpen = window.innerWidth <= 900 && state !== 'peek';
+            const targetRatio = isMobileOpen ? 0.27 : 0.5;
+            planoSingle.animateOriginYRatio(targetRatio, redrawActiveMode, 260);
+        }
+    });
+
+    const autoCloseMobileSheet = () => {
+        if (window.innerWidth <= 900 && bottomSheetCtrl && bottomSheetCtrl.isOpen()) {
+            bottomSheetCtrl.close();
+        }
+    };
+
+    ['base-btnApply', 'base-btnReset', 'construir-btnAnimate', 'construir-btnReset', 'fn-btnPlay', 'dyn-btnPlay'].forEach(btnId => {
+        const btnEl = document.getElementById(btnId);
+        if (btnEl) {
+            btnEl.addEventListener('click', autoCloseMobileSheet);
+        }
+    });
 
     // 4. Instanciação dos 4 Modos
     const domBase = {
@@ -108,14 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSpeedCycleDyn: document.getElementById('dyn-btnSpeedCycle')
     };
 
-    const modos = {
+    modos = {
         base: new ModoBase(planoSingle, domBase),
         construir: new ModoConstruir(planoSingle, domConstruir),
         funcoes: new ModoFuncoes(planoSingle, domFuncoes),
         dinamico: new ModoDinamico(planoSingle, domDinamico)
     };
-
-    let activeModeName = null;
 
     // 5. Troca de Modos pela Navegação Superior de Abas (.tab-nav)
     function switchMode(newMode) {
@@ -163,6 +195,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 6. Redimensionamento Global do Canvas
     function handleGlobalResize() {
+        if (!planoSingle.originAnimId) {
+            if (window.innerWidth > 900) {
+                planoSingle.setOriginYRatio(0.5);
+            } else {
+                const isMobileOpen = bottomSheetCtrl ? bottomSheetCtrl.isOpen() : false;
+                planoSingle.setOriginYRatio(isMobileOpen ? 0.27 : 0.5);
+            }
+        }
         planoSingle.resize();
         if (activeModeName === 'dinamico') {
             modos.dinamico.drawDynamicScene();

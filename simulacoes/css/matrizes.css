@@ -436,7 +436,115 @@
     gap: 12px;
 }
 
+.subpane-controls > .control-group,
+.subpane-theory > .control-group {
+    margin-bottom: 0;
+}
+
 .subpane-controls.hidden,
 .subpane-theory.hidden {
     display: none !important;
+}
+
+/* =============================================================================
+   RESPONSIVIDADE MOBILE & TABLET (<= 900px e <= 480px)
+   ============================================================================= */
+@media (max-width: 900px) {
+    /* Mantém a barra superior de etapas da Aba 2 centralizada no topo do canvas */
+    .canvas-toolbar.pos-top-center {
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        max-width: calc(100vw - 20px);
+        white-space: nowrap;
+        z-index: 62;
+    }
+
+    /* Painel flutuante compacto para deixar a metade superior do plano (0,0) sempre visível */
+    .controls-panel {
+        height: 46%;
+        max-height: calc(100% - 68px - var(--safe-bottom));
+        padding: 8px 10px;
+    }
+
+    .subpane-controls {
+        gap: 9px;
+    }
+
+    .matrix-box {
+        padding: 8px 12px;
+        margin-bottom: 2px;
+    }
+
+    .matrix-grid {
+        gap: 8px 10px;
+        padding: 0 8px;
+    }
+
+    .matrix-cell input[type="number"] {
+        width: 72px;
+        height: 36px;
+        font-size: 0.92rem;
+    }
+
+    .matrix-cell-fn input[type="text"] {
+        width: 112px;
+        height: 36px;
+        font-size: 0.80rem;
+    }
+
+    .readout-card {
+        padding: 9px 10px;
+        gap: 5px;
+    }
+
+    /* Oculta barra de etapas quando o teclado virtual do celular está aberto */
+    .is-keyboard-open #construir-stepper-toolbar {
+        display: none !important;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Protege os badges e rótulos dos botões nas toolbars contra a regra genérica span:first-child */
+    #construir-stepper-toolbar .stepper-badge {
+        display: inline-flex !important;
+        width: 17px;
+        height: 17px;
+        font-size: 0.66rem;
+    }
+
+    #construir-stepper-toolbar .btn-text,
+    #canvas-transport-toolbar .btn-text {
+        display: inline !important;
+        font-size: 0.72rem;
+    }
+
+    .stepper-btn {
+        padding: 4px 7px;
+        gap: 4px;
+    }
+
+    .stepper-arrow {
+        font-size: 0.68rem;
+        padding: 0 1px;
+    }
+
+    /* Abas superiores compactas para caberem as 4 abas sem rolagem horizontal */
+    #mode-tab-nav .tab-btn {
+        padding: 6px 6px;
+        font-size: 0.73rem;
+        gap: 4px;
+        flex: 1;
+        justify-content: center;
+    }
+
+    #mode-tab-nav .tab-btn .icon-svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* Desloca levemente a barra de transporte para a esquerda para nunca colidir com o botão ⚙ */
+    .canvas-toolbar.pos-bottom-center {
+        left: calc(50% - 18px);
+    }
 }

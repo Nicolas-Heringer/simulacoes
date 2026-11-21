@@ -53,6 +53,7 @@ export class PlanoCartesiano {
         // Escala e limites
         this.scale = 50; // pixels por unidade matemática
         this.gridRange = 14;
+        this.originYRatio = 0.5; // Fração vertical da origem (0.5 = centro; ~0.27 no mobile com painel aberto)
         this.origin = { x: canvas.width / 2, y: canvas.height / 2 };
 
         // Interatividade
@@ -88,7 +89,7 @@ export class PlanoCartesiano {
 
         this.width = rect.width;
         this.height = rect.height;
-        this.origin = { x: rect.width / 2, y: rect.height / 2 };
+        this.origin = { x: rect.width / 2, y: rect.height * (this.originYRatio || 0.5) };
 
         if (rect.width < 500) {
             this.scale = 36;
@@ -100,6 +101,58 @@ export class PlanoCartesiano {
             this.scale = 52;
             this.gridRange = 14;
         }
+    }
+
+    /**
+     * Define a fração vertical da origem (ex: 0.27 quando o painel mobile está aberto, 0.5 quando fechado)
+     */
+    setOriginYRatio(ratio) {
+        if (this.originAnimId) {
+            cancelAnimationFrame(this.originAnimId);
+            this.originAnimId = null;
+        }
+        this.originYRatio = ratio;
+        if (this.height) {
+            this.origin = { x: this.width / 2, y: this.height * ratio };
+        }
+    }
+
+    /**
+     * Anima suavemente a transição vertical da origem (0,0) acompanhando a abertura/fechamento do menu mobile
+     */
+    animateOriginYRatio(targetRatio, onFrameDraw = null, duration = 260) {
+        if (this.originAnimId) {
+            cancelAnimationFrame(this.originAnimId);
+            this.originAnimId = null;
+        }
+
+        const startRatio = this.originYRatio ?? 0.5;
+        if (Math.abs(targetRatio - startRatio) < 1e-3 || !this.height) {
+            this.setOriginYRatio(targetRatio);
+            if (onFrameDraw) onFrameDraw();
+            else this.draw();
+            return;
+        }
+
+        const startTime = performance.now();
+        const step = (now) => {
+            const p = Math.min((now - startTime) / duration, 1.0);
+            // Curva cubic-out equivalente ao transition do painel mobile
+            const eased = 1 - Math.pow(1 - p, 3);
+            this.originYRatio = startRatio + (targetRatio - startRatio) * eased;
+            this.origin = { x: this.width / 2, y: this.height * this.originYRatio };
+
+            if (onFrameDraw) onFrameDraw();
+            else this.draw();
+
+            if (p < 1.0) {
+                this.originAnimId = requestAnimationFrame(step);
+            } else {
+                this.originAnimId = null;
+            }
+        };
+
+        this.originAnimId = requestAnimationFrame(step);
     }
 
     /**
@@ -872,33 +925,34 @@ export class PlanoCartesiano {
     /**
      * Identifica qual elemento interativo o ponteiro está sobrepondo
      */
-    getHitTarget(screenX, screenY) {
+    getHitTarget(screenX, screenY, customRadius = null) {
         if (!this.isInteractive) return null;
+        const radius = customRadius || this.dragRadius;
 
         if (this.allowedDragTargets.includes('i')) {
             const iPx = this.toScreen(this.iHat.x, this.iHat.y);
-            if (Math.hypot(screenX - iPx.x, screenY - iPx.y) <= this.dragRadius) {
+            if (Math.hypot(screenX - iPx.x, screenY - iPx.y) <= radius) {
                 return { type: 'i' };
             }
         }
 
         if (this.allowedDragTargets.includes('j')) {
             const jPx = this.toScreen(this.jHat.x, this.jHat.y);
-            if (Math.hypot(screenX - jPx.x, screenY - jPx.y) <= this.dragRadius) {
+            if (Math.hypot(screenX - jPx.x, screenY - jPx.y) <= radius) {
                 return { type: 'j' };
             }
         }
 
         if (this.allowedDragTargets.includes('v') && this.showVVec && this.vVec) {
             const vPx = this.toScreen(this.vVec.x, this.vVec.y);
-            if (Math.hypot(screenX - vPx.x, screenY - vPx.y) <= this.dragRadius) {
+            if (Math.hypot(screenX - vPx.x, screenY - vPx.y) <= radius) {
                 return { type: 'v' };
             }
         }
 
         if (this.allowedDragTargets.includes('vPrime') && this.showVPrime && this.vPrime) {
             const vpPx = this.toScreen(this.vPrime.x, this.vPrime.y);
-            if (Math.hypot(screenX - vpPx.x, screenY - vpPx.y) <= this.dragRadius) {
+            if (Math.hypot(screenX - vpPx.x, screenY - vpPx.y) <= radius) {
                 return { type: 'vPrime' };
             }
         }
@@ -907,14 +961,14 @@ export class PlanoCartesiano {
         for (let i = 0; i < this.probeSurfaces.length; i++) {
             const surf = this.probeSurfaces[i];
             const cPx = this.toScreen(surf.cx, surf.cy);
-            if (Math.hypot(screenX - cPx.x, screenY - cPx.y) <= this.dragRadius) {
+            if (Math.hypot(screenX - cPx.x, screenY - cPx.y) <= radius) {
                 return { type: 'surface-center', index: i };
             }
 
             const hPx = surf.type === 'circle'
                 ? this.toScreen(surf.cx + surf.size, surf.cy)
                 : this.toScreen(surf.cx + surf.size / 2, surf.cy + surf.size / 2);
-            if (Math.hypot(screenX - hPx.x, screenY - hPx.y) <= this.dragRadius) {
+            if (Math.hypot(screenX - hPx.x, screenY - hPx.y) <= radius) {
                 return { type: 'surface-resize', index: i };
             }
         }
@@ -933,8 +987,9 @@ export class PlanoCartesiano {
             const rect = canvas.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
             const mouseY = e.clientY - rect.top;
+            const hitRadius = e.pointerType === 'touch' ? 28 : this.dragRadius;
 
-            const hit = this.getHitTarget(mouseX, mouseY);
+            const hit = this.getHitTarget(mouseX, mouseY, hitRadius);
             if (hit) {
                 this.draggingTarget = hit;
                 canvas.style.cursor = 'grabbing';
