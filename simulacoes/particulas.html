@@ -4,7 +4,8 @@
 <head>
     <!-- Metadados da Página -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
     <meta name="theme-color" content="#0f172a">
     <title>Interações Moleculares & Campos Retardados — Design System 2.0</title>
 
@@ -18,13 +19,15 @@
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 
     <!-- Design System Unificado e Estilos Específicos -->
+    <script src="../theme-init.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/particulas.css">
 
     <!-- Suporte a LaTeX com KaTeX (com crossorigin anônimo para evitar avisos de Tracking Prevention) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -36,6 +39,9 @@
         </a>
 
         <div class="sim-header-actions">
+            <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
+                <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
+            </button>
             <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
@@ -57,7 +63,8 @@
 
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
-                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Painel de Controles (F)">
+                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar"
+                    title="Expandir Painel de Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
                 </button>
@@ -65,9 +72,9 @@
 
             <!-- Barra Flutuante de Transporte (#canvas-transport-toolbar) -->
             <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
-                <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
-                        data-state="0" data-text-idle="Executar" data-text-active="Pausar"
-                        data-icon-idle="play" data-icon-active="pause" title="Executar / Pausar (Espaço)">
+                <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim" data-state="0"
+                    data-text-idle="Executar" data-text-active="Pausar" data-icon-idle="play" data-icon-active="pause"
+                    title="Executar / Pausar (Espaço)">
                     <img src="../assets/icons/play.svg" class="icon-svg" alt="Executar">
                     <span class="btn-text">Executar</span>
                 </button>
@@ -80,7 +87,8 @@
             </div>
 
             <!-- Botão de Configurações Mobile (Canto Inferior Direito) -->
-            <button type="button" id="btn-mobile-settings" class="canvas-btn-settings" title="Configurações e Parâmetros" aria-label="Configurações e Parâmetros" aria-expanded="false">
+            <button type="button" id="btn-mobile-settings" class="canvas-btn-settings"
+                title="Configurações e Parâmetros" aria-label="Configurações e Parâmetros" aria-expanded="false">
                 <img src="../assets/icons/gear.svg" class="icon-svg" alt="Configurações">
             </button>
         </div>
@@ -90,15 +98,18 @@
 
             <!-- Topo: Barra de Abas Expansíveis -->
             <div class="tab-nav">
-                <button class="tab-btn active" data-tab="panel-tab-params" id="tab-btn-params" title="Parâmetros Físicos">
+                <button class="tab-btn active" data-tab="panel-tab-params" id="tab-btn-params"
+                    title="Parâmetros Físicos">
                     <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Parâmetros">
                     <span class="tab-label">Parâmetros</span>
                 </button>
-                <button class="tab-btn" data-tab="panel-tab-telemetry" id="tab-btn-telemetry" title="Gráficos de Telemetria">
+                <button class="tab-btn" data-tab="panel-tab-telemetry" id="tab-btn-telemetry"
+                    title="Gráficos de Telemetria">
                     <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="Telemetria">
                     <span class="tab-label">Telemetria</span>
                 </button>
-                <button class="tab-btn" data-tab="panel-tab-theory" id="tab-btn-theory" title="Fundamentação Teórica & Fórmulas">
+                <button class="tab-btn" data-tab="panel-tab-theory" id="tab-btn-theory"
+                    title="Fundamentação Teórica & Fórmulas">
                     <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                     <span class="tab-label">Teoria</span>
                 </button>
@@ -120,7 +131,8 @@
                                 <span>Aguardando Preset</span>
                             </div>
                         </div>
-                        <p class="tab-subtitle">Simulação de partículas com propagação causal retardada na velocidade $c$.</p>
+                        <p class="tab-subtitle">Simulação de partículas com propagação causal retardada na velocidade
+                            $c$.</p>
                     </div>
 
                     <div class="sim-divider-label"><span>Seletores de Presets</span></div>
@@ -129,44 +141,50 @@
                     <div class="control-group">
                         <div class="control-grid-2x2">
                             <button class="btn-preset" id="preset-single-static" data-template="singleStatic"
-                                    data-focus-control="action" data-focus-label="" data-focus-order="1"
-                                    data-focus-tooltip="1 Partícula (Parada)">
-                                <img src="../assets/icons/particle-single.svg" class="icon-svg" alt="1 Parada"> 1 Partícula (Parada)
+                                data-focus-control="action" data-focus-label="" data-focus-order="1"
+                                data-focus-tooltip="1 Partícula (Parada)">
+                                <img src="../assets/icons/particle-single.svg" class="icon-svg" alt="1 Parada"> 1
+                                Partícula (Parada)
                             </button>
                             <button class="btn-preset" id="preset-single-moving" data-template="singleMoving"
-                                    data-focus-control="action" data-focus-label="" data-focus-order="2"
-                                    data-focus-tooltip="1 Partícula (Móvel)">
-                                <img src="../assets/icons/particle-moving.svg" class="icon-svg" alt="1 Móvel"> 1 Partícula (Móvel)
+                                data-focus-control="action" data-focus-label="" data-focus-order="2"
+                                data-focus-tooltip="1 Partícula (Móvel)">
+                                <img src="../assets/icons/particle-moving.svg" class="icon-svg" alt="1 Móvel"> 1
+                                Partícula (Móvel)
                             </button>
                             <button class="btn-preset" id="preset-double-static" data-template="double"
-                                    data-focus-control="action" data-focus-label="" data-focus-order="3"
-                                    data-focus-tooltip="2 Partículas (Paradas)">
-                                <img src="../assets/icons/particles-double.svg" class="icon-svg" alt="2 Paradas"> 2 Partículas (Paradas)
+                                data-focus-control="action" data-focus-label="" data-focus-order="3"
+                                data-focus-tooltip="2 Partículas (Paradas)">
+                                <img src="../assets/icons/particles-double.svg" class="icon-svg" alt="2 Paradas"> 2
+                                Partículas (Paradas)
                             </button>
                             <button class="btn-preset" id="preset-double-moving" data-template="doubleMoving"
-                                    data-focus-control="action" data-focus-label="" data-focus-order="4"
-                                    data-focus-tooltip="2 Partículas (Opostas)">
-                                <img src="../assets/icons/particles-opposite.svg" class="icon-svg" alt="2 Opostas"> 2 Partículas (Opostas)
+                                data-focus-control="action" data-focus-label="" data-focus-order="4"
+                                data-focus-tooltip="2 Partículas (Opostas)">
+                                <img src="../assets/icons/particles-opposite.svg" class="icon-svg" alt="2 Opostas"> 2
+                                Partículas (Opostas)
                             </button>
-                            <button class="btn-preset" id="preset-many" data-template="many"
-                                    data-focus-control="action" data-focus-label="" data-focus-order="5"
-                                    data-focus-tooltip="3 Corpos (3)">
-                                <img src="../assets/icons/particles-three.svg" class="icon-svg" alt="3 Corpos"> 3 Corpos (3)
+                            <button class="btn-preset" id="preset-many" data-template="many" data-focus-control="action"
+                                data-focus-label="" data-focus-order="5" data-focus-tooltip="3 Corpos (3)">
+                                <img src="../assets/icons/particles-three.svg" class="icon-svg" alt="3 Corpos"> 3 Corpos
+                                (3)
                             </button>
                             <button class="btn-preset" id="preset-circular" data-template="circular"
-                                    data-focus-control="action" data-focus-label="" data-focus-order="6"
-                                    data-focus-tooltip="Anel Circular (12)">
-                                <img src="../assets/icons/particle-circle.svg" class="icon-svg" alt="Anel"> Anel Circular (12)
+                                data-focus-control="action" data-focus-label="" data-focus-order="6"
+                                data-focus-tooltip="Anel Circular (12)">
+                                <img src="../assets/icons/particle-circle.svg" class="icon-svg" alt="Anel"> Anel
+                                Circular (12)
                             </button>
-                            <button class="btn-preset" id="preset-grid" data-template="grid"
-                                    data-focus-control="action" data-focus-label="" data-focus-order="7"
-                                    data-focus-tooltip="Grade 6×6 (36)">
-                                <img src="../assets/icons/particle-grid.svg" class="icon-svg" alt="Grade"> Grade $6\times 6$ (36)
+                            <button class="btn-preset" id="preset-grid" data-template="grid" data-focus-control="action"
+                                data-focus-label="" data-focus-order="7" data-focus-tooltip="Grade 6×6 (36)">
+                                <img src="../assets/icons/particle-grid.svg" class="icon-svg" alt="Grade"> Grade
+                                $6\times 6$ (36)
                             </button>
-                            <button class="btn-preset" id="preset-nacl" data-template="NaCl"
-                                    data-focus-control="action" data-focus-label="" data-focus-order="8"
-                                    data-focus-divider="after" data-focus-tooltip="Sal NaCl (64)">
-                                <img src="../assets/icons/salt-nacl.svg" class="icon-svg" alt="NaCl"> Sal $\text{NaCl}$ (64)
+                            <button class="btn-preset" id="preset-nacl" data-template="NaCl" data-focus-control="action"
+                                data-focus-label="" data-focus-order="8" data-focus-divider="after"
+                                data-focus-tooltip="Sal NaCl (64)">
+                                <img src="../assets/icons/salt-nacl.svg" class="icon-svg" alt="NaCl"> Sal $\text{NaCl}$
+                                (64)
                             </button>
                         </div>
                     </div>
@@ -177,15 +195,15 @@
                     <div class="control-group">
                         <label>Ação ao Clicar / Arrastar no Canvas:</label>
                         <div class="segmented-control" id="cursor-mode-selector">
-                            <button type="button" class="segment-btn active" id="btn-cursor-repel" data-cursor-mode="repel"
-                                    data-focus-control="action" data-focus-label="" data-focus-order="9"
-                                    data-focus-tooltip="Clique no Canvas: Repulsão Radial">
+                            <button type="button" class="segment-btn active" id="btn-cursor-repel"
+                                data-cursor-mode="repel" data-focus-control="action" data-focus-label=""
+                                data-focus-order="9" data-focus-tooltip="Clique no Canvas: Repulsão Radial">
                                 <img src="../assets/icons/radial-outward.svg" class="icon-svg" alt="Repulsão">
                                 <span>Repulsão</span>
                             </button>
                             <button type="button" class="segment-btn" id="btn-cursor-attract" data-cursor-mode="attract"
-                                    data-focus-control="action" data-focus-label="" data-focus-order="10"
-                                    data-focus-divider="after" data-focus-tooltip="Clique no Canvas: Atração Radial">
+                                data-focus-control="action" data-focus-label="" data-focus-order="10"
+                                data-focus-divider="after" data-focus-tooltip="Clique no Canvas: Atração Radial">
                                 <img src="../assets/icons/radial-inward.svg" class="icon-svg" alt="Atração">
                                 <span>Atração</span>
                             </button>
@@ -208,7 +226,8 @@
                     <!-- Seletor de Tipo de Potencial (Oculto quando interação desligada) -->
                     <div class="control-group" id="group-potential-select">
                         <label for="selector-de-tipo-de-interacao">Modelo de Força / Potencial:</label>
-                        <select id="selector-de-tipo-de-interacao" class="sim-control" data-focus-control="select" data-focus-order="11">
+                        <select id="selector-de-tipo-de-interacao" class="sim-control" data-focus-control="select"
+                            data-focus-order="11">
                             <option value="coulomb" selected>Interação Coulombiana Retardada (Cargas ±q)</option>
                             <option value="lennardJones">Potencial de Lennard-Jones 12-6</option>
                             <option value="atracao">Apenas Atração ($F \propto 1/r$)</option>
@@ -220,15 +239,16 @@
                     <div class="control-group" id="group-epsilon">
                         <div class="slider-container sim-dual-slider">
                             <div class="slider-header">
-                                <label for="slider-epsilon" class="slider-label">Acoplamento de Cargas ($\varepsilon_C$)</label>
+                                <label for="slider-epsilon" class="slider-label">Acoplamento de Cargas
+                                    ($\varepsilon_C$)</label>
                                 <div class="dual-input-wrapper">
-                                    <input type="number" class="dual-input-number" id="num-epsilon"
-                                           min="0.01" max="1.00" step="0.01" value="0.10">
+                                    <input type="number" class="dual-input-number" id="num-epsilon" min="0.01"
+                                        max="1.00" step="0.01" value="0.10">
                                     <span class="dual-input-unit">a.u.</span>
                                 </div>
                             </div>
-                            <input type="range" class="sim-slider" id="slider-epsilon"
-                                   min="0.01" max="1.00" step="0.01" value="0.10">
+                            <input type="range" class="sim-slider" id="slider-epsilon" min="0.01" max="1.00" step="0.01"
+                                value="0.10">
                         </div>
                     </div>
 
@@ -238,16 +258,17 @@
                     <div class="control-group">
                         <div class="slider-container sim-dual-slider">
                             <div class="slider-header">
-                                <label for="slider-temp" class="slider-label">Temperatura Alvo ($T_{\text{target}}$)</label>
+                                <label for="slider-temp" class="slider-label">Temperatura Alvo
+                                    ($T_{\text{target}}$)</label>
                                 <div class="dual-input-wrapper">
-                                    <input type="number" class="dual-input-number" id="num-temp"
-                                           min="0.001" max="10.0" step="0.01" value="0.10">
+                                    <input type="number" class="dual-input-number" id="num-temp" min="0.001" max="10.0"
+                                        step="0.01" value="0.10">
                                     <span class="dual-input-unit">a.u.</span>
                                 </div>
                             </div>
                             <input type="range" class="sim-slider" id="slider-temp" data-focus-control="slider"
-                                   data-focus-label="T" data-focus-order="12"
-                                   min="0.001" max="10.0" step="0.01" value="0.10">
+                                data-focus-label="T" data-focus-order="12" min="0.001" max="10.0" step="0.01"
+                                value="0.10">
                         </div>
                     </div>
 
@@ -257,13 +278,13 @@
                             <div class="slider-header">
                                 <label for="slider-wave-speed" class="slider-label">Velocidade da Onda ($c$)</label>
                                 <div class="dual-input-wrapper">
-                                    <input type="number" class="dual-input-number" id="num-wave-speed"
-                                           min="1.0" max="10.0" step="0.5" value="2.0">
+                                    <input type="number" class="dual-input-number" id="num-wave-speed" min="1.0"
+                                        max="10.0" step="0.5" value="2.0">
                                     <span class="dual-input-unit">px/f</span>
                                 </div>
                             </div>
-                            <input type="range" class="sim-slider" id="slider-wave-speed"
-                                   min="1.0" max="10.0" step="0.5" value="2.0">
+                            <input type="range" class="sim-slider" id="slider-wave-speed" min="1.0" max="10.0"
+                                step="0.5" value="2.0">
                         </div>
                     </div>
 
@@ -271,15 +292,16 @@
                     <div class="control-group">
                         <div class="slider-container sim-dual-slider">
                             <div class="slider-header">
-                                <label for="slider-attenuation" class="slider-label">Atenuação do Termostato ($\gamma$)</label>
+                                <label for="slider-attenuation" class="slider-label">Atenuação do Termostato
+                                    ($\gamma$)</label>
                                 <div class="dual-input-wrapper">
-                                    <input type="number" class="dual-input-number" id="num-attenuation"
-                                           min="0.01" max="0.50" step="0.01" value="0.09">
+                                    <input type="number" class="dual-input-number" id="num-attenuation" min="0.01"
+                                        max="0.50" step="0.01" value="0.09">
                                     <span class="dual-input-unit">taxa</span>
                                 </div>
                             </div>
-                            <input type="range" class="sim-slider" id="slider-attenuation"
-                                   min="0.01" max="0.50" step="0.01" value="0.09">
+                            <input type="range" class="sim-slider" id="slider-attenuation" min="0.01" max="0.50"
+                                step="0.01" value="0.09">
                         </div>
                     </div>
 
@@ -292,7 +314,8 @@
                             <h3 class="tab-title">Telemetria em Tempo Real</h3>
                             <div class="sim-badge"><span class="status-dot"></span><span>60 FPS</span></div>
                         </div>
-                        <p class="tab-subtitle">Monitoramento contínuo de energia cinética, temperatura e equilíbrio estatístico.</p>
+                        <p class="tab-subtitle">Monitoramento contínuo de energia cinética, temperatura e equilíbrio
+                            estatístico.</p>
                     </div>
 
                     <!-- Gráfico 1: Energia Cinética Total K(t) -->
@@ -347,7 +370,8 @@
                             </div>
                             <div class="sim-readout-row">
                                 <span class="sim-readout-label">Status do Termostato:</span>
-                                <span class="sim-readout-value tone-emerald" id="telemetry-thermostat-status">Equilíbrio</span>
+                                <span class="sim-readout-value tone-emerald"
+                                    id="telemetry-thermostat-status">Equilíbrio</span>
                             </div>
                             <div class="sim-readout-row">
                                 <span class="sim-readout-label">Frentes de Onda Vivas:</span>
@@ -364,52 +388,65 @@
                             <h3 class="tab-title">Fundamentação Teórica</h3>
                             <div class="sim-badge"><span class="status-dot"></span><span>$\KaTeX$</span></div>
                         </div>
-                        <p class="tab-subtitle">Equações de onda, funções de Green retardadas e potenciais intermoleculares.</p>
+                        <p class="tab-subtitle">Equações de onda, funções de Green retardadas e potenciais
+                            intermoleculares.</p>
                     </div>
 
                     <!-- Card Didático 1: Função de Green Retardada -->
                     <div class="control-group">
                         <div class="theory-card">
-                            <h4><img src="../assets/icons/book-open.svg" class="icon-svg icon-accent" alt="Teoria"> Campos Retardados & Funções de Green</h4>
+                            <h4><img src="../assets/icons/book-open.svg" class="icon-svg icon-accent" alt="Teoria">
+                                Campos Retardados & Funções de Green</h4>
                             <p>
-                                A informação de força não se propaga instantaneamente ($c < \infty$). A equação de onda d'Alembertiana governante:
-                            </p>
-                            $$\left( \nabla^2 - \frac{1}{c^2}\frac{\partial^2}{\partial t^2} \right) \Phi(\mathbf{r}, t) = -\frac{\rho(\mathbf{r}, t)}{\varepsilon_0}$$
-                            <p>
-                                Possui solução exata via a **Função de Green Retardada Causal**:
-                            </p>
-                            $$G_{\text{ret}}(\mathbf{r}, t; \mathbf{r}', t') = \frac{\delta\left( t - t' - \frac{|\mathbf{r} - \mathbf{r}'|}{c} \right)}{4\pi |\mathbf{r} - \mathbf{r}'|}$$
-                            <p>
-                                O campo em $\mathbf{r}$ no instante $t$ depende unicamente do estado da partícula emissora no instante retardado $t_{\text{ret}} = t - |\mathbf{r} - \mathbf{r}'|/c$.
-                            </p>
+                                A informação de força não se propaga instantaneamente ($c < \infty$). A equação de onda
+                                    d'Alembertiana governante: </p>
+                                    $$\left( \nabla^2 - \frac{1}{c^2}\frac{\partial^2}{\partial t^2} \right)
+                                    \Phi(\mathbf{r}, t) = -\frac{\rho(\mathbf{r}, t)}{\varepsilon_0}$$
+                                    <p>
+                                        Possui solução exata via a **Função de Green Retardada Causal**:
+                                    </p>
+                                    $$G_{\text{ret}}(\mathbf{r}, t; \mathbf{r}', t') = \frac{\delta\left( t - t' -
+                                    \frac{|\mathbf{r} - \mathbf{r}'|}{c} \right)}{4\pi |\mathbf{r} - \mathbf{r}'|}$$
+                                    <p>
+                                        O campo em $\mathbf{r}$ no instante $t$ depende unicamente do estado da
+                                        partícula emissora no instante retardado $t_{\text{ret}} = t - |\mathbf{r} -
+                                        \mathbf{r}'|/c$.
+                                    </p>
                         </div>
                     </div>
 
                     <!-- Card Didático 2: Potenciais Efetivos -->
                     <div class="control-group">
                         <div class="theory-card">
-                            <h4><img src="../assets/icons/sparkles.svg" class="icon-svg icon-accent" alt="Lennard-Jones"> Potencial de Lennard-Jones & Coulomb</h4>
+                            <h4><img src="../assets/icons/sparkles.svg" class="icon-svg icon-accent"
+                                    alt="Lennard-Jones"> Potencial de Lennard-Jones & Coulomb</h4>
                             <p>
                                 Potencial 12-6 de equilíbrio intermolecular:
                             </p>
-                            $$V_{\text{LJ}}(r) = 4\varepsilon \left[ \left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right]$$
+                            $$V_{\text{LJ}}(r) = 4\varepsilon \left[ \left(\frac{\sigma}{r}\right)^{12} -
+                            \left(\frac{\sigma}{r}\right)^6 \right]$$
                             <p>
-                                Para o cristal iônico de $\text{NaCl}$, a força coulombiana combinada com a repulsão de caroço de Pauli ($r^{-6}$) gera a estabilização da rede cristalina:
+                                Para o cristal iônico de $\text{NaCl}$, a força coulombiana combinada com a repulsão de
+                                caroço de Pauli ($r^{-6}$) gera a estabilização da rede cristalina:
                             </p>
-                            $$\mathbf{F}_{ij}(t) = \left( -\frac{q_i q_j \varepsilon_C}{r^2} - \frac{A}{r^6} \right) \hat{\mathbf{r}}_{ij}$$
+                            $$\mathbf{F}_{ij}(t) = \left( -\frac{q_i q_j \varepsilon_C}{r^2} - \frac{A}{r^6} \right)
+                            \hat{\mathbf{r}}_{ij}$$
                         </div>
                     </div>
 
                     <!-- Card Didático 3: Termostato e Equipartição -->
                     <div class="control-group">
                         <div class="theory-card">
-                            <h4><img src="../assets/icons/thermometer.svg" class="icon-svg icon-accent" alt="Termo"> Termostato & Equipartição</h4>
+                            <h4><img src="../assets/icons/thermometer.svg" class="icon-svg icon-accent" alt="Termo">
+                                Termostato & Equipartição</h4>
                             <p>
-                                Pelo Teorema da Equipartição em 2D com $N$ partículas ($2N$ graus de liberdade translacionais):
+                                Pelo Teorema da Equipartição em 2D com $N$ partículas ($2N$ graus de liberdade
+                                translacionais):
                             </p>
                             $$K = \sum_{i=1}^N \frac{1}{2}m_i v_i^2 = N k_B T \quad \implies \quad T = \frac{K}{N k_B}$$
-                            
-                            <button class="btn-secondary" id="btn-abrir-modal-teoria" style="width: 100%; margin-top: 12px;">
+
+                            <button class="btn-secondary" id="btn-abrir-modal-teoria"
+                                style="width: 100%; margin-top: 12px;">
                                 <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                                 Ver Dedução Matemática Completa (Modal)
                             </button>
@@ -447,36 +484,55 @@
                 <div class="theory-section">
                     <h4>1. Propagação Causal & Função de Green Retardada</h4>
                     <p>
-                        Em teorias de campo clássicas e eletrodinâmica relativística, nenhuma interação pode se propagar mais rápido que a velocidade da luz no meio ($c$). A equação diferencial que rege o potencial escalar ou eletromagnético $\Phi$ gerado por uma densidade de carga/fonte pontual $\rho(\mathbf{r}, t) = q \delta(\mathbf{r} - \mathbf{r}_0(t))$ é a equação de onda inomogênea:
+                        Em teorias de campo clássicas e eletrodinâmica relativística, nenhuma interação pode se propagar
+                        mais rápido que a velocidade da luz no meio ($c$). A equação diferencial que rege o potencial
+                        escalar ou eletromagnético $\Phi$ gerado por uma densidade de carga/fonte pontual
+                        $\rho(\mathbf{r}, t) = q \delta(\mathbf{r} - \mathbf{r}_0(t))$ é a equação de onda inomogênea:
                     </p>
-                    $$\Box \Phi(\mathbf{r}, t) \equiv \left( \nabla^2 - \frac{1}{c^2} \frac{\partial^2}{\partial t^2} \right) \Phi(\mathbf{r}, t) = -\frac{\rho(\mathbf{r}, t)}{\varepsilon_0}$$
+                    $$\Box \Phi(\mathbf{r}, t) \equiv \left( \nabla^2 - \frac{1}{c^2} \frac{\partial^2}{\partial t^2}
+                    \right) \Phi(\mathbf{r}, t) = -\frac{\rho(\mathbf{r}, t)}{\varepsilon_0}$$
                     <p>
-                        A resposta a uma fonte impulsiva pontual no espaço-tempo $(\mathbf{r}', t')$ é obtida através da <strong>Função de Green Retardada</strong>:
+                        A resposta a uma fonte impulsiva pontual no espaço-tempo $(\mathbf{r}', t')$ é obtida através da
+                        <strong>Função de Green Retardada</strong>:
                     </p>
-                    $$G_{\text{ret}}(\mathbf{r}, t; \mathbf{r}', t') = \frac{1}{4\pi |\mathbf{r} - \mathbf{r}'|} \delta\left( t - t' - \frac{|\mathbf{r} - \mathbf{r}'|}{c} \right) \Theta(t - t')$$
+                    $$G_{\text{ret}}(\mathbf{r}, t; \mathbf{r}', t') = \frac{1}{4\pi |\mathbf{r} - \mathbf{r}'|}
+                    \delta\left( t - t' - \frac{|\mathbf{r} - \mathbf{r}'|}{c} \right) \Theta(t - t')$$
                     <p>
-                        Onde $\Theta(t - t')$ é a função degrau de Heaviside que impõe estritamente o princípio da <em>causalidade física</em> (efeitos não precedem suas causas). A integração no espaço-tempo resulta nos célebres <strong>Potenciais Retardados de Liénard-Wiechert</strong>:
+                        Onde $\Theta(t - t')$ é a função degrau de Heaviside que impõe estritamente o princípio da
+                        <em>causalidade física</em> (efeitos não precedem suas causas). A integração no espaço-tempo
+                        resulta nos célebres <strong>Potenciais Retardados de Liénard-Wiechert</strong>:
                     </p>
-                    $$\Phi(\mathbf{r}, t) = \frac{1}{4\pi\varepsilon_0} \int \frac{\rho(\mathbf{r}', t_{\text{ret}})}{|\mathbf{r} - \mathbf{r}'|} d^3 r', \quad \text{onde} \quad t_{\text{ret}} = t - \frac{|\mathbf{r} - \mathbf{r}'|}{c}$$
+                    $$\Phi(\mathbf{r}, t) = \frac{1}{4\pi\varepsilon_0} \int \frac{\rho(\mathbf{r}',
+                    t_{\text{ret}})}{|\mathbf{r} - \mathbf{r}'|} d^3 r', \quad \text{onde} \quad t_{\text{ret}} = t -
+                    \frac{|\mathbf{r} - \mathbf{r}'|}{c}$$
                 </div>
 
                 <div class="theory-callout">
                     <strong>💡 Correspondência com a Simulação:</strong>
                     <ul>
-                        <li>Cada círculo emitido por uma partícula no Canvas representa a crista de uma <strong>frente de onda esférica $\delta\left(t - t' - R/c\right)$</strong>.</li>
-                        <li>A partícula receptora $j$ só experimenta a força devida à partícula $i$ no momento exato em que a frente de onda correspondente atinge sua posição atual.</li>
-                        <li>Isso reproduz naturalmente o <strong>Efeito Doppler</strong> e deformações anisotrópicas no campo de forças quando as partículas estão em movimento.</li>
+                        <li>Cada círculo emitido por uma partícula no Canvas representa a crista de uma <strong>frente
+                                de onda esférica $\delta\left(t - t' - R/c\right)$</strong>.</li>
+                        <li>A partícula receptora $j$ só experimenta a força devida à partícula $i$ no momento exato em
+                            que a frente de onda correspondente atinge sua posição atual.</li>
+                        <li>Isso reproduz naturalmente o <strong>Efeito Doppler</strong> e deformações anisotrópicas no
+                            campo de forças quando as partículas estão em movimento.</li>
                     </ul>
                 </div>
 
                 <div class="theory-section">
                     <h4>2. Potenciais de Lennard-Jones e Interação Coulombiana Iônica</h4>
                     <p>
-                        O modelo de <strong>Lennard-Jones (12-6)</strong> descreve a interação entre átomos neutros considerando atração por forças dispersivas de van der Waals ($\propto r^{-6}$) e repulsão quântica de curto alcance por sobreposição de orbitais e Princípio de Exclusão de Pauli ($\propto r^{-12}$):
+                        O modelo de <strong>Lennard-Jones (12-6)</strong> descreve a interação entre átomos neutros
+                        considerando atração por forças dispersivas de van der Waals ($\propto r^{-6}$) e repulsão
+                        quântica de curto alcance por sobreposição de orbitais e Princípio de Exclusão de Pauli
+                        ($\propto r^{-12}$):
                     </p>
-                    $$V_{\text{LJ}}(r) = 4\varepsilon \left[ \left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right]$$
+                    $$V_{\text{LJ}}(r) = 4\varepsilon \left[ \left(\frac{\sigma}{r}\right)^{12} -
+                    \left(\frac{\sigma}{r}\right)^6 \right]$$
                     <p>
-                        No cristal de $\text{NaCl}$, as partículas carregam cargas líquidas $q_{\text{Na}} = +1$ e $q_{\text{Cl}} = -1$. O potencial efetivo acopla a atração/repulsão eletrostática mediada por ondas com o termo repulsivo de Pauli:
+                        No cristal de $\text{NaCl}$, as partículas carregam cargas líquidas $q_{\text{Na}} = +1$ e
+                        $q_{\text{Cl}} = -1$. O potencial efetivo acopla a atração/repulsão eletrostática mediada por
+                        ondas com o termo repulsivo de Pauli:
                     </p>
                     $$F_{\text{eff}}(r) = -\frac{q_i q_j \varepsilon_C}{r^2} - \frac{A}{r^6}$$
                 </div>
@@ -484,9 +540,12 @@
                 <div class="theory-section">
                     <h4>3. Termostato de Velocidades e Teorema de Equipartição</h4>
                     <p>
-                        Para manter a estabilidade térmica ou simular processos isotérmicos a uma temperatura $T_{\text{target}}$, aplica-se um algoritmo de reescalonamento contínuo das velocidades (análogo ao termostato de Berendsen):
+                        Para manter a estabilidade térmica ou simular processos isotérmicos a uma temperatura
+                        $T_{\text{target}}$, aplica-se um algoritmo de reescalonamento contínuo das velocidades (análogo
+                        ao termostato de Berendsen):
                     </p>
-                    $$\lambda = \sqrt{1 + \gamma \left( \frac{T_{\text{target}}}{T_{\text{instantâneo}}} - 1 \right)}, \quad \mathbf{v}_i \leftarrow \lambda \mathbf{v}_i$$
+                    $$\lambda = \sqrt{1 + \gamma \left( \frac{T_{\text{target}}}{T_{\text{instantâneo}}} - 1 \right)},
+                    \quad \mathbf{v}_i \leftarrow \lambda \mathbf{v}_i$$
                 </div>
             </div>
 
@@ -509,43 +568,44 @@
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
-                    Simule a dinâmica de partículas interagindo através de frentes de onda esféricas causais propagando-se na velocidade $c$, com potenciais interatômicos e controle termodinâmico.
+                    Simule a dinâmica de partículas interagindo através de frentes de onda propagando-se na velocidade
+                    $c$.
                 </p>
                 <div class="onboarding-grid">
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="Ondas">
                             <span>1. Propagação de Ondas na Velocidade $c$</span>
                         </div>
                         <p class="onboarding-card-text">
-                            A força entre partículas não é instantânea. Cada crista de onda esférica propaga-se a uma velocidade $c$, aplicando a interação retardada somente ao interceptar a posição física de outra partícula (Função de Green d'Alembertiana).
+                            A interação entre as partículas não é instantânea. Cada onda se propaga a uma velocidade $c$,
+                            aplicando a força somente quando alcança outra partícula.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="Potenciais">
-                            <span>2. Potencial Interatômico & Colisões</span>
+                            <span>2. Tipos de Interação & Colisões</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Alterne entre interação coulombiana com cargas alternadas ($\pm q$), potencial de Lennard-Jones (12-6) e modelos de atração/repulsão pura. Partículas colidem elasticamente com as paredes do domínio.
+                            Alterne entre os tipos de interação: coulombiana, Lennard-Jones e modelos de atração ou
+                            repulsão pura. As partículas colidem elasticamente com as bordas da tela.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/thermometer.svg" class="icon-svg" alt="Temperatura">
-                            <span>3. Temperatura & Equipartição</span>
+                            <span>3. Temperatura</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Pelo teorema da equipartição em 2D ($K = N k_B T$), a energia cinética média define a temperatura instantânea. O termostato com taxa de atenuação $\gamma$ reescala velocidades para convergir à temperatura alvo.
+                            A temperatura do sistema é calculada a partir da energia cinética média. Ajuste a
+                            temperatura alvo nos controles para aquecer ou resfriar o sistema.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/particle-grid.svg" class="icon-svg" alt="Presets">
-                            <span>4. Presets de Redes e Gás 2D</span>
+                            <span>4. Presets & Interação na Tela</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Carregue cristais de $\text{NaCl}$ (64 íons), grades periódicas, anéis circulares ou sistemas simples de 1 a 3 corpos. Interaja diretamente clicando e arrastando sobre o canvas para aplicar impulsos mecânicos.
+                            Alterne entre configurações prontas como cristais, anéis e grades. Clique ou arraste
+                            diretamente na tela para atrair ou repelir partículas.
                         </p>
                     </div>
                 </div>
@@ -554,7 +614,8 @@
                 <div id="onboarding-qr-panel" class="onboarding-qr-panel hidden">
                     <div class="onboarding-qr-card">
                         <div class="onboarding-qr-preview">
-                            <canvas id="onboarding-qr-canvas" class="onboarding-qr-canvas" aria-label="QR Code para acesso de alunos"></canvas>
+                            <canvas id="onboarding-qr-canvas" class="onboarding-qr-canvas"
+                                aria-label="QR Code para acesso de alunos"></canvas>
                             <span class="onboarding-qr-scan-badge">
                                 <img src="../assets/icons/smartphone.svg" class="icon-svg" alt="">
                                 Aponte a câmera
@@ -566,11 +627,14 @@
                                 <span>Acesso Direto para a Turma</span>
                             </div>
                             <p class="onboarding-qr-desc">
-                                Projete esta tela na lousa. Os estudantes podem escanear o código da carteira para abrir esta simulação instantaneamente no celular.
+                                Projete esta tela na lousa. Os estudantes podem escanear o código da carteira para abrir
+                                esta simulação instantaneamente no celular.
                             </p>
                             <div class="onboarding-qr-url-row">
-                                <input type="text" id="onboarding-qr-url" class="onboarding-qr-url-input" readonly aria-label="URL da simulação">
-                                <button type="button" class="btn-secondary" id="btn-copy-qr-url" title="Copiar link direto">
+                                <input type="text" id="onboarding-qr-url" class="onboarding-qr-url-input" readonly
+                                    aria-label="URL da simulação">
+                                <button type="button" class="btn-secondary" id="btn-copy-qr-url"
+                                    title="Copiar link direto">
                                     <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="">
                                     <span id="btn-copy-qr-label">Copiar Link</span>
                                 </button>
@@ -580,7 +644,8 @@
                 </div>
             </div>
             <div class="sim-modal-footer">
-                <button type="button" class="btn-secondary" id="btn-toggle-onboarding-qr" title="Exibir QR Code para compartilhar com a turma">
+                <button type="button" class="btn-secondary" id="btn-toggle-onboarding-qr"
+                    title="Exibir QR Code para compartilhar com a turma">
                     <img src="../assets/icons/smartphone.svg" class="icon-svg" alt="">
                     <span id="btn-toggle-onboarding-qr-text">Conectar Alunos (QR Code)</span>
                 </button>

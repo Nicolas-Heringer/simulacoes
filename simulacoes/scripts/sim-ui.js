@@ -253,6 +253,41 @@ export function syncDualSlider(sliderTarget, numTarget, onChangeCallback) {
  * Classe controladora de Mini-Gráficos de Telemetria 2D em tempo real via HTML5 Canvas
  */
 /**
+ * Mapeia cores luminosas/neon de séries de gráficos 2D para equivalentes escuros de alto contraste
+ * quando os mini-gráficos da barra lateral e o modal de inspeção estão no Modo Claro.
+ */
+const LIGHT_PLOT_COLOR_MAP = {
+    '#facc15': '#b45309',
+    '#eab308': '#a16207',
+    '#fde047': '#b45309',
+    '#fbbf24': '#b45309',
+    '#38bdf8': '#0369a1',
+    '#22d3ee': '#0e7490',
+    '#2dd4bf': '#0f766e',
+    '#22c55e': '#15803d',
+    '#4ade80': '#15803d',
+    '#34d399': '#047857',
+    '#10b981': '#047857',
+    '#a855f7': '#6b21a8',
+    '#c084fc': '#6b21a8',
+    '#818cf8': '#3730a3',
+    '#f43f5e': '#be123c',
+    '#fb7185': '#be123c',
+    '#f472b6': '#be185d',
+    '#fb923c': '#c2410c',
+    '#f8fafc': '#1e1b4b',
+    '#ffffff': '#1e1b4b',
+    '#e2e8f0': '#334155',
+    '#94a3b8': '#475569'
+};
+
+function resolvePlotCurveColor(rawColor, isLight, fallbackColor) {
+    const c = (rawColor || fallbackColor || '#38bdf8').trim();
+    if (!isLight) return c;
+    return LIGHT_PLOT_COLOR_MAP[c.toLowerCase()] || c;
+}
+
+/**
  * Compacta um array de registros { t, ... } preservando picos (mínimo e máximo de cada par)
  * quando o histórico ultrapassa o limite de segurança de memória.
  */
@@ -387,6 +422,7 @@ export class RealtimePlot {
 
         this.resize();
         window.addEventListener('resize', () => this.resize());
+        window.addEventListener('themechange', () => this.render());
         if (window.ResizeObserver && this.canvas.parentElement) {
             new ResizeObserver(() => this.resize()).observe(this.canvas.parentElement);
         }
@@ -506,8 +542,10 @@ export class RealtimePlot {
 
         ctx.clearRect(0, 0, width, height);
 
+        const tc = getThemeColors();
+
         // Grade Central Sutil
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.strokeStyle = tc.plotGrid;
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(0, height / 2);
@@ -564,9 +602,10 @@ export class RealtimePlot {
         ctx.lineTo(0, height);
         ctx.closePath();
 
-        const strokeColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-hud').trim() ||
-                            getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() ||
-                            this.color;
+        const rawStroke = getComputedStyle(document.documentElement).getPropertyValue('--accent-hud').trim() ||
+                          getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() ||
+                          this.color;
+        const strokeColor = resolvePlotCurveColor(rawStroke, tc.theme === 'light', tc.cyan);
 
         const areaGrad = ctx.createLinearGradient(0, 0, 0, height);
         areaGrad.addColorStop(0, strokeColor.startsWith('#') ? `${strokeColor}44` : 'rgba(56, 189, 248, 0.25)');
@@ -575,12 +614,12 @@ export class RealtimePlot {
         ctx.fill();
         ctx.restore();
 
-        // 2. Traço da Linha com Efeito Glow
+        // 2. Traço da Linha com Efeito Glow (suavizado no tema claro)
         ctx.save();
         ctx.strokeStyle = strokeColor;
         ctx.lineWidth = 2;
-        ctx.shadowColor = strokeColor;
-        ctx.shadowBlur = 8;
+        ctx.shadowColor = tc.theme === 'light' ? 'transparent' : strokeColor;
+        ctx.shadowBlur = tc.theme === 'light' ? 0 : 8;
         ctx.stroke();
         ctx.restore();
     }
@@ -643,6 +682,7 @@ export class MultiSeriesPlot {
 
         this.resize();
         window.addEventListener('resize', () => this.resize());
+        window.addEventListener('themechange', () => this.render());
         if (window.ResizeObserver && this.canvas.parentElement) {
             new ResizeObserver(() => this.resize()).observe(this.canvas.parentElement);
         }
@@ -845,9 +885,12 @@ export class MultiSeriesPlot {
 
         const getY = (v) => height - ((v - plotMin) / plotSpan) * height;
 
+        const tc = getThemeColors();
+        const isLight = tc.theme === 'light';
+
         // 1. Grade e Linha Zero
         if (this.showGrid) {
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+            ctx.strokeStyle = tc.plotGrid;
             ctx.lineWidth = 1;
             const gridLines = 4;
             for (let i = 1; i < gridLines; i++) {
@@ -861,7 +904,7 @@ export class MultiSeriesPlot {
             // Eixo zero destacado se estiver na faixa
             if (plotMin < 0 && plotMax > 0) {
                 const zeroY = getY(0);
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+                ctx.strokeStyle = tc.plotAxis;
                 ctx.setLineDash([4, 4]);
                 ctx.beginPath();
                 ctx.moveTo(0, zeroY);
@@ -878,12 +921,13 @@ export class MultiSeriesPlot {
 
             const stepX = width / (this.maxPoints - 1);
             const offsetIdx = this.maxPoints - buf.length;
+            const curveColor = resolvePlotCurveColor(s.color, isLight, tc.cyan);
 
             ctx.save();
-            ctx.strokeStyle = s.color || '#38bdf8';
+            ctx.strokeStyle = curveColor;
             ctx.lineWidth = 2;
-            ctx.shadowColor = s.color || '#38bdf8';
-            ctx.shadowBlur = 6;
+            ctx.shadowColor = isLight ? 'transparent' : curveColor;
+            ctx.shadowBlur = isLight ? 0 : 6;
             ctx.beginPath();
 
             for (let i = 0; i < buf.length; i++) {
@@ -906,15 +950,16 @@ export class MultiSeriesPlot {
             this.series.forEach(s => {
                 const val = this.latestValues[s.id] !== undefined ? this.latestValues[s.id].toFixed(1) : '--';
                 const text = `${s.label}: ${val}${s.unit || ''}`;
+                const curveColor = resolvePlotCurveColor(s.color, isLight, tc.cyan);
 
                 // Marcador circular
-                ctx.fillStyle = s.color || '#38bdf8';
+                ctx.fillStyle = curveColor;
                 ctx.beginPath();
                 ctx.arc(legendX + 4, legendY - 3, 3.5, 0, Math.PI * 2);
                 ctx.fill();
 
                 // Texto do rótulo
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+                ctx.fillStyle = tc.plotText;
                 ctx.fillText(text, legendX + 11, legendY);
 
                 legendX += ctx.measureText(text).width + 16;
@@ -926,6 +971,7 @@ export class MultiSeriesPlot {
     renderPhaseSpace() {
         const { ctx, width, height, phaseBuffer } = this;
         if (!phaseBuffer || phaseBuffer.length < 2) return;
+        const tc = getThemeColors();
 
         let minX = Infinity, maxX = -Infinity;
         let minP = Infinity, maxP = -Infinity;
@@ -948,7 +994,7 @@ export class MultiSeriesPlot {
         const getScreenY = (p) => height / 2 - ((p - midP) / spanP) * height;
 
         // Eixos de referência cruzados
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+        ctx.strokeStyle = tc.plotAxis;
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(0, height / 2);
@@ -959,12 +1005,13 @@ export class MultiSeriesPlot {
 
         // Trajetória no espaço de fase com fade temporal
         const total = phaseBuffer.length;
+        const phaseRgb = tc.theme === 'light' ? '2, 132, 199' : '56, 189, 248';
         for (let i = 1; i < total; i++) {
             const p0 = phaseBuffer[i - 1];
             const p1 = phaseBuffer[i];
             const alpha = 0.15 + 0.85 * (i / total);
 
-            ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
+            ctx.strokeStyle = `rgba(${phaseRgb}, ${alpha})`;
             ctx.lineWidth = 1.5;
             ctx.beginPath();
             ctx.moveTo(getScreenX(p0.x), getScreenY(p0.p));
@@ -974,7 +1021,7 @@ export class MultiSeriesPlot {
 
         // Ponto atual
         const last = phaseBuffer[total - 1];
-        ctx.fillStyle = '#facc15';
+        ctx.fillStyle = tc.accent;
         ctx.beginPath();
         ctx.arc(getScreenX(last.x), getScreenY(last.p), 4, 0, Math.PI * 2);
         ctx.fill();
@@ -1296,7 +1343,9 @@ function renderPlotViewerCanvas(plot) {
         const sx = (x) => padLeft + plotW / 2 + ((x - midX) / spanX) * plotW;
         const sy = (p) => padTop + plotH / 2 - ((p - midP) / spanP) * plotH;
 
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+        const tc = getThemeColors();
+        const phaseRgb = tc.theme === 'light' ? '2, 132, 199' : '56, 189, 248';
+        ctx.strokeStyle = tc.plotAxis;
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(padLeft, padTop + plotH / 2);
@@ -1307,7 +1356,7 @@ function renderPlotViewerCanvas(plot) {
 
         for (let i = 1; i < pts.length; i++) {
             const alpha = 0.2 + 0.8 * (i / pts.length);
-            ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
+            ctx.strokeStyle = `rgba(${phaseRgb}, ${alpha})`;
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(sx(pts[i - 1].x), sy(pts[i - 1].p));
@@ -1359,6 +1408,9 @@ function renderPlotViewerCanvas(plot) {
     const getX = (idx) => padLeft + (records.length > 1 ? (idx / (records.length - 1)) * plotW : plotW / 2);
     const getY = (val) => padTop + plotH - ((val - yMin) / yRange) * plotH;
 
+    const tc = getThemeColors();
+    const isLight = tc.theme === 'light';
+
     // 1. Grade horizontal e vertical + rótulos Y
     ctx.font = '11px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
     ctx.textAlign = 'right';
@@ -1370,14 +1422,14 @@ function renderPlotViewerCanvas(plot) {
         const y = padTop + ratio * plotH;
         const val = yMax - ratio * yRange;
 
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.07)';
+        ctx.strokeStyle = tc.plotGrid;
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(padLeft, y);
         ctx.lineTo(padLeft + plotW, y);
         ctx.stroke();
 
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+        ctx.fillStyle = tc.plotText;
         ctx.fillText(val.toFixed(Math.abs(yMax) >= 10 ? 1 : 2), padLeft - 8, y);
     }
 
@@ -1390,30 +1442,31 @@ function renderPlotViewerCanvas(plot) {
         const idx = Math.min(records.length - 1, Math.round(ratio * (records.length - 1)));
         const tVal = records[idx]?.t ?? idx;
 
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.strokeStyle = tc.plotGrid;
         ctx.beginPath();
         ctx.moveTo(x, padTop);
         ctx.lineTo(x, padTop + plotH);
         ctx.stroke();
 
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+        ctx.fillStyle = tc.plotText;
         const label = plot.hasExplicitTime ? `${Number(tVal).toFixed(2)}s` : `#${idx + 1}`;
         ctx.fillText(label, x, padTop + plotH + 8);
     }
 
     // 2. Desenho das curvas
-    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-hud').trim() ||
-                        getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() ||
-                        plot.color || '#38bdf8';
+    const rawAccentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-hud').trim() ||
+                           tc.accent ||
+                           plot.color || tc.cyan;
+    const accentColor = resolvePlotCurveColor(rawAccentColor, isLight, tc.cyan);
 
     if (isMulti) {
         plot.series.forEach(s => {
-            const color = s.color || accentColor;
+            const color = resolvePlotCurveColor(s.color, isLight, accentColor);
             ctx.save();
             ctx.strokeStyle = color;
             ctx.lineWidth = 2.2;
-            ctx.shadowColor = color;
-            ctx.shadowBlur = 6;
+            ctx.shadowColor = isLight ? 'transparent' : color;
+            ctx.shadowBlur = isLight ? 0 : 6;
             ctx.beginPath();
             for (let i = 0; i < records.length; i++) {
                 const x = getX(i);
@@ -1438,7 +1491,7 @@ function renderPlotViewerCanvas(plot) {
         ctx.lineTo(getX(0), padTop + plotH);
         ctx.closePath();
         const grad = ctx.createLinearGradient(0, padTop, 0, padTop + plotH);
-        grad.addColorStop(0, accentColor.startsWith('#') ? `${accentColor}44` : 'rgba(56, 189, 248, 0.25)');
+        grad.addColorStop(0, accentColor.startsWith('#') ? `${accentColor}33` : 'rgba(56, 189, 248, 0.20)');
         grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = grad;
         ctx.fill();
@@ -1447,8 +1500,8 @@ function renderPlotViewerCanvas(plot) {
         ctx.save();
         ctx.strokeStyle = accentColor;
         ctx.lineWidth = 2.2;
-        ctx.shadowColor = accentColor;
-        ctx.shadowBlur = 8;
+        ctx.shadowColor = isLight ? 'transparent' : accentColor;
+        ctx.shadowBlur = isLight ? 0 : 8;
         ctx.stroke();
         ctx.restore();
     }
@@ -1460,7 +1513,7 @@ function renderPlotViewerCanvas(plot) {
         const rec = records[idx];
 
         ctx.save();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+        ctx.strokeStyle = tc.plotCrosshair;
         ctx.lineWidth = 1;
         ctx.setLineDash([4, 4]);
         ctx.beginPath();
@@ -1477,7 +1530,7 @@ function renderPlotViewerCanvas(plot) {
             const parts = plot.series.map(s => {
                 const v = Number(rec.values?.[s.id] ?? 0);
                 const y = getY(v);
-                ctx.fillStyle = s.color || accentColor;
+                ctx.fillStyle = resolvePlotCurveColor(s.color, isLight, accentColor);
                 ctx.beginPath();
                 ctx.arc(cx, y, 4.5, 0, Math.PI * 2);
                 ctx.fill();
@@ -1499,15 +1552,15 @@ function renderPlotViewerCanvas(plot) {
         const boxX = Math.max(padLeft + 4, Math.min(padLeft + plotW - textW - 4, cx - textW / 2));
         const boxY = padTop + 6;
 
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+        ctx.fillStyle = tc.plotTooltipBg;
+        ctx.strokeStyle = tc.plotTooltipBorder;
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.roundRect(boxX, boxY, textW, 24, 6);
         ctx.fill();
         ctx.stroke();
 
-        ctx.fillStyle = '#f8fafc';
+        ctx.fillStyle = tc.plotTooltipText;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillText(infoText, boxX + 9, boxY + 12);
@@ -3147,5 +3200,180 @@ export function setFieldState(target, state = null, hintText = '') {
         hintEl.className = 'field-hint' + (state ? ` is-${state}` : '');
     }
 }
+
+// =============================================================================
+// 11. SISTEMA DE TEMAS CLARO / ESCURO & EXTRAÇÃO DE TOKENS CSS PARA CANVAS
+// =============================================================================
+
+const THEME_STORAGE_KEY = 'sim_theme';
+const THEME_COLOR_DARK = '#0f172a';
+const THEME_COLOR_LIGHT = '#ffffff';
+
+const THEME_ICON_SUN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M6.34 17.66l-1.41 1.41"/><path d="M19.07 4.93l-1.41 1.41"/></svg>`;
+const THEME_ICON_MOON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`;
+
+/**
+ * Retorna o tema ativo ('dark' ou 'light').
+ * @returns {'dark'|'light'}
+ */
+export function getTheme() {
+    return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+}
+
+/**
+ * Extrai em tempo real as cores semânticas do tema ativo diretamente das variáveis CSS.
+ * Projetado para alimentar gráficos 2D (RealtimePlot / MultiSeriesPlot) e, na Fase 2, os canvas das simulações.
+ */
+export function getThemeColors() {
+    const s = getComputedStyle(document.documentElement);
+    const read = (prop, fallback = '') => s.getPropertyValue(prop).trim() || fallback;
+    const theme = getTheme();
+    const isLight = theme === 'light';
+
+    return {
+        theme,
+        bgMain: read('--bg-main', isLight ? '#f4f4f5' : '#070b16'),
+        bgSurface: read('--bg-surface', isLight ? '#ffffff' : '#0f172a'),
+        bgCard: read('--bg-card', isLight ? '#ffffff' : 'rgba(30, 41, 59, 0.65)'),
+        bgCanvas: read('--bg-canvas', '#070b16'),
+        accent: read('--accent-color', isLight ? '#18181b' : '#facc15'),
+        accentFg: read('--accent-fg', isLight ? '#ffffff' : '#0f172a'),
+        textPrimary: read('--text-primary', isLight ? '#09090b' : '#f8fafc'),
+        textSecondary: read('--text-secondary', isLight ? '#52525b' : '#94a3b8'),
+        textMuted: read('--text-muted', isLight ? '#71717a' : '#64748b'),
+        border: read('--border-color', isLight ? 'rgba(9, 9, 11, 0.14)' : 'rgba(255, 255, 255, 0.10)'),
+        plotBg: read('--plot-bg', isLight ? '#fafafa' : 'rgba(0, 0, 0, 0.40)'),
+        plotGrid: read('--plot-grid', isLight ? 'rgba(9, 9, 11, 0.09)' : 'rgba(255, 255, 255, 0.08)'),
+        plotAxis: read('--plot-axis', isLight ? 'rgba(9, 9, 11, 0.26)' : 'rgba(255, 255, 255, 0.22)'),
+        plotText: read('--plot-text', isLight ? 'rgba(9, 9, 11, 0.68)' : 'rgba(255, 255, 255, 0.65)'),
+        plotCrosshair: read('--plot-crosshair', isLight ? 'rgba(9, 9, 11, 0.42)' : 'rgba(255, 255, 255, 0.45)'),
+        plotTooltipBg: read('--plot-tooltip-bg', isLight ? 'rgba(255, 255, 255, 0.96)' : 'rgba(15, 23, 42, 0.92)'),
+        plotTooltipBorder: read('--plot-tooltip-border', isLight ? 'rgba(9, 9, 11, 0.18)' : 'rgba(255, 255, 255, 0.18)'),
+        plotTooltipText: read('--plot-tooltip-text', isLight ? '#09090b' : '#f8fafc'),
+        canvasGrid: read('--canvas-grid', isLight ? 'rgba(9, 9, 11, 0.10)' : 'rgba(255, 255, 255, 0.08)'),
+        canvasText: read('--canvas-text', isLight ? '#09090b' : '#f8fafc'),
+        cyan: read('--color-cyan', isLight ? '#0284c7' : '#38bdf8'),
+        emerald: read('--color-emerald', isLight ? '#15803d' : '#22c55e'),
+        purple: read('--color-purple', isLight ? '#7e22ce' : '#a855f7'),
+        rose: read('--color-rose', isLight ? '#e11d48' : '#f43f5e'),
+        pink: read('--color-pink', isLight ? '#db2777' : '#f472b6'),
+        orange: read('--color-orange', isLight ? '#c2410c' : '#fb923c')
+    };
+}
+
+function syncThemeToggleButton(btn, theme) {
+    if (!btn) return;
+    const isLight = theme === 'light';
+    const nextLabel = isLight ? 'Alternar para modo escuro' : 'Alternar para modo claro';
+    btn.setAttribute('aria-pressed', isLight ? 'true' : 'false');
+    btn.setAttribute('title', nextLabel);
+    btn.setAttribute('aria-label', nextLabel);
+
+    const existingIcon = btn.querySelector('.icon-svg');
+    const wrapper = document.createElement('span');
+    wrapper.innerHTML = isLight ? THEME_ICON_MOON : THEME_ICON_SUN;
+    const nextSvg = wrapper.firstElementChild;
+    if (existingIcon && nextSvg) {
+        existingIcon.replaceWith(nextSvg);
+    } else if (nextSvg && !existingIcon) {
+        btn.prepend(nextSvg);
+    }
+}
+
+/**
+ * Define e persiste o tema ('dark' ou 'light'), atualizando DOM, meta theme-color e disparando 'themechange'.
+ * @param {'dark'|'light'} theme
+ * @param {{ persist?: boolean }} [options]
+ */
+export function setTheme(theme, options = {}) {
+    const normalized = theme === 'light' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = normalized;
+
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) {
+        metaTheme.setAttribute('content', normalized === 'light' ? THEME_COLOR_LIGHT : THEME_COLOR_DARK);
+    }
+
+    if (options.persist !== false) {
+        try {
+            localStorage.setItem(THEME_STORAGE_KEY, normalized);
+        } catch {
+            // Ignora indisponibilidade de storage (ex: contexto restrito)
+        }
+    }
+
+    document.querySelectorAll('#btn-theme-toggle, [data-theme-toggle]').forEach(btn => {
+        syncThemeToggleButton(btn, normalized);
+    });
+
+    if (_activeViewerPlot) {
+        renderPlotViewerCanvas();
+    }
+
+    window.dispatchEvent(new CustomEvent('themechange', {
+        detail: { theme: normalized, colors: getThemeColors() }
+    }));
+
+    return normalized;
+}
+
+/**
+ * Alterna entre tema escuro e tema claro.
+ */
+export function toggleTheme() {
+    return setTheme(getTheme() === 'light' ? 'dark' : 'light');
+}
+
+/**
+ * Inscreve um callback para mudanças de tema. Retorna função para cancelar a inscrição.
+ * @param {(detail: { theme: 'dark'|'light', colors: ReturnType<typeof getThemeColors> }) => void} callback
+ */
+export function onThemeChange(callback) {
+    if (typeof callback !== 'function') return () => {};
+    const handler = (e) => callback(e.detail || { theme: getTheme(), colors: getThemeColors() });
+    window.addEventListener('themechange', handler);
+    return () => window.removeEventListener('themechange', handler);
+}
+
+let _themeStorageListenerAttached = false;
+
+/**
+ * Inicializa o botão de alternância de tema no cabeçalho da simulação (idempotente).
+ * @param {string|HTMLElement} [target='#btn-theme-toggle']
+ */
+export function initThemeToggle(target = '#btn-theme-toggle') {
+    const btn = typeof target === 'string' ? document.querySelector(target) : target;
+    const current = getTheme();
+
+    if (btn && btn.dataset.themeBound !== 'true') {
+        btn.dataset.themeBound = 'true';
+        btn.addEventListener('click', () => toggleTheme());
+    }
+    if (btn) {
+        syncThemeToggleButton(btn, current);
+    }
+
+    if (!_themeStorageListenerAttached) {
+        _themeStorageListenerAttached = true;
+        window.addEventListener('storage', (e) => {
+            if (e.key === THEME_STORAGE_KEY) {
+                setTheme(e.newValue === 'light' ? 'light' : 'dark', { persist: false });
+            }
+        });
+    }
+
+    return { getTheme, setTheme, toggleTheme, getThemeColors, onThemeChange };
+}
+
+// Auto-inicialização segura para todas as simulações que importam sim-ui.js
+if (typeof document !== 'undefined') {
+    const autoBindTheme = () => initThemeToggle('#btn-theme-toggle');
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', autoBindTheme, { once: true });
+    } else {
+        autoBindTheme();
+    }
+}
+
 
 

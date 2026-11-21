@@ -32,10 +32,10 @@
     gap: 5px;
     background: linear-gradient(
         135deg,
-        rgba(250, 204, 21, 0.12) 0%,
-        rgba(250, 204, 21, 0.03) 100%
+        color-mix(in srgb, var(--accent-color) 11%, var(--bg-card)) 0%,
+        var(--bg-card) 100%
     );
-    border: 1px solid rgba(250, 204, 21, 0.40);
+    border: 1px solid color-mix(in srgb, var(--accent-color) 35%, transparent);
     border-radius: 14px;
     padding: 14px 16px 12px;
     text-align: center;
@@ -54,7 +54,7 @@
     height: 70px;
     background: radial-gradient(
         ellipse,
-        rgba(250, 204, 21, 0.20) 0%,
+        color-mix(in srgb, var(--accent-color) 16%, transparent) 0%,
         transparent 70%
     );
     pointer-events: none;
@@ -108,7 +108,7 @@
     flex-direction: column;
     align-items: center;
     gap: 5px;
-    background: rgba(0, 0, 0, 0.22);
+    background: var(--bg-recessed);
     border: 1px solid var(--border-color);
     border-radius: 10px;
     padding: 9px 6px 7px;
@@ -116,8 +116,8 @@
 }
 
 .qn-cell:focus-within {
-    border-color: rgba(250, 204, 21, 0.45);
-    background: rgba(250, 204, 21, 0.04);
+    border-color: var(--accent-color);
+    background: var(--accent-subtle);
 }
 
 .qn-symbol {
@@ -155,7 +155,7 @@
 
 /* ---------- Legenda de cores ---------- */
 .color-legend {
-    background: rgba(0, 0, 0, 0.22);
+    background: var(--bg-recessed);
     border: 1px solid var(--border-color);
     border-radius: 10px;
     padding: 12px 14px;
@@ -271,8 +271,8 @@
     font-weight: 700;
     font-size: 0.78rem;
     color: var(--accent-color);
-    background: rgba(250, 204, 21, 0.12);
-    border: 1px solid rgba(250, 204, 21, 0.35);
+    background: var(--accent-subtle);
+    border: 1px solid color-mix(in srgb, var(--accent-color) 35%, transparent);
     border-radius: var(--radius-sm);
     padding: 2px 7px;
     letter-spacing: 0.03em;
@@ -293,7 +293,7 @@
 
 .quick-qn-select {
     appearance: none;
-    background: rgba(15, 23, 42, 0.9);
+    background: var(--bg-input);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
     padding: 3px 6px;
@@ -310,7 +310,7 @@
 .quick-qn-select:hover,
 .quick-qn-select:focus {
     border-color: var(--accent-color);
-    background: rgba(30, 41, 59, 0.95);
+    background: var(--bg-surface-elevated);
 }
 
 /* Popover Quântico */

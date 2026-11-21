@@ -16,6 +16,7 @@
 
     <!-- Favicon e Folhas de Estilo -->
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <script src="../theme-init.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/audio.css">
 
@@ -35,6 +36,9 @@
         </a>
 
         <div class="sim-header-actions">
+            <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
+                <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
+            </button>
             <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
@@ -320,43 +324,39 @@
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
-                    Explore a física acústica em tempo real decompondo sinais sonoros em suas componentes harmônicas fundamentais.
+                    Visualize sons em tempo real na forma de onda e descubra quais frequências e notas musicais compõem o áudio.
                 </p>
                 <div class="onboarding-grid">
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/play.svg" class="icon-svg icon-accent" alt="">
-                            <span>1. Permissão de Microfone & Início</span>
+                            <span>1. Ativar o Microfone</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Clique em <strong>Capturar Áudio</strong> na barra inferior (ou pressione <kbd>Espaço</kbd>) e <strong>permita o acesso ao microfone</strong> no navegador. O processamento é realizado 100% localmente no seu dispositivo, sem qualquer gravação externa.
+                            Clique em <strong>Capturar Áudio</strong> na barra inferior (ou pressione <kbd>Espaço</kbd>) e permita o acesso ao microfone. Tudo é processado localmente no seu dispositivo.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="">
-                            <span>2. Osciloscópio & Espectro FFT</span>
+                            <span>2. Onda & Frequências</span>
                         </div>
                         <p class="onboarding-card-text">
-                            O <strong>Osciloscópio</strong> estabiliza a forma de onda periódica no tempo via <em>zero-crossing</em>. O <strong>Espectro</strong> exibe a intensidade de cada harmônico de 20 Hz a 20 kHz e detecta a nota musical correspondente.
+                            O <strong>Osciloscópio</strong> mostra o formato do som no tempo, enquanto o <strong>Espectro</strong> exibe a intensidade das frequências e detecta a nota musical.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/rotate.svg" class="icon-svg" alt="">
-                            <span>3. Visualização PiP & Mobile</span>
+                            <span>3. Alternar Gráficos</span>
                         </div>
                         <p class="onboarding-card-text">
-                            No Desktop, <strong>clique em qualquer ponto da miniatura</strong> para alternar qual gráfico fica em destaque. No smartphone, os dois gráficos ficam alinhados verticalmente para visualização simultânea.
+                            No computador, clique na miniatura para trocar qual gráfico fica em destaque. No celular, os dois gráficos aparecem juntos na vertical.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/pause.svg" class="icon-svg" alt="">
-                            <span>4. Congelar (Freeze) & Inspecionar</span>
+                            <span>4. Congelar & Inspecionar</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Clique em <strong>Congelar Tela</strong> para pausar a onda e o espectro a qualquer momento. Passe o cursor ou deslize o dedo sobre a FFT para ler as frequências e potências exatas com o retículo.
+                            Clique em <strong>Congelar Tela</strong> para pausar o som a qualquer momento. Passe o cursor ou deslize o dedo sobre o espectro para ler cada frequência.
                         </p>
                     </div>
                 </div>

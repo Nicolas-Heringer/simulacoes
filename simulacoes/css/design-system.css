@@ -11,17 +11,41 @@
    1. DESIGN TOKENS (:root)
    ============================================================================= */
 :root {
-    /* Paleta de Cores de Superfície (Dark Theme de Alto Contraste) */
-    --bg-main: #070b16;
-    --bg-surface: #0f172a;
-    --bg-surface-elevated: #1e293b;
-    --bg-panel: rgba(15, 23, 42, 0.80);
-    --bg-card: rgba(30, 41, 59, 0.65);
-    --bg-input: rgba(15, 23, 42, 0.85);
+    color-scheme: dark;
 
-    /* Cor de Acento Geral da Página (Global) */
-    --accent-color: #facc15;
-    --accent-color-hover: #eab308;
+    /* Paleta de Cores de Superfície (Dark Theme — Modo "Papel" / Carbono Quente) */
+    --bg-main: #0c0a09;
+    --bg-surface: #1c1917;
+    --bg-surface-elevated: #292524;
+    --bg-panel: rgba(28, 25, 23, 0.85);
+    --bg-card: rgba(41, 37, 36, 0.65);
+    --bg-input: rgba(28, 25, 23, 0.90);
+    --bg-subtle: rgba(255, 255, 255, 0.05);
+    --bg-hover: rgba(255, 255, 255, 0.10);
+    --bg-strong: rgba(255, 255, 255, 0.16);
+    --bg-glass: rgba(28, 25, 23, 0.90);
+    --bg-glass-strong: rgba(28, 25, 23, 0.96);
+    --bg-recessed: rgba(0, 0, 0, 0.40);
+    --bg-backdrop: rgba(0, 0, 0, 0.78);
+    --bg-backdrop-soft: rgba(5, 8, 18, 0.58);
+    --bg-canvas: #070b16;
+    --bg-canvas-inner: #0f172a;
+
+    /* Tokens Fixos do Palco 3Blue1Brown (Blindados contra o Tema Claro da Interface) */
+    --stage-accent: #facc15;
+    --stage-cyan: #38bdf8;
+    --stage-emerald: #22c55e;
+    --stage-purple: #a855f7;
+    --stage-rose: #f43f5e;
+    --stage-orange: #fb923c;
+    --stage-pink: #f472b6;
+    --stage-text: #f8fafc;
+    --stage-text-muted: #94a3b8;
+
+    /* Cor de Acento Geral da Página (Global — Paleta Índigo no Tema Escuro) */
+    --accent-color: #818cf8;
+    --accent-color-hover: #6366f1;
+    --accent-fg: #0c0a09;
     --accent-subtle: color-mix(in srgb, var(--accent-color) 15%, transparent);
     --accent-glow: color-mix(in srgb, var(--accent-color) 35%, transparent);
 
@@ -33,6 +57,8 @@
     --accent-slider: var(--accent-color);
     --accent-switch: var(--accent-color);
     --accent-hud: var(--accent-color);
+    --accent-divider: #64748b;
+    --ui-border-width: 1.5px;
 
     /* Cores Semânticas Auxiliares */
     --color-cyan: #38bdf8;
@@ -57,11 +83,24 @@
     --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-mono: 'JetBrains Mono', 'Courier New', monospace;
 
-    /* Bordas & Divisores */
-    --border-color: rgba(255, 255, 255, 0.10);
-    --border-subtle: rgba(255, 255, 255, 0.06);
+    /* Bordas & Divisores (Contornos "Forte" 1.5px) */
+    --border-color: rgba(255, 255, 255, 0.28);
+    --border-subtle: rgba(255, 255, 255, 0.18);
+    --border-strong: rgba(255, 255, 255, 0.45);
     --border-focus: var(--accent-btn, var(--accent-color));
     --header-height: 52px;
+
+    /* Tokens de Gráficos 2D & Canvas (Base para RealtimePlot / MultiSeriesPlot / Fase 2) */
+    --plot-bg: rgba(0, 0, 0, 0.40);
+    --plot-grid: rgba(255, 255, 255, 0.08);
+    --plot-axis: rgba(255, 255, 255, 0.22);
+    --plot-text: rgba(255, 255, 255, 0.65);
+    --plot-crosshair: rgba(255, 255, 255, 0.45);
+    --plot-tooltip-bg: rgba(28, 25, 23, 0.94);
+    --plot-tooltip-border: rgba(255, 255, 255, 0.28);
+    --plot-tooltip-text: #f8fafc;
+    --canvas-grid: rgba(255, 255, 255, 0.08);
+    --canvas-text: #f8fafc;
 
     /* Raios de Arredondamento */
     --radius-xs: 4px;
@@ -88,6 +127,235 @@
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     --safe-left: env(safe-area-inset-left, 0px);
     --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* =============================================================================
+   1.1 TEMA CLARO — PALETA GRAFITE + AZUL MARINHO/ÍNDIGO FORTE & SUPERFÍCIE PAPEL ([data-theme="light"])
+   ============================================================================= */
+:root[data-theme="light"] {
+    color-scheme: light;
+
+    /* Superfície "Papel" com contraste real entre Painel (#f5f5f4) e Cards Brancos (#ffffff) */
+    --bg-main: #e7e5e4;
+    --bg-surface: #fafaf9;
+    --bg-surface-elevated: #f5f5f4;
+    --bg-panel: #f5f5f4;
+    --bg-card: #ffffff;
+    --bg-input: #ffffff;
+    --bg-subtle: rgba(15, 23, 42, 0.055);
+    --bg-hover: rgba(15, 23, 42, 0.10);
+    --bg-strong: rgba(15, 23, 42, 0.18);
+    --bg-glass: rgba(250, 250, 249, 0.94);
+    --bg-glass-strong: rgba(250, 250, 249, 0.98);
+    --bg-recessed: #fafaf9;
+    --bg-backdrop: rgba(15, 23, 42, 0.48);
+    --bg-backdrop-soft: rgba(15, 23, 42, 0.35);
+    --bg-canvas: #070b16;
+    --bg-canvas-inner: #0f172a;
+
+    /* Paleta Grafite com Cor Geral em Azul Marinho / Índigo Forte (#1e1b4b — puxado para o preto) */
+    --accent-color: #1e1b4b;
+    --accent-color-hover: #131136;
+    --accent-fg: #ffffff;
+    --accent-warm: #1e1b4b;
+    --accent-card: #1e1b4b;
+    --accent-hud: #0369a1;
+    --accent-subtle: rgba(30, 27, 75, 0.10);
+    --accent-glow: rgba(30, 27, 75, 0.22);
+
+    /* Cores Semânticas calibradas para alto contraste sobre fundo claro */
+    --color-cyan: #0284c7;
+    --color-cyan-glow: rgba(2, 132, 199, 0.24);
+    --color-emerald: #15803d;
+    --color-purple: #7e22ce;
+    --color-rose: #e11d48;
+    --color-pink: #db2777;
+    --color-orange: #c2410c;
+
+    /* Tipografia Editorial */
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+
+    /* Contornos "Forte" (1.5px com borda escura bem definida) */
+    --border-color: #64748b;
+    --border-subtle: #94a3b8;
+    --border-strong: #334155;
+    --ui-border-width: 1.5px;
+    --accent-divider: #475569;
+
+    /* Tokens de Gráficos 2D & Canvas */
+    --plot-bg: #fafaf9;
+    --plot-grid: rgba(15, 23, 42, 0.11);
+    --plot-axis: rgba(15, 23, 42, 0.30);
+    --plot-text: rgba(15, 23, 42, 0.72);
+    --plot-crosshair: rgba(30, 27, 75, 0.50);
+    --plot-tooltip-bg: rgba(255, 255, 255, 0.98);
+    --plot-tooltip-border: #64748b;
+    --plot-tooltip-text: #0f172a;
+    --canvas-grid: rgba(15, 23, 42, 0.12);
+    --canvas-text: #0f172a;
+
+    /* Sombras nítidas de recorte */
+    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.05);
+    --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.10);
+    --shadow-lg: 0 10px 26px rgba(15, 23, 42, 0.14);
+    --shadow-popover: 0 12px 32px rgba(15, 23, 42, 0.18);
+}
+
+/* =============================================================================
+   1.2 BLINDAGEM INTEGRAL DO PALCO ESCURO (.canvas-area) NO MODO CLARO
+   Mantém tudo que está dentro do palco (.canvas-area > *) com tema escuro 3Blue1Brown
+   (barras flutuantes de transporte, HUDs, cabeçalhos de osciloscópio e overlays),
+   alterando apenas os menus (.sim-header, .controls-panel) e o contorno externo do palco.
+   ============================================================================= */
+.canvas-area {
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
+}
+
+:root[data-theme="light"] .canvas-area > * {
+    color-scheme: dark;
+    --bg-main: #0c0a09;
+    --bg-surface: #1c1917;
+    --bg-surface-elevated: #292524;
+    --bg-panel: rgba(28, 25, 23, 0.85);
+    --bg-card: rgba(41, 37, 36, 0.72);
+    --bg-input: rgba(28, 25, 23, 0.90);
+    --bg-subtle: rgba(255, 255, 255, 0.06);
+    --bg-hover: rgba(255, 255, 255, 0.12);
+    --bg-strong: rgba(255, 255, 255, 0.18);
+    --bg-glass: rgba(22, 20, 18, 0.88);
+    --bg-glass-strong: rgba(22, 20, 18, 0.95);
+    --bg-recessed: rgba(0, 0, 0, 0.45);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --border-color: rgba(255, 255, 255, 0.28);
+    --border-subtle: rgba(255, 255, 255, 0.18);
+    --border-strong: rgba(255, 255, 255, 0.45);
+    --accent-color: #818cf8;
+    --accent-color-hover: #6366f1;
+    --accent-fg: #0c0a09;
+    --accent-nav: #818cf8;
+    --accent-btn: #818cf8;
+    --accent-card: #818cf8;
+    --accent-text: #818cf8;
+    --accent-slider: #818cf8;
+    --accent-switch: #818cf8;
+    --accent-hud: #818cf8;
+    --accent-divider: #64748b;
+    --accent-subtle: rgba(129, 140, 248, 0.15);
+    --accent-glow: rgba(129, 140, 248, 0.35);
+    --color-cyan: #38bdf8;
+    --color-cyan-glow: rgba(56, 189, 248, 0.35);
+    --color-emerald: #22c55e;
+    --color-purple: #a855f7;
+    --color-rose: #f43f5e;
+    --color-pink: #f472b6;
+    --color-orange: #fb923c;
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.60);
+    --shadow-popover: 0 12px 36px rgba(0, 0, 0, 0.70);
+}
+
+/* Reforço Estrutural Parametrizável de Contornos (--ui-border-width = 1.5px nos dois temas), Divisores de Seção & Destaques */
+.controls-panel,
+.sim-header {
+    border-width: var(--ui-border-width, 1.5px);
+    border-color: var(--border-subtle);
+}
+
+.slider-container,
+.sim-plot-card,
+.sim-readout,
+.theory-card,
+.onboarding-card,
+.matrix-box,
+.btn-preset,
+.segmented-control,
+.segmented-grid,
+.tab-nav {
+    border-width: var(--ui-border-width, 1.5px);
+    border-color: var(--border-subtle);
+    box-shadow: var(--shadow-sm);
+}
+
+.slider-container:hover,
+.sim-plot-card:hover,
+.sim-readout:hover,
+.theory-card:hover {
+    border-color: var(--border-color);
+}
+
+.dual-input-wrapper,
+.plot-canvas-wrapper,
+select.sim-control,
+input[type="number"].sim-input,
+input[type="text"].sim-input,
+.matrix-cell input[type="number"],
+.matrix-cell input[type="text"],
+.matrix-input,
+button.btn-secondary,
+button.btn-outline,
+.btn-header-action {
+    border-width: var(--ui-border-width, 1.5px);
+    border-color: var(--border-color);
+}
+
+/* Estilos Comutáveis de Divisores de Seção (.sim-divider-label): Limpo (clean = padrão), Minimal e Cápsula (pill) */
+.sim-divider-label,
+.sim-divider-label > span {
+    color: var(--accent-divider, var(--text-secondary));
+    font-weight: 700;
+    transition: all var(--trans-fast);
+}
+
+.sim-divider-label::before,
+.sim-divider-label::after {
+    height: 1.5px;
+    background: color-mix(in srgb, var(--accent-divider, var(--border-color)) 45%, var(--border-color));
+}
+
+html[data-divider-style="minimal"] .sim-divider-label,
+html[data-divider-style="minimal"] .sim-divider-label > span {
+    color: var(--accent-divider, var(--text-muted));
+    font-weight: 600;
+}
+
+html[data-divider-style="minimal"] .sim-divider-label::before,
+html[data-divider-style="minimal"] .sim-divider-label::after {
+    height: 1px;
+    background: var(--border-color);
+}
+
+html[data-divider-style="pill"] .sim-divider-label > span {
+    background: color-mix(in srgb, var(--accent-divider, var(--accent-color)) 11%, transparent);
+    border: 1.5px solid color-mix(in srgb, var(--accent-divider, var(--accent-color)) 32%, transparent);
+    color: var(--accent-divider, var(--accent-color));
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+html[data-divider-style="pill"] .sim-divider-label::before {
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-divider, var(--accent-color)) 45%, var(--border-color)));
+}
+
+html[data-divider-style="pill"] .sim-divider-label::after {
+    height: 1.5px;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--accent-divider, var(--accent-color)) 45%, var(--border-color)), transparent);
+}
+
+/* Ícones de destaque (.icon-accent) e cartões teóricos */
+:root[data-theme="light"] .icon-accent,
+:root[data-theme="light"] .theory-card h4 .icon-svg {
+    color: var(--accent-card, var(--accent-color, #1e1b4b));
+}
+
+:root[data-theme="light"] .theory-card {
+    border-left: 3.5px solid var(--accent-card, var(--accent-color, #1e1b4b));
 }
 
 @supports (height: 100dvh) {
@@ -125,11 +393,11 @@ body {
     height: 6px;
 }
 ::-webkit-scrollbar-track {
-    background: rgba(15, 23, 42, 0.4);
+    background: var(--bg-subtle);
     border-radius: var(--radius-xs);
 }
 ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.18);
+    background: var(--bg-strong);
     border-radius: var(--radius-xs);
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -177,8 +445,9 @@ body {
 .btn-header-action {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--bg-subtle);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     padding: 6px 12px;
@@ -190,8 +459,19 @@ body {
 }
 
 .btn-header-action:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--bg-hover);
     border-color: var(--border-focus);
+}
+
+.btn-header-action.btn-theme-toggle {
+    padding: 6px 8px;
+    min-width: 32px;
+    min-height: 32px;
+    color: var(--text-secondary);
+}
+
+.btn-header-action.btn-theme-toggle:hover {
+    color: var(--accent-text, var(--accent-color));
 }
 
 /* Layout Grid da Simulação (Canvas à esquerda + Painel à direita com trava e colapso) */
@@ -219,7 +499,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.35);
+    background-color: var(--bg-canvas);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
     overflow: hidden;
@@ -306,7 +586,7 @@ body {
 
 .btn-collapse-sidebar:hover {
     color: var(--accent-text, var(--accent-color));
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--bg-hover);
     border-color: var(--border-color);
 }
 
@@ -323,7 +603,7 @@ body {
 
 /* Botão Flutuante de Reabrir Painel (Expandir) no Canvas */
 .canvas-btn-expand-sidebar {
-    background: rgba(15, 23, 42, 0.88);
+    background: var(--bg-glass);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border-color);
@@ -347,7 +627,7 @@ body {
 .canvas-btn-expand-sidebar:hover {
     color: var(--text-primary);
     border-color: var(--accent-btn, var(--accent-color));
-    background: rgba(30, 41, 59, 0.95);
+    background: var(--bg-glass-strong);
     transform: translateY(-1px);
 }
 
@@ -478,7 +758,7 @@ button.sim-btn {
 button.btn-primary:hover:not(:disabled),
 button.sim-btn:hover:not(:disabled) {
     background-color: var(--accent-btn, var(--accent-color));
-    color: var(--bg-main);
+    color: var(--accent-fg);
     box-shadow: 0 0 16px color-mix(in srgb, var(--accent-btn, var(--accent-color)) 35%, transparent);
     transform: translateY(-1px);
 }
@@ -488,7 +768,7 @@ button.btn-primary.is-active,
 button.btn-primary.active,
 button.btn-toggle.is-active {
     background-color: var(--accent-btn, var(--accent-color));
-    color: var(--bg-main);
+    color: var(--accent-fg);
     border-color: var(--accent-btn, var(--accent-color));
     box-shadow: 0 0 16px color-mix(in srgb, var(--accent-btn, var(--accent-color)) 45%, transparent);
 }
@@ -504,14 +784,14 @@ button.btn-toggle.is-active:hover:not(:disabled) {
 button.btn-primary:active:not(:disabled),
 button.sim-btn:active:not(:disabled) {
     transform: translateY(0);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-sm);
 }
 
 button.btn-primary:disabled,
 button.sim-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
-    border-color: rgba(255, 255, 255, 0.12);
+    border-color: var(--border-color);
     color: var(--text-muted);
     background: transparent;
     box-shadow: none;
@@ -522,7 +802,7 @@ button.sim-btn:disabled {
    BARRA DE REPRODUÇÃO FÍSICO-TEMPORAL (TRANSPORT BAR)
    ============================================================================= */
 .sim-transport-bar {
-    background: rgba(15, 23, 42, 0.75);
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 12px;
@@ -565,7 +845,7 @@ button.sim-btn:disabled {
 .transport-speed-pills {
     display: flex;
     gap: 3px;
-    background: rgba(0, 0, 0, 0.35);
+    background: var(--bg-recessed);
     padding: 2px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border-subtle);
@@ -586,7 +866,7 @@ button.sim-btn:disabled {
 
 .transport-speed-pills .speed-btn:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--bg-hover);
 }
 
 .transport-speed-pills .speed-btn.active {
@@ -602,7 +882,7 @@ button.btn-outline {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: var(--bg-subtle);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
     padding: 10px 16px;
@@ -617,17 +897,17 @@ button.btn-outline {
 
 button.btn-secondary:hover:not(:disabled),
 button.btn-outline:hover:not(:disabled) {
-    background-color: rgba(255, 255, 255, 0.10);
-    border-color: rgba(255, 255, 255, 0.25);
-    color: #ffffff;
+    background-color: var(--bg-hover);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
     transform: translateY(-1px);
 }
 
 button.btn-secondary.is-active,
 button.btn-outline.is-active {
-    background-color: color-mix(in srgb, var(--accent-color) 18%, transparent);
+    background-color: color-mix(in srgb, var(--accent-color) 16%, transparent);
     border-color: var(--accent-color);
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 button.btn-secondary:disabled,
@@ -647,7 +927,7 @@ button.btn-outline:disabled {
     padding: 9px 10px;
     font-size: 0.80rem;
     font-weight: 600;
-    background: rgba(30, 41, 59, 0.7);
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     color: var(--text-primary);
@@ -658,17 +938,17 @@ button.btn-outline:disabled {
 }
 
 .btn-preset:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--accent-btn, var(--accent-color)) 15%, transparent);
+    background: color-mix(in srgb, var(--accent-btn, var(--accent-color)) 12%, transparent);
     border-color: var(--accent-btn, var(--accent-color));
     color: var(--accent-btn, var(--accent-color));
     transform: translateY(-1px);
 }
 
 .btn-preset.active {
-    background: color-mix(in srgb, var(--accent-btn, var(--accent-color)) 18%, transparent);
+    background: color-mix(in srgb, var(--accent-btn, var(--accent-color)) 16%, transparent);
     border-color: var(--accent-btn, var(--accent-color));
     color: var(--accent-btn, var(--accent-color));
-    box-shadow: 0 0 10px color-mix(in srgb, var(--accent-btn, var(--accent-color)) 35%, transparent);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--accent-btn, var(--accent-color)) 25%, transparent);
 }
 
 .btn-preset:disabled {
@@ -680,10 +960,10 @@ button.btn-outline:disabled {
 /* Botão Flutuante de Canvas (.canvas-btn-floating / .canvas-btn-action) */
 .canvas-btn-floating,
 .canvas-btn-action {
-    background: rgba(15, 23, 42, 0.85);
+    background: var(--bg-glass);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 8px 14px;
     font-size: 0.78rem;
@@ -702,16 +982,16 @@ button.btn-outline:disabled {
 .canvas-btn-action:hover {
     color: var(--text-primary);
     border-color: var(--accent-btn, var(--accent-color));
-    background: rgba(30, 41, 59, 0.9);
+    background: var(--bg-glass-strong);
     transform: translateY(-1px);
 }
 
 .canvas-btn-floating.active,
 .canvas-btn-action.active {
-    background: color-mix(in srgb, var(--accent-btn, var(--accent-color)) 15%, transparent);
+    background: color-mix(in srgb, var(--accent-btn, var(--accent-color)) 15%, var(--bg-glass));
     border-color: var(--accent-btn, var(--accent-color));
     color: var(--accent-btn, var(--accent-color));
-    box-shadow: 0 0 14px color-mix(in srgb, var(--accent-btn, var(--accent-color)) 35%, transparent);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--accent-btn, var(--accent-color)) 30%, transparent);
 }
 
 .canvas-btn-floating.active .icon-spin,
@@ -728,7 +1008,7 @@ button.btn-outline:disabled {
     height: 36px;
     padding: 0;
     border-radius: var(--radius-md);
-    background: rgba(30, 41, 59, 0.6);
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
     color: var(--text-secondary);
     cursor: pointer;
@@ -736,16 +1016,16 @@ button.btn-outline:disabled {
 }
 
 .btn-icon:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--accent-btn, var(--accent-color)) 15%, transparent);
+    background: color-mix(in srgb, var(--accent-btn, var(--accent-color)) 12%, transparent);
     border-color: var(--accent-btn, var(--accent-color));
     color: var(--accent-btn, var(--accent-color));
 }
 
 .btn-icon.active {
-    background: color-mix(in srgb, var(--accent-btn, var(--accent-color)) 18%, transparent);
+    background: color-mix(in srgb, var(--accent-btn, var(--accent-color)) 16%, transparent);
     border-color: var(--accent-btn, var(--accent-color));
     color: var(--accent-btn, var(--accent-color));
-    box-shadow: 0 0 8px color-mix(in srgb, var(--accent-btn, var(--accent-color)) 35%, transparent);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--accent-btn, var(--accent-color)) 25%, transparent);
 }
 
 /* =============================================================================
@@ -755,7 +1035,7 @@ button.btn-outline:disabled {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    background: rgba(15, 23, 42, 0.5);
+    background: var(--bg-card);
     padding: 10px 12px;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-subtle);
@@ -796,7 +1076,7 @@ button.btn-outline:disabled {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    background: rgba(0, 0, 0, 0.35);
+    background: var(--bg-recessed);
     padding: 2px 6px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border-color);
@@ -853,14 +1133,14 @@ input[type="range"].sim-slider:focus {
 input[type="range"].sim-slider::-webkit-slider-runnable-track {
     width: 100%;
     height: 6px;
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--bg-strong);
     border-radius: 3px;
     border: none;
     transition: background var(--trans-fast);
 }
 
 input[type="range"].sim-slider:hover::-webkit-slider-runnable-track {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--border-strong);
 }
 
 input[type="range"].sim-slider::-webkit-slider-thumb {
@@ -981,10 +1261,10 @@ input[type="text"].sim-input:focus {
     position: absolute;
     cursor: pointer;
     inset: 0;
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: var(--bg-strong);
     transition: var(--trans-normal);
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
 }
 
 .slider-round:before {
@@ -994,7 +1274,8 @@ input[type="text"].sim-input:focus {
     width: 14px;
     left: 2px;
     bottom: 2px;
-    background-color: white;
+    background-color: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
     transition: var(--trans-normal);
     border-radius: 50%;
 }
@@ -1006,7 +1287,7 @@ input[type="text"].sim-input:focus {
 
 .sim-switch input:checked + .slider-round:before {
     transform: translateX(18px);
-    background-color: var(--bg-surface);
+    background-color: var(--accent-fg);
 }
 
 /* Controles Segmentados Universais (Pills / Segmented Controls) */
@@ -1015,7 +1296,7 @@ input[type="text"].sim-input:focus {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
     gap: 4px;
-    background: rgba(15, 23, 42, 0.75);
+    background: var(--bg-recessed);
     padding: 4px;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
@@ -1043,15 +1324,15 @@ input[type="text"].sim-input:focus {
 .segment-btn:hover,
 .btn-segment:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-subtle);
 }
 
 .segment-btn.active,
 .btn-segment.active {
-    background: color-mix(in srgb, var(--accent-switch, var(--accent-color)) 15%, transparent);
+    background: color-mix(in srgb, var(--accent-switch, var(--accent-color)) 14%, var(--bg-surface));
     border-color: var(--accent-switch, var(--accent-color));
     color: var(--accent-switch, var(--accent-color));
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-sm);
 }
 
 /* Barra de Navegação por Abas Expansíveis (Sliding / Accordion Tab Bar) */
@@ -1060,13 +1341,12 @@ input[type="text"].sim-input:focus {
     align-items: center;
     gap: 4px;
     margin-bottom: 12px;
-    background: rgba(15, 23, 42, 0.75);
+    background: var(--bg-recessed);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     padding: 4px;
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .tab-btn {
@@ -1110,10 +1390,10 @@ input[type="text"].sim-input:focus {
 /* Aba Ativa: Fica expandida com cor de acento */
 .tab-btn.active {
     flex: 1 0 auto;
-    background: color-mix(in srgb, var(--accent-nav, var(--accent-color)) 18%, transparent);
+    background: color-mix(in srgb, var(--accent-nav, var(--accent-color)) 14%, var(--bg-surface));
     border-color: var(--accent-nav, var(--accent-color));
     color: var(--accent-nav, var(--accent-color));
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--shadow-sm);
 }
 
 .tab-btn.active .tab-label {
@@ -1125,7 +1405,7 @@ input[type="text"].sim-input:focus {
 /* Hover na Aba Inativa: Expande suavemente ao passar o mouse */
 .tab-btn:hover:not(.active):not(.disabled) {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--bg-hover);
     border-color: color-mix(in srgb, var(--accent-nav, var(--accent-color)) 35%, transparent);
 }
 
@@ -1219,8 +1499,8 @@ input[type="text"].sim-input:focus {
 
 .sim-badge.idle,
 .status-badge.idle {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.12);
+    background: var(--bg-subtle);
+    border-color: var(--border-color);
     color: var(--text-muted);
 }
 
@@ -1235,10 +1515,10 @@ input[type="text"].sim-input:focus {
     position: absolute;
     bottom: 20px;
     left: 20px;
-    background: rgba(15, 23, 42, 0.88);
+    background: var(--bg-glass);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 10px 14px;
     display: flex;
@@ -1272,7 +1552,7 @@ input[type="text"].sim-input:focus {
    MINI-GRÁFICO DE TELEMETRIA EM TEMPO REAL (.sim-plot-card / .sim-sparkline)
    ============================================================================= */
 .sim-plot-card {
-    background: rgba(15, 23, 42, 0.75);
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 10px 12px;
@@ -1327,7 +1607,7 @@ input[type="text"].sim-input:focus {
     position: relative;
     width: 100%;
     height: 84px;
-    background: rgba(0, 0, 0, 0.40);
+    background: var(--plot-bg);
     border-radius: var(--radius-md);
     border: 1px solid var(--border-subtle);
     overflow: hidden;
@@ -1358,10 +1638,10 @@ input[type="text"].sim-input:focus {
     bottom: 15px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(15, 23, 42, 0.85);
+    background: var(--bg-glass);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: 6px 14px;
     font-size: 0.74rem;
@@ -1378,7 +1658,7 @@ input[type="text"].sim-input:focus {
 /* Tooltip Flutuante de Inspeção Genérico */
 .cell-tooltip {
     position: absolute;
-    background: rgba(15, 23, 42, 0.94);
+    background: var(--bg-glass-strong);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--accent-card, var(--accent-color));
@@ -1482,7 +1762,7 @@ input[type="text"].sim-input:focus {
 .sim-modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.78);
+    background: var(--bg-backdrop);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     z-index: 1000;
@@ -1556,7 +1836,7 @@ input[type="text"].sim-input:focus {
 
 .sim-modal-close:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-hover);
 }
 
 .sim-modal-body {
@@ -1620,7 +1900,7 @@ input[type="text"].sim-input:focus {
 }
 
 .sim-modal-hint kbd {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-subtle);
     border: 1px solid var(--border-color);
     padding: 2px 6px;
     border-radius: 4px;
@@ -1630,7 +1910,7 @@ input[type="text"].sim-input:focus {
 
 /* Variante Compacta de Instruções Iniciais / Boas-Vindas (.modal-onboarding) */
 .sim-modal-overlay.modal-onboarding {
-    background: rgba(5, 8, 18, 0.58);
+    background: var(--bg-backdrop-soft);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
 }
@@ -1654,7 +1934,7 @@ input[type="text"].sim-input:focus {
 }
 
 .onboarding-card {
-    background: rgba(255, 255, 255, 0.035);
+    background: var(--bg-subtle);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 12px;
@@ -1664,18 +1944,10 @@ input[type="text"].sim-input:focus {
 }
 
 .onboarding-card-title {
-    display: flex;
-    align-items: center;
-    gap: 7px;
     font-size: 0.82rem;
     font-weight: 600;
+    line-height: 1.35;
     color: var(--text-primary);
-}
-
-.onboarding-card-title .icon-svg {
-    color: var(--accent-color);
-    width: 16px;
-    height: 16px;
 }
 
 .onboarding-card-text {
@@ -1699,7 +1971,7 @@ input[type="text"].sim-input:focus {
     display: flex;
     align-items: center;
     gap: 18px;
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--bg-subtle);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: 16px;
@@ -1716,7 +1988,7 @@ input[type="text"].sim-input:focus {
 .onboarding-qr-canvas {
     background: #ffffff;
     border-radius: var(--radius-sm);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--shadow-md);
     image-rendering: pixelated;
     display: block;
 }
@@ -1951,7 +2223,7 @@ input[type="text"].sim-input:focus {
 }
 
 .preview-box {
-    background: rgba(0, 0, 0, 0.25);
+    background: var(--bg-recessed);
     border: 1px dashed var(--border-color);
     border-radius: var(--radius-md);
     padding: 12px;
@@ -1971,10 +2243,10 @@ input[type="text"].sim-input:focus {
     position: absolute;
     top: 15px;
     left: 15px;
-    background: rgba(15, 23, 42, 0.90);
+    background: var(--bg-glass);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.16);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 6px 10px;
     display: inline-flex;
@@ -1983,7 +2255,7 @@ input[type="text"].sim-input:focus {
     z-index: 50;
     font-size: 0.76rem;
     color: var(--text-secondary);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
     white-space: nowrap;
     user-select: none;
 }
@@ -2000,7 +2272,7 @@ input[type="text"].sim-input:focus {
 .theme-bar-divider {
     width: 1px;
     height: 16px;
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--border-color);
     margin: 0 2px;
 }
 
@@ -2022,7 +2294,7 @@ input[type="text"].sim-input:focus {
 
 .toolbar-dot.active,
 .theme-dot-btn.active {
-    border-color: #ffffff;
+    border-color: var(--text-primary);
     transform: scale(1.15);
     box-shadow: 0 0 10px currentColor;
 }
@@ -2033,8 +2305,8 @@ input[type="text"].sim-input:focus {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-color);
     color: var(--text-primary);
     padding: 4px 10px;
     border-radius: var(--radius-sm);
@@ -2198,7 +2470,7 @@ input[type="text"].sim-input:focus {
 
 /* Seletor Compacto Espelhado */
 .focus-mirror-select {
-    background: rgba(15, 23, 42, 0.92);
+    background: var(--bg-input);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
     padding: 4px 8px;
@@ -2221,7 +2493,7 @@ input[type="text"].sim-input:focus {
     font-size: 0.74rem;
     font-weight: 600;
     color: var(--accent-color);
-    background: rgba(0, 0, 0, 0.45);
+    background: var(--bg-recessed);
     padding: 3px 8px;
     border-radius: var(--radius-sm);
     border: 1px solid color-mix(in srgb, var(--accent-color) 30%, transparent);
@@ -2237,7 +2509,7 @@ input[type="text"].sim-input:focus {
     font-size: 0.72rem;
     color: var(--text-secondary);
     padding: 2px 6px;
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--bg-subtle);
     border-radius: var(--radius-sm);
 }
 
@@ -2260,12 +2532,12 @@ input[type="text"].sim-input:focus {
     position: absolute;
     top: 54px;
     left: 15px;
-    min-width: 350px;
-    max-width: 380px;
-    background: rgba(15, 23, 42, 0.96);
+    min-width: 390px;
+    max-width: 420px;
+    background: var(--bg-glass-strong);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-popover);
     z-index: 60;
@@ -2331,16 +2603,107 @@ input[type="text"].sim-input:focus {
 .popover-close:hover,
 .color-tooltip-close:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-hover);
 }
 
 .popover-body,
 .color-tooltip-body {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    max-height: 380px;
+    gap: 7px;
+    max-height: 440px;
     overflow-y: auto;
+    padding-right: 4px;
+}
+
+.workbench-section-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.palette-preset-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+}
+
+.palette-preset-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 4px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 0.66rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--trans-fast);
+    text-align: center;
+    line-height: 1.15;
+}
+
+.palette-preset-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+    border-color: var(--border-strong);
+}
+
+.palette-preset-btn.active {
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--accent-color) 14%, var(--bg-surface));
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 1px var(--accent-color);
+}
+
+.palette-swatch-pair {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.palette-swatch-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.structure-pill-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.structure-pill-btn {
+    font-size: 0.67rem;
+    font-weight: 600;
+    font-family: inherit;
+    padding: 3px 7px;
+    border-radius: var(--radius-xs);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--trans-fast);
+}
+
+.structure-pill-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+}
+
+.structure-pill-btn.active {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--accent-fg);
 }
 
 .popover-row,
@@ -2348,13 +2711,13 @@ input[type="text"].sim-input:focus {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    padding: 4px 0;
+    gap: 8px;
+    padding: 3px 0;
 }
 
 .popover-row-label,
 .color-row-label {
-    font-size: 0.75rem;
+    font-size: 0.74rem;
     color: var(--text-secondary);
     font-weight: 500;
     white-space: nowrap;
@@ -2363,7 +2726,7 @@ input[type="text"].sim-input:focus {
 .color-dots-group {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
 }
 
 .color-dot {
@@ -2371,76 +2734,125 @@ input[type="text"].sim-input:focus {
     height: 16px;
     border-radius: 50%;
     background: var(--c);
-    border: 1.5px solid transparent;
+    border: 1.5px solid rgba(0, 0, 0, 0.18);
     cursor: pointer;
     transition: transform var(--trans-fast), border-color var(--trans-fast), box-shadow var(--trans-fast);
+    flex-shrink: 0;
 }
 
 .color-dot:hover {
-    transform: scale(1.25);
+    transform: scale(1.22);
 }
 
 .color-dot.active {
-    border-color: #ffffff;
-    transform: scale(1.2);
+    border-color: var(--text-primary);
+    transform: scale(1.18);
     box-shadow: 0 0 8px var(--c);
 }
 
-.color-dot-inherit {
-    font-size: 0.65rem;
+.color-dot-inherit,
+.color-dot-neutral {
+    font-size: 0.63rem;
     font-weight: 600;
+    font-family: inherit;
     padding: 2px 5px;
     border-radius: var(--radius-xs);
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-color);
     color: var(--text-secondary);
     cursor: pointer;
     transition: all var(--trans-fast);
 }
 
-.color-dot-inherit:hover {
+.color-dot-inherit:hover,
+.color-dot-neutral:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--bg-hover);
 }
 
-.color-dot-inherit.active {
-    background: rgba(255, 255, 255, 0.22);
-    border-color: rgba(255, 255, 255, 0.5);
-    color: #ffffff;
+.color-dot-inherit.active,
+.color-dot-neutral.active {
+    background: var(--bg-strong);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+}
+
+.color-picker-input {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 50%;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    overflow: hidden;
+    flex-shrink: 0;
+    transition: transform var(--trans-fast), border-color var(--trans-fast);
+}
+
+.color-picker-input:hover {
+    transform: scale(1.18);
+    border-color: var(--text-primary);
+}
+
+.color-picker-input::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.color-picker-input::-webkit-color-swatch {
+    border: none;
+    border-radius: 50%;
+}
+
+.color-picker-input::-moz-color-swatch {
+    border: none;
+    border-radius: 50%;
 }
 
 .color-tooltip-divider {
     height: 1px;
     background: var(--border-color);
-    margin: 4px 0;
+    margin: 3px 0;
 }
 
 .color-tooltip-footer {
     padding-top: 8px;
     border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 6px;
 }
 
-.btn-reset-colors {
-    width: 100%;
+.btn-reset-colors,
+.btn-copy-tokens {
+    flex: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 7px 10px;
-    background: rgba(255, 255, 255, 0.06);
+    gap: 5px;
+    padding: 7px 8px;
+    background: var(--bg-subtle);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     color: var(--text-secondary);
-    font-size: 0.74rem;
-    font-weight: 500;
+    font-size: 0.72rem;
+    font-weight: 600;
     font-family: inherit;
     cursor: pointer;
     transition: all var(--trans-fast);
 }
 
-.btn-reset-colors:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.25);
+.btn-copy-tokens {
+    background: color-mix(in srgb, var(--accent-color) 12%, var(--bg-surface));
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.btn-reset-colors:hover,
+.btn-copy-tokens:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-strong);
     color: var(--text-primary);
 }
 
@@ -2453,7 +2865,7 @@ input[type="text"].sim-input:focus {
 }
 
 .icon-card {
-    background: rgba(15, 23, 42, 0.6);
+    background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 10px 6px;
@@ -2559,10 +2971,10 @@ input[type="text"].sim-input:focus {
         width: 38px;
         height: 38px;
         border-radius: var(--radius-pill);
-        background: rgba(15, 23, 42, 0.88);
+        background: var(--bg-glass);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.16);
+        border: 1px solid var(--border-color);
         color: var(--text-primary);
         box-shadow: var(--shadow-md);
         cursor: pointer;
@@ -2580,8 +2992,8 @@ input[type="text"].sim-input:focus {
     .canvas-btn-settings.is-active {
         border-color: var(--accent-btn, var(--accent-color));
         color: var(--accent-btn, var(--accent-color));
-        background: color-mix(in srgb, var(--accent-btn, var(--accent-color)) 18%, rgba(15, 23, 42, 0.94));
-        box-shadow: 0 0 14px color-mix(in srgb, var(--accent-btn, var(--accent-color)) 35%, transparent);
+        background: color-mix(in srgb, var(--accent-btn, var(--accent-color)) 14%, var(--bg-glass-strong));
+        box-shadow: 0 0 14px color-mix(in srgb, var(--accent-btn, var(--accent-color)) 30%, transparent);
     }
 
     .canvas-btn-settings.is-active .icon-svg {
@@ -2672,11 +3084,11 @@ input[type="text"].sim-input:focus {
         padding: 10px 12px;
         z-index: 60;
         border-radius: 18px;
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid var(--border-color);
+        background: var(--bg-glass-strong);
         backdrop-filter: blur(18px);
         -webkit-backdrop-filter: blur(18px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.75);
+        box-shadow: var(--shadow-popover);
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -2744,65 +3156,8 @@ input[type="text"].sim-input:focus {
 .is-warning { --field-state-color: var(--state-warning); }
 .is-ready   { --field-state-color: var(--state-ready); }
 
-/* Entradas de texto, número, seleção e wrappers de entrada dual */
-input.sim-input.is-valid,
-input.sim-input.is-invalid,
-input.sim-input.is-warning,
-select.sim-control.is-invalid,
-select.sim-control.is-warning,
-.dual-input-wrapper.is-valid,
-.dual-input-wrapper.is-invalid,
-.dual-input-wrapper.is-warning {
-    border-color: var(--field-state-color);
-}
-
-input.sim-input.is-invalid,
-input.sim-input.is-warning,
-select.sim-control.is-invalid,
-select.sim-control.is-warning,
-.dual-input-wrapper.is-invalid,
-.dual-input-wrapper.is-warning {
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--field-state-color) 40%, transparent),
-                0 0 10px color-mix(in srgb, var(--field-state-color) 28%, transparent);
-}
-
-/* Sliders: trilho, thumb e valor numérico seguem a cor do estado via --accent-slider */
-.sim-dual-slider.is-valid,
-.sim-dual-slider.is-invalid,
-.sim-dual-slider.is-warning,
-.slider-container.is-valid,
-.slider-container.is-invalid,
-.slider-container.is-warning {
-    --accent-slider: var(--field-state-color);
-    border-color: color-mix(in srgb, var(--field-state-color) 55%, transparent);
-}
-
-/* Interruptores segmentados e switches herdam a cor de estado */
-.sim-switch.is-invalid,
-.sim-switch.is-warning,
-.segmented-control.is-invalid,
-.segmented-control.is-warning {
-    --accent-switch: var(--field-state-color);
-}
-
-/* Botões: a cor de acento passa a refletir o estado */
-button.is-valid,
-button.is-invalid,
-button.is-warning {
-    --accent-btn: var(--field-state-color);
-}
-
-button.is-ready:not(:disabled) {
-    --accent-btn: var(--state-ready);
-    animation: stateReadyPulse 1.3s ease-in-out infinite alternate;
-}
-
-@keyframes stateReadyPulse {
-    from { box-shadow: 0 0 4px color-mix(in srgb, var(--state-ready) 30%, transparent); }
-    to   { box-shadow: 0 0 18px color-mix(in srgb, var(--state-ready) 80%, transparent); }
-}
-
-/* Ícones SVG nativos adotam a cor do estado */
+/* Os blocos de validação mantêm os contornos, sliders, inputs e botões com suas cores
+   originais do tema, alterando apenas a cor semântica do texto de aviso (.field-hint). */
 .icon-svg.is-valid,
 .icon-svg.is-invalid,
 .icon-svg.is-warning,
@@ -2852,7 +3207,7 @@ button:disabled,
    LEITURAS NUMÉRICAS (READOUT) & BADGE INFORMATIVO NO CANVAS
    ============================================================================= */
 .sim-readout {
-    background: rgba(15, 23, 42, 0.55);
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: 10px 12px;
@@ -2911,7 +3266,7 @@ button:disabled,
     font-size: 0.84rem;
     font-weight: 600;
     color: var(--text-primary);
-    background: rgba(15, 23, 42, 0.85);
+    background: var(--bg-glass);
     border: 1px solid color-mix(in srgb, var(--accent-color) 40%, transparent);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
@@ -2929,11 +3284,10 @@ button:disabled,
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(15, 23, 42, 0.6);
+    background: var(--bg-recessed);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: 10px 14px;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
     transition: border-color var(--trans-normal), box-shadow var(--trans-normal);
 }
 
@@ -2995,7 +3349,7 @@ button:disabled,
     height: 34px;
     text-align: center;
     background-color: var(--bg-surface);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
     font-family: var(--font-mono);

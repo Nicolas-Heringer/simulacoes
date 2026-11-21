@@ -16,6 +16,7 @@
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 
     <!-- Design System CSS Modular -->
+    <script src="../theme-init.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
 
     <!-- Suporte a Fórmulas Matemáticas com KaTeX -->
@@ -44,6 +45,9 @@
         </a>
 
         <div class="sim-header-actions">
+            <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
+                <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
+            </button>
             <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
@@ -484,36 +488,32 @@
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
-                    Observe a <strong>trajetória e a silhueta pontilhadas</strong>: elas mostram exatamente onde o corpo estaria por inércia (1ª Lei de Newton) caso nenhuma força resultante atuasse sobre ele.
+                    Observe a <strong>trajetória e a silhueta pontilhadas</strong>: elas mostram onde o objeto seguiria em linha reta por inércia se nenhuma força atuasse sobre ele.
                 </p>
                 <div class="onboarding-grid">
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/motion-oscillate.svg" class="icon-svg" alt="">
                             <span>1. Inércia & Desvio</span>
                         </div>
-                        <p class="onboarding-card-text">Aplique um pulso de força transversal ($\vec{F}$) e compare o novo MRU defletido com a trajetória inercial original.</p>
+                        <p class="onboarding-card-text">Aplique um pulso de força lateral nos controles para desviar o corpo e compare o novo caminho com a linha pontilhada original.</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/orbital.svg" class="icon-svg" alt="">
                             <span>2. Movimento Circular</span>
                         </div>
-                        <p class="onboarding-card-text">Alterne entre a <em>Fuga Contínua</em> e o <em>Passo de Newton</em> ($\Delta t$), ou corte a força centrípeta ($\vec{F}_c = 0$).</p>
+                        <p class="onboarding-card-text">Alterne entre o movimento contínuo e o avanço passo a passo, ou corte a força centrípeta para ver o objeto escapar pela tangente.</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/mouse-left.svg" class="icon-svg" alt="">
-                            <span>Câmera 3D Livre</span>
+                            <span>3. Câmera 3D Livre</span>
                         </div>
-                        <p class="onboarding-card-text">Arraste no palco para orbitar a cena 3D e use o scroll do mouse (ou gesto de pinça) para zoom.</p>
+                        <p class="onboarding-card-text">Arraste na tela para girar a cena em 3D e use o scroll do mouse (ou gesto de pinça) para aproximar ou afastar.</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/sliders.svg" class="icon-svg" alt="">
-                            <span>Inspeção com Tempo Pausado</span>
+                            <span>4. Inspecionar Pausado</span>
                         </div>
-                        <p class="onboarding-card-text">Pause a simulação na barra inferior e altere massas, raios ou vetores para inspecionar o quadro congelado.</p>
+                        <p class="onboarding-card-text">Pause a simulação na barra inferior e altere massa, raio ou vetores no painel lateral para observar cada mudança com calma.</p>
                     </div>
                 </div>
 

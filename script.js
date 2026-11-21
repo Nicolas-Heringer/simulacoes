@@ -242,12 +242,81 @@ document.addEventListener("DOMContentLoaded", function () {
   // Converte ícones SVG nativos inline (ex.: mouse-left.svg nos cards)
   inlineSVGImages();
 
+  // Inicializa alternância de tema claro/escuro sincronizada com as simulações
+  initHomeThemeToggle();
+
   // Inicializa previews e efeito spotlight dos cards de simulações
   initCardPreviews();
 
   // Inicializa seção de Material Bibliográfico
   initBibliograficaSection();
 });
+
+// --- Alternância de Tema Claro / Escuro (Sincronizada com localStorage 'sim_theme') ---
+function initHomeThemeToggle() {
+  const THEME_KEY = "sim_theme";
+  const ICON_SUN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M6.34 17.66l-1.41 1.41"/><path d="M19.07 4.93l-1.41 1.41"/></svg>`;
+  const ICON_MOON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`;
+
+  const btn = document.getElementById("btn-theme-toggle");
+
+  const getCurrentTheme = () =>
+    document.documentElement.dataset.theme === "light" ? "light" : "dark";
+
+  const applyTheme = (theme, persist = true) => {
+    const normalized = theme === "light" ? "light" : "dark";
+    const isLight = normalized === "light";
+    document.documentElement.dataset.theme = normalized;
+
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute("content", isLight ? "#ffffff" : "#0f172a");
+    }
+
+    if (persist) {
+      try {
+        localStorage.setItem(THEME_KEY, normalized);
+      } catch {
+        // Ignora indisponibilidade de storage
+      }
+    }
+
+    if (btn) {
+      const nextAction = isLight ? "Alternar para modo escuro" : "Alternar para modo claro";
+      btn.setAttribute("aria-pressed", isLight ? "true" : "false");
+      btn.setAttribute("title", nextAction);
+      btn.setAttribute("aria-label", nextAction);
+
+      const labelEl = btn.querySelector(".theme-toggle-label");
+      if (labelEl) {
+        labelEl.textContent = isLight ? "Modo escuro" : "Modo claro";
+      }
+
+      const existingIcon = btn.querySelector(".icon-svg");
+      const wrap = document.createElement("span");
+      wrap.innerHTML = isLight ? ICON_MOON : ICON_SUN;
+      const nextSvg = wrap.firstElementChild;
+      if (existingIcon && nextSvg) {
+        existingIcon.replaceWith(nextSvg);
+      } else if (nextSvg && !existingIcon) {
+        btn.prepend(nextSvg);
+      }
+    }
+  };
+
+  if (btn) {
+    applyTheme(getCurrentTheme(), false);
+    btn.addEventListener("click", () => {
+      applyTheme(getCurrentTheme() === "light" ? "dark" : "light", true);
+    });
+  }
+
+  window.addEventListener("storage", e => {
+    if (e.key === THEME_KEY) {
+      applyTheme(e.newValue === "light" ? "light" : "dark", false);
+    }
+  });
+}
 
 // --- Lógica da seção de Material Bibliográfico ---
 async function initBibliograficaSection() {

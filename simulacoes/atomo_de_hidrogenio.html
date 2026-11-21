@@ -18,6 +18,7 @@
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 
     <!-- Estilos CSS do Design System e Específicos -->
+    <script src="../theme-init.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/atomo_de_hidrogenio.css">
 
@@ -47,6 +48,9 @@
         </a>
 
         <div class="sim-header-actions">
+            <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
+                <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
+            </button>
             <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
@@ -356,36 +360,32 @@
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
-                    Explore a distribuição espacial da função de onda $\Psi_{n,l,m_l}(r,\theta,\phi)$ do elétron no potencial coulombiano via amostragem 3D de Monte Carlo.
+                    Explore em 3D as nuvens de probabilidade do elétron nos diferentes orbitais do átomo de hidrogênio.
                 </p>
                 <div class="onboarding-grid">
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/orbital.svg" class="icon-svg" alt="">
                             <span>1. Números Quânticos</span>
                         </div>
-                        <p class="onboarding-card-text">Configure o nível principal ($n$), momento angular azimutal ($l$) e projeção magnética ($m_l$) para selecionar o autoestado de Schrödinger.</p>
+                        <p class="onboarding-card-text">Altere os números $n$, $l$ e $m_l$ no painel lateral para trocar o orbital e ver como sua forma muda no espaço.</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="">
                             <span>2. Densidade $|\Psi|^2$</span>
                         </div>
-                        <p class="onboarding-card-text">A densidade de pontos no espaço representa a probabilidade de encontrar o elétron, evidenciando nós radiais e angulares.</p>
+                        <p class="onboarding-card-text">As regiões com mais pontos indicam onde é mais provável encontrar o elétron, revelando camadas e espaços vazios entre elas.</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/prism.svg" class="icon-svg" alt="">
-                            <span>3. Fase Quântica & Cores</span>
+                            <span>3. Modos de Cor</span>
                         </div>
-                        <p class="onboarding-card-text">Alterne entre o mapa da fase complexa $\arg(\Psi)$ (cores do espectro contínuo) e a densidade de probabilidade $|\Psi|^2$.</p>
+                        <p class="onboarding-card-text">Alterne a coloração dos pontos entre a densidade de probabilidade e a fase da onda para destacar as simetrias do orbital.</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/mouse-left.svg" class="icon-svg" alt="">
                             <span>4. Navegação 3D & Modo Foco</span>
                         </div>
-                        <p class="onboarding-card-text">Arraste para orbitar, use o scroll para zoom, ative a autorrotação ou use a tecla <kbd>F</kbd> para imersão em tela cheia.</p>
+                        <p class="onboarding-card-text">Arraste na tela para orbitar em 3D, use o scroll (ou pinça) para zoom, ative a autorrotação ou pressione <kbd>F</kbd> para tela cheia.</p>
                     </div>
                 </div>
 

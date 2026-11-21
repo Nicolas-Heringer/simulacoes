@@ -18,6 +18,7 @@
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 
     <!-- Design System Unificado e Estilos Específicos -->
+    <script src="../theme-init.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/snell.css">
 
@@ -36,6 +37,9 @@
         </a>
 
         <div class="sim-header-actions">
+            <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
+                <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
+            </button>
             <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
@@ -426,36 +430,32 @@
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
-                    Explore a propagação da luz em meios ópticos contínuos e não-homogêneos governada pela equação vetorial dos raios $\frac{d}{ds} \left( n \frac{d\mathbf{r}}{ds} \right) = \nabla n$ e pelo Princípio de Fermat.
+                    Observe como feixes de luz mudam de direção ao atravessar interfaces, lentes, fibras ópticas e meios com índice variável.
                 </p>
                 <div class="onboarding-grid">
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/mouse-left.svg" class="icon-svg" alt="">
-                            <span>1. Emissão & Rotação do Feixe</span>
+                            <span>1. Lançar & Girar Feixes</span>
                         </div>
-                        <p class="onboarding-card-text">Clique ou arraste no canvas para emitir raios luminosos. Use o <em>scroll do mouse</em> para girar a orientação ($\theta$) do feixe em tempo real.</p>
+                        <p class="onboarding-card-text">Clique ou arraste na tela para emitir raios de luz e use o <em>scroll do mouse</em> para girar a direção do feixe em tempo real.</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/prism.svg" class="icon-svg" alt="">
-                            <span>2. Perfis de Meios Ópticos</span>
+                            <span>2. Cenários Ópticos</span>
                         </div>
-                        <p class="onboarding-card-text">Alterne entre interfaces planas, lentes circulares, lentes GRIN (convergente/divergente), fibras ópticas e miragens atmosféricas.</p>
+                        <p class="onboarding-card-text">Alterne nos controles entre interfaces planas, lentes, fibras ópticas e miragens atmosféricas para ver diferentes desvios da luz.</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
-                            <span>3. Dispersão Cromática (Cauchy)</span>
+                            <span>3. Dispersão de Cores</span>
                         </div>
-                        <p class="onboarding-card-text">Ative a dispersão para decompor o feixe policromático: comprimentos de onda curtos (violeta) refratam mais intensamente que os longos (vermelho).</p>
+                        <p class="onboarding-card-text">Ative a dispersão para separar a luz branca em várias cores, mostrando como tons violetas desviam mais do que os vermelhos.</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/compass.svg" class="icon-svg" alt="">
-                            <span>4. Inspeção sob o Cursor (HUD)</span>
+                            <span>4. Inspecionar sob o Cursor</span>
                         </div>
-                        <p class="onboarding-card-text">Passe o cursor sobre qualquer ponto para ler o índice local $n(x,y)$, posição, ângulo de emissão e contagem de feixes ativos no HUD inferior.</p>
+                        <p class="onboarding-card-text">Passe o cursor por qualquer região da tela para ler na barra inferior o índice de refração $n$ local e o ângulo de emissão.</p>
                     </div>
                 </div>
 

@@ -1,24 +1,31 @@
 :root {
-    /* Paleta de Cores: Tema escuro com destaque amarelo */
-    --bg-main: #0f172a;
-    /* Azul noite bem escuro para o fundo principal */
-    --bg-sidebar: #111b2e;
-    /* Tom profundo integrado ao fundo principal */
-    --bg-card: rgba(30, 41, 59, 0.4);
-    /* Fundo translúcido para os cards (Glassmorphism) */
-    --bg-card-hover: rgba(30, 41, 59, 0.7);
+    color-scheme: dark;
 
-    --accent-color: #facc15;
-    /* Amarelo vibrante para destaques */
-    --accent-color-hover: #eab308;
-    /* Amarelo mais escuro para hover */
+    /* Paleta de Cores: Tema Escuro — Superfície "Papel" + Paleta Índigo + Contornos Fortes */
+    --bg-main: #0c0a09;
+    --bg-sidebar: #161412;
+    --bg-card: rgba(41, 37, 36, 0.65);
+    --bg-card-hover: rgba(52, 47, 45, 0.85);
+    --bg-subtle: rgba(255, 255, 255, 0.05);
+    --bg-hover: rgba(255, 255, 255, 0.10);
+    --bg-navbar-mobile: rgba(22, 20, 18, 0.95);
+
+    --accent-color: #818cf8;
+    --accent-color-hover: #6366f1;
+    --accent-fg: #0c0a09;
+    --accent-subtle: rgba(129, 140, 248, 0.14);
+    --accent-border: rgba(129, 140, 248, 0.32);
+    --accent-underline: rgba(129, 140, 248, 0.50);
+    --accent-glow: rgba(129, 140, 248, 0.22);
 
     --text-primary: #f8fafc;
-    /* Quase branco para textos principais */
     --text-secondary: #94a3b8;
-    /* Cinza azulado para textos secundários e descrições */
+    --text-prose: #cbd5e1;
 
-    --border-color: rgba(255, 255, 255, 0.1);
+    --border-color: rgba(255, 255, 255, 0.28);
+    --border-subtle: rgba(255, 255, 255, 0.18);
+    --card-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    --card-shadow-hover: 0 14px 32px rgba(0, 0, 0, 0.45), 0 0 0 1.5px rgba(129, 140, 248, 0.45);
 
     /* Fontes Seguras */
     --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -29,6 +36,36 @@
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     --safe-left: env(safe-area-inset-left, 0px);
     --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* Tema Claro — Superfície "Papel" + Paleta Grafite com Cor Geral Azul Marinho/Índigo Forte (#1e1b4b) + Contornos Fortes */
+:root[data-theme="light"] {
+    color-scheme: light;
+
+    --bg-main: #e7e5e4;
+    --bg-sidebar: #fafaf9;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f5f5f4;
+    --bg-subtle: rgba(15, 23, 42, 0.055);
+    --bg-hover: rgba(15, 23, 42, 0.10);
+    --bg-navbar-mobile: rgba(250, 250, 249, 0.96);
+
+    --accent-color: #1e1b4b;
+    --accent-color-hover: #131136;
+    --accent-fg: #ffffff;
+    --accent-subtle: rgba(30, 27, 75, 0.10);
+    --accent-border: rgba(30, 27, 75, 0.30);
+    --accent-underline: rgba(30, 27, 75, 0.45);
+    --accent-glow: rgba(30, 27, 75, 0.14);
+
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-prose: #1e293b;
+
+    --border-color: #64748b;
+    --border-subtle: #94a3b8;
+    --card-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.05);
+    --card-shadow-hover: 0 14px 30px rgba(15, 23, 42, 0.18), 0 0 0 1.5px #1e1b4b;
 }
 
 @supports (height: 100dvh) {
@@ -74,13 +111,13 @@ p {
     top: 0;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid rgba(255, 255, 255, 0.07);
+    border-right: 1px solid var(--border-subtle);
     z-index: 100;
 }
 
 .sidebar-header {
     padding: 22px 18px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid var(--border-subtle);
 }
 
 .sidebar-brand {
@@ -168,7 +205,7 @@ p {
     font-size: 0.72rem;
     font-weight: 600;
     color: var(--text-secondary);
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: var(--bg-subtle);
     padding: 2px 7px;
     border-radius: 999px;
     line-height: 1.4;
@@ -180,13 +217,13 @@ p {
 }
 
 .menu li a:hover {
-    background-color: rgba(255, 255, 255, 0.04);
+    background-color: var(--bg-subtle);
     color: var(--text-primary);
 }
 
 .menu li a.active {
-    background-color: rgba(250, 204, 21, 0.11);
-    border-color: rgba(250, 204, 21, 0.22);
+    background-color: var(--accent-subtle);
+    border-color: var(--accent-border);
     color: var(--accent-color);
 }
 
@@ -195,13 +232,47 @@ p {
 }
 
 .menu li a.active .menu-count {
-    background-color: rgba(250, 204, 21, 0.16);
+    background-color: var(--accent-subtle);
     color: var(--accent-color);
+}
+
+/* Botão de Alternância de Tema (Desktop: rodapé da sidebar acima dos links sociais | Mobile: topo direito) */
+.sidebar-theme-wrap {
+    padding: 0 14px 12px;
+}
+
+.theme-toggle-btn {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-subtle);
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+    font-size: 0.84rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+    color: var(--accent-color);
+    background-color: var(--accent-subtle);
+    border-color: var(--accent-border);
+}
+
+.theme-toggle-btn .icon-svg {
+    width: 16px;
+    height: 16px;
 }
 
 .sidebar-footer {
     padding: 16px 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    border-top: 1px solid var(--border-subtle);
 }
 
 .social-links {
@@ -219,16 +290,16 @@ p {
     height: 36px;
     border-radius: 9px;
     color: var(--text-secondary);
-    background-color: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-subtle);
     font-size: 1.15rem;
     transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .social-links a:hover {
     color: var(--accent-color);
-    background-color: rgba(250, 204, 21, 0.12);
-    border-color: rgba(250, 204, 21, 0.28);
+    background-color: var(--accent-subtle);
+    border-color: var(--accent-border);
     transform: translateY(-2px);
 }
 
@@ -325,7 +396,7 @@ p {
 .about-prose p {
     font-size: 1.02rem;
     line-height: 1.75;
-    color: #cbd5e1;
+    color: var(--text-prose);
     text-align: left;
 }
 
@@ -372,7 +443,7 @@ p {
 .editorial-link {
     color: var(--text-primary);
     text-decoration: none;
-    border-bottom: 1px solid rgba(250, 204, 21, 0.45);
+    border-bottom: 1px solid var(--accent-underline);
     padding-bottom: 1px;
     transition: color 0.2s ease, border-color 0.2s ease;
 }
@@ -421,6 +492,7 @@ p {
     align-items: stretch;
     text-align: left;
     gap: 14px;
+    box-shadow: var(--card-shadow);
     transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
         background-color 0.35s ease,
         border-color 0.3s ease,
@@ -431,7 +503,7 @@ p {
 .card:hover {
     transform: translateY(-5px) scale(1.015);
     border-color: var(--accent-color);
-    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(250, 204, 21, 0.15);
+    box-shadow: var(--card-shadow-hover);
 }
 
 /* Camada 0: Compositor unificado de preview (ambient + spotlight + scrim em um único fade) */
@@ -508,7 +580,7 @@ p {
     position: absolute;
     inset: 0;
     background: radial-gradient(520px circle at var(--mouse-X, 50%) var(--mouse-Y, 50%),
-            rgba(250, 204, 21, 0.16),
+            var(--accent-glow),
             transparent 42%);
     opacity: 0;
     transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
@@ -520,7 +592,7 @@ p {
 
 .card.has-preview::before {
     background: radial-gradient(320px circle at var(--mouse-X, 50%) var(--mouse-Y, 50%),
-            rgba(250, 204, 21, 0.08),
+            var(--accent-subtle),
             transparent 55%);
 }
 
@@ -646,7 +718,7 @@ p {
     width: 100%;
     min-height: 34px;
     padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid var(--border-subtle);
     font-size: 0.84rem;
     font-weight: 600;
     color: var(--text-secondary);
@@ -697,7 +769,7 @@ p {
     opacity: 0;
     transform: scale(0.45) rotate(18deg);
     pointer-events: none;
-    filter: drop-shadow(0 2px 8px rgba(15, 23, 42, 0.95)) drop-shadow(0 0 8px rgba(250, 204, 21, 0.35));
+    filter: drop-shadow(0 2px 8px rgba(15, 23, 42, 0.95)) drop-shadow(0 0 8px var(--accent-glow));
     transition: opacity 0.16s ease 0s,
         transform 0.2s cubic-bezier(0.22, 1, 0.36, 1) 0s;
     will-change: opacity, transform;
@@ -705,7 +777,7 @@ p {
 
 .card:hover .card-footer {
     color: var(--accent-color);
-    border-top-color: rgba(250, 204, 21, 0.22);
+    border-top-color: var(--accent-border);
 }
 
 .card:not(.has-preview):hover .card-footer-action .card-arrow {
@@ -785,7 +857,7 @@ p {
 .filter-btn.active {
     background-color: var(--accent-color);
     border-color: var(--accent-color);
-    color: var(--bg-main);
+    color: var(--accent-fg);
     font-weight: 600;
 }
 
@@ -910,10 +982,12 @@ p {
 }
 
 .academic-degree {
-    background-color: rgba(15, 23, 42, 0.5);
+    background-color: var(--bg-card);
     padding: 18px 22px;
     border-radius: 12px;
+    border: 1.5px solid var(--border-color);
     border-left: 4px solid var(--accent-color);
+    box-shadow: var(--card-shadow);
 }
 
 .degree-header {
@@ -924,9 +998,9 @@ p {
 }
 
 .degree-badge {
-    background-color: rgba(250, 204, 21, 0.15);
+    background-color: var(--accent-subtle);
     color: var(--accent-color);
-    border: 1px solid rgba(250, 204, 21, 0.3);
+    border: 1.5px solid var(--accent-border);
     font-size: 0.75rem;
     font-weight: 600;
     padding: 3px 10px;
@@ -949,10 +1023,11 @@ p {
 
 .research-section,
 .outreach-section {
-    background-color: rgba(15, 23, 42, 0.3);
+    background-color: var(--bg-card);
     padding: 20px;
     border-radius: 12px;
-    border: 1px solid var(--border-color);
+    border: 1.5px solid var(--border-color);
+    box-shadow: var(--card-shadow);
 }
 
 .research-section h5,
@@ -967,7 +1042,7 @@ p {
 
 .research-section h5 ion-icon,
 .outreach-section h5 ion-icon {
-    color: #63b3ed;
+    color: var(--accent-color);
     font-size: 1.2rem;
 }
 
@@ -985,9 +1060,9 @@ p {
 }
 
 .research-num {
-    background-color: rgba(99, 179, 237, 0.15);
-    color: #63b3ed;
-    border: 1px solid rgba(99, 179, 237, 0.3);
+    background-color: var(--accent-subtle);
+    color: var(--accent-color);
+    border: 1.5px solid var(--accent-border);
     font-weight: 700;
     font-size: 0.85rem;
     width: 28px;
@@ -1014,9 +1089,9 @@ p {
 
 .tech-tag {
     display: inline-block;
-    background-color: rgba(250, 204, 21, 0.12);
+    background-color: var(--accent-subtle);
     color: var(--accent-color);
-    border: 1px solid rgba(250, 204, 21, 0.25);
+    border: 1px solid var(--accent-border);
     font-size: 0.75rem;
     font-weight: 600;
     padding: 1px 7px;
@@ -1033,13 +1108,14 @@ p {
 }
 
 .stat-card {
-    background-color: rgba(15, 23, 42, 0.4);
-    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    border: 1.5px solid var(--border-color);
     border-radius: 12px;
     padding: 16px 20px;
     display: flex;
     align-items: center;
     gap: 15px;
+    box-shadow: var(--card-shadow);
     transition: border-color 0.3s ease, transform 0.3s ease;
 }
 
@@ -1051,7 +1127,7 @@ p {
 .stat-icon {
     font-size: 1.8rem;
     color: var(--accent-color);
-    background: rgba(250, 204, 21, 0.1);
+    background: var(--accent-subtle);
     width: 46px;
     height: 46px;
     border-radius: 10px;
@@ -1094,21 +1170,22 @@ p {
 }
 
 .usage-card {
-    background-color: rgba(15, 23, 42, 0.3);
-    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    border: 1.5px solid var(--border-color);
     border-radius: 12px;
     padding: 20px;
+    box-shadow: var(--card-shadow);
     transition: border-color 0.3s ease, transform 0.3s ease;
 }
 
 .usage-card:hover {
-    border-color: #63b3ed;
+    border-color: var(--accent-color);
     transform: translateY(-3px);
 }
 
 .usage-icon {
     font-size: 1.8rem;
-    color: #63b3ed;
+    color: var(--accent-color);
     margin-bottom: 12px;
 }
 
@@ -1139,9 +1216,9 @@ p {
 }
 
 .tech-pill {
-    background-color: rgba(15, 23, 42, 0.5);
+    background-color: var(--bg-card);
     color: var(--text-primary);
-    border: 1px solid var(--border-color);
+    border: 1.5px solid var(--border-color);
     padding: 8px 16px;
     border-radius: 999px;
     font-size: 0.88rem;
@@ -1149,6 +1226,7 @@ p {
     display: flex;
     align-items: center;
     gap: 8px;
+    box-shadow: var(--card-shadow);
     transition: all 0.3s ease;
 }
 
@@ -1171,13 +1249,14 @@ p {
 }
 
 .dev-credits-card {
-    background-color: rgba(15, 23, 42, 0.3);
-    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    border: 1.5px solid var(--border-color);
     padding: 20px 24px;
     border-radius: 12px;
     display: flex;
     gap: 16px;
     align-items: flex-start;
+    box-shadow: var(--card-shadow);
 }
 
 .dev-credits-icon {
@@ -1210,14 +1289,14 @@ p {
     align-items: center;
     gap: 10px;
     background-color: var(--accent-color);
-    color: var(--bg-main);
+    color: var(--accent-fg);
     padding: 14px 32px;
     border-radius: 999px;
     font-weight: 700;
     font-size: 1.05rem;
     text-decoration: none;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(250, 204, 21, 0.25);
+    box-shadow: 0 4px 15px var(--accent-glow);
 }
 
 .btn-cta ion-icon {
@@ -1227,7 +1306,7 @@ p {
 .btn-cta:hover {
     background-color: var(--accent-color-hover);
     transform: translateY(-3px) scale(1.03);
-    box-shadow: 0 8px 25px rgba(250, 204, 21, 0.4);
+    box-shadow: 0 8px 25px var(--accent-border);
 }
 
 /* Ícones Vetoriais SVG Nativos (Herança Dinâmica de Cores e Cor de Acento) */
@@ -1281,7 +1360,7 @@ p {
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-subtle);
     border: 1px solid var(--border-color);
     transition: all 0.25s ease;
 }
@@ -1290,7 +1369,7 @@ p {
 .footer-social-links a:active {
     color: var(--accent-color);
     border-color: var(--accent-color);
-    background: rgba(250, 204, 21, 0.15);
+    background: var(--accent-subtle);
     transform: translateY(-2px);
 }
 
@@ -1327,11 +1406,12 @@ p {
         padding: 0 max(16px, var(--safe-right)) 0 max(16px, var(--safe-left));
         border-right: none;
         border-bottom: 1px solid var(--border-color);
-        background: rgba(15, 23, 42, 0.94);
+        background: var(--bg-navbar-mobile);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
         z-index: 1000;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
+        gap: 8px;
     }
 
     .sidebar-header {
@@ -1364,6 +1444,7 @@ p {
         flex-direction: row;
         padding: 0;
         gap: 6px;
+        margin-left: auto;
     }
 
     .menu li {
@@ -1391,9 +1472,25 @@ p {
     }
 
     .menu li a.active {
-        background-color: rgba(250, 204, 21, 0.14);
-        border-color: rgba(250, 204, 21, 0.25);
+        background-color: var(--accent-subtle);
+        border-color: var(--accent-border);
         color: var(--accent-color);
+    }
+
+    .sidebar-theme-wrap {
+        padding: 0;
+        flex-shrink: 0;
+    }
+
+    .theme-toggle-btn {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 9px;
+    }
+
+    .theme-toggle-label {
+        display: none;
     }
 
     .sidebar-footer {
@@ -1517,7 +1614,7 @@ p {
     .card:active {
         transform: scale(0.98);
         border-color: var(--accent-color);
-        background-color: rgba(30, 41, 59, 0.7);
+        background-color: var(--bg-card-hover);
     }
 
     /* Grade Didática de Uso */
@@ -1612,7 +1709,7 @@ p {
 
 .biblio-search-box input:focus {
     border-color: var(--accent-color);
-    box-shadow: 0 0 10px rgba(250, 204, 21, 0.2);
+    box-shadow: 0 0 0 3px var(--accent-subtle);
 }
 
 .biblio-clear-btn {
@@ -1620,7 +1717,7 @@ p {
     right: 12px;
     top: 50%;
     transform: translateY(-50%) scale(0.8);
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--bg-hover);
     border: none;
     outline: none;
     width: 26px;
@@ -1646,7 +1743,7 @@ p {
 }
 
 .biblio-clear-btn:hover {
-    background: rgba(250, 204, 21, 0.2);
+    background: var(--accent-subtle);
     color: var(--accent-color);
     transform: translateY(-50%) scale(1.1);
 }
@@ -1688,7 +1785,7 @@ p {
 
 .biblio-item:hover {
     border-color: var(--accent-color);
-    background-color: rgba(30, 41, 59, 0.7);
+    background-color: var(--bg-card-hover);
 }
 
 .biblio-item-main {
@@ -1751,7 +1848,7 @@ p {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background-color: rgba(15, 23, 42, 0.5);
+    background-color: var(--bg-subtle);
     border: 1px solid var(--border-color);
     color: var(--text-secondary);
     font-size: 0.8rem;
@@ -1767,12 +1864,124 @@ p {
 .btn-link-afiliado:hover {
     border-color: var(--accent-color);
     color: var(--accent-color);
-    background-color: rgba(250, 204, 21, 0.1);
+    background-color: var(--accent-subtle);
 }
 
 .btn-link-afiliado {
     color: var(--accent-color);
-    border-color: rgba(250, 204, 21, 0.3);
+    border-color: var(--accent-border);
+}
+
+/* =============================================================================
+   AJUSTES FINOS DO TEMA CLARO MONOCROMÁTICO EDITORIAL (Home)
+   ============================================================================= */
+:root[data-theme="light"] .sidebar-logo {
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.16);
+}
+
+.sidebar,
+.card,
+.biblio-item,
+.biblio-search-box input,
+.filter-btn,
+.theme-toggle-btn,
+.social-links a,
+.btn-copiar-citacao,
+.btn-link-afiliado {
+    border-width: 1.5px;
+}
+
+:root[data-theme="light"] .filter-btn:not(.active),
+:root[data-theme="light"] .biblio-search-box input,
+:root[data-theme="light"] .theme-toggle-btn {
+    border-color: #64748b;
+    background-color: #ffffff;
+}
+
+/* Tags de categoria & níveis com contraste calibrado sobre superfícies claras */
+:root[data-theme="light"] .tag-fisica,
+:root[data-theme="light"] .nivel-grad {
+    background-color: rgba(2, 132, 199, 0.10);
+    color: #0369a1;
+    border-color: rgba(2, 132, 199, 0.28);
+}
+
+:root[data-theme="light"] .tag-matematica,
+:root[data-theme="light"] .nivel-pos {
+    background-color: rgba(126, 34, 206, 0.10);
+    color: #6b21a8;
+    border-color: rgba(126, 34, 206, 0.28);
+}
+
+:root[data-theme="light"] .tag-quimica,
+:root[data-theme="light"] .nivel-em {
+    background-color: rgba(21, 128, 61, 0.10);
+    color: #15803d;
+    border-color: rgba(21, 128, 61, 0.28);
+}
+
+:root[data-theme="light"] .tag-biologia {
+    background-color: rgba(194, 65, 12, 0.10);
+    color: #c2410c;
+    border-color: rgba(194, 65, 12, 0.28);
+}
+
+:root[data-theme="light"] .tag-dev {
+    background-color: rgba(24, 24, 27, 0.08);
+    color: #18181b;
+    border-color: rgba(24, 24, 27, 0.22);
+}
+
+:root[data-theme="light"] .text-fisica { color: #0369a1; }
+:root[data-theme="light"] .text-matematica { color: #6b21a8; }
+:root[data-theme="light"] .text-quimica { color: #15803d; }
+:root[data-theme="light"] .text-biologia { color: #c2410c; }
+
+/* Cards no hover desktop: quando o preview escuro da simulação aparece, texto e ícone ficam brancos nítidos */
+@media (hover: hover) and (pointer: fine) {
+    :root[data-theme="light"] .card.has-preview:hover {
+        background-color: #0f172a;
+        border-color: #18181b;
+    }
+
+    :root[data-theme="light"] .card.has-preview:hover h3,
+    :root[data-theme="light"] .card.has-preview:hover h1 {
+        color: #ffffff;
+        text-shadow: 0 2px 14px rgba(0, 0, 0, 0.85);
+    }
+
+    :root[data-theme="light"] .card.has-preview:hover .card-footer {
+        color: #ffffff;
+    }
+
+    :root[data-theme="light"] .card.has-preview:hover .card-footer-action .card-click-icon {
+        filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.85));
+    }
+}
+
+/* Cards em telas touch / mobile no Modo Claro: mantém fundo branco limpo e legível */
+@media (hover: none), (max-width: 768px) {
+    :root[data-theme="light"] .card.has-preview .card-preview-ambient {
+        opacity: 0.10;
+        filter: grayscale(100%);
+    }
+
+    :root[data-theme="light"] .card.has-preview .card-preview-scrim {
+        background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0.82) 0%,
+                rgba(255, 255, 255, 0.90) 55%,
+                rgba(255, 255, 255, 0.96) 100%);
+    }
+
+    :root[data-theme="light"] .card.has-preview h3,
+    :root[data-theme="light"] .card.has-preview h1,
+    :root[data-theme="light"] .card.has-preview p {
+        text-shadow: none;
+    }
+
+    :root[data-theme="light"] .card.has-preview p {
+        color: var(--text-secondary);
+    }
 }
 
 @media (max-width: 640px) {

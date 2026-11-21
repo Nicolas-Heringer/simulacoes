@@ -14,6 +14,7 @@
 
     <!-- Favicon e Design System 2.0 -->
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <script src="../theme-init.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/gravidade.css">
 
@@ -31,6 +32,9 @@
         </a>
 
         <div class="sim-header-actions">
+            <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
+                <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
+            </button>
             <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
@@ -696,43 +700,39 @@
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
-                    Explore como forças puramente radiais moldam as órbitas no plano e teste as três Leis de Kepler de forma visual e quantitativa.
+                    Experimente lançar órbitas no plano, testar as Leis de Kepler e descobrir como diferentes forças centrais moldam o movimento.
                 </p>
                 <div class="onboarding-grid">
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/touch-drag.svg" class="icon-svg" alt="">
-                            <span>1. Manipulação Direta no Plano</span>
+                            <span>1. Lançar Órbitas na Tela</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Arraste o <strong>planeta</strong> ou a <strong>ponta do vetor velocidade $\vec{v}_0$</strong> diretamente no canvas para lançar órbitas em qualquer ângulo com pré-visualização instantânea.
+                            Arraste o <strong>planeta</strong> ou a <strong>ponta da seta de velocidade</strong> diretamente na tela para escolher a direção do lançamento e pré-visualizar a órbita.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/stopwatch.svg" class="icon-svg" alt="">
-                            <span>2. Laboratório da 2ª Lei (Áreas Iguais)</span>
+                            <span>2. Lei das Áreas Iguais</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Na aba <strong>Kepler & Gráficos</strong>, clique em <strong>Capturar Setor ($\Delta t$)</strong> próximo ao periélio e novamente no afélio para pintar setores de mesma área e observar a reta linear no gráfico Tempo × Área.
+                            Na aba <strong>Kepler & Gráficos</strong>, clique em <strong>Capturar Setor</strong> perto e longe do centro para comparar áreas varridas no mesmo intervalo de tempo.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/orbital.svg" class="icon-svg" alt="">
-                            <span>3. Forças Centrais & Teorema de Bertrand</span>
+                            <span>3. Outras Leis de Força</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Varie o expoente $n$ em $F(r) = -k/r^n$ (de Hooke $n=-1$ a Newton $n=2$, rosetas e instabilidade $n=3$) ou teste Schwarzschild, Yukawa e Rutherford — verificando que a 2ª Lei continua válida em todos os casos!
+                            Altere o tipo de força central nos controles para comparar órbitas fechadas, trajetórias em roseta e outros modelos clássicos.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/particles-double.svg" class="icon-svg" alt="">
-                            <span>4. Dois Corpos & Centro de Massa</span>
+                            <span>4. Dois Corpos & Referenciais</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Alterne entre <strong>1. Em $m_1$</strong>, <strong>2. Em $m_2$</strong> e <strong>3. Centro de Massa</strong> no topo do canvas para revelar a ação-reação ($\vec{F}_{12} = -\vec{F}_{21}$) e ver ambos os corpos orbitarem o baricentro.
+                            Use os botões no topo da tela para alternar a visão entre cada corpo e o centro de massa, acompanhando o movimento mútuo entre eles.
                         </p>
                     </div>
                 </div>

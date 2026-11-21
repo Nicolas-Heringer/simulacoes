@@ -35,7 +35,9 @@ import {
     solveEigenvaluesSymmetric3x3,
     diagonalizeSymmetric3x3,
     MatrixTensorEditor,
-    setFieldState
+    setFieldState,
+    getTheme,
+    onThemeChange
 } from './sim-ui.js';
 
 // Re-exporta todos os controladores e utilitários para retrocompatibilidade
@@ -72,7 +74,7 @@ export {
     setFieldState
 };
 
-// Catálogo Canônico Completo: 73 Ícones Vetoriais SVG em assets/icons/
+// Catálogo Canônico Completo: 74 Ícones Vetoriais SVG em assets/icons/
 const ICONS_LIST = [
     // Transporte, Navegação & UI (19)
     'play', 'pause', 'step', 'refresh', 'refresh-cw', 'rotate',
@@ -86,8 +88,8 @@ const ICONS_LIST = [
     'mouse-drag-horizontal', 'keyboard', 'key', 'smartphone', 'mobile',
     'tablet', 'touch', 'touch-drag', 'touch-pan', 'touch-pinch',
     'pinch', 'screen-rotate',
-    // Clima, Geofísica, Ecologia & Termodinâmica (10)
-    'globe', 'sun', 'snowflake', 'leaf', 'flower',
+    // Clima, Geofísica, Ecologia & Termodinâmica (11)
+    'globe', 'sun', 'moon', 'snowflake', 'leaf', 'flower',
     'thermometer', 'cyclone', 'wind', 'gauge', 'pressure',
     // Mecânica, Oscilações, Ondas, Óptica & Eletromagnetismo (11)
     'gravity-fall', 'motion-oscillate', 'spring', 'pendulum',
@@ -177,7 +179,7 @@ function buildMeshGeometry(type, radius, steps) {
     wireMesh = new THREE.Mesh(geom, wireMat);
     scene.add(wireMesh);
 
-    const accentHex = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() || '#facc15';
+    const accentHex = getComputedStyle(document.documentElement).getPropertyValue('--stage-accent').trim() || '#facc15';
     const ptsMat = new THREE.PointsMaterial({ color: accentHex, size: 0.035 });
     pointsMesh = new THREE.Points(geom, ptsMat);
     scene.add(pointsMesh);
@@ -261,29 +263,317 @@ function animate() {
     }
 }
 
-function changeThemeColor(color) {
-    document.documentElement.style.setProperty('--accent-color', color);
-    document.documentElement.style.setProperty('--accent-nav', color);
-    document.documentElement.style.setProperty('--accent-btn', color);
-    document.documentElement.style.setProperty('--accent-card', color);
-    document.documentElement.style.setProperty('--accent-text', color);
-    document.documentElement.style.setProperty('--accent-slider', color);
-    document.documentElement.style.setProperty('--accent-switch', color);
-    document.documentElement.style.setProperty('--accent-hud', color);
+// =============================================================================
+// WORKBENCH DE ESQUEMA DE CORES (CLARO & ESCURO — REGRA 90/10)
+// =============================================================================
 
-    if (testLight) testLight.color.set(color);
-    if (pointsMesh && pointsMesh.material) pointsMesh.material.color.set(color);
+const COMPONENT_TARGETS = ['nav', 'btn', 'card', 'slider', 'switch', 'hud', 'divider', 'text'];
 
-    document.querySelectorAll('.theme-dot-btn').forEach(d => {
-        d.classList.toggle('active', d.getAttribute('data-color') === color);
+const SWATCH_SLOTS = {
+    light: ['#b45309', '#0369a1', '#0f766e', '#1e1b4b', '#be123c'],
+    dark:  ['#facc15', '#38bdf8', '#2dd4bf', '#818cf8', '#f43f5e']
+};
+
+const NEUTRAL_TOKENS = {
+    light: { default: '#18181b', divider: '#475569' },
+    dark:  { default: '#e2e8f0', divider: '#64748b' }
+};
+
+const SURFACE_PRESETS = {
+    light: {
+        slate:   { bgMain: '#e2e8f0', bgSurface: '#ffffff', bgPanel: '#f1f5f9', bgCard: '#ffffff', bgRecessed: '#f8fafc' },
+        neutral: { bgMain: '#e4e4e7', bgSurface: '#ffffff', bgPanel: '#f4f4f5', bgCard: '#ffffff', bgRecessed: '#fafafa' },
+        warm:    { bgMain: '#e7e5e4', bgSurface: '#fafaf9', bgPanel: '#f5f5f4', bgCard: '#ffffff', bgRecessed: '#fafaf9' }
+    },
+    dark: {
+        slate:   { bgMain: '#070b16', bgSurface: '#0f172a', bgPanel: 'rgba(15, 23, 42, 0.80)', bgCard: 'rgba(30, 41, 59, 0.65)', bgRecessed: 'rgba(0, 0, 0, 0.35)' },
+        neutral: { bgMain: '#09090b', bgSurface: '#18181b', bgPanel: 'rgba(24, 24, 27, 0.85)', bgCard: 'rgba(39, 39, 42, 0.65)', bgRecessed: 'rgba(0, 0, 0, 0.40)' },
+        warm:    { bgMain: '#0c0a09', bgSurface: '#1c1917', bgPanel: 'rgba(28, 25, 23, 0.85)', bgCard: 'rgba(41, 37, 36, 0.65)', bgRecessed: 'rgba(0, 0, 0, 0.40)' }
+    }
+};
+
+const BORDER_PRESETS = {
+    light: {
+        subtle:  { width: '1px',   borderColor: '#cbd5e1', borderSubtle: '#e2e8f0', borderStrong: '#94a3b8' },
+        defined: { width: '1.5px', borderColor: '#94a3b8', borderSubtle: '#cbd5e1', borderStrong: '#64748b' },
+        strong:  { width: '1.5px', borderColor: '#64748b', borderSubtle: '#94a3b8', borderStrong: '#334155' }
+    },
+    dark: {
+        subtle:  { width: '1px',   borderColor: 'rgba(255, 255, 255, 0.10)', borderSubtle: 'rgba(255, 255, 255, 0.06)', borderStrong: 'rgba(255, 255, 255, 0.22)' },
+        defined: { width: '1.5px', borderColor: 'rgba(255, 255, 255, 0.18)', borderSubtle: 'rgba(255, 255, 255, 0.11)', borderStrong: 'rgba(255, 255, 255, 0.32)' },
+        strong:  { width: '1.5px', borderColor: 'rgba(255, 255, 255, 0.28)', borderSubtle: 'rgba(255, 255, 255, 0.18)', borderStrong: 'rgba(255, 255, 255, 0.45)' }
+    }
+};
+
+const PALETTE_PRESETS = {
+    ouro: {
+        light: {
+            global: '#b45309',
+            surface: 'warm',
+            borders: 'strong',
+            dividers: 'clean',
+            overrides: { nav: 'neutral', divider: 'neutral' }
+        },
+        dark: {
+            global: '#facc15',
+            surface: 'warm',
+            borders: 'strong',
+            dividers: 'clean',
+            overrides: { divider: 'neutral' }
+        }
+    },
+    azul: {
+        light: {
+            global: '#0369a1',
+            surface: 'warm',
+            borders: 'strong',
+            dividers: 'clean',
+            overrides: { nav: 'neutral', card: '#b45309', divider: 'neutral' }
+        },
+        dark: {
+            global: '#38bdf8',
+            surface: 'warm',
+            borders: 'strong',
+            dividers: 'clean',
+            overrides: { card: '#facc15', divider: 'neutral' }
+        }
+    },
+    petroleo: {
+        light: {
+            global: '#0f766e',
+            surface: 'warm',
+            borders: 'strong',
+            dividers: 'clean',
+            overrides: { nav: 'neutral', divider: 'neutral' }
+        },
+        dark: {
+            global: '#2dd4bf',
+            surface: 'warm',
+            borders: 'strong',
+            dividers: 'clean',
+            overrides: { divider: 'neutral' }
+        }
+    },
+    indigo: {
+        light: {
+            global: '#1e1b4b',
+            surface: 'warm',
+            borders: 'strong',
+            dividers: 'clean',
+            overrides: { nav: 'neutral', divider: 'neutral' }
+        },
+        dark: {
+            global: '#818cf8',
+            surface: 'warm',
+            borders: 'strong',
+            dividers: 'clean',
+            overrides: { divider: 'neutral' }
+        }
+    },
+    grafite: {
+        light: {
+            global: '#1e1b4b',
+            surface: 'warm',
+            borders: 'strong',
+            dividers: 'clean',
+            overrides: { hud: '#0369a1', divider: 'neutral' }
+        },
+        dark: {
+            global: '#e2e8f0',
+            surface: 'warm',
+            borders: 'strong',
+            dividers: 'clean',
+            overrides: { hud: '#38bdf8', divider: 'neutral' }
+        }
+    }
+};
+
+function createThemeStateFromPreset(presetId, mode) {
+    const p = PALETTE_PRESETS[presetId]?.[mode] || PALETTE_PRESETS.grafite[mode];
+    const components = {};
+    COMPONENT_TARGETS.forEach(t => {
+        components[t] = p.overrides?.[t] || 'auto';
+    });
+    return {
+        paletteId: presetId,
+        global: p.global,
+        surface: p.surface,
+        borders: p.borders,
+        dividers: p.dividers,
+        components
+    };
+}
+
+const workbenchState = {
+    light: createThemeStateFromPreset('grafite', 'light'),
+    dark:  createThemeStateFromPreset('indigo', 'dark')
+};
+
+function resolveComponentColor(mode, state, target) {
+    if (target === 'global') {
+        return state.global === 'neutral' ? NEUTRAL_TOKENS[mode].default : state.global;
+    }
+    const val = state.components[target] || 'auto';
+    if (val === 'auto') {
+        return state.global === 'neutral' ? NEUTRAL_TOKENS[mode].default : state.global;
+    }
+    if (val === 'neutral') {
+        return target === 'divider' ? NEUTRAL_TOKENS[mode].divider : NEUTRAL_TOKENS[mode].default;
+    }
+    return val;
+}
+
+function applyWorkbenchStateToDOM() {
+    const mode = getTheme();
+    const state = workbenchState[mode];
+    const root = document.documentElement;
+
+    // 1. Superfície
+    const surf = SURFACE_PRESETS[mode][state.surface] || SURFACE_PRESETS[mode].slate;
+    root.style.setProperty('--bg-main', surf.bgMain);
+    root.style.setProperty('--bg-surface', surf.bgSurface);
+    root.style.setProperty('--bg-panel', surf.bgPanel);
+    root.style.setProperty('--bg-card', surf.bgCard);
+    root.style.setProperty('--bg-recessed', surf.bgRecessed);
+
+    // 2. Contornos / Bordas
+    const brd = BORDER_PRESETS[mode][state.borders] || BORDER_PRESETS[mode].defined;
+    root.style.setProperty('--ui-border-width', brd.width);
+    root.style.setProperty('--border-color', brd.borderColor);
+    root.style.setProperty('--border-subtle', brd.borderSubtle);
+    root.style.setProperty('--border-strong', brd.borderStrong);
+
+    // 3. Estilo de Divisores
+    root.setAttribute('data-divider-style', state.dividers || 'minimal');
+
+    // 4. Cor Global + Componentes
+    const globalColor = resolveComponentColor(mode, state, 'global');
+    root.style.setProperty('--accent-color', globalColor);
+    root.style.setProperty('--accent-color-hover', globalColor);
+
+    COMPONENT_TARGETS.forEach(target => {
+        const resolved = resolveComponentColor(mode, state, target);
+        root.style.setProperty(`--accent-${target}`, resolved);
     });
 
-    const globalGroup = document.querySelector('.color-dots-group[data-target="global"]');
-    if (globalGroup) {
-        globalGroup.querySelectorAll('.color-dot').forEach(d => {
-            d.classList.toggle('active', d.getAttribute('data-color') === color);
-        });
+    // Mantém os elementos 3D do palco escuro (luz direcional e vértices da geometria)
+    // fixos nos tokens do palco (--stage-accent), sem alterar com o tema claro/escuro da UI.
+    if (plotInstance) plotInstance.render();
+    if (multiPlotInstance) multiPlotInstance.render();
+
+    syncWorkbenchControlsUI();
+}
+
+function syncWorkbenchControlsUI() {
+    const mode = getTheme();
+    const state = workbenchState[mode];
+    const slots = SWATCH_SLOTS[mode];
+
+    const modeBadge = document.getElementById('workbench-mode-badge');
+    if (modeBadge) {
+        modeBadge.textContent = mode === 'light' ? 'Modo Claro' : 'Modo Escuro';
     }
+
+    // Atualiza dots da barra rápida superior
+    document.querySelectorAll('.theme-dot-btn').forEach(dot => {
+        const pid = dot.getAttribute('data-palette-id');
+        if (pid && PALETTE_PRESETS[pid]) {
+            const c = PALETTE_PRESETS[pid][mode].global;
+            dot.style.background = c;
+            dot.setAttribute('data-color', c);
+            dot.classList.toggle('active', state.paletteId === pid);
+        }
+    });
+
+    // Atualiza botões das 5 paletas base
+    document.querySelectorAll('.palette-preset-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-palette') === state.paletteId);
+    });
+
+    // Atualiza pílulas de estrutura
+    ['surface', 'borders', 'dividers'].forEach(key => {
+        const group = document.querySelector(`.structure-pill-group[data-structure="${key}"]`);
+        if (!group) return;
+        group.querySelectorAll('.structure-pill-btn').forEach(b => {
+            b.classList.toggle('active', b.getAttribute('data-val') === state[key]);
+        });
+    });
+
+    // Atualiza grupos de cores por componente
+    document.querySelectorAll('.color-dots-group').forEach(group => {
+        const target = group.getAttribute('data-target');
+        const currentSetting = target === 'global' ? state.global : (state.components[target] || 'auto');
+        const resolvedHex = resolveComponentColor(mode, state, target);
+
+        // Atualiza os 5 dots com as cores calibradas do modo atual (Claro vs Escuro)
+        group.querySelectorAll('.color-dot[data-slot]').forEach(dot => {
+            const idx = Number(dot.getAttribute('data-slot'));
+            const slotColor = slots[idx] || slots[0];
+            dot.style.setProperty('--c', slotColor);
+            dot.setAttribute('data-color', slotColor);
+            dot.classList.toggle(
+                'active',
+                currentSetting !== 'auto' &&
+                currentSetting !== 'neutral' &&
+                currentSetting.toLowerCase() === slotColor.toLowerCase()
+            );
+        });
+
+        const inheritBtn = group.querySelector('.color-dot-inherit');
+        if (inheritBtn) {
+            inheritBtn.classList.toggle('active', currentSetting === 'auto');
+        }
+
+        const neutralBtn = group.querySelector('.color-dot-neutral');
+        if (neutralBtn) {
+            neutralBtn.classList.toggle('active', currentSetting === 'neutral');
+        }
+
+        const picker = group.querySelector('.color-picker-input');
+        if (picker && resolvedHex.startsWith('#') && resolvedHex.length === 7) {
+            picker.value = resolvedHex;
+        }
+    });
+}
+
+function applyPalettePreset(paletteId) {
+    const mode = getTheme();
+    if (!PALETTE_PRESETS[paletteId]) return;
+    workbenchState[mode] = createThemeStateFromPreset(paletteId, mode);
+    applyWorkbenchStateToDOM();
+}
+
+function buildExportCSS() {
+    const formatModeBlock = (mode, selector) => {
+        const st = workbenchState[mode];
+        const surf = SURFACE_PRESETS[mode][st.surface];
+        const brd = BORDER_PRESETS[mode][st.borders];
+        const globalCol = resolveComponentColor(mode, st, 'global');
+        const lines = [
+            `${selector} {`,
+            `    /* Paleta Base: ${st.paletteId} | Superfície: ${st.surface} | Bordas: ${st.borders} | Divisores: ${st.dividers} */`,
+            `    --bg-main: ${surf.bgMain};`,
+            `    --bg-surface: ${surf.bgSurface};`,
+            `    --bg-panel: ${surf.bgPanel};`,
+            `    --bg-card: ${surf.bgCard};`,
+            `    --bg-recessed: ${surf.bgRecessed};`,
+            `    --ui-border-width: ${brd.width};`,
+            `    --border-color: ${brd.borderColor};`,
+            `    --border-subtle: ${brd.borderSubtle};`,
+            `    --border-strong: ${brd.borderStrong};`,
+            `    --accent-color: ${globalCol};`
+        ];
+        COMPONENT_TARGETS.forEach(t => {
+            const val = st.components[t];
+            if (val && val !== 'auto') {
+                lines.push(`    --accent-${t}: ${resolveComponentColor(mode, st, t)};`);
+            }
+        });
+        lines.push(`}`);
+        return lines.join('\n');
+    };
+
+    return `${formatModeBlock('dark', ':root')}\n\n${formatModeBlock('light', ':root[data-theme="light"]')}`;
 }
 
 function setupListeners() {
@@ -348,11 +638,29 @@ function setupListeners() {
         }
     });
 
-    // --- BARRA DE TEMAS FLUTUANTE (CANVAS) ---
+    // --- BARRA DE TEMAS FLUTUANTE (CANVAS) & WORKBENCH DE CORES ---
     document.querySelectorAll('.theme-dot-btn').forEach(dot => {
         dot.addEventListener('click', () => {
-            const color = dot.getAttribute('data-color');
-            if (color) changeThemeColor(color);
+            const pid = dot.getAttribute('data-palette-id');
+            if (pid) applyPalettePreset(pid);
+        });
+    });
+
+    document.querySelectorAll('.palette-preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const pid = btn.getAttribute('data-palette');
+            if (pid) applyPalettePreset(pid);
+        });
+    });
+
+    document.querySelectorAll('.structure-pill-group').forEach(group => {
+        const structKey = group.getAttribute('data-structure');
+        group.querySelectorAll('.structure-pill-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mode = getTheme();
+                workbenchState[mode][structKey] = btn.getAttribute('data-val');
+                applyWorkbenchStateToDOM();
+            });
         });
     });
 
@@ -373,66 +681,111 @@ function setupListeners() {
             });
         }
 
+        // Mantém o Workbench aberto enquanto o usuário testa abas, controles do painel lateral
+        // ou alterna entre Modo Claro e Modo Escuro no cabeçalho; fecha apenas ao clicar no ✕,
+        // no botão de toggle da barra ou diretamente sobre o palco 3D (#simulationCanvas).
         document.addEventListener('click', (e) => {
-            if (!colorTooltip.contains(e.target) && e.target !== btnOpenTooltip && !btnOpenTooltip.contains(e.target)) {
+            if (e.target && e.target.id === 'simulationCanvas') {
                 colorTooltip.classList.add('hidden');
             }
         });
     }
 
-    // Gerenciador dos pontos de cor do Popover
+    // Gerenciador dos pontos de cor, Auto, Neutro e Color Picker livre do Popover
     document.querySelectorAll('.color-dots-group').forEach(group => {
         const targetComponent = group.getAttribute('data-target');
 
         const inheritBtn = group.querySelector('.color-dot-inherit');
         if (inheritBtn) {
             inheritBtn.addEventListener('click', () => {
-                group.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
-                inheritBtn.classList.add('active');
+                const mode = getTheme();
                 if (targetComponent !== 'global') {
-                    document.documentElement.style.removeProperty(`--accent-${targetComponent}`);
+                    workbenchState[mode].components[targetComponent] = 'auto';
+                    applyWorkbenchStateToDOM();
                 }
+            });
+        }
+
+        const neutralBtn = group.querySelector('.color-dot-neutral');
+        if (neutralBtn) {
+            neutralBtn.addEventListener('click', () => {
+                const mode = getTheme();
+                if (targetComponent === 'global') {
+                    workbenchState[mode].global = 'neutral';
+                    workbenchState[mode].paletteId = 'custom';
+                } else {
+                    workbenchState[mode].components[targetComponent] = 'neutral';
+                }
+                applyWorkbenchStateToDOM();
             });
         }
 
         group.querySelectorAll('.color-dot').forEach(dot => {
             dot.addEventListener('click', () => {
+                const mode = getTheme();
                 const color = dot.getAttribute('data-color');
-                if (inheritBtn) inheritBtn.classList.remove('active');
-                group.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
-                dot.classList.add('active');
-
+                if (!color) return;
                 if (targetComponent === 'global') {
-                    changeThemeColor(color);
+                    workbenchState[mode].global = color;
+                    workbenchState[mode].paletteId = 'custom';
                 } else {
-                    const cssVar = `--accent-${targetComponent}`;
-                    document.documentElement.style.setProperty(cssVar, color);
+                    workbenchState[mode].components[targetComponent] = color;
                 }
+                applyWorkbenchStateToDOM();
             });
         });
+
+        const picker = group.querySelector('.color-picker-input');
+        if (picker) {
+            picker.addEventListener('input', () => {
+                const mode = getTheme();
+                const color = picker.value;
+                if (targetComponent === 'global') {
+                    workbenchState[mode].global = color;
+                    workbenchState[mode].paletteId = 'custom';
+                } else {
+                    workbenchState[mode].components[targetComponent] = color;
+                }
+                applyWorkbenchStateToDOM();
+            });
+        }
     });
 
-    // Botão de Reset de Todas as Cores
+    // Botão Copiar Tokens CSS
+    const btnCopyTokens = document.getElementById('btn-copy-theme-tokens');
+    const btnCopyTokensText = document.getElementById('btn-copy-theme-tokens-text');
+    if (btnCopyTokens) {
+        btnCopyTokens.addEventListener('click', async () => {
+            const cssText = buildExportCSS();
+            try {
+                await navigator.clipboard.writeText(cssText);
+                if (btnCopyTokensText) {
+                    const prev = btnCopyTokensText.textContent;
+                    btnCopyTokensText.textContent = 'Tokens Copiados!';
+                    setTimeout(() => { btnCopyTokensText.textContent = prev; }, 2000);
+                }
+            } catch {
+                console.log(cssText);
+            }
+        });
+    }
+
+    // Botão de Reset de Todas as Cores do Modo Atual
     const btnResetColors = document.getElementById('btn-reset-all-colors');
     if (btnResetColors) {
         btnResetColors.addEventListener('click', () => {
-            const defaultAccent = '#facc15';
-            changeThemeColor(defaultAccent);
-            document.querySelectorAll('.color-dots-group').forEach(group => {
-                const targetComponent = group.getAttribute('data-target');
-                const inheritBtn = group.querySelector('.color-dot-inherit');
-                group.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
-
-                if (targetComponent === 'global') {
-                    const yellowDot = group.querySelector('.color-dot[data-color="#facc15"]');
-                    if (yellowDot) yellowDot.classList.add('active');
-                } else {
-                    if (inheritBtn) inheritBtn.classList.add('active');
-                    document.documentElement.style.removeProperty(`--accent-${targetComponent}`);
-                }
-            });
+            const mode = getTheme();
+            const defaultPreset = mode === 'light' ? 'grafite' : 'indigo';
+            workbenchState[mode] = createThemeStateFromPreset(defaultPreset, mode);
+            applyWorkbenchStateToDOM();
         });
     }
+
+    // Reaplica automaticamente o estado correspondente ao alternar entre Claro e Escuro
+    onThemeChange(() => {
+        applyWorkbenchStateToDOM();
+    });
+    applyWorkbenchStateToDOM();
 
     // --- BARRA FLUTUANTE DE TRANSPORTE / REPRODUÇÃO ---
     playControl = initToggleButton('#btn-demo-primary', (active) => {
@@ -763,7 +1116,7 @@ function setupSemanticStateDemo() {
             if (wrapperEl) setFieldState(wrapperEl, 'invalid');
             if (btnEl) setFieldState(btnEl, 'invalid');
         } else if (mode === 'ready') {
-            setFieldState(fieldEl, 'ready', 'Configuração pronta! Clique no botão pulsante para executar.');
+            setFieldState(fieldEl, 'ready', 'Configuração pronta! Parâmetros prontos para execução.');
             if (btnEl) setFieldState(btnEl, 'ready');
         } else if (mode === 'disabled') {
             setFieldState(fieldEl, 'disabled', 'Controle bloqueado no modo de simulação atual.');

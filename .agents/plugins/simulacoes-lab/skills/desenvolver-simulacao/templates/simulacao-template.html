@@ -6,8 +6,9 @@
     <meta name="theme-color" content="#0f172a">
     <title>{{TITULO_SIMULACAO}} - Plataforma Científica</title>
     
-    <!-- Favicon e Design System CSS -->
+    <!-- Favicon, Boot de Tema (Zero-FOUC) e Design System CSS -->
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <script src="../theme-init.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
 
     <!-- Suporte a Fórmulas Matemáticas com KaTeX -->
@@ -34,6 +35,9 @@
         </a>
 
         <div class="sim-header-actions">
+            <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
+                <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
+            </button>
             <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
@@ -152,38 +156,34 @@
     </main>
 
     <!-- Modal de Instruções Iniciais / Guia Rápido (Abre 1x por sessão ou via botão Instruções) -->
-    <div id="modal-onboarding" class="sim-modal-overlay modal-onboarding">
-        <div class="sim-modal-content">
+    <div id="modal-onboarding" class="sim-modal-overlay modal-onboarding hidden" aria-hidden="true" role="dialog">
+        <div class="sim-modal-container">
             <div class="sim-modal-header">
-                <h2 class="sim-modal-title">
-                    <img src="../assets/icons/help-circle.svg" class="icon-svg icon-accent" alt="Guia Rápido">
-                    Guia Rápido: {{TITULO_SIMULACAO}}
-                </h2>
-                <button class="sim-modal-close" title="Fechar (Esc)">
-                    <img src="../assets/icons/close.svg" class="icon-svg" alt="Fechar">
-                </button>
+                <div class="sim-modal-title">
+                    <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                    <span>{{TITULO_SIMULACAO}} — Guia Rápido</span>
+                </div>
+                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
-                    Explore o comportamento físico do sistema em tempo real ou com o tempo pausado utilizando os controles interativos.
+                    Explore o comportamento do sistema em tempo real usando os controles interativos e manipulando a cena diretamente.
                 </p>
                 <div class="onboarding-grid">
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/orbit.svg" class="icon-svg icon-accent" alt="Câmera">
-                            Navegação 3D
+                            <span>1. Navegação 3D</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Arraste no canvas para orbitar a câmera em 3D e use a roda do mouse (ou gesto de pinça) para aproximar ou afastar.
+                            Arraste na tela para orbitar a cena em 3D e use o scroll do mouse (ou gesto de pinça) para aproximar ou afastar.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/sliders.svg" class="icon-svg icon-accent" alt="Parâmetros">
-                            Inspeção em Tempo Real
+                            <span>2. Controles em Tempo Real</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Altere os sliders e opções no painel lateral mesmo com a simulação pausada para observar o efeito imediato na geometria.
+                            Altere os parâmetros no painel lateral mesmo com a simulação pausada para observar o efeito imediato na cena.
                         </p>
                     </div>
                 </div>

@@ -17,6 +17,7 @@
     <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 
     <!-- Design System Base & Estilos Específicos -->
+    <script src="../theme-init.js"></script>
     <link rel="stylesheet" href="css/design-system.css" />
     <link rel="stylesheet" href="css/tensor_de_inercia.css" />
 
@@ -34,6 +35,9 @@
         </a>
 
         <div class="sim-header-actions">
+            <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
+                <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
+            </button>
             <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
@@ -352,36 +356,32 @@
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
-                    Visualize em tempo real como a distribuição de massa determina o <strong>tensor de inércia $\mathbf{I}$</strong>, seu elipsoide característico e o alinhamento com os eixos principais de rotação.
+                    Veja em 3D como a forma e a distribuição de massa de um objeto determinam sua resistência à rotação em diferentes direções.
                 </p>
                 <div class="onboarding-grid">
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/matrix-basis.svg" class="icon-svg" alt="">
-                            <span>1. Tensor de Inércia $\mathbf{I}$</span>
+                            <span>1. Distribuição de Massa</span>
                         </div>
-                        <p class="onboarding-card-text">Alterne entre massa pontual única, sistema discreto de partículas ou corpos extensos 3D. A matriz $3 \times 3$ com momentos e produtos de inércia é calculada instantaneamente.</p>
+                        <p class="onboarding-card-text">Alterne entre uma massa pontual, conjuntos de partículas ou corpos 3D e veja a matriz de inércia se atualizar instantaneamente.</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/axis-3d.svg" class="icon-svg" alt="">
-                            <span>2. Elipsoide de Poinsot</span>
+                            <span>2. Elipsoide de Inércia</span>
                         </div>
-                        <p class="onboarding-card-text">O mini-visualizador 3D exibe a quádrica de inércia $\mathbf{r}^T \mathbf{I} \mathbf{r} = 1$, cujos semi-eixos são inversamente proporcionais a $1/\sqrt{I_k}$.</p>
+                        <p class="onboarding-card-text">O mini-visualizador 3D mostra a forma da inércia do corpo, indicando em quais direções é mais fácil ou mais difícil girá-lo.</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="">
-                            <span>3. Diagonalização & Eixos Principais</span>
+                            <span>3. Eixos Principais</span>
                         </div>
-                        <p class="onboarding-card-text">Clique em <em>⚡ Diagonalizar Tensor</em> para calcular os autovalores $I_1, I_2, I_3$ e animar a rotação do corpo até que seus eixos principais coincidam com o sistema cartesiano.</p>
+                        <p class="onboarding-card-text">Clique em <em>Diagonalizar Tensor</em> para girar o corpo até alinhá-lo aos seus eixos naturais de rotação e simplificar a matriz.</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/rotate.svg" class="icon-svg" alt="">
-                            <span>4. Rotação Livre em 3D</span>
+                            <span>4. Rotação & Câmera 3D</span>
                         </div>
-                        <p class="onboarding-card-text">Use a barra de transporte inferior para iniciar/pausar a rotação em torno do eixo escolhido (X, Y, Z ou personalizado), ajuste $\omega$ e orbite a cena livremente.</p>
+                        <p class="onboarding-card-text">Use a barra inferior para girar ou pausar o corpo no eixo escolhido, ajuste a velocidade e arraste na cena para orbitar em 3D.</p>
                     </div>
                 </div>
 

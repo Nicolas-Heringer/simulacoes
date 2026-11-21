@@ -18,6 +18,7 @@
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 
     <!-- Estilos CSS do Design System e Específicos -->
+    <script src="../theme-init.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/drude.css">
 
@@ -36,6 +37,9 @@
         </a>
 
         <div class="sim-header-actions">
+            <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
+                <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
+            </button>
             <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
@@ -428,43 +432,39 @@
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
-                    Explore a física microscópica da condução elétrica clássica em redes sólidas, compreendendo a velocidade de deriva, agitação térmica e colisões inelásticas com íons.
+                    Veja como elétrons se movem dentro de um metal, colidindo com a rede de átomos e gerando corrente elétrica sob um campo elétrico.
                 </p>
                 <div class="onboarding-grid">
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/particle-grid.svg" class="icon-svg" alt="">
-                            <span>1. Gás de Elétrons Livres & Rede Iônica</span>
+                            <span>1. Elétrons no Metal</span>
                         </div>
                         <p class="onboarding-card-text">
-                            No modelo de Paul Drude (1900), os elétrons de valência formam um gás clássico de cargas livres que transitam entre cátions fixos da rede cristalina, acelerados unicamente pelo campo elétrico entre colisões.
+                            Os elétrons circulam livremente entre os íons fixos da rede. Use os controles para alterar o campo elétrico, a temperatura e a estrutura do material.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/electron-drift.svg" class="icon-svg" alt="">
-                            <span>2. Velocidade Térmica vs. Deriva ($v_d$)</span>
+                            <span>2. Agitação Térmica vs. Corrente</span>
                         </div>
                         <p class="onboarding-card-text">
-                            A velocidade térmica $v_{\text{th}}$ é rápida e caótica (com média vetorial nula). Sob campo elétrico $\vec{E}$, surge uma velocidade de deriva líquida $v_d = -e\tau E / m$ muito sutil, responsável pelo fluxo de corrente macroscópico.
+                            Sem campo elétrico, os elétrons agitam-se em todas as direções sem avanço líquido. Ao ligar o campo, surge um desvio coletivo que forma a corrente elétrica.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/stopwatch.svg" class="icon-svg" alt="">
-                            <span>3. Tempo de Colisão ($\tau$) & Lei de Ohm</span>
+                            <span>3. Colisões & Resistência</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Colisões com íons e vibrações térmicas (fônons) re-termalizam o momento dos elétrons isotropicamente. O equilíbrio contínuo entre ganho e perda de momento deduz a Lei de Ohm microscópica $\vec{J} = \sigma_0 \vec{E}$.
+                            Cada colisão muda a direção do elétron e freia seu avanço. Aumente a temperatura ou a densidade da rede para ver como a resistência cresce.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="">
-                            <span>4. Elétron Traçador & Caminho com Drift</span>
+                            <span>4. Acompanhe um Elétron</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Ative o botão <em>Elétron Traçador</em> para observar a trajetória estocástica de uma única partícula: um passeio aleatório (random walk) cujos ziguezagues sofrem um desvio direcionado constante imposto pelo campo.
+                            Ative o <em>Elétron Traçador</em> nos controles para destacar o caminho em ziguezague de uma única partícula e acompanhar seu desvio gradual.
                         </p>
                     </div>
                 </div>

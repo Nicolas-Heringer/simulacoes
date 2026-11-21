@@ -18,6 +18,7 @@
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 
     <!-- Design System Unificado e Estilos Específicos -->
+    <script src="../theme-init.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/movimento.css">
 
@@ -37,6 +38,9 @@
         </a>
 
         <div class="sim-header-actions">
+            <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
+                <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
+            </button>
             <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
@@ -538,43 +542,39 @@
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
-                    Explore visualmente as funções horárias $s(t)$, alternando entre o movimento na reta orientada 1D e a construção analítica dos gráficos espaço-tempo.
+                    Visualize o movimento em linha reta e veja como ele se transforma nos gráficos de posição, velocidade e aceleração.
                 </p>
                 <div class="onboarding-grid">
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/particle-moving.svg" class="icon-svg" alt="MRU">
                             <span>1. Movimento Uniforme (MRU)</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Velocidade escalar constante ($a = 0$). A posição varia de forma linear segundo $s(t) = s_0 + vt$, gerando retas nos gráficos e marcas estroboscópicas com espaçamento equidistante a cada 1s.
+                            Com velocidade constante e sem aceleração, o objeto percorre distâncias iguais em tempos iguais, formando uma linha reta no gráfico.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="MRUV">
                             <span>2. Movimento Variado (MRUV)</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Aceleração escalar constante ($a \neq 0$) e velocidade linear $v(t) = v_0 + at$. A trajetória no espaço-tempo é uma parábola $s(t) = s_0 + v_0 t + \frac{1}{2}at^2$, com espaçamento estroboscópico variável.
+                            Com aceleração constante, a velocidade muda ao longo do tempo e a posição desenha uma curva parabólica no gráfico.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Transição">
-                            <span>3. Transição Pista 1D ↔ Gráfico 2D</span>
+                            <span>3. Pista 1D & Gráfico 2D</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Alterne para o gráfico bidimensional para desdobrar a evolução no tempo. Use o botão de rotação para alternar os eixos (t no X ou no Y) e navegue com scroll (zoom) e arraste (pan).
+                            Alterne entre a pista em linha reta e o gráfico bidimensional. Use o scroll para zoom, arraste para mover a tela e gire os eixos quando quiser.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="Gráficos">
-                            <span>4. Gráficos & Encontro de Móveis</span>
+                            <span>4. Controle do Tempo & Encontro</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Inspecione grandezas instantâneas ($s$, $v$, $a$) deslizando o scrubber temporal. No modo de 2 corpos, identifique visual e algebricamente o ponto onde $s_A(t) = s_B(t)$.
+                            Deslize a barra de tempo para inspecionar posição, velocidade e aceleração em cada instante. No modo de dois corpos, observe exatamente onde eles se encontram.
                         </p>
                     </div>
                 </div>

@@ -12,6 +12,7 @@
 
     <!-- Favicon e Design System CSS -->
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <script src="../theme-init.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/fonons.css">
 
@@ -38,6 +39,9 @@
         </a>
 
         <div class="sim-header-actions">
+            <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
+                <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
+            </button>
             <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
@@ -276,36 +280,32 @@
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
-                    Explore a física dos <strong>fônons</strong> (quanta de vibrações elásticas na rede cristalina), modos normais harmônicos e a propagação de ondas acústicas e ópticas em redes atômicas 2D.
+                    Observe como vibrações coletivas se propagam pelos átomos de uma rede cristalina em diferentes modos de onda.
                 </p>
                 <div class="onboarding-grid">
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="">
-                            <span>1. Relação de Dispersão $\omega(\vec{k})$</span>
+                            <span>1. Ondas na Rede Cristalina</span>
                         </div>
-                        <p class="onboarding-card-text">Ondas mecânicas propagam-se com velocidade de fase $v = \omega/k$. No limite de grandes comprimentos de onda ($k \to 0$), a dispersão torna-se linear com velocidade acústica $v_s = a\sqrt{K/M}$.</p>
+                        <p class="onboarding-card-text">Os átomos comportam-se como se estivessem conectados por molas. Alterne entre redes monoatômicas ou diatômicas e diferentes densidades no painel.</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/particles-opposite.svg" class="icon-svg" alt="">
-                            <span>2. Ramo Acústico vs. Óptico</span>
+                            <span>2. Modos Acústico & Óptico</span>
                         </div>
-                        <p class="onboarding-card-text">Em redes diatômicas com massas distintas ($M_1 \ne M_2$), surgem modos acústicos (oscilação em fase de átomos vizinhos) e modos ópticos (oposição de fase com gap de frequências proibidas).</p>
+                        <p class="onboarding-card-text">Em redes diatômicas, átomos de massas diferentes podem vibrar juntos na mesma direção (modo acústico) ou em sentidos opostos (modo óptico).</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/particle-grid.svg" class="icon-svg" alt="">
-                            <span>3. Vetor de Onda $\vec{k}$ & Zona de Brillouin</span>
+                            <span>3. Energia Cinética Média</span>
                         </div>
-                        <p class="onboarding-card-text">A periodicidade discreta da rede restringe vetores de onda independentes à 1ª Zona de Brillouin ($|k| \le \pi/a$). Ondas fora da zona são indistinguíveis por aliasing espacial.</p>
+                        <p class="onboarding-card-text">Acompanhe no gráfico em tempo real como a energia cinética média da rede sobe após cada perturbação e se dissipa conforme o amortecimento.</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="">
-                            <span>4. Energia Mecânica da Rede</span>
+                            <span>4. Perturbar a Rede</span>
                         </div>
-                        <p class="onboarding-card-text">Acompanhe no gráfico em tempo real a energia cinética média $\langle K \rangle$ dos átomos. Use o cursor para excitar vibrações ou escolha um <em>Modo de Perturbação</em> e clique em <em>Perturbar Rede</em>.</p>
+                        <p class="onboarding-card-text">Clique ou arraste diretamente na tela para gerar perturbações a partir do cursor, ou dispare ondas prontas (radial, planar ou transversal) pelo painel.</p>
                     </div>
                 </div>
 

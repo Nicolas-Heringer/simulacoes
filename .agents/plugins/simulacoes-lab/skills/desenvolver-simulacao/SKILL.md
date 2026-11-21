@@ -34,7 +34,7 @@ Ao executar este fluxo, consulte obrigatoriamente os arquivos de referência:
 
 1. **Consulta ao Catálogo (`ui_lab.html`) e Scaffold do HTML**:
    * Crie o arquivo `simulacoes/<nome>.html` copiando a estrutura de [templates/simulacao-template.html](./templates/simulacao-template.html).
-   * Atualize a tag `<title>` e a importação do script final (`scripts/<nome>.js`). O cabeçalho `.sim-header` contém apenas `.btn-back` à esquerda e `.sim-header-actions` com `#btn-open-onboarding` (`.btn-header-action`) à direita (sem título no header).
+   * Atualize a tag `<title>` e a importação do script final (`scripts/<nome>.js`). Inclua `<script src="../theme-init.js"></script>` antes de `css/design-system.css` para boot sem piscada do tema salvo. O cabeçalho `.sim-header` contém `.btn-back` à esquerda e `.sim-header-actions` com `#btn-theme-toggle` e `#btn-open-onboarding` (`.btn-header-action`) à direita (sem título no header).
    * Configure a navegação por abas usando `.tab-nav` com botões `.tab-btn[data-tab="..."]` e painéis `.tab-pane`.
    * Insira os controles necessários baseando-se exclusivamente nas marcações de `simulacoes/ui_lab.html`:
      - `.canvas-toolbar.pos-bottom-center` (`#canvas-transport-toolbar`) flutuando na base de `.canvas-area` para controle temporal (Play/Pause, Passo, Reset e Velocidade Cíclica), mantendo o menu lateral limpo.
@@ -44,6 +44,7 @@ Ao executar este fluxo, consulte obrigatoriamente os arquivos de referência:
      - `.sim-plot-card` para gráficos `RealtimePlot` ou `MultiSeriesPlot`.
      - Container para `MatrixTensorEditor` caso a simulação envolva matrizes $2\times 2$ ou tensores $3\times 3$.
      - Atributos `data-focus-control` nos controles essenciais que devem aparecer na barra flutuante durante o Modo Foco (`F`).
+   * Configure o modal `#modal-onboarding` com linguagem simples, direta e focada na intuição de interação com a simulação (sem ícones dentro de `.onboarding-card-title` e sem equações densas; símbolos isolados simples são permitidos).
    * Configure a teoria e equações KaTeX em `.theory-card` na aba de teoria e/ou no modal `.sim-modal-overlay`.
 
 2. **Scaffold do JavaScript**:

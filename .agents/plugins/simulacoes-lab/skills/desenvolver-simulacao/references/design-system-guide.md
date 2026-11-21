@@ -374,47 +374,41 @@ Estrutura obrigatória para envolver instâncias de `RealtimePlot` ou `MultiSeri
 </div>
 
 <!-- Modal de Instruções Iniciais / Guia Rápido (Abre 1x na primeira sessão ou pelo botão #btn-open-onboarding) -->
-<div id="modal-onboarding" class="sim-modal-overlay modal-onboarding">
-    <div class="sim-modal-content">
+<!-- Diretriz editorial: linguagem simples e acessível, foco na intuição de uso/interação, sem equações densas (reservar formalismo à aba Teoria) e sem ícones nos títulos dos cards. -->
+<div id="modal-onboarding" class="sim-modal-overlay modal-onboarding hidden" aria-hidden="true" role="dialog">
+    <div class="sim-modal-container">
         <div class="sim-modal-header">
-            <h2 class="sim-modal-title">
-                <img src="../assets/icons/help-circle.svg" class="icon-svg icon-accent" alt="Guia Rápido">
-                Guia Rápido de Interatividade
-            </h2>
-            <button class="sim-modal-close" title="Fechar (Esc)">
-                <img src="../assets/icons/close.svg" class="icon-svg" alt="Fechar">
-            </button>
+            <div class="sim-modal-title">
+                <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
+                <span>Título da Simulação — Guia Rápido</span>
+            </div>
+            <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
         </div>
         <div class="sim-modal-body">
             <p class="onboarding-intro">
-                Resumo didático da interatividade básica da página.
+                Resumo curto e acessível do que o usuário pode explorar nesta simulação.
             </p>
             <div class="onboarding-grid">
                 <div class="onboarding-card">
                     <div class="onboarding-card-title">
-                        <img src="../assets/icons/orbit.svg" class="icon-svg icon-accent" alt="3D">
-                        Câmera e Navegação
+                        <span>1. Câmera e Navegação</span>
                     </div>
                     <p class="onboarding-card-text">
-                        Arraste no canvas para orbitar em 3D e use o scroll para zoom.
+                        Arraste na tela para orbitar em 3D e use o scroll do mouse (ou gesto de pinça) para zoom.
                     </p>
                 </div>
                 <div class="onboarding-card">
                     <div class="onboarding-card-title">
-                        <img src="../assets/icons/sliders.svg" class="icon-svg icon-accent" alt="Parâmetros">
-                        Inspeção com Tempo Pausado
+                        <span>2. Inspeção com Tempo Pausado</span>
                     </div>
                     <p class="onboarding-card-text">
-                        Altere parâmetros mesmo com a simulação pausada para inspecionar mudanças instantaneamente.
+                        Altere parâmetros mesmo com a simulação pausada para observar as mudanças instantaneamente.
                     </p>
                 </div>
             </div>
         </div>
         <div class="sim-modal-footer">
-            <button class="btn-primary sim-modal-close-btn">
-                <img src="../assets/icons/check.svg" class="icon-svg" alt="Começar">
-                Começar Exploração
-            </button>
+            <button type="button" class="btn-primary tone-accent" data-modal-close>Começar a Explorar</button>
         </div>
     </div>
 </div>
@@ -490,6 +484,8 @@ Sempre importe de `./sim-ui.js`:
   Inicializa o Modal de Instruções Iniciais (`.modal-onboarding`), abrindo automaticamente **apenas na primeira visita da sessão** (`sessionStorage`) e conectando por padrão o botão `#btn-open-onboarding` (`triggerSelector`) para reabertura sob demanda.
 * **`initPopover(triggerBtnSelector, popoverSelector)`**:
   Alterna a visibilidade (`.hidden`) de um `.sim-popover` ancorado, fechando automaticamente ao clicar fora ou pressionar `Escape`.
+* **Sistema de Temas Claro / Escuro (`initThemeToggle`, `getTheme`, `setTheme`, `toggleTheme`, `getThemeColors`, `onThemeChange`)**:
+  Gerencia o tema ativo (`html[data-theme="dark" | "light"]`) sincronizado via `localStorage('sim_theme')` e `<script src="../theme-init.js"></script>` no `<head>`. O botão `#btn-theme-toggle` em `.sim-header-actions` é conectado automaticamente ao carregar `sim-ui.js`. Use `getThemeColors()` para extrair cores do CSS para renderização em canvas e `onThemeChange(cb)` para redesenhar cenas ao alternar o tema.
 
 ### 4.3 Controles Físicos e Intencionalidade Semântica
 * **`syncDualSlider(rangeSelector, numberSelector, onChangeCallback)`**:

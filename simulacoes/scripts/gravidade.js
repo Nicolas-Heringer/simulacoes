@@ -52,15 +52,15 @@ function readThemeTokens() {
     const style = getComputedStyle(document.documentElement);
     const get = (name, fallback) => style.getPropertyValue(name).trim() || fallback;
     return {
-        accent: get('--accent-color', '#6366f1'),
-        cyan: get('--color-cyan', '#06b6d4'),
-        emerald: get('--color-emerald', '#10b981'),
-        purple: get('--color-purple', '#a855f7'),
-        rose: get('--color-rose', '#f43f5e'),
-        orange: get('--color-orange', '#f59e0b'),
-        pink: get('--color-pink', '#ec4899'),
-        textPrimary: get('--text-primary', '#f4f4f6'),
-        textSecondary: get('--text-secondary', '#94a3b8')
+        accent: get('--stage-accent', '#facc15'),
+        cyan: get('--stage-cyan', '#38bdf8'),
+        emerald: get('--stage-emerald', '#22c55e'),
+        purple: get('--stage-purple', '#a855f7'),
+        rose: get('--stage-rose', '#f43f5e'),
+        orange: get('--stage-orange', '#fb923c'),
+        pink: get('--stage-pink', '#f472b6'),
+        textPrimary: get('--stage-text', '#f8fafc'),
+        textSecondary: get('--stage-text-muted', '#94a3b8')
     };
 }
 

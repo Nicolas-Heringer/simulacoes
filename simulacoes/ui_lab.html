@@ -14,6 +14,7 @@
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 
     <!-- Design System 100% Desacoplado e Modular -->
+    <script src="../theme-init.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
 
     <!-- Suporte a LaTeX com KaTeX -->
@@ -51,6 +52,9 @@
         </a>
 
         <div class="sim-header-actions">
+            <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
+                <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
+            </button>
             <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
@@ -69,143 +73,253 @@
             <div class="canvas-top-left-stack">
                 <!-- Barra de Ferramentas Flutuante / Seletor Rápido & Popover de Configurações -->
                 <div class="canvas-toolbar pos-top-left" id="theme-selector-bar">
-                    <span>🎨 Acento:</span>
-                    <div class="toolbar-dot theme-dot-btn active" style="background: #facc15;" data-color="#facc15" title="Amarelo Solar (Padrão)"></div>
-                    <div class="toolbar-dot theme-dot-btn" style="background: #38bdf8;" data-color="#38bdf8" title="Azul Ciano Atmosférico"></div>
-                    <div class="toolbar-dot theme-dot-btn" style="background: #22c55e;" data-color="#22c55e" title="Verde Esmeralda"></div>
-                    <div class="toolbar-dot theme-dot-btn" style="background: #a855f7;" data-color="#a855f7" title="Roxo Cósmico"></div>
-                    <div class="toolbar-dot theme-dot-btn" style="background: #f43f5e;" data-color="#f43f5e" title="Rosa Carmim"></div>
+                    <span>🎨 Paleta:</span>
+                    <div class="toolbar-dot theme-dot-btn" style="background: #facc15;" data-palette-id="ouro" data-color="#facc15" title="1. Ouro 3b1b (Clássico 90/10)"></div>
+                    <div class="toolbar-dot theme-dot-btn" style="background: #38bdf8;" data-palette-id="azul" data-color="#38bdf8" title="2. Azul Científico (3Blue1Brown)"></div>
+                    <div class="toolbar-dot theme-dot-btn" style="background: #2dd4bf;" data-palette-id="petroleo" data-color="#2dd4bf" title="3. Petróleo Editorial"></div>
+                    <div class="toolbar-dot theme-dot-btn active" style="background: #818cf8;" data-palette-id="indigo" data-color="#818cf8" title="4. Índigo Acadêmico (Padrão Escuro)"></div>
+                    <div class="toolbar-dot theme-dot-btn" style="background: #1e1b4b;" data-palette-id="grafite" data-color="#1e1b4b" title="5. Grafite + Azul Marinho Forte (Padrão Claro)"></div>
                     <div class="toolbar-divider"></div>
-                    <button id="btn-toggle-color-tooltip" class="toolbar-btn" title="Personalizar cores por componente">
-                        <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="Customizar">
-                        <span>Componentes</span>
+                    <button id="btn-toggle-color-tooltip" class="toolbar-btn" title="Abrir Workbench de Cores por Componente">
+                        <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Customizar">
+                        <span>Workbench de Cores</span>
                     </button>
                 </div>
 
                 <!-- Barra Flutuante Espelhada do Modo Foco (declarativa via data-focus-control) -->
                 <div id="focus-context-toolbar" class="canvas-toolbar pos-top-left focus-mirror-toolbar"></div>
 
-                <!-- Popover Universal de Configurações / Customização Independente de Cores -->
+                <!-- Popover Universal de Configurações / Workbench de Esquema de Cores -->
                 <div id="color-customizer-tooltip" class="sim-popover hidden">
                 <div class="popover-header">
                     <div class="popover-title">
-                        <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="Cores">
-                        <span>Cores por Componente</span>
+                        <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Cores">
+                        <span>Workbench de Cores (<span id="workbench-mode-badge">Modo Escuro</span>)</span>
                     </div>
                     <button id="btn-close-color-tooltip" class="popover-close" title="Fechar">✕</button>
                 </div>
 
                 <div class="color-tooltip-body">
-                    <!-- 1. Cor Geral da Página -->
+                    <!-- BLOCO 1: 5 PALETAS BASE (CLARO + ESCURO — REGRA 90/10) -->
+                    <div class="workbench-section-label">1. Paletas Base (90/10 — Claro & Escuro)</div>
+                    <div class="palette-preset-grid" id="palette-preset-grid">
+                        <button type="button" class="palette-preset-btn" data-palette="ouro" title="Ouro 3b1b + Estrutura Ardósia">
+                            <span class="palette-swatch-pair">
+                                <span class="palette-swatch-dot" style="background:#b45309;"></span>
+                                <span class="palette-swatch-dot" style="background:#facc15;"></span>
+                            </span>
+                            <span>Ouro 3b1b</span>
+                        </button>
+                        <button type="button" class="palette-preset-btn" data-palette="azul" title="Azul Científico 3b1b + Detalhe Âmbar">
+                            <span class="palette-swatch-pair">
+                                <span class="palette-swatch-dot" style="background:#0369a1;"></span>
+                                <span class="palette-swatch-dot" style="background:#38bdf8;"></span>
+                            </span>
+                            <span>Azul 3b1b</span>
+                        </button>
+                        <button type="button" class="palette-preset-btn" data-palette="petroleo" title="Petróleo Editorial Sóbrio">
+                            <span class="palette-swatch-pair">
+                                <span class="palette-swatch-dot" style="background:#0f766e;"></span>
+                                <span class="palette-swatch-dot" style="background:#2dd4bf;"></span>
+                            </span>
+                            <span>Petróleo</span>
+                        </button>
+                        <button type="button" class="palette-preset-btn active" data-palette="indigo" title="Índigo Acadêmico (Padrão Modo Escuro)">
+                            <span class="palette-swatch-pair">
+                                <span class="palette-swatch-dot" style="background:#1e1b4b;"></span>
+                                <span class="palette-swatch-dot" style="background:#818cf8;"></span>
+                            </span>
+                            <span>Índigo</span>
+                        </button>
+                        <button type="button" class="palette-preset-btn" data-palette="grafite" title="Grafite + Azul Marinho Forte (Padrão Modo Claro)">
+                            <span class="palette-swatch-pair">
+                                <span class="palette-swatch-dot" style="background:#1e1b4b;"></span>
+                                <span class="palette-swatch-dot" style="background:#e2e8f0;"></span>
+                            </span>
+                            <span>Grafite</span>
+                        </button>
+                    </div>
+
+                    <div class="color-tooltip-divider"></div>
+
+                    <!-- BLOCO 2: ESTRUTURA, BORDAS & DIVISORES -->
+                    <div class="workbench-section-label">2. Estrutura, Contornos & Divisores</div>
+
                     <div class="color-override-row">
-                        <span class="color-row-label">🌐 Cor Geral (Global)</span>
-                        <div class="color-dots-group" data-target="global">
-                            <button class="color-dot active" style="--c: #facc15;" data-color="#facc15" title="Amarelo"></button>
-                            <button class="color-dot" style="--c: #38bdf8;" data-color="#38bdf8" title="Ciano"></button>
-                            <button class="color-dot" style="--c: #22c55e;" data-color="#22c55e" title="Esmeralda"></button>
-                            <button class="color-dot" style="--c: #a855f7;" data-color="#a855f7" title="Roxo"></button>
-                            <button class="color-dot" style="--c: #f43f5e;" data-color="#f43f5e" title="Rosa"></button>
+                        <span class="color-row-label">🪨 Superfície</span>
+                        <div class="structure-pill-group" data-structure="surface">
+                            <button type="button" class="structure-pill-btn" data-val="slate">Slate</button>
+                            <button type="button" class="structure-pill-btn" data-val="neutral">Neutro</button>
+                            <button type="button" class="structure-pill-btn active" data-val="warm">Papel</button>
+                        </div>
+                    </div>
+
+                    <div class="color-override-row">
+                        <span class="color-row-label">📐 Contornos</span>
+                        <div class="structure-pill-group" data-structure="borders">
+                            <button type="button" class="structure-pill-btn" data-val="subtle">1px Sutil</button>
+                            <button type="button" class="structure-pill-btn" data-val="defined">1.5px Definido</button>
+                            <button type="button" class="structure-pill-btn active" data-val="strong">Forte</button>
+                        </div>
+                    </div>
+
+                    <div class="color-override-row">
+                        <span class="color-row-label">➖ Divisores</span>
+                        <div class="structure-pill-group" data-structure="dividers">
+                            <button type="button" class="structure-pill-btn" data-val="minimal">Minimal</button>
+                            <button type="button" class="structure-pill-btn active" data-val="clean">Limpo</button>
+                            <button type="button" class="structure-pill-btn" data-val="pill">Cápsula</button>
                         </div>
                     </div>
 
                     <div class="color-tooltip-divider"></div>
 
+                    <!-- BLOCO 3: CORES POR COMPONENTE + COLOR PICKER LIVRE -->
+                    <div class="workbench-section-label">3. Cores por Elemento (Dots ou Picker Livre)</div>
+
+                    <!-- 1. Cor Geral da Página -->
+                    <div class="color-override-row">
+                        <span class="color-row-label">🌐 Cor Geral</span>
+                        <div class="color-dots-group" data-target="global">
+                            <button type="button" class="color-dot-neutral" title="Aplicar tom neutro/grafite">Neutro</button>
+                            <button type="button" class="color-dot active" data-slot="0" style="--c: #facc15;" data-color="#facc15" title="Ouro / Âmbar"></button>
+                            <button type="button" class="color-dot" data-slot="1" style="--c: #38bdf8;" data-color="#38bdf8" title="Azul 3b1b"></button>
+                            <button type="button" class="color-dot" data-slot="2" style="--c: #2dd4bf;" data-color="#2dd4bf" title="Petróleo / Teal"></button>
+                            <button type="button" class="color-dot" data-slot="3" style="--c: #818cf8;" data-color="#818cf8" title="Índigo"></button>
+                            <button type="button" class="color-dot" data-slot="4" style="--c: #f43f5e;" data-color="#f43f5e" title="Carmim"></button>
+                            <input type="color" class="color-picker-input" value="#facc15" title="Escolher cor livre">
+                        </div>
+                    </div>
+
                     <!-- 2. Barra de Navegação (Abas) -->
                     <div class="color-override-row">
-                        <span class="color-row-label">🧭 Barra de Abas (Nav)</span>
+                        <span class="color-row-label">🧭 Abas (Nav)</span>
                         <div class="color-dots-group" data-target="nav">
-                            <button class="color-dot-inherit active" title="Herdar cor geral">Auto</button>
-                            <button class="color-dot" style="--c: #facc15;" data-color="#facc15"></button>
-                            <button class="color-dot" style="--c: #38bdf8;" data-color="#38bdf8"></button>
-                            <button class="color-dot" style="--c: #22c55e;" data-color="#22c55e"></button>
-                            <button class="color-dot" style="--c: #a855f7;" data-color="#a855f7"></button>
-                            <button class="color-dot" style="--c: #f43f5e;" data-color="#f43f5e"></button>
+                            <button type="button" class="color-dot-inherit active" title="Herdar cor geral">Auto</button>
+                            <button type="button" class="color-dot-neutral" title="Aba ativa sóbria/neutra (Regra 90/10)">Neutro</button>
+                            <button type="button" class="color-dot" data-slot="0" style="--c: #facc15;" data-color="#facc15"></button>
+                            <button type="button" class="color-dot" data-slot="1" style="--c: #38bdf8;" data-color="#38bdf8"></button>
+                            <button type="button" class="color-dot" data-slot="2" style="--c: #2dd4bf;" data-color="#2dd4bf"></button>
+                            <button type="button" class="color-dot" data-slot="3" style="--c: #818cf8;" data-color="#818cf8"></button>
+                            <button type="button" class="color-dot" data-slot="4" style="--c: #f43f5e;" data-color="#f43f5e"></button>
+                            <input type="color" class="color-picker-input" value="#38bdf8" title="Escolher cor livre para Abas">
                         </div>
                     </div>
 
                     <!-- 3. Botões & Presets -->
                     <div class="color-override-row">
-                        <span class="color-row-label">🔘 Botões & Presets</span>
+                        <span class="color-row-label">🔘 Botões</span>
                         <div class="color-dots-group" data-target="btn">
-                            <button class="color-dot-inherit active" title="Herdar cor geral">Auto</button>
-                            <button class="color-dot" style="--c: #facc15;" data-color="#facc15"></button>
-                            <button class="color-dot" style="--c: #38bdf8;" data-color="#38bdf8"></button>
-                            <button class="color-dot" style="--c: #22c55e;" data-color="#22c55e"></button>
-                            <button class="color-dot" style="--c: #a855f7;" data-color="#a855f7"></button>
-                            <button class="color-dot" style="--c: #f43f5e;" data-color="#f43f5e"></button>
+                            <button type="button" class="color-dot-inherit active" title="Herdar cor geral">Auto</button>
+                            <button type="button" class="color-dot-neutral" title="Botões sóbrios em grafite">Neutro</button>
+                            <button type="button" class="color-dot" data-slot="0" style="--c: #facc15;" data-color="#facc15"></button>
+                            <button type="button" class="color-dot" data-slot="1" style="--c: #38bdf8;" data-color="#38bdf8"></button>
+                            <button type="button" class="color-dot" data-slot="2" style="--c: #2dd4bf;" data-color="#2dd4bf"></button>
+                            <button type="button" class="color-dot" data-slot="3" style="--c: #818cf8;" data-color="#818cf8"></button>
+                            <button type="button" class="color-dot" data-slot="4" style="--c: #f43f5e;" data-color="#f43f5e"></button>
+                            <input type="color" class="color-picker-input" value="#38bdf8" title="Escolher cor livre para Botões">
                         </div>
                     </div>
 
-                    <!-- 3. Cards & Badges -->
+                    <!-- 4. Cards & Badges -->
                     <div class="color-override-row">
-                        <span class="color-row-label">🃏 Cards & Badges</span>
+                        <span class="color-row-label">🃏 Cards & Teoria</span>
                         <div class="color-dots-group" data-target="card">
-                            <button class="color-dot-inherit active" title="Herdar cor geral">Auto</button>
-                            <button class="color-dot" style="--c: #facc15;" data-color="#facc15"></button>
-                            <button class="color-dot" style="--c: #38bdf8;" data-color="#38bdf8"></button>
-                            <button class="color-dot" style="--c: #22c55e;" data-color="#22c55e"></button>
-                            <button class="color-dot" style="--c: #a855f7;" data-color="#a855f7"></button>
-                            <button class="color-dot" style="--c: #f43f5e;" data-color="#f43f5e"></button>
+                            <button type="button" class="color-dot-inherit active" title="Herdar cor geral">Auto</button>
+                            <button type="button" class="color-dot-neutral" title="Títulos de teoria e badges neutros">Neutro</button>
+                            <button type="button" class="color-dot" data-slot="0" style="--c: #facc15;" data-color="#facc15"></button>
+                            <button type="button" class="color-dot" data-slot="1" style="--c: #38bdf8;" data-color="#38bdf8"></button>
+                            <button type="button" class="color-dot" data-slot="2" style="--c: #2dd4bf;" data-color="#2dd4bf"></button>
+                            <button type="button" class="color-dot" data-slot="3" style="--c: #818cf8;" data-color="#818cf8"></button>
+                            <button type="button" class="color-dot" data-slot="4" style="--c: #f43f5e;" data-color="#f43f5e"></button>
+                            <input type="color" class="color-picker-input" value="#d97706" title="Escolher cor livre para Cards/Teoria">
                         </div>
                     </div>
 
-                    <!-- 4. Sliders & Inputs -->
+                    <!-- 5. Sliders & Inputs -->
                     <div class="color-override-row">
-                        <span class="color-row-label">🎚️ Sliders & Inputs</span>
+                        <span class="color-row-label">🎚️ Sliders</span>
                         <div class="color-dots-group" data-target="slider">
-                            <button class="color-dot-inherit active" title="Herdar cor geral">Auto</button>
-                            <button class="color-dot" style="--c: #facc15;" data-color="#facc15"></button>
-                            <button class="color-dot" style="--c: #38bdf8;" data-color="#38bdf8"></button>
-                            <button class="color-dot" style="--c: #22c55e;" data-color="#22c55e"></button>
-                            <button class="color-dot" style="--c: #a855f7;" data-color="#a855f7"></button>
-                            <button class="color-dot" style="--c: #f43f5e;" data-color="#f43f5e"></button>
+                            <button type="button" class="color-dot-inherit active" title="Herdar cor geral">Auto</button>
+                            <button type="button" class="color-dot-neutral" title="Sliders em grafite sóbrio">Neutro</button>
+                            <button type="button" class="color-dot" data-slot="0" style="--c: #facc15;" data-color="#facc15"></button>
+                            <button type="button" class="color-dot" data-slot="1" style="--c: #38bdf8;" data-color="#38bdf8"></button>
+                            <button type="button" class="color-dot" data-slot="2" style="--c: #2dd4bf;" data-color="#2dd4bf"></button>
+                            <button type="button" class="color-dot" data-slot="3" style="--c: #818cf8;" data-color="#818cf8"></button>
+                            <button type="button" class="color-dot" data-slot="4" style="--c: #f43f5e;" data-color="#f43f5e"></button>
+                            <input type="color" class="color-picker-input" value="#38bdf8" title="Escolher cor livre para Sliders">
                         </div>
                     </div>
 
-                    <!-- 5. Switches & Segmentos -->
+                    <!-- 6. Switches & Segmentos -->
                     <div class="color-override-row">
-                        <span class="color-row-label">🔀 Switches & Toggles</span>
+                        <span class="color-row-label">🔀 Switches</span>
                         <div class="color-dots-group" data-target="switch">
-                            <button class="color-dot-inherit active" title="Herdar cor geral">Auto</button>
-                            <button class="color-dot" style="--c: #facc15;" data-color="#facc15"></button>
-                            <button class="color-dot" style="--c: #38bdf8;" data-color="#38bdf8"></button>
-                            <button class="color-dot" style="--c: #22c55e;" data-color="#22c55e"></button>
-                            <button class="color-dot" style="--c: #a855f7;" data-color="#a855f7"></button>
-                            <button class="color-dot" style="--c: #f43f5e;" data-color="#f43f5e"></button>
+                            <button type="button" class="color-dot-inherit active" title="Herdar cor geral">Auto</button>
+                            <button type="button" class="color-dot-neutral" title="Switches em grafite sóbrio">Neutro</button>
+                            <button type="button" class="color-dot" data-slot="0" style="--c: #facc15;" data-color="#facc15"></button>
+                            <button type="button" class="color-dot" data-slot="1" style="--c: #38bdf8;" data-color="#38bdf8"></button>
+                            <button type="button" class="color-dot" data-slot="2" style="--c: #2dd4bf;" data-color="#2dd4bf"></button>
+                            <button type="button" class="color-dot" data-slot="3" style="--c: #818cf8;" data-color="#818cf8"></button>
+                            <button type="button" class="color-dot" data-slot="4" style="--c: #f43f5e;" data-color="#f43f5e"></button>
+                            <input type="color" class="color-picker-input" value="#38bdf8" title="Escolher cor livre para Switches">
                         </div>
                     </div>
 
-                    <!-- 6. HUD de Diagnóstico -->
+                    <!-- 7. HUD & Gráficos -->
                     <div class="color-override-row">
-                        <span class="color-row-label">📊 HUD de Diagnóstico</span>
+                        <span class="color-row-label">📊 HUD & Plots</span>
                         <div class="color-dots-group" data-target="hud">
-                            <button class="color-dot-inherit active" title="Herdar cor geral">Auto</button>
-                            <button class="color-dot" style="--c: #facc15;" data-color="#facc15"></button>
-                            <button class="color-dot" style="--c: #38bdf8;" data-color="#38bdf8"></button>
-                            <button class="color-dot" style="--c: #22c55e;" data-color="#22c55e"></button>
-                            <button class="color-dot" style="--c: #a855f7;" data-color="#a855f7"></button>
-                            <button class="color-dot" style="--c: #f43f5e;" data-color="#f43f5e"></button>
+                            <button type="button" class="color-dot-inherit active" title="Herdar cor geral">Auto</button>
+                            <button type="button" class="color-dot-neutral" title="HUD em grafite sóbrio">Neutro</button>
+                            <button type="button" class="color-dot" data-slot="0" style="--c: #facc15;" data-color="#facc15"></button>
+                            <button type="button" class="color-dot" data-slot="1" style="--c: #38bdf8;" data-color="#38bdf8"></button>
+                            <button type="button" class="color-dot" data-slot="2" style="--c: #2dd4bf;" data-color="#2dd4bf"></button>
+                            <button type="button" class="color-dot" data-slot="3" style="--c: #818cf8;" data-color="#818cf8"></button>
+                            <button type="button" class="color-dot" data-slot="4" style="--c: #f43f5e;" data-color="#f43f5e"></button>
+                            <input type="color" class="color-picker-input" value="#38bdf8" title="Escolher cor livre para HUD/Plots">
                         </div>
                     </div>
 
-                    <!-- 7. Textos & Títulos -->
+                    <!-- 8. Divisores de Seção -->
                     <div class="color-override-row">
-                        <span class="color-row-label">🔤 Textos & Destaques</span>
+                        <span class="color-row-label">🏷️ Divisores</span>
+                        <div class="color-dots-group" data-target="divider">
+                            <button type="button" class="color-dot-inherit" title="Herdar cor geral">Auto</button>
+                            <button type="button" class="color-dot-neutral active" title="Divisores discretos neutros (Regra 90/10)">Neutro</button>
+                            <button type="button" class="color-dot" data-slot="0" style="--c: #facc15;" data-color="#facc15"></button>
+                            <button type="button" class="color-dot" data-slot="1" style="--c: #38bdf8;" data-color="#38bdf8"></button>
+                            <button type="button" class="color-dot" data-slot="2" style="--c: #2dd4bf;" data-color="#2dd4bf"></button>
+                            <button type="button" class="color-dot" data-slot="3" style="--c: #818cf8;" data-color="#818cf8"></button>
+                            <button type="button" class="color-dot" data-slot="4" style="--c: #f43f5e;" data-color="#f43f5e"></button>
+                            <input type="color" class="color-picker-input" value="#475569" title="Escolher cor livre para Divisores">
+                        </div>
+                    </div>
+
+                    <!-- 9. Textos & Ícones de Destaque -->
+                    <div class="color-override-row">
+                        <span class="color-row-label">🔤 Destaques</span>
                         <div class="color-dots-group" data-target="text">
-                            <button class="color-dot-inherit active" title="Herdar cor geral">Auto</button>
-                            <button class="color-dot" style="--c: #facc15;" data-color="#facc15"></button>
-                            <button class="color-dot" style="--c: #38bdf8;" data-color="#38bdf8"></button>
-                            <button class="color-dot" style="--c: #22c55e;" data-color="#22c55e"></button>
-                            <button class="color-dot" style="--c: #a855f7;" data-color="#a855f7"></button>
-                            <button class="color-dot" style="--c: #f43f5e;" data-color="#f43f5e"></button>
+                            <button type="button" class="color-dot-inherit active" title="Herdar cor geral">Auto</button>
+                            <button type="button" class="color-dot-neutral" title="Destaques em grafite">Neutro</button>
+                            <button type="button" class="color-dot" data-slot="0" style="--c: #facc15;" data-color="#facc15"></button>
+                            <button type="button" class="color-dot" data-slot="1" style="--c: #38bdf8;" data-color="#38bdf8"></button>
+                            <button type="button" class="color-dot" data-slot="2" style="--c: #2dd4bf;" data-color="#2dd4bf"></button>
+                            <button type="button" class="color-dot" data-slot="3" style="--c: #818cf8;" data-color="#818cf8"></button>
+                            <button type="button" class="color-dot" data-slot="4" style="--c: #f43f5e;" data-color="#f43f5e"></button>
+                            <input type="color" class="color-picker-input" value="#38bdf8" title="Escolher cor livre para Destaques">
                         </div>
                     </div>
                 </div>
 
                 <div class="color-tooltip-footer">
-                    <button id="btn-reset-all-colors" class="btn-reset-colors">
+                    <button type="button" id="btn-copy-theme-tokens" class="btn-copy-tokens" title="Copiar CSS dos tokens atuais (Claro + Escuro)">
+                        <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="">
+                        <span id="btn-copy-theme-tokens-text">Copiar Tokens CSS</span>
+                    </button>
+                    <button type="button" id="btn-reset-all-colors" class="btn-reset-colors" title="Restaurar paleta padrão">
                         <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
-                        <span>Restaurar Herança Geral (Todos em Auto)</span>
+                        <span>Restaurar</span>
                     </button>
                 </div>
             </div>
@@ -825,22 +939,20 @@
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
-                    Esta vitrine apresenta os controles canônicos do Design System 2.0 integrados a uma cena 3D interativa.
+                    Esta vitrine reúne os controles oficiais do Design System 2.0 integrados a uma cena 3D interativa.
                 </p>
                 <div class="onboarding-grid">
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/mouse-left.svg" class="icon-svg" alt="">
-                            <span>Câmera 3D Interativa</span>
+                            <span>1. Câmera 3D Interativa</span>
                         </div>
-                        <p class="onboarding-card-text">Arraste no canvas para orbitar a geometria e use a roda do mouse (ou pinça) para aplicar zoom.</p>
+                        <p class="onboarding-card-text">Arraste na tela para orbitar o objeto e use o scroll do mouse (ou gesto de pinça) para aproximar ou afastar.</p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/play.svg" class="icon-svg" alt="">
-                            <span>Transporte Flutuante</span>
+                            <span>2. Transporte Flutuante</span>
                         </div>
-                        <p class="onboarding-card-text">Use a barra na base central para executar, avançar passo a passo ($\Delta t$), reiniciar ou ciclar a velocidade.</p>
+                        <p class="onboarding-card-text">Use a barra na base da tela para executar, avançar passo a passo, reiniciar ou mudar a velocidade da simulação.</p>
                     </div>
                 </div>
 

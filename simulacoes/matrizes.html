@@ -18,6 +18,7 @@
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 
     <!-- Design System Base & Estilos Específicos -->
+    <script src="../theme-init.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/matrizes.css">
 
@@ -36,6 +37,9 @@
         </a>
 
         <div class="sim-header-actions">
+            <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
+                <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
+            </button>
             <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
@@ -588,43 +592,39 @@
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
-                    Explore a álgebra e a física das <strong>transformações matriciais em 2D</strong>: desde a interpretação geométrica dos vetores da base e síntese de operadores lineares até matrizes funcionais e sistemas dinâmicos contínuos.
+                    Visualize como matrizes 2D giram, esticam, deformam o espaço e guiam trajetórias em tempo real.
                 </p>
                 <div class="onboarding-grid">
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/matrix-basis.svg" class="icon-svg" alt="">
-                            <span>1. Modo Base & Operadores Lineares</span>
+                            <span>1. Modo Base</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Manipule os coeficientes da matriz $M$ ou arraste diretamente os vetores da base $\hat{i}'$ e $\hat{j}'$. Experimente rotações, escalas e cisalhamentos, compreendendo $\det(M)$ como fator de escala e orientação de área.
+                            Edite os valores da matriz $M$ ou arraste diretamente os vetores da base na tela para experimentar rotações, escalas e cisalhamentos.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/axis-3d.svg" class="icon-svg" alt="">
-                            <span>2. Modo Construir (Progressão em 3 Etapas)</span>
+                            <span>2. Modo Construir</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Construa operadores lineares passo a passo em tela cheia: defina a base inicial $(\hat{i}, \hat{j}, \vec{v})$, posicione a base transformada $(\hat{i}', \hat{j}')$ e anime a evolução espacial com o vetor deslocamento $\vec{d} = \vec{v}' - \vec{v}$.
+                            Monte uma transformação passo a passo: posicione os vetores iniciais, defina para onde eles vão e anime a deformação do plano.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="">
-                            <span>3. Modo Funções & Matrizes Não-Lineares</span>
+                            <span>3. Modo Funções</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Analise matrizes funcionais $M(x, y, t)$ com deformação contínua no tempo. Posicione superfícies de teste (círculos e quadrados) para examinar a curvatura espacial e a aproximação linear local pela matriz Jacobiana.
+                            Explore matrizes que variam no espaço e no tempo. Arraste formas de teste pela grade para ver como o espaço se curva localmente.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/motion-oscillate.svg" class="icon-svg" alt="">
-                            <span>4. Modo Dinâmico & Sistemas Contínuos</span>
+                            <span>4. Modo Dinâmico</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Simule fluxos contínuos governados por $\frac{\mathrm{d}\vec{x}}{\mathrm{d}t} = M\vec{x}$ integrados via Runge-Kutta 4 (RK4). Observe o campo vetorial, gere órbitas interativas por clique e identifique autovetores invariantes e pontos fixos.
+                            Observe o campo de setas gerado pela matriz e clique em qualquer ponto da tela para lançar trajetórias que acompanham o fluxo.
                         </p>
                     </div>
                 </div>

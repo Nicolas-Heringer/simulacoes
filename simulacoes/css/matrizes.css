@@ -54,7 +54,7 @@
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--bg-strong);
     color: var(--text-secondary);
     font-size: 0.70rem;
     font-weight: 700;
@@ -66,15 +66,15 @@
 }
 
 .stepper-btn.active {
-    background: color-mix(in srgb, var(--accent-color) 18%, transparent);
+    background: color-mix(in srgb, var(--accent-color) 16%, var(--bg-surface));
     border-color: var(--accent-color);
     color: var(--accent-color);
-    box-shadow: 0 0 12px color-mix(in srgb, var(--accent-color) 25%, transparent);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--accent-color) 22%, transparent);
 }
 
 .stepper-btn.active .stepper-badge {
     background: var(--accent-color);
-    color: var(--bg-main);
+    color: var(--accent-fg);
 }
 
 .stepper-arrow {
@@ -97,12 +97,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(15, 23, 42, 0.6);
+    background: var(--bg-recessed);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: 12px 16px;
     margin-bottom: 6px;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
     transition: border-color var(--trans-normal), box-shadow var(--trans-normal);
 }
 
@@ -163,9 +162,9 @@
     height: 38px;
     text-align: center;
     background-color: var(--bg-surface);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
-    color: #ffffff;
+    color: var(--text-primary);
     font-family: var(--font-mono);
     font-weight: 600;
     font-size: 0.95rem;
@@ -204,11 +203,11 @@
 }
 
 .cell-i .cell-symbol {
-    color: color-mix(in srgb, var(--accent-color) 85%, #ffffff);
+    color: var(--accent-color);
 }
 
 .cell-j .cell-symbol {
-    color: color-mix(in srgb, var(--color-cyan) 85%, #ffffff);
+    color: var(--color-cyan);
 }
 
 .matrix-input-wrap input:focus + .cell-symbol,
@@ -217,18 +216,18 @@
     visibility: hidden;
 }
 
-/* Coluna î (Amarelo) */
+/* Coluna î (Acento) */
 .cell-i input {
-    border-color: rgba(250, 204, 21, 0.45);
+    border-color: color-mix(in srgb, var(--accent-color) 45%, transparent);
 }
 .cell-i input:focus {
     border-color: var(--accent-color);
-    box-shadow: 0 0 8px color-mix(in srgb, var(--accent-color) 40%, transparent);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--accent-color) 35%, transparent);
 }
 
 /* Coluna ĵ (Ciano) */
 .cell-j input {
-    border-color: rgba(56, 189, 248, 0.45);
+    border-color: color-mix(in srgb, var(--color-cyan) 45%, transparent);
 }
 .cell-j input:focus {
     border-color: var(--color-cyan);
@@ -257,7 +256,7 @@
 
 /* --- READOUT CARD ESPECÍFICO --- */
 .readout-card {
-    background: rgba(15, 23, 42, 0.6);
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: 12px;
@@ -324,22 +323,22 @@
 
 .btn-action.primary {
     background-color: var(--accent-color);
-    color: var(--bg-main);
+    color: var(--accent-fg);
     border-color: var(--accent-color);
 }
 
 .btn-action.primary:hover {
     background-color: var(--accent-color-hover);
-    box-shadow: 0 0 12px color-mix(in srgb, var(--accent-color) 40%, transparent);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--accent-color) 35%, transparent);
 }
 
 .btn-action.secondary {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: var(--bg-subtle);
     color: var(--text-primary);
 }
 
 .btn-action.secondary:hover {
-    background-color: rgba(255, 255, 255, 0.16);
+    background-color: var(--bg-hover);
 }
 
 .btn-action.secondary.active {
@@ -382,14 +381,14 @@
     font-size: 0.76rem;
     font-weight: 600;
     color: var(--accent-color);
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--bg-recessed);
     padding: 3px 8px;
     border-radius: var(--radius-sm);
-    border: 1px solid rgba(250, 204, 21, 0.25);
+    border: 1px solid color-mix(in srgb, var(--accent-color) 30%, transparent);
 }
 
 .focus-select {
-    background: rgba(15, 23, 42, 0.9);
+    background: var(--bg-input);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
     padding: 4px 6px;
@@ -401,7 +400,7 @@
 
 /* --- MINI-GRÁFICO DE TELEMETRIA (MODO 4) --- */
 .telemetry-container {
-    background: rgba(15, 23, 42, 0.7);
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: 10px;
@@ -423,7 +422,7 @@
     width: 100%;
     height: 70px;
     display: block;
-    background: rgba(0, 0, 0, 0.35);
+    background: var(--plot-bg);
     border-radius: var(--radius-sm);
     border: 1px solid var(--border-subtle);
 }

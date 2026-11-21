@@ -149,7 +149,7 @@ class FeixesBuilder {
                 configs.push({ css, dfac, subCount: fxPerWav });
             });
         } else {
-            const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() || '#facc15';
+            const accent = getComputedStyle(document.documentElement).getPropertyValue('--stage-accent').trim() || '#facc15';
             configs.push({ css: accent.startsWith('#') ? `${accent}ee` : 'rgba(250, 204, 21, 0.9)', dfac: 1.0, subCount: numFeixes });
         }
 
@@ -185,7 +185,7 @@ class FeixesBuilder {
         const angleRad = this.angle;
         const uX = Math.cos(angleRad);
         const uY = Math.sin(angleRad);
-        const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() || '#facc15';
+        const accent = getComputedStyle(document.documentElement).getPropertyValue('--stage-accent').trim() || '#facc15';
 
         if (this.mode === 'point') {
             // Seta de direção principal

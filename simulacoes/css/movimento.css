@@ -8,7 +8,7 @@
     display: block;
     width: 100%;
     height: 100%;
-    background-color: var(--bg-main);
+    background-color: var(--bg-canvas);
     cursor: default;
     user-select: none;
     touch-action: none;
@@ -38,13 +38,13 @@
 }
 
 .equation-panel.theme-yellow {
-    border: 1px solid rgba(250, 204, 21, 0.3);
-    background: linear-gradient(180deg, rgba(250, 204, 21, 0.04) 0%, rgba(15, 23, 42, 0.6) 100%);
+    border: 1px solid color-mix(in srgb, var(--accent-color) 32%, transparent);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--accent-color) 6%, var(--bg-card)) 0%, var(--bg-card) 100%);
 }
 
 .equation-panel.theme-cyan {
-    border: 1px solid rgba(56, 189, 248, 0.3);
-    background: linear-gradient(180deg, rgba(56, 189, 248, 0.04) 0%, rgba(15, 23, 42, 0.6) 100%);
+    border: 1px solid color-mix(in srgb, var(--color-cyan) 35%, transparent);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--color-cyan) 6%, var(--bg-card)) 0%, var(--bg-card) 100%);
 }
 
 .panel-tag-row {
@@ -76,7 +76,7 @@
 
 /* Caixa de Exibição da Equação Matemática */
 .equation-box {
-    background: rgba(7, 11, 22, 0.85);
+    background: var(--bg-recessed);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: 8px 10px;
@@ -84,7 +84,6 @@
     font-size: 0.95rem;
     color: var(--accent-color);
     letter-spacing: 0.5px;
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .equation-box.cyan-box {
@@ -92,7 +91,7 @@
 }
 
 .equation-panel .slider-container {
-    background: rgba(0, 0, 0, 0.25);
+    background: var(--bg-subtle);
 }
 
 .equation-panel .switch-container {
@@ -109,10 +108,10 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    background: rgba(15, 23, 42, 0.88);
+    background: var(--bg-glass);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 4px 6px;
     box-shadow: var(--shadow-md);
@@ -141,7 +140,7 @@
 
 .zoom-btn:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-hover);
 }
 
 .zoom-btn:active {

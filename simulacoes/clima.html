@@ -18,6 +18,7 @@
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 
     <!-- Design System Unificado e Estilos Específicos -->
+    <script src="../theme-init.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/clima.css?v=3.6">
 
@@ -48,6 +49,9 @@
         </a>
 
         <div class="sim-header-actions">
+            <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
+                <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
+            </button>
             <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
@@ -753,43 +757,39 @@
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
-                    Explore a geração de malhas geodésicas esféricas por Voronoi (SCVT), a escala geométrica real da atmosfera terrestre, a mecânica celeste das estações do ano e os padrões de circulação e ventos globais.
+                    Explore em 3D a malha esférica do planeta, a escala da atmosfera, as estações do ano e a circulação dos ventos globais.
                 </p>
                 <div class="onboarding-grid">
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/particle-grid.svg" class="icon-svg" alt="Voronoi">
-                            <span>1. Voronoi Esférico & Relaxamento de Lloyd</span>
+                            <span>1. Malha Esférica (Voronoi)</span>
                         </div>
                         <p class="onboarding-card-text">
-                            A distribuição aleatória inicial converge iterativamente para uma Tesselação Centroide de Voronoi Esférica (SCVT). Pela característica de Euler ($\chi = 2$), a malha estabiliza com exatamente 12 pentágonos ($F_5$) entre hexágonos ($F_6$).
+                            Veja pontos aleatórios se organizarem em uma malha de polígonos sobre a esfera e ajuste a quantidade de células e o relaxamento nos controles.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/globe.svg" class="icon-svg" alt="Escala Atmosférica">
-                            <span>2. Troposfera & Escalas Atmosféricas</span>
+                            <span>2. Escala da Atmosfera</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Compare a espessura real da troposfera ($\approx 12\text{ km}$) com o raio da Terra ($6371\text{ km}$, apenas $0{,}19\%$). Ajuste o controle de exagero vertical para inspecionar os perfis térmicos e de altitude em 3D.
+                            Compare a espessura real da camada onde ocorre o clima com o tamanho da Terra e use o exagero vertical para observar os detalhes em 3D.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/sun.svg" class="icon-svg" alt="Estações">
-                            <span>3. Mecânica Celeste, Estações & Insolação</span>
+                            <span>3. Estações do Ano & Luz Solar</span>
                         </div>
                         <p class="onboarding-card-text">
-                            A inclinação axial ($\epsilon = 23{,}44^\circ$) dita a variação da declinação solar ($\delta_\odot$) ao longo do ano. Simule os solstícios e equinócios, acompanhando o ponto subsolar e a distribuição zonal de irradiância.
+                            Altere a época do ano e a inclinação da Terra para acompanhar solstícios, equinócios e como a luz solar se distribui pelos hemisférios.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/wind.svg" class="icon-svg" alt="Circulação Global">
-                            <span>4. Circulação Global & Efeito Coriolis</span>
+                            <span>4. Ventos Globais & Câmera 3D</span>
                         </div>
                         <p class="onboarding-card-text">
-                            O desequilíbrio radiativo equatorial aciona as células convectivas de Hadley, Ferrel e Polar. A aceleração de Coriolis deflete os fluxos, originando os ventos alísios tropicais, ventos de oeste e vórtices ciclônicos.
+                            Observe como o aquecimento solar e a rotação moldam os grandes ventos. Arraste na tela para girar o globo e use o scroll para zoom.
                         </p>
                     </div>
                 </div>

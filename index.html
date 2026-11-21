@@ -36,6 +36,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <script src="theme-init.js"></script>
     <link rel="stylesheet" type="text/css" href="styles.css">
 
     <!-- Suporte a LaTeX com KaTeX -->
@@ -88,6 +89,13 @@
                 </a>
             </li>
         </ul>
+        <div class="sidebar-theme-wrap">
+            <button type="button" id="btn-theme-toggle" class="theme-toggle-btn"
+                title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
+                <img src="assets/icons/sun.svg" class="icon-svg" alt="">
+                <span class="theme-toggle-label">Modo claro</span>
+            </button>
+        </div>
         <div class="sidebar-footer">
             <ul class="social-links">
                 <li><a href="https://www.youtube.com/@nicolas_heringer" target="_blank" rel="noopener noreferrer"
@@ -112,20 +120,15 @@
                     <p>
                         Este projeto reúne simulações interativas de <span class="text-fisica">Física</span> e
                         <span class="text-matematica">Matemática</span>. A minha proposta aqui é possibilitar que
-                        fenômenos
-                        que geralmente são abstratos possam ser visualizados e manipulados de maneira relativamente
-                        simples,
-                        tanto por estudantes quanto por professores (embora minha proposta central seja que colegas
-                        professores
-                        utilizem minha pagina como recurso didático).
+                        fenômenos que geralmente são abstratos possam ser visualizados e manipulados de maneira
+                        relativamente simples, tanto por estudantes quanto por professores — embora meu objetivo
+                        principal seja que colegas professores utilizem esta página como recurso didático.
                     </p>
                     <p>
-                        Todo o acervo de simulações roda direto no navegador, sem necessidade de instalação (esse
-                        aspecto
-                        é importante pois algumas simulações como "particulas" exigem uma boa capacidade de
-                        processamento
-                        e podem não rodar em dispositivos mais simples como as Telas Interativas ou Chromebooks, então é
-                        interessante testar o dispositivo antes do uso real).
+                        Todo o acervo de simulações roda direto no navegador, sem necessidade de instalação. Vale notar
+                        que algumas simulações mais pesadas, como a de partículas, exigem maior capacidade de
+                        processamento e podem não rodar bem em dispositivos mais simples (como telas interativas ou
+                        Chromebooks), então vale testar antes do uso em aula.
                     </p>
                 </div>
 
@@ -207,8 +210,7 @@
                         </div>
                         <div class="card-body">
                             <h3>Simulação de partículas</h3>
-                            <p>Nesta simulação é possível visualizar interações entre partículas com carga elétrica.
-                            </p>
+                            <p>Visualize interações entre partículas com carga elétrica.</p>
                         </div>
                         <div class="card-footer">
                             <span class="card-footer-label">Explorar</span>
@@ -231,8 +233,8 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <h3>Audio Fourier</h3>
-                            <p>Nesta simulação é possível visualizar um som e seu espectro de frequências.</p>
+                            <h3>Áudio Fourier</h3>
+                            <p>Visualize um som em tempo real e o seu espectro de frequências.</p>
                         </div>
                         <div class="card-footer">
                             <span class="card-footer-label">Explorar</span>
@@ -255,7 +257,7 @@
                         </div>
                         <div class="card-body">
                             <h3>Fônons</h3>
-                            <p>Nesta simulação é possível visualizar uma onda de matéria numa rede cristalina.</p>
+                            <p>Visualize uma onda de matéria se propagando em uma rede cristalina.</p>
                         </div>
                         <div class="card-footer">
                             <span class="card-footer-label">Explorar</span>
@@ -278,8 +280,7 @@
                         </div>
                         <div class="card-body">
                             <h3>Lei de Snell</h3>
-                            <p>Nesta simulação é possível visualizar a lei de Snell em meios com índice de refração
-                                variados.</p>
+                            <p>Visualize a lei de Snell em meios com índices de refração variados.</p>
                         </div>
                         <div class="card-footer">
                             <span class="card-footer-label">Explorar</span>
@@ -303,8 +304,7 @@
                         </div>
                         <div class="card-body">
                             <h3>Ondas estacionárias 2D</h3>
-                            <p>Nesta simulação é possível visualizar ondas estacionárias em uma superfície 2D (padrões
-                                de Chladni).</p>
+                            <p>Visualize ondas estacionárias em uma superfície 2D (padrões de Chladni).</p>
                         </div>
                         <div class="card-footer">
                             <span class="card-footer-label">Explorar</span>
@@ -327,7 +327,7 @@
                         </div>
                         <div class="card-body">
                             <h3>Queda livre interativa</h3>
-                            <p>Nesta simulação é possível visualizar e interagir com um objeto em queda livre.</p>
+                            <p>Visualize e interaja com um objeto em queda livre.</p>
                         </div>
                         <div class="card-footer">
                             <span class="card-footer-label">Explorar</span>
@@ -351,8 +351,8 @@
                         </div>
                         <div class="card-body">
                             <h3>Forças Centrais &amp; Leis de Kepler</h3>
-                            <p>Nesta simulação é possível explorar o surgimento de órbitas sob diferentes forças
-                                centrais, visualizaar a 2ª Lei de Kepler e acompanhar algumas métricas.</p>
+                            <p>Explore o surgimento de órbitas sob diferentes forças centrais, visualize a 2ª Lei de
+                                Kepler e acompanhe algumas métricas.</p>
                         </div>
                         <div class="card-footer">
                             <span class="card-footer-label">Explorar</span>
@@ -375,7 +375,7 @@
                         </div>
                         <div class="card-body">
                             <h3>Modelo de Drude</h3>
-                            <p>Nesta simulação é possível conceituar a condução elétrica clássica interagindo com uma
+                            <p>Explore de forma conceitual a condução elétrica clássica com elétrons interagindo com uma
                                 rede cristalina.</p>
                         </div>
                         <div class="card-footer">
@@ -399,8 +399,8 @@
                         </div>
                         <div class="card-body">
                             <h3>Átomo de Hidrogênio</h3>
-                            <p>Nesta simulação é possível visualizar os autovalores (Energias) e autovetores (Estados)
-                                do átomo de hidrogênio variando os números quânticos.</p>
+                            <p>Visualize as energias e os orbitais do átomo de hidrogênio variando os números quânticos.
+                            </p>
                         </div>
                         <div class="card-footer">
                             <span class="card-footer-label">Explorar</span>
@@ -424,8 +424,8 @@
                         </div>
                         <div class="card-body">
                             <h3>Cinemática</h3>
-                            <p>Nesta simulação é possível interagir com as funções horárias da posição S(t) no MRU e
-                                MRUV, gráficos de Posição x Tempo e analisar pontos de encontro entre corpos.</p>
+                            <p>Interaja com as funções horárias da posição s(t) no MRU e MRUV, gráficos de Posição ×
+                                Tempo e pontos de encontro entre corpos.</p>
                         </div>
                         <div class="card-footer">
                             <span class="card-footer-label">Explorar</span>
@@ -449,9 +449,8 @@
                         </div>
                         <div class="card-body">
                             <h3>Transformações e Matrizes</h3>
-                            <p>Nesta simulação é possivel visualizar a maneira como uma Transformação modifica o espaço
-                                R2, bem como
-                                sua representação matricial.</p>
+                            <p>Visualize como uma transformação modifica o espaço R² e qual é a sua representação
+                                matricial.</p>
                         </div>
                         <div class="card-footer">
                             <span class="card-footer-label">Explorar</span>
@@ -500,11 +499,8 @@
                         </div>
                         <div class="card-body">
                             <h3>Planeta Terra</h3>
-                            <p>Nesta simulação é possível visualizar e interagir com um modelo de terrestre simples que
-                                pode ser
-                                utilizado para discutir as estações do ano e também o funcionamento de modelos
-                                climáticos.
-                            </p>
+                            <p>Visualize e interaja com um modelo terrestre simples para discutir as estações do ano e o
+                                funcionamento de modelos climáticos.</p>
                         </div>
                         <div class="card-footer">
                             <span class="card-footer-label">Explorar</span>
@@ -599,8 +595,7 @@
                     <ion-icon name="logo-instagram"></ion-icon>
                 </a>
             </div>
-            <p>Desenvolvido por Nicolas Heringer. Hospedado no GitHub Pages & desenvolvido com auxílio de IA (Google
-                Antigravity).</p>
+            <p>Desenvolvido por Nicolas Heringer com auxílio de IA (Google Antigravity) e hospedado no GitHub Pages.</p>
         </footer>
 
     </main>

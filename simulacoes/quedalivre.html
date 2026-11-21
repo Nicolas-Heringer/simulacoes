@@ -12,6 +12,7 @@
 
     <!-- Favicon e Design System CSS -->
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <script src="../theme-init.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/quedalivre.css">
 
@@ -38,6 +39,9 @@
         </a>
 
         <div class="sim-header-actions">
+            <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
+                <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
+            </button>
             <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
@@ -276,43 +280,39 @@
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
-                    Simule a dinâmica de um corpo sob ação da gravidade, resistência viscosa do ar (arrasto) e colisões elásticas/inelásticas com as fronteiras.
+                    Explore a queda de um objeto sob a gravidade, comparando o vácuo com a resistência do ar e diferentes tipos de quique.
                 </p>
                 <div class="onboarding-grid">
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/gravity-fall.svg" class="icon-svg" alt="Queda Livre">
-                            <span>1. Queda Livre no Vácuo vs Resistência do Ar</span>
+                            <span>1. Vácuo vs. Resistência do Ar</span>
                         </div>
                         <p class="onboarding-card-text">
-                            No vácuo ($b = 0$), todos os corpos aceleram à mesma taxa $g$, independentemente da massa. Com resistência ($b > 0$), a força de arrasto $\vec{F}_{\text{arrasto}} = -b\vec{v}$ opõe-se ao movimento e reduz a aceleração efetiva.
+                            Sem resistência do ar, a queda não depende da massa. Aumente o arrasto nos controles para observar o ar freando o movimento gradualmente.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/wind.svg" class="icon-svg" alt="Velocidade Terminal">
-                            <span>2. Velocidade Terminal & Balanço de Forças</span>
+                            <span>2. Velocidade Terminal</span>
                         </div>
                         <p class="onboarding-card-text">
-                            À medida que a velocidade aumenta, a força de arrasto equilibra o peso ($F_g = F_{\text{arrasto}} \implies mg = bv_t$). A resultante torna-se nula e a esfera atinge a velocidade terminal assintótica $v_t = mg/b$.
+                            Com resistência do ar, o objeto acelera até que o arrasto equilibre o peso, passando a cair com velocidade constante.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="Energia">
-                            <span>3. Conservação & Dissipação de Energia</span>
+                            <span>3. Energia & Quiques</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Acompanhe no gráfico a interconversão de energia potencial $U = mgh$ em cinética $K = \frac{1}{2}mv^2$. O arrasto dissipa energia continuamente em calor, enquanto o coeficiente de restituição $e$ dita a perda a cada quique.
+                            Acompanhe nos gráficos a troca entre energia potencial e cinética, e ajuste a elasticidade para controlar a altura perdida a cada quique.
                         </p>
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <img src="../assets/icons/touch-drag.svg" class="icon-svg" alt="Interação">
-                            <span>4. Interação & Arremesso Manual</span>
+                            <span>4. Arrastar & Arremessar</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Clique ou toque e arraste a esfera para posicioná-la no espaço ou realize um movimento rápido para arremessá-la em qualquer direção. O vetor de lançamento transfere a velocidade instantânea do ponteiro.
+                            Clique ou toque na esfera para arrastá-la até outra posição, ou faça um movimento rápido para arremessá-la em qualquer direção.
                         </p>
                     </div>
                 </div>
