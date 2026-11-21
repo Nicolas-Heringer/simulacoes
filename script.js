@@ -1,6 +1,5 @@
-// Esta função lida com a posição do mouse e muda a propriedade de posição do mouse
-// de maneira relativa a cada card. Isso possibilita criar o efeito de "sombra"
-const handleOnMouseMove = e => {
+// Atualiza a posição relativa do ponteiro em cada card para a lanterna/brilho no hover
+const handleCardPointerMove = e => {
   const { currentTarget: target } = e;
   const rect = target.getBoundingClientRect();
   const x = e.clientX - rect.left;
@@ -10,8 +9,128 @@ const handleOnMouseMove = e => {
   target.style.setProperty("--mouse-Y", `${y}px`);
 };
 
-for (const card of document.querySelectorAll(".card")) {
-  card.onmousemove = e => handleOnMouseMove(e);
+// Converte <img class="icon-svg"> em <svg> inline com cache (herança de currentColor + animações nativas)
+async function inlineSVGImages() {
+  const images = document.querySelectorAll('img.icon-svg[src$=".svg"]');
+  if (images.length === 0) return;
+
+  const svgCache = new Map();
+  const parser = new DOMParser();
+
+  for (const img of images) {
+    const src = img.getAttribute("src");
+    if (!src) continue;
+
+    let svgText = svgCache.get(src);
+    if (!svgText) {
+      try {
+        const res = await fetch(src);
+        if (!res.ok) continue;
+        svgText = await res.text();
+        svgCache.set(src, svgText);
+      } catch {
+        continue;
+      }
+    }
+
+    const doc = parser.parseFromString(svgText, "image/svg+xml");
+    const svg = doc.querySelector("svg");
+    if (!svg) continue;
+
+    svg.setAttribute("class", img.getAttribute("class") || "icon-svg");
+    svg.setAttribute("aria-hidden", "true");
+    if (img.id) svg.setAttribute("id", img.id);
+    img.replaceWith(svg);
+  }
+}
+
+function initCardPreviews() {
+  const cardLinks = document.querySelectorAll(".card-link[data-preview]");
+  const loadedUrls = new Set();
+
+  const loadPreviewForLink = link => {
+    const previewUrl = link.getAttribute("data-preview");
+    const card = link.querySelector(".card");
+    if (!previewUrl || !card || card.dataset.previewStatus) return;
+
+    card.dataset.previewStatus = "loading";
+
+    // Injeta o compositor unificado de preview se ainda não existir
+    if (!card.querySelector(".card-preview")) {
+      const preview = document.createElement("div");
+      preview.className = "card-preview";
+      preview.setAttribute("aria-hidden", "true");
+      preview.innerHTML = `
+        <div class="card-preview-ambient"></div>
+        <div class="card-preview-spotlight"></div>
+        <div class="card-preview-scrim"></div>
+      `;
+      card.prepend(preview);
+    }
+
+    const applyPreview = () => {
+      card.style.setProperty("--card-preview", `url("${previewUrl}")`);
+      // Garante um frame em opacity: 0 antes de ativar .has-preview para transição sempre suave
+      requestAnimationFrame(() => {
+        card.classList.add("has-preview");
+        card.dataset.previewStatus = "loaded";
+      });
+    };
+
+    if (loadedUrls.has(previewUrl)) {
+      applyPreview();
+      return;
+    }
+
+    const img = new Image();
+    img.decoding = "async";
+    img.onload = () => {
+      loadedUrls.add(previewUrl);
+      applyPreview();
+    };
+    img.onerror = () => {
+      // Fallback automático: mantém sem .has-preview (exibe brilho radial padrão)
+      card.dataset.previewStatus = "missing";
+    };
+    img.src = previewUrl;
+  };
+
+  // Registra rastreamento de ponteiro em todos os cards e pré-carrega preview no pointerenter
+  document.querySelectorAll(".card").forEach(card => {
+    const link = card.closest(".card-link[data-preview]");
+    card.addEventListener("pointerenter", e => {
+      handleCardPointerMove(e);
+      if (link) loadPreviewForLink(link);
+    });
+    card.addEventListener("pointermove", handleCardPointerMove);
+  });
+
+  // Carregamento lazy quando os cards entram na viewport (inclusive ao ativar #secao-simulacoes)
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            loadPreviewForLink(entry.target);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { rootMargin: "200px 0px" }
+    );
+
+    cardLinks.forEach(link => {
+      if (!link.hasAttribute("hidden")) {
+        observer.observe(link);
+      }
+    });
+  } else {
+    cardLinks.forEach(link => {
+      if (!link.hasAttribute("hidden")) {
+        loadPreviewForLink(link);
+      }
+    });
+  }
 }
 
 // Aqui eu lido com o menu e a mudança entre seções
@@ -29,9 +148,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Verifica se há um hash na URL (ex: #secao-simulacoes)
+  // Verifica se há um hash na URL (ex: #secao-sobre)
   const hash = window.location.hash;
-  let secaoInicial = "secao-sobre"; // Padrão
+  let secaoInicial = "secao-simulacoes"; // Padrão: abre direto no acervo de simulações
 
   if (hash) {
     const secaoTentativa = hash.substring(1); // Remove o #
@@ -111,6 +230,21 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // Atualiza contador dinâmico de simulações visíveis na sidebar
+  const menuCountSim = document.getElementById("menu-count-sim");
+  if (menuCountSim) {
+    const visibleCardsCount = Array.from(cardLinks).filter(
+      link => !link.hasAttribute("hidden") && !link.classList.contains("hide") && !link.classList.contains("hidden")
+    ).length;
+    menuCountSim.textContent = String(visibleCardsCount);
+  }
+
+  // Converte ícones SVG nativos inline (ex.: mouse-left.svg nos cards)
+  inlineSVGImages();
+
+  // Inicializa previews e efeito spotlight dos cards de simulações
+  initCardPreviews();
+
   // Inicializa seção de Material Bibliográfico
   initBibliograficaSection();
 });
@@ -131,6 +265,10 @@ async function initBibliograficaSection() {
     const response = await fetch("livros.json");
     if (!response.ok) throw new Error("Network response was not ok");
     livrosData = await response.json();
+    const menuCountBiblio = document.getElementById("menu-count-biblio");
+    if (menuCountBiblio) {
+      menuCountBiblio.textContent = String(livrosData.length);
+    }
   } catch (error) {
     console.error("Erro ao carregar livros.json:", error);
     gridLivros.innerHTML = '<p class="no-results" style="display:block;">Não foi possível carregar a lista de livros.</p>';

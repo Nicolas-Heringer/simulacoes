@@ -55,36 +55,46 @@
     <!-- Barra lateral (Sidebar) -->
     <nav class="sidebar">
         <div class="sidebar-header">
-            <h2>Simulações</h2>
+            <a href="#secao-simulacoes" class="sidebar-brand">
+                <img src="favicon.svg" alt="" class="sidebar-logo" width="34" height="34">
+                <div class="sidebar-brand-text">
+                    <h2>Simulações</h2>
+                    <span>Física &amp; Matemática</span>
+                </div>
+            </a>
         </div>
         <ul class="menu">
             <li class="list">
-                <a href="#secao-sobre">
-                    <span class="icone"><ion-icon name="person-outline"></ion-icon></span>
-                    <span class="texto">Sobre mim</span>
-                </a>
-            </li>
-            <li class="list">
-                <a href="#secao-simulacoes">
+                <a href="#secao-simulacoes" class="active">
                     <span class="icone"><ion-icon name="apps-outline"></ion-icon></span>
-                    <span class="texto">Simulações</span>
+                    <span class="texto">Acervo</span>
+                    <span class="menu-count" id="menu-count-sim"></span>
                 </a>
             </li>
             <li class="list">
                 <a href="#secao-bibliografia">
                     <span class="icone"><ion-icon name="book-outline"></ion-icon></span>
-                    <span class="texto">Material Bibliográfico</span>
+                    <span class="texto">Bibliografia</span>
+                    <span class="menu-count" id="menu-count-biblio"></span>
+                </a>
+            </li>
+            <li class="list">
+                <a href="#secao-sobre">
+                    <span class="icone"><ion-icon name="information-circle-outline"></ion-icon></span>
+                    <span class="texto">Sobre</span>
                 </a>
             </li>
         </ul>
         <div class="sidebar-footer">
             <ul class="social-links">
-                <li><a href="https://www.instagram.com/nicolasheringer/" target="_blank"><ion-icon
-                            name="logo-instagram"></ion-icon></a></li>
-                <li><a href="https://www.linkedin.com/in/nicolasheringer/" target="_blank"><ion-icon
-                            name="logo-linkedin"></ion-icon></a></li>
-                <li><a href="https://github.com/Nicolas-Heringer" target="_blank"><ion-icon
-                            name="logo-github"></ion-icon></a></li>
+                <li><a href="https://www.youtube.com/@nicolas_heringer" target="_blank" rel="noopener noreferrer"
+                        title="YouTube" aria-label="YouTube"><ion-icon name="logo-youtube"></ion-icon></a></li>
+                <li><a href="https://github.com/Nicolas-Heringer" target="_blank" rel="noopener noreferrer"
+                        title="GitHub" aria-label="GitHub"><ion-icon name="logo-github"></ion-icon></a></li>
+                <li><a href="https://www.linkedin.com/in/nicolasheringer/" target="_blank" rel="noopener noreferrer"
+                        title="LinkedIn" aria-label="LinkedIn"><ion-icon name="logo-linkedin"></ion-icon></a></li>
+                <li><a href="https://www.instagram.com/nicolasheringer/" target="_blank" rel="noopener noreferrer"
+                        title="Instagram" aria-label="Instagram"><ion-icon name="logo-instagram"></ion-icon></a></li>
             </ul>
         </div>
     </nav>
@@ -92,179 +102,72 @@
     <!-- Conteúdo Principal -->
     <main class="main-content">
 
-        <div id="secao-sobre" class="section active">
-            <h2>Sobre mim</h2>
-            <div class="card-content">
-
-                <!-- Destaques Rápidos -->
-                <!-- <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon"><ion-icon name="school-outline"></ion-icon></div>
-                        <div class="stat-info">
-                            <span class="stat-title">Formação</span>
-                            <span class="stat-desc">Física (UFMG)</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><ion-icon name="cube-outline"></ion-icon></div>
-                        <div class="stat-info">
-                            <span class="stat-title">Simulações</span>
-                            <span class="stat-desc">Interativas & Visuais</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><ion-icon name="book-outline"></ion-icon></div>
-                        <div class="stat-info">
-                            <span class="stat-title">Recurso Didático</span>
-                            <span class="stat-desc">Aberto & Gratuito</span>
-                        </div>
-                    </div>
-                </div> -->
-
-                <p>
-                    Bem-vindo(a) à minha plataforma de simulações educacionais! Minha missão é fornecer recursos
-                    didáticos que auxiliem professores e estudantes no aprendizado de conceitos complexos de
-                    <span class="text-fisica">Física</span> e <span class="text-matematica">Matemática</span>.
-                    Acredito que a visualização e a interação são ferramentas poderosas para a
-                    compreensão profunda dessas disciplinas.
-                </p>
-                <p>
-                    Criei esta página para servir como suporte pedagógico para professores, oferecendo uma variedade de
-                    simulações interativas que podem ser utilizadas em sala de aula ou como material complementar para
-                    estudos individuais. Meu objetivo é tornar o aprendizado mais envolvente e acessível, permitindo que
-                    os estudantes explorem fenômenos das Ciências Naturais e da Matemática.
-                </p>
-                <p>
-                    Espero que gostem das simulações! Se tiver alguma sugestão ou precisar de assistência, não hesite
-                    em me contatar (as redes sociais estão no canto inferior esquerdo da tela).
-                </p>
-
-                <!-- Guia Rápido de Uso Pedagógico -->
-                <div class="usage-guide-section">
-                    <h3 class="subsection-title">
-                        <ion-icon name="easel-outline"></ion-icon> Como utilizar as simulações
-                    </h3>
-                    <div class="usage-grid">
-                        <div class="usage-card">
-                            <div class="usage-icon"><ion-icon name="desktop-outline"></ion-icon></div>
-                            <h4>Em Sala de Aula</h4>
-                            <p>Demonstrações visuais ao vivo para enriquecer aulas expositivas e engajar alunos.</p>
-                        </div>
-                        <div class="usage-card">
-                            <div class="usage-icon"><ion-icon name="flask-outline"></ion-icon></div>
-                            <h4>Laboratório Virtual</h4>
-                            <p>Ambiente para alunos variarem parâmetros em tempo real e testarem hipóteses.</p>
-                        </div>
-                        <div class="usage-card">
-                            <div class="usage-icon"><ion-icon name="body-outline"></ion-icon></div>
-                            <h4>Estudo Autônomo</h4>
-                            <p>Material interativo complementar para desenvolver intuição física e matemática no seu
-                                próprio ritmo.</p>
-                        </div>
-                    </div>
+        <div id="secao-sobre" class="section">
+            <h2>Sobre</h2>
+            <div class="about-editorial">
+                <div class="about-prose">
+                    <p>
+                        Este projeto reúne simulações interativas de <span class="text-fisica">Física</span> e
+                        <span class="text-matematica">Matemática</span> pensadas para tornar mais tangíveis fenômenos
+                        que normalmente ficam restritos a equações estáticas — de órbitas sob forças centrais e
+                        padrões de Chladni a redes cristalinas, condução elétrica e estados quânticos.
+                    </p>
+                    <p>
+                        Todo o acervo roda direto no navegador, sem necessidade de instalação, e é mantido de forma
+                        aberta e gratuita para uso em sala de aula, demonstrações didáticas ou estudo individual.
+                    </p>
                 </div>
 
-                <!-- Histórico e Formação Acadêmica -->
-                <!-- <div class="academic-section">
-                    <h3 class="subsection-title">
-                        <ion-icon name="school-outline"></ion-icon> Formação Acadêmica & Pesquisa
-                    </h3>
-
-                    <div class="academic-card">
-                        <div class="academic-degree">
-                            <div class="degree-header">
-                                <span class="degree-badge">Graduação</span>
-                                <h4>Bacharelado & Licenciatura em Física</h4>
-                            </div>
-                            <p class="institution">Universidade Federal de Minas Gerais (UFMG)</p>
-                        </div>
-
-                        <div class="research-section">
-                            <h5><ion-icon name="flask-outline"></ion-icon> Projetos de Iniciação Científica</h5>
-                            <ul class="research-list">
-                                <li>
-                                    <span class="research-num">1</span>
-                                    <div class="research-info">
-                                        <strong>Estudo de Espectroscopia de Fotoelétrons de Raio-X (XPS)</strong>
-                                        <p>Desenvolvimento e automação de experimentos com programação via <span
-                                                class="tech-tag">LabVIEW</span>.</p>
-                                    </div>
-                                </li>
-                                <li>
-                                    <span class="research-num">2</span>
-                                    <div class="research-info">
-                                        <strong>Estudo de Magnetometria de Amostra Vibrante (VSM)</strong>
-                                        <p>Caracterização magnética e controle de instrumentação via <span
-                                                class="tech-tag">LabVIEW</span>.</p>
-                                    </div>
-                                </li>
-                                <li>
-                                    <span class="research-num">3</span>
-                                    <div class="research-info">
-                                        <strong>Estudo de Sistemas de Elétrons Fortemente Correlacionados</strong>
-                                        <p>Modelagem física e computacional utilizando a técnica de <em>Dynamic Mean
-                                                Field Theory (DMFT)</em> <span class="tech-tag">Fortran</span>.</p>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div class="outreach-section">
-                            <h5><ion-icon name="planet-outline"></ion-icon> Extensão & Divulgação Científica</h5>
-                            <p>Participação ativa no grupo de astronomia no <strong>Observatório Astronômico Frei
-                                    Rosário</strong> (UFMG).</p>
-                        </div>
+                <dl class="about-colophon">
+                    <div class="colophon-row">
+                        <dt>Autoria</dt>
+                        <dd>Nicolas Heringer</dd>
                     </div>
-                </div> -->
-
-                <!-- Tecnologias & Ferramentas -->
-                <!-- <div class="tech-stack-section">
-                    <h3 class="subsection-title">
-                        <ion-icon name="code-slash-outline"></ion-icon> Tecnologias & Ferramentas
-                    </h3>
-                    <div class="tech-badges-list">
-                        <span class="tech-pill"><ion-icon name="logo-javascript"></ion-icon> JavaScript (Canvas /
-                            WebGL)</span>
-                        <span class="tech-pill"><ion-icon name="logo-html5"></ion-icon> HTML5 & CSS3</span>
-                        <span class="tech-pill"><ion-icon name="logo-python"></ion-icon> Python</span>
-                        <span class="tech-pill"><ion-icon name="terminal-outline"></ion-icon> Fortran</span>
-                        <span class="tech-pill"><ion-icon name="analytics-outline"></ion-icon> Física
-                            Computacional</span>
-                        <span class="tech-pill"><ion-icon name="calculator-outline"></ion-icon> Modelagem
-                            Matemática</span>
+                    <div class="colophon-row">
+                        <dt>Código-fonte</dt>
+                        <dd>
+                            <a href="https://github.com/Nicolas-Heringer/simulacoes" target="_blank"
+                                rel="noopener noreferrer" class="editorial-link">github.com/Nicolas-Heringer/simulacoes</a>
+                        </dd>
                     </div>
-                </div> -->
+                    <div class="colophon-row">
+                        <dt>YouTube</dt>
+                        <dd>
+                            <a href="https://www.youtube.com/@nicolas_heringer" target="_blank"
+                                rel="noopener noreferrer" class="editorial-link">youtube.com/@nicolas_heringer</a>
+                            <span class="colophon-note"> — tutoriais sobre o uso das simulações ainda não estão disponíveis (no momento o canal reúne resoluções de exercícios de vestibular).</span>
+                        </dd>
+                    </div>
+                    <div class="colophon-row">
+                        <dt>Base técnica</dt>
+                        <dd>HTML, CSS e JavaScript nativos, Canvas 2D, Three.js e KaTeX — hospedado no GitHub Pages</dd>
+                    </div>
+                    <div class="colophon-row">
+                        <dt>Acesso</dt>
+                        <dd>Aberto e gratuito, sem cadastro ou dependências externas para uso</dd>
+                    </div>
+                </dl>
 
-                <!-- Botão Call To Action -->
-                <div class="cta-container">
-                    <a href="#secao-simulacoes" class="btn-cta">
-                        <ion-icon name="play-circle-outline"></ion-icon> Explorar Simulações Agora
-                    </a>
+                <div class="about-contact">
+                    <p>
+                        Encontrou algum erro numérico, comportamento inesperado ou tem sugestão de nova simulação?
+                        Abra uma issue no
+                        <a href="https://github.com/Nicolas-Heringer/simulacoes/issues" target="_blank"
+                            rel="noopener noreferrer" class="editorial-link">GitHub</a>
+                        ou envie uma mensagem pelo
+                        <a href="https://www.linkedin.com/in/nicolasheringer/" target="_blank"
+                            rel="noopener noreferrer" class="editorial-link">LinkedIn</a>
+                        ou
+                        <a href="https://www.instagram.com/nicolasheringer/" target="_blank"
+                            rel="noopener noreferrer" class="editorial-link">Instagram</a>.
+                    </p>
                 </div>
-
-                <!-- Desenvolvimento & Hospedagem -->
-                <div class="dev-credits-section">
-                    <h3 class="subsection-title">
-                        <ion-icon name="sparkles-outline"></ion-icon> Desenvolvimento & Tecnologias
-                    </h3>
-                    <div class="dev-credits-card">
-                        <ion-icon name="logo-github" class="dev-credits-icon"></ion-icon>
-                        <p>
-                            Esta plataforma é um projeto open-source hospedado no <strong>GitHub Pages</strong>.
-                            A estrutura da página e suas simulações foram aprimoradas através de ferramentas de
-                            Inteligência Artificial,
-                            com destaque para o <strong>Antigravity do Google</strong> (Google DeepMind), otimizando o
-                            design, a interatividade e a arquitetura do código.
-
-                        </p>
-                    </div>
-                </div>
-
             </div>
         </div>
 
-        <div id="secao-simulacoes" class="section">
+        <div id="secao-simulacoes" class="section active">
             <h2>Simulações</h2>
+            <p class="section-lead">Acervo interativo e aberto de Física e Matemática para explorar direto no navegador.</p>
 
             <!-- Barra de Filtros -->
             <div class="filter-bar" id="filter-bar">
@@ -276,158 +179,318 @@
             </div>
 
             <div id="cards">
-                <a href='simulacoes/particulas.html' class="card-link" data-categorias="fisica">
+                <a href="simulacoes/particulas.html" class="card-link" data-categorias="fisica" data-preview="assets/previews/particulas.png">
                     <div class="card">
-                        <div class="card-tags">
-                            <span class="card-tag tag-fisica">Física</span>
+                        <div class="card-header">
+                            <div class="card-tags">
+                                <span class="card-tag tag-fisica">Física</span>
+                            </div>
                         </div>
-                        <h1>Simulação de partículas</h1>
-                        <p>Nesta simulação é possível visualizar um sistema de partículas com interação coulombiana.</p>
+                        <div class="card-body">
+                            <h3>Simulação de partículas</h3>
+                            <p>Nesta simulação é possível visualizar um sistema de partículas com interação coulombiana.</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-footer-label">Explorar</span>
+                            <span class="card-footer-spacer" aria-hidden="true"></span>
+                            <span class="card-footer-action" aria-hidden="true">
+                                <ion-icon name="arrow-forward-outline" class="card-arrow"></ion-icon>
+                                <img src="assets/icons/mouse-left.svg" class="icon-svg card-click-icon" alt="">
+                            </span>
+                        </div>
                     </div>
                 </a>
 
-                <a href='simulacoes/audio.html' class="card-link" data-categorias="fisica matematica">
+                <a href="simulacoes/audio.html" class="card-link" data-categorias="fisica matematica" data-preview="assets/previews/audio.png">
                     <div class="card">
-                        <div class="card-tags">
-                            <span class="card-tag tag-fisica">Física</span>
-                            <span class="card-tag tag-matematica">Matemática</span>
+                        <div class="card-header">
+                            <div class="card-tags">
+                                <span class="card-tag tag-fisica">Física</span>
+                                <span class="card-tag tag-matematica">Matemática</span>
+                            </div>
                         </div>
-                        <h1>Audio Fourier</h1>
-                        <p>Nesta simulação é possível visualizar um som e seu espectro de frequências.</p>
+                        <div class="card-body">
+                            <h3>Audio Fourier</h3>
+                            <p>Nesta simulação é possível visualizar um som e seu espectro de frequências.</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-footer-label">Explorar</span>
+                            <span class="card-footer-spacer" aria-hidden="true"></span>
+                            <span class="card-footer-action" aria-hidden="true">
+                                <ion-icon name="arrow-forward-outline" class="card-arrow"></ion-icon>
+                                <img src="assets/icons/mouse-left.svg" class="icon-svg card-click-icon" alt="">
+                            </span>
+                        </div>
                     </div>
                 </a>
 
-                <a href='simulacoes/fonons.html' class="card-link" data-categorias="fisica">
+                <a href="simulacoes/fonons.html" class="card-link" data-categorias="fisica" data-preview="assets/previews/fonons.png">
                     <div class="card">
-                        <div class="card-tags">
-                            <span class="card-tag tag-fisica">Física</span>
+                        <div class="card-header">
+                            <div class="card-tags">
+                                <span class="card-tag tag-fisica">Física</span>
+                            </div>
                         </div>
-                        <h1>Fônons</h1>
-                        <p>Nesta simulação é possível visualizar uma onda de matéria numa rede cristalina.</p>
+                        <div class="card-body">
+                            <h3>Fônons</h3>
+                            <p>Nesta simulação é possível visualizar uma onda de matéria numa rede cristalina.</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-footer-label">Explorar</span>
+                            <span class="card-footer-spacer" aria-hidden="true"></span>
+                            <span class="card-footer-action" aria-hidden="true">
+                                <ion-icon name="arrow-forward-outline" class="card-arrow"></ion-icon>
+                                <img src="assets/icons/mouse-left.svg" class="icon-svg card-click-icon" alt="">
+                            </span>
+                        </div>
                     </div>
                 </a>
 
-                <a href='simulacoes/snell.html' class="card-link" data-categorias="fisica">
+                <a href="simulacoes/snell.html" class="card-link" data-categorias="fisica" data-preview="assets/previews/snell.png">
                     <div class="card">
-                        <div class="card-tags">
-                            <span class="card-tag tag-fisica">Física</span>
+                        <div class="card-header">
+                            <div class="card-tags">
+                                <span class="card-tag tag-fisica">Física</span>
+                            </div>
                         </div>
-                        <h1>Lei de Snell</h1>
-                        <p>Nesta simulação é possível visualizar a lei de Snell em meios com índice de refração
-                            variados.</p>
+                        <div class="card-body">
+                            <h3>Lei de Snell</h3>
+                            <p>Nesta simulação é possível visualizar a lei de Snell em meios com índice de refração variados.</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-footer-label">Explorar</span>
+                            <span class="card-footer-spacer" aria-hidden="true"></span>
+                            <span class="card-footer-action" aria-hidden="true">
+                                <ion-icon name="arrow-forward-outline" class="card-arrow"></ion-icon>
+                                <img src="assets/icons/mouse-left.svg" class="icon-svg card-click-icon" alt="">
+                            </span>
+                        </div>
                     </div>
                 </a>
 
-                <a href='simulacoes/estacionarias2d.html' class="card-link" data-categorias="fisica matematica">
+                <a href="simulacoes/estacionarias2d.html" class="card-link" data-categorias="fisica matematica" data-preview="assets/previews/estacionarias2d.png">
                     <div class="card">
-                        <div class="card-tags">
-                            <span class="card-tag tag-fisica">Física</span>
-                            <span class="card-tag tag-matematica">Matemática</span>
+                        <div class="card-header">
+                            <div class="card-tags">
+                                <span class="card-tag tag-fisica">Física</span>
+                                <span class="card-tag tag-matematica">Matemática</span>
+                            </div>
                         </div>
-                        <h1>Ondas estacionárias 2D</h1>
-                        <p>Nesta simulação é possível visualizar ondas estacionárias em uma superfície 2D (padrões de
-                            Chladni).</p>
+                        <div class="card-body">
+                            <h3>Ondas estacionárias 2D</h3>
+                            <p>Nesta simulação é possível visualizar ondas estacionárias em uma superfície 2D (padrões de Chladni).</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-footer-label">Explorar</span>
+                            <span class="card-footer-spacer" aria-hidden="true"></span>
+                            <span class="card-footer-action" aria-hidden="true">
+                                <ion-icon name="arrow-forward-outline" class="card-arrow"></ion-icon>
+                                <img src="assets/icons/mouse-left.svg" class="icon-svg card-click-icon" alt="">
+                            </span>
+                        </div>
                     </div>
                 </a>
 
-                <a href='simulacoes/quedalivre.html' class="card-link" data-categorias="fisica">
+                <a href="simulacoes/quedalivre.html" class="card-link" data-categorias="fisica" data-preview="assets/previews/quedalivre.png">
                     <div class="card">
-                        <div class="card-tags">
-                            <span class="card-tag tag-fisica">Física</span>
+                        <div class="card-header">
+                            <div class="card-tags">
+                                <span class="card-tag tag-fisica">Física</span>
+                            </div>
                         </div>
-                        <h1>Queda livre interativa</h1>
-                        <p>Nesta simulação é possível visualizar e interagir com um objeto em queda livre.</p>
+                        <div class="card-body">
+                            <h3>Queda livre interativa</h3>
+                            <p>Nesta simulação é possível visualizar e interagir com um objeto em queda livre.</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-footer-label">Explorar</span>
+                            <span class="card-footer-spacer" aria-hidden="true"></span>
+                            <span class="card-footer-action" aria-hidden="true">
+                                <ion-icon name="arrow-forward-outline" class="card-arrow"></ion-icon>
+                                <img src="assets/icons/mouse-left.svg" class="icon-svg card-click-icon" alt="">
+                            </span>
+                        </div>
                     </div>
                 </a>
 
-                <a href='simulacoes/gravidade.html' class="card-link" data-categorias="fisica matematica">
+                <a href="simulacoes/gravidade.html" class="card-link" data-categorias="fisica matematica" data-preview="assets/previews/gravidade.png">
                     <div class="card">
-                        <div class="card-tags">
-                            <span class="card-tag tag-fisica">Física</span>
-                            <span class="card-tag tag-matematica">Matemática</span>
+                        <div class="card-header">
+                            <div class="card-tags">
+                                <span class="card-tag tag-fisica">Física</span>
+                                <span class="card-tag tag-matematica">Matemática</span>
+                            </div>
                         </div>
-                        <h1>Forças Centrais & Leis de Kepler</h1>
-                        <p>Explore órbitas sob forças centrais (Teorema de Bertrand, Schwarzschild, Yukawa e Rutherford), capture setores da 2ª Lei e analise energia e espaço de fase radial.</p>
+                        <div class="card-body">
+                            <h3>Forças Centrais &amp; Leis de Kepler</h3>
+                            <p>Explore órbitas sob forças centrais (Teorema de Bertrand, Schwarzschild, Yukawa e Rutherford), capture setores da 2ª Lei e analise energia e espaço de fase radial.</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-footer-label">Explorar</span>
+                            <span class="card-footer-spacer" aria-hidden="true"></span>
+                            <span class="card-footer-action" aria-hidden="true">
+                                <ion-icon name="arrow-forward-outline" class="card-arrow"></ion-icon>
+                                <img src="assets/icons/mouse-left.svg" class="icon-svg card-click-icon" alt="">
+                            </span>
+                        </div>
                     </div>
                 </a>
 
-                <a href='simulacoes/drude.html' class="card-link" data-categorias="fisica">
+                <a href="simulacoes/drude.html" class="card-link" data-categorias="fisica" data-preview="assets/previews/drude.png">
                     <div class="card">
-                        <div class="card-tags">
-                            <span class="card-tag tag-fisica">Física</span>
+                        <div class="card-header">
+                            <div class="card-tags">
+                                <span class="card-tag tag-fisica">Física</span>
+                            </div>
                         </div>
-                        <h1>Modelo de Drude</h1>
-                        <p>Nesta simulação é possível visualizar a condução elétrica clássica interagindo com uma rede
-                            cristalina.</p>
+                        <div class="card-body">
+                            <h3>Modelo de Drude</h3>
+                            <p>Nesta simulação é possível visualizar a condução elétrica clássica interagindo com uma rede cristalina.</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-footer-label">Explorar</span>
+                            <span class="card-footer-spacer" aria-hidden="true"></span>
+                            <span class="card-footer-action" aria-hidden="true">
+                                <ion-icon name="arrow-forward-outline" class="card-arrow"></ion-icon>
+                                <img src="assets/icons/mouse-left.svg" class="icon-svg card-click-icon" alt="">
+                            </span>
+                        </div>
                     </div>
                 </a>
 
-                <a href='simulacoes/atomo_de_hidrogenio.html' class="card-link" data-categorias="fisica">
+                <a href="simulacoes/atomo_de_hidrogenio.html" class="card-link" data-categorias="fisica" data-preview="assets/previews/atomo_de_hidrogenio.png">
                     <div class="card">
-                        <div class="card-tags">
-                            <span class="card-tag tag-fisica">Física</span>
+                        <div class="card-header">
+                            <div class="card-tags">
+                                <span class="card-tag tag-fisica">Física</span>
+                            </div>
                         </div>
-                        <h1>Átomo de Hidrogênio</h1>
-                        <p>Nesta simulação é possível visualizar os autovalores (Energias) e autovetores (Estados) do
-                            atomo de hidrogenio.
-                        </p>
+                        <div class="card-body">
+                            <h3>Átomo de Hidrogênio</h3>
+                            <p>Nesta simulação é possível visualizar os autovalores (Energias) e autovetores (Estados) do átomo de hidrogênio.</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-footer-label">Explorar</span>
+                            <span class="card-footer-spacer" aria-hidden="true"></span>
+                            <span class="card-footer-action" aria-hidden="true">
+                                <ion-icon name="arrow-forward-outline" class="card-arrow"></ion-icon>
+                                <img src="assets/icons/mouse-left.svg" class="icon-svg card-click-icon" alt="">
+                            </span>
+                        </div>
                     </div>
                 </a>
 
-                <a href='simulacoes/movimento.html' class="card-link" data-categorias="fisica matematica">
+                <a href="simulacoes/movimento.html" class="card-link" data-categorias="fisica matematica" data-preview="assets/previews/movimento.png">
                     <div class="card">
-                        <div class="card-tags">
-                            <span class="card-tag tag-fisica">Física</span>
-                            <span class="card-tag tag-matematica">Matemática</span>
+                        <div class="card-header">
+                            <div class="card-tags">
+                                <span class="card-tag tag-fisica">Física</span>
+                                <span class="card-tag tag-matematica">Matemática</span>
+                            </div>
                         </div>
-                        <h1>Cinemática</h1>
-                        <p>Cinemática escalar em 1D: funções horárias da posição s(t) no MRU e MRUV, gráficos
-                            espaço-tempo e determinação analítica de encontros.</p>
+                        <div class="card-body">
+                            <h3>Cinemática</h3>
+                            <p>Cinemática escalar em 1D: funções horárias da posição s(t) no MRU e MRUV, gráficos espaço-tempo e determinação analítica de encontros.</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-footer-label">Explorar</span>
+                            <span class="card-footer-spacer" aria-hidden="true"></span>
+                            <span class="card-footer-action" aria-hidden="true">
+                                <ion-icon name="arrow-forward-outline" class="card-arrow"></ion-icon>
+                                <img src="assets/icons/mouse-left.svg" class="icon-svg card-click-icon" alt="">
+                            </span>
+                        </div>
                     </div>
                 </a>
 
-                <a href='simulacoes/matrizes.html' class="card-link" data-categorias="fisica matematica">
+                <a href="simulacoes/matrizes.html" class="card-link" data-categorias="fisica matematica" data-preview="assets/previews/matrizes.png">
                     <div class="card">
-                        <div class="card-tags">
-                            <span class="card-tag tag-fisica">Física</span>
-                            <span class="card-tag tag-matematica">Matemática</span>
+                        <div class="card-header">
+                            <div class="card-tags">
+                                <span class="card-tag tag-fisica">Física</span>
+                                <span class="card-tag tag-matematica">Matemática</span>
+                            </div>
                         </div>
-                        <h1>Matrizes 2D & Sistemas Dinâmicos</h1>
-                        <p>Interpretação geométrica da base, construção de operadores lineares, deformações não-lineares e fluxo contínuo de sistemas dinâmicos.</p>
+                        <div class="card-body">
+                            <h3>Matrizes 2D &amp; Sistemas Dinâmicos</h3>
+                            <p>Interpretação geométrica da base, construção de operadores lineares, deformações não-lineares e fluxo contínuo de sistemas dinâmicos.</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-footer-label">Explorar</span>
+                            <span class="card-footer-spacer" aria-hidden="true"></span>
+                            <span class="card-footer-action" aria-hidden="true">
+                                <ion-icon name="arrow-forward-outline" class="card-arrow"></ion-icon>
+                                <img src="assets/icons/mouse-left.svg" class="icon-svg card-click-icon" alt="">
+                            </span>
+                        </div>
                     </div>
                 </a>
 
-                <a href='simulacoes/tensor_de_inercia.html' class="card-link" hidden data-categorias="fisica matematica">
+                <a href="simulacoes/tensor_de_inercia.html" class="card-link" hidden data-categorias="fisica matematica" data-preview="assets/previews/tensor_de_inercia.png">
                     <div class="card">
-                        <div class="card-tags">
-                            <span class="card-tag tag-fisica">Física</span>
-                            <span class="card-tag tag-matematica">Matemática</span>
+                        <div class="card-header">
+                            <div class="card-tags">
+                                <span class="card-tag tag-fisica">Física</span>
+                                <span class="card-tag tag-matematica">Matemática</span>
+                            </div>
                         </div>
-                        <h1>Tensor de Inércia 3D</h1>
-                        <p>Visualização tridimensional de tensores de inércia para massas pontuais e corpos extensos, elipsoide de Poinsot e diagonalização de eixos principais.</p>
+                        <div class="card-body">
+                            <h3>Tensor de Inércia 3D</h3>
+                            <p>Visualização tridimensional de tensores de inércia para massas pontuais e corpos extensos, elipsoide de Poinsot e diagonalização de eixos principais.</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-footer-label">Explorar</span>
+                            <span class="card-footer-spacer" aria-hidden="true"></span>
+                            <span class="card-footer-action" aria-hidden="true">
+                                <ion-icon name="arrow-forward-outline" class="card-arrow"></ion-icon>
+                                <img src="assets/icons/mouse-left.svg" class="icon-svg card-click-icon" alt="">
+                            </span>
+                        </div>
                     </div>
                 </a>
 
-                <a href='simulacoes/clima.html' class="card-link" data-categorias="fisica matematica">
+                <a href="simulacoes/clima.html" class="card-link" data-categorias="fisica matematica" data-preview="assets/previews/clima.png">
                     <div class="card">
-                        <div class="card-tags">
-                            <span class="card-tag tag-fisica">Física</span>
-                            <span class="card-tag tag-matematica">Matemática</span>
+                        <div class="card-header">
+                            <div class="card-tags">
+                                <span class="card-tag tag-fisica">Física</span>
+                                <span class="card-tag tag-matematica">Matemática</span>
+                            </div>
                         </div>
-                        <h1>Clima Terrestre</h1>
-                        <p>Nesta simulação é possível visualizar e interagir com um modelo de clima terrestre
-                            utilizando tesselação de Voronoi esférica e dinâmica climática global.</p>
+                        <div class="card-body">
+                            <h3>Clima Terrestre</h3>
+                            <p>Nesta simulação é possível visualizar e interagir com um modelo de clima terrestre utilizando tesselação de Voronoi esférica e dinâmica climática global.</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-footer-label">Explorar</span>
+                            <span class="card-footer-spacer" aria-hidden="true"></span>
+                            <span class="card-footer-action" aria-hidden="true">
+                                <ion-icon name="arrow-forward-outline" class="card-arrow"></ion-icon>
+                                <img src="assets/icons/mouse-left.svg" class="icon-svg card-click-icon" alt="">
+                            </span>
+                        </div>
                     </div>
                 </a>
 
-                <a href='simulacoes/ui_lab.html' class="card-link" hidden data-categorias="todas dev">
+                <a href="simulacoes/ui_lab.html" class="card-link" hidden data-categorias="todas dev" data-preview="assets/previews/ui_lab.png">
                     <div class="card">
-                        <div class="card-tags">
-                            <span class="card-tag tag-dev">Design System / UI</span>
+                        <div class="card-header">
+                            <div class="card-tags">
+                                <span class="card-tag tag-dev">Design System / UI</span>
+                            </div>
                         </div>
-                        <h1>Laboratório de Interface</h1>
-                        <p>Ambiente controlado para testes e padronização de botões, sliders, switches, HUDs, paletas e
-                            catálogo de ícones SVG.</p>
+                        <div class="card-body">
+                            <h3>Laboratório de Interface</h3>
+                            <p>Ambiente controlado para testes e padronização de botões, sliders, switches, HUDs, paletas e catálogo de ícones SVG.</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-footer-label">Explorar</span>
+                            <span class="card-footer-spacer" aria-hidden="true"></span>
+                            <span class="card-footer-action" aria-hidden="true">
+                                <ion-icon name="arrow-forward-outline" class="card-arrow"></ion-icon>
+                                <img src="assets/icons/mouse-left.svg" class="icon-svg card-click-icon" alt="">
+                            </span>
+                        </div>
                     </div>
                 </a>
             </div>
@@ -439,8 +502,7 @@
 
         <div id="secao-bibliografia" class="section">
             <h2>Material Bibliográfico</h2>
-            <p style="margin-bottom: 25px;">Recomendações e referências bibliográficas fundamentais abrangendo do ensino
-                médio à física de muitos corpos.</p>
+            <p class="section-lead">Recomendações e referências bibliográficas fundamentais abrangendo do ensino médio à física de muitos corpos.</p>
 
             <div class="biblio-controls">
                 <div class="biblio-search-box">
@@ -472,17 +534,21 @@
 
         <footer class="rodape">
             <div class="footer-social-links">
-                <a href="https://www.instagram.com/nicolasheringer/" target="_blank" rel="noopener noreferrer"
-                    title="Instagram" aria-label="Instagram">
-                    <ion-icon name="logo-instagram"></ion-icon>
+                <a href="https://www.youtube.com/@nicolas_heringer" target="_blank" rel="noopener noreferrer"
+                    title="YouTube" aria-label="YouTube">
+                    <ion-icon name="logo-youtube"></ion-icon>
+                </a>
+                <a href="https://github.com/Nicolas-Heringer" target="_blank" rel="noopener noreferrer" title="GitHub"
+                    aria-label="GitHub">
+                    <ion-icon name="logo-github"></ion-icon>
                 </a>
                 <a href="https://www.linkedin.com/in/nicolasheringer/" target="_blank" rel="noopener noreferrer"
                     title="LinkedIn" aria-label="LinkedIn">
                     <ion-icon name="logo-linkedin"></ion-icon>
                 </a>
-                <a href="https://github.com/Nicolas-Heringer" target="_blank" rel="noopener noreferrer" title="GitHub"
-                    aria-label="GitHub">
-                    <ion-icon name="logo-github"></ion-icon>
+                <a href="https://www.instagram.com/nicolasheringer/" target="_blank" rel="noopener noreferrer"
+                    title="Instagram" aria-label="Instagram">
+                    <ion-icon name="logo-instagram"></ion-icon>
                 </a>
             </div>
             <p>Desenvolvido por Nicolas Heringer. Hospedado no GitHub Pages & desenvolvido com auxílio de IA (Google
