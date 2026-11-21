@@ -67,6 +67,7 @@ const state = {
     showEarthTexture: true,
     showStars: true,
     showConstellations: true,
+    showConstellationLabels: true,
     showGenerators: true,
     showWireframe: true,
     showGraticule: true,
@@ -74,34 +75,39 @@ const state = {
 };
 
 // =============================================================================
-// 2. DADOS ASTRONÔMICOS: ESTRELAS DO ZODÍACO E CONSTELAÇÕES CELESTES
+// 2. DADOS ASTRONÔMICOS: ESTRELAS DO ZODÍACO E CONSTELAÇÕES CELESTES (J2000)
 // =============================================================================
 
+/**
+ * Converte coordenadas equatoriais celestes (Ascensão Reta em horas, Declinação em graus)
+ * para coordenadas cartesianas no referencial equatorial direito (Three.js: +X = 0h/Equinócio
+ * de Março, +Y = Polo Norte Celeste, -Z = 6h/Solstício de Junho, sentido anti-horário prógrado).
+ */
 function raDecToXYZ(raHours, decDeg, radius = 75.0) {
     const raRad = (raHours / 24.0) * 2.0 * Math.PI;
     const decRad = (decDeg / 180.0) * Math.PI;
 
     const x = radius * Math.cos(decRad) * Math.cos(raRad);
     const y = radius * Math.sin(decRad);
-    const z = radius * Math.cos(decRad) * Math.sin(raRad);
+    const z = -radius * Math.cos(decRad) * Math.sin(raRad);
     return [x, y, z];
 }
 
 const CONSTELLATIONS = [
-    { name: 'Áries', sign: 'Aries', stars: [[2.11, 23.46], [1.91, 20.80], [1.89, 19.29]], lines: [[0, 1], [1, 2]] },
-    { name: 'Touro', sign: 'Taurus', stars: [[4.60, 16.51], [5.44, 28.61], [3.79, 24.11], [5.63, 21.14], [4.47, 19.18]], lines: [[0, 4], [4, 2], [0, 3], [3, 1]] },
-    { name: 'Gêmeos', sign: 'Gemini', stars: [[7.58, 31.89], [7.76, 28.03], [6.63, 16.40], [7.34, 21.98], [6.73, 25.13], [6.38, 22.51]], lines: [[0, 4], [4, 5], [5, 2], [1, 3], [3, 2], [0, 1]] },
-    { name: 'Câncer', sign: 'Cancer', stars: [[8.97, 11.86], [8.28, 9.19], [8.72, 18.15], [8.74, 18.01]], lines: [[0, 2], [2, 3], [3, 1]] },
-    { name: 'Leão', sign: 'Leo', stars: [[10.14, 11.97], [10.33, 19.84], [11.82, 14.57], [11.23, 20.52], [9.88, 23.77], [10.27, 23.42]], lines: [[0, 1], [1, 5], [5, 4], [1, 3], [3, 2], [2, 0]] },
-    { name: 'Virgem', sign: 'Virgo', stars: [[13.42, -11.16], [12.69, -1.45], [13.04, 10.96], [11.84, 1.77], [12.33, -0.67], [13.58, -0.60]], lines: [[0, 4], [4, 1], [1, 3], [1, 5], [5, 2], [5, 0]] },
-    { name: 'Libra', sign: 'Libra', stars: [[15.28, -9.38], [14.85, -16.04], [15.59, -14.79], [15.07, -25.25]], lines: [[0, 1], [1, 3], [3, 2], [2, 0]] },
-    { name: 'Escorpião', sign: 'Scorpius', stars: [[16.49, -26.43], [16.09, -19.80], [16.01, -22.62], [17.62, -43.00], [17.56, -37.10], [17.51, -37.29], [16.84, -34.29]], lines: [[1, 2], [2, 0], [0, 6], [6, 3], [3, 4], [4, 5]] },
-    { name: 'Sagitário', sign: 'Sagittarius', stars: [[18.40, -34.38], [18.92, -26.30], [19.04, -29.88], [18.36, -29.83], [18.47, -25.42], [18.09, -30.42]], lines: [[0, 3], [3, 4], [4, 1], [1, 2], [2, 0], [3, 5]] },
-    { name: 'Capricórnio', sign: 'Capricornus', stars: [[20.30, -12.54], [20.35, -14.78], [21.78, -16.13], [21.67, -16.66], [20.86, -26.92]], lines: [[0, 1], [1, 4], [4, 3], [3, 2], [2, 0]] },
-    { name: 'Aquário', sign: 'Aquarius', stars: [[21.52, -5.57], [22.09, -0.32], [22.91, -15.82], [20.79, -9.50], [22.36, -1.39]], lines: [[3, 0], [0, 1], [1, 4], [4, 2]] },
-    { name: 'Peixes', sign: 'Pisces', stars: [[2.03, 2.76], [23.06, 3.28], [1.23, 7.59], [1.69, 15.35], [23.29, 3.28]], lines: [[0, 2], [2, 3], [0, 1], [1, 4]] },
-    { name: 'Cruzeiro do Sul', stars: [[12.44, -63.10], [12.79, -59.69], [12.52, -57.11], [12.25, -58.75]], lines: [[0, 2], [1, 3]] },
-    { name: 'Órion', stars: [[5.92, 7.41], [5.24, -8.20], [5.42, 6.35], [5.79, -9.67], [5.68, -1.94], [5.60, -1.20], [5.53, -0.30]], lines: [[0, 2], [2, 6], [6, 5], [5, 4], [4, 1], [1, 3], [3, 0]] }
+    { id: 'aries', name: 'Áries', sign: 'Aries', isZodiac: true, stars: [[2.11, 23.46], [1.91, 20.80], [1.89, 19.29]], lines: [[0, 1], [1, 2]] },
+    { id: 'taurus', name: 'Touro', sign: 'Taurus', isZodiac: true, stars: [[4.60, 16.51], [5.44, 28.61], [3.79, 24.11], [5.63, 21.14], [4.47, 19.18]], lines: [[0, 4], [4, 2], [0, 3], [3, 1]] },
+    { id: 'gemini', name: 'Gêmeos', sign: 'Gemini', isZodiac: true, stars: [[7.58, 31.89], [7.76, 28.03], [6.63, 16.40], [7.34, 21.98], [6.73, 25.13], [6.38, 22.51]], lines: [[0, 4], [4, 5], [5, 2], [1, 3], [3, 2], [0, 1]] },
+    { id: 'cancer', name: 'Câncer', sign: 'Cancer', isZodiac: true, stars: [[8.97, 11.86], [8.28, 9.19], [8.72, 21.47], [8.74, 18.01]], lines: [[0, 3], [3, 2], [3, 1]] },
+    { id: 'leo', name: 'Leão', sign: 'Leo', isZodiac: true, stars: [[10.14, 11.97], [10.33, 19.84], [11.82, 14.57], [11.23, 20.52], [9.88, 23.77], [10.27, 23.42]], lines: [[0, 1], [1, 5], [5, 4], [1, 3], [3, 2], [2, 0]] },
+    { id: 'virgo', name: 'Virgem', sign: 'Virgo', isZodiac: true, stars: [[13.42, -11.16], [12.69, -1.45], [13.04, 10.96], [11.84, 1.77], [12.33, -0.67], [13.58, -0.60]], lines: [[0, 4], [4, 1], [1, 3], [1, 5], [5, 2], [5, 0]] },
+    { id: 'libra', name: 'Libra', sign: 'Libra', isZodiac: true, stars: [[15.28, -9.38], [14.85, -16.04], [15.59, -14.79], [15.07, -25.25]], lines: [[0, 1], [1, 3], [3, 2], [2, 0]] },
+    { id: 'scorpius', name: 'Escorpião', sign: 'Scorpius', isZodiac: true, stars: [[16.49, -26.43], [16.09, -19.80], [16.01, -22.62], [17.62, -43.00], [17.56, -37.10], [17.51, -37.29], [16.84, -34.29]], lines: [[1, 2], [2, 0], [0, 6], [6, 3], [3, 4], [4, 5]] },
+    { id: 'sagittarius', name: 'Sagitário', sign: 'Sagittarius', isZodiac: true, stars: [[18.40, -34.38], [18.92, -26.30], [19.04, -29.88], [18.36, -29.83], [18.47, -25.42], [18.09, -30.42]], lines: [[0, 3], [3, 4], [4, 1], [1, 2], [2, 0], [3, 5]] },
+    { id: 'capricornus', name: 'Capricórnio', sign: 'Capricornus', isZodiac: true, stars: [[20.30, -12.54], [20.35, -14.78], [21.78, -16.13], [21.67, -16.66], [20.86, -26.92]], lines: [[0, 1], [1, 4], [4, 3], [3, 2], [2, 0]] },
+    { id: 'aquarius', name: 'Aquário', sign: 'Aquarius', isZodiac: true, stars: [[21.52, -5.57], [22.09, -0.32], [22.91, -15.82], [20.79, -9.50], [22.36, -1.39]], lines: [[3, 0], [0, 1], [1, 4], [4, 2]] },
+    { id: 'pisces', name: 'Peixes', sign: 'Pisces', isZodiac: true, stars: [[2.03, 2.76], [23.06, 3.28], [1.23, 7.59], [1.69, 15.35], [23.29, 3.28]], lines: [[0, 2], [2, 3], [0, 1], [1, 4]] },
+    { id: 'crux', name: 'Cruzeiro do Sul', isZodiac: false, stars: [[12.44, -63.10], [12.79, -59.69], [12.52, -57.11], [12.25, -58.75]], lines: [[0, 2], [1, 3]] },
+    { id: 'orion', name: 'Órion', isZodiac: false, stars: [[5.92, 7.41], [5.24, -8.20], [5.42, 6.35], [5.79, -9.67], [5.68, -1.94], [5.60, -1.20], [5.53, -0.30]], lines: [[0, 2], [2, 6], [6, 5], [5, 4], [4, 1], [1, 3], [3, 0]] }
 ];
 
 function getGeographicLocation(latDeg, lonDeg) {
@@ -136,8 +142,30 @@ function getDayOfYearFromDate(dayOfMonth, monthIdx) {
     return Math.max(1, Math.min(365, doy));
 }
 
+/**
+ * Retorna a constelação astronômica real (época J2000, limites da IAU para as 12 constelações clássicas)
+ * em que o Sol se projeta no dia do ano informado.
+ * Nota: entre 30/Nov (dia 334) e 17/Dez (dia 351), o Sol também atravessa Ofiúco (13ª constelação da eclíptica).
+ */
+function getAstronomicalConstellationByDay(doy) {
+    const safeDoy = ((Math.floor(doy) - 1 + 365) % 365) + 1;
+    if (safeDoy >= 71 && safeDoy <= 108)  return { id: 'pisces',      label: 'Peixes (Pisces)',           short: 'Peixes' };
+    if (safeDoy >= 109 && safeDoy <= 133) return { id: 'aries',       label: 'Áries (Aries)',             short: 'Áries' };
+    if (safeDoy >= 134 && safeDoy <= 171) return { id: 'taurus',      label: 'Touro (Taurus)',            short: 'Touro' };
+    if (safeDoy >= 172 && safeDoy <= 201) return { id: 'gemini',      label: 'Gêmeos (Gemini)',           short: 'Gêmeos' };
+    if (safeDoy >= 202 && safeDoy <= 221) return { id: 'cancer',      label: 'Câncer (Cancer)',           short: 'Câncer' };
+    if (safeDoy >= 222 && safeDoy <= 258) return { id: 'leo',         label: 'Leão (Leo)',                short: 'Leão' };
+    if (safeDoy >= 259 && safeDoy <= 303) return { id: 'virgo',       label: 'Virgem (Virgo)',            short: 'Virgem' };
+    if (safeDoy >= 304 && safeDoy <= 326) return { id: 'libra',       label: 'Libra (Libra)',             short: 'Libra' };
+    if (safeDoy >= 327 && safeDoy <= 351) return { id: 'scorpius',    label: 'Escorpião (Scorpius)',      short: 'Escorpião' };
+    if (safeDoy >= 352 || safeDoy <= 19)  return { id: 'sagittarius', label: 'Sagitário (Sagittarius)',   short: 'Sagitário' };
+    if (safeDoy >= 20 && safeDoy <= 46)   return { id: 'capricornus', label: 'Capricórnio (Capricornus)', short: 'Capricórnio' };
+    return { id: 'aquarius', label: 'Aquário (Aquarius)', short: 'Aquário' };
+}
+
 function getZodiacConstellationInfo(dayOfYear) {
-    let d = Math.max(1, Math.min(365, Math.floor(dayOfYear)));
+    const safeDoy = Math.max(1, Math.min(365, Math.floor(dayOfYear)));
+    let d = safeDoy;
     let monthIdx = 0;
     while (d > DAYS_IN_MONTH[monthIdx] && monthIdx < 11) {
         d -= DAYS_IN_MONTH[monthIdx];
@@ -149,29 +177,23 @@ function getZodiacConstellationInfo(dayOfYear) {
     const lambdaOrbit = ((dayOfYear - 80 + 365) % 365) * (2.0 * Math.PI / 365.0);
     const sunDeclDeg = (Math.asin(Math.sin(AXIAL_TILT_RAD) * Math.sin(lambdaOrbit)) * 180.0 / Math.PI);
 
-    let sunZodiac = 'Gêmeos';
-    let midnightZodiac = 'Sagitário';
-
-    if (dayOfYear >= 80 && dayOfYear < 111) { sunZodiac = 'Áries (Aries)'; midnightZodiac = 'Libra'; }
-    else if (dayOfYear >= 111 && dayOfYear < 142) { sunZodiac = 'Touro (Taurus)'; midnightZodiac = 'Escorpião'; }
-    else if (dayOfYear >= 142 && dayOfYear < 173) { sunZodiac = 'Gêmeos (Gemini)'; midnightZodiac = 'Sagitário'; }
-    else if (dayOfYear >= 173 && dayOfYear < 204) { sunZodiac = 'Câncer (Cancer)'; midnightZodiac = 'Capricórnio'; }
-    else if (dayOfYear >= 204 && dayOfYear < 235) { sunZodiac = 'Leão (Leo)'; midnightZodiac = 'Aquário'; }
-    else if (dayOfYear >= 235 && dayOfYear < 266) { sunZodiac = 'Virgem (Virgo)'; midnightZodiac = 'Peixes'; }
-    else if (dayOfYear >= 266 && dayOfYear < 297) { sunZodiac = 'Libra'; midnightZodiac = 'Áries'; }
-    else if (dayOfYear >= 297 && dayOfYear < 328) { sunZodiac = 'Escorpião (Scorpius)'; midnightZodiac = 'Touro'; }
-    else if (dayOfYear >= 328 && dayOfYear < 356) { sunZodiac = 'Sagitário (Sagittarius)'; midnightZodiac = 'Gêmeos'; }
-    else if (dayOfYear >= 356 || dayOfYear < 20) { sunZodiac = 'Capricórnio (Capricornus)'; midnightZodiac = 'Câncer'; }
-    else if (dayOfYear >= 20 && dayOfYear < 50) { sunZodiac = 'Aquário (Aquarius)'; midnightZodiac = 'Leão'; }
-    else { sunZodiac = 'Peixes (Pisces)'; midnightZodiac = 'Virgem'; }
+    const sunConst = getAstronomicalConstellationByDay(safeDoy);
+    const midnightDoy = ((safeDoy - 1 + 182) % 365) + 1;
+    const midnightConst = getAstronomicalConstellationByDay(midnightDoy);
+    const isOphiuchusWindow = (safeDoy >= 334 && safeDoy <= 351);
 
     return {
         dateFormatted,
         dateShort,
         lambdaOrbit,
         sunDeclDeg,
-        sunZodiac,
-        midnightZodiac,
+        sunZodiac: sunConst.label,
+        sunZodiacShort: sunConst.short,
+        sunZodiacId: sunConst.id,
+        midnightZodiac: midnightConst.label,
+        midnightZodiacShort: midnightConst.short,
+        midnightZodiacId: midnightConst.id,
+        isOphiuchusWindow,
         dayOfMonth: d,
         monthIdx
     };
@@ -199,6 +221,9 @@ let generatorPointsMesh = null;
 let graticuleGroup = null;
 let starfieldPointsMesh = null;
 let constellationsGroup = null;
+let constellationsLabelsGroup = null;
+const constellationEntries = new Map();
+let _lastConstellationHighlightKey = '';
 let polarAxisLineGroup = null;
 let eclipticPlaneMesh = null;
 let sunVisualGroup = null;
@@ -446,6 +471,130 @@ function createStarSpriteTexture() {
     return new THREE.CanvasTexture(canvas);
 }
 
+function createConstellationLabelTexture(name, role = 'normal') {
+    const canvas = document.createElement('canvas');
+    canvas.width = 384;
+    canvas.height = 96;
+    const ctx = canvas.getContext('2d');
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const text = role === 'sun'
+        ? `☀ ${name}`
+        : role === 'midnight'
+            ? `☾ ${name}`
+            : name;
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    if (role === 'sun' || role === 'midnight') {
+        const accent = role === 'sun' ? '#facc15' : '#c084fc';
+        const border = role === 'sun' ? 'rgba(250, 204, 21, 0.85)' : 'rgba(192, 132, 252, 0.85)';
+        ctx.font = '700 32px Inter, system-ui, -apple-system, sans-serif';
+        const textW = ctx.measureText(text).width;
+        const padX = 24;
+        const boxW = Math.min(canvas.width - 12, textW + padX * 2);
+        const boxH = 54;
+        const bx = (canvas.width - boxW) / 2;
+        const by = (canvas.height - boxH) / 2;
+        const r = 27;
+
+        ctx.fillStyle = 'rgba(10, 15, 29, 0.84)';
+        ctx.beginPath();
+        ctx.moveTo(bx + r, by);
+        ctx.lineTo(bx + boxW - r, by);
+        ctx.quadraticCurveTo(bx + boxW, by, bx + boxW, by + r);
+        ctx.lineTo(bx + boxW, by + boxH - r);
+        ctx.quadraticCurveTo(bx + boxW, by + boxH, bx + boxW - r, by + boxH);
+        ctx.lineTo(bx + r, by + boxH);
+        ctx.quadraticCurveTo(bx, by + boxH, bx, by + boxH - r);
+        ctx.lineTo(bx, by + r);
+        ctx.quadraticCurveTo(bx, by, bx + r, by);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = border;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.fillStyle = accent;
+        ctx.fillText(text, canvas.width / 2, canvas.height / 2 + 1);
+    } else {
+        ctx.font = '600 26px Inter, system-ui, -apple-system, sans-serif';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = 'rgba(203, 213, 225, 0.72)';
+        ctx.fillText(text, canvas.width / 2, canvas.height / 2 + 1);
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.needsUpdate = true;
+    return tex;
+}
+
+function updateConstellationHighlights(sunId = null, midnightId = null) {
+    if (!constellationsGroup) return;
+
+    const showLabels = state.showConstellations && state.showConstellationLabels && state.activeTab !== 'tab-math';
+    if (constellationsLabelsGroup) {
+        constellationsLabelsGroup.visible = showLabels;
+    }
+
+    const activeHighlight = (state.activeTab === 'tab-seasons' && state.showConstellationLabels);
+    const key = `${activeHighlight ? 1 : 0}|${showLabels ? 1 : 0}|${activeHighlight ? sunId : ''}|${activeHighlight ? midnightId : ''}`;
+    if (key === _lastConstellationHighlightKey) return;
+    _lastConstellationHighlightKey = key;
+
+    for (const [id, entry] of constellationEntries.entries()) {
+        let role = 'normal';
+        if (activeHighlight) {
+            if (id === sunId) role = 'sun';
+            else if (id === midnightId) role = 'midnight';
+        }
+
+        if (role === 'sun') {
+            entry.lineMat.color.setHex(0xfacc15);
+            entry.lineMat.opacity = 0.95;
+            entry.starMat.color.setHex(0xfef08a);
+            entry.starMat.size = 1.45;
+            entry.starMat.opacity = 1.0;
+        } else if (role === 'midnight') {
+            entry.lineMat.color.setHex(0xc084fc);
+            entry.lineMat.opacity = 0.80;
+            entry.starMat.color.setHex(0xd8b4fe);
+            entry.starMat.size = 1.25;
+            entry.starMat.opacity = 1.0;
+        } else {
+            entry.lineMat.color.setHex(0x38bdf8);
+            entry.lineMat.opacity = activeHighlight ? 0.30 : 0.45;
+            entry.starMat.color.setHex(0xfacc15);
+            entry.starMat.size = activeHighlight ? 0.82 : 0.95;
+            entry.starMat.opacity = activeHighlight ? 0.85 : 1.0;
+        }
+
+        if (entry.role !== role) {
+            entry.role = role;
+            const prevTex = entry.labelMat.map;
+            entry.labelMat.map = createConstellationLabelTexture(entry.name, role);
+            entry.labelMat.needsUpdate = true;
+            if (prevTex) prevTex.dispose();
+
+            if (role === 'sun') {
+                entry.labelSprite.scale.set(16.0, 4.0, 1);
+                entry.labelMat.opacity = 1.0;
+            } else if (role === 'midnight') {
+                entry.labelSprite.scale.set(15.0, 3.75, 1);
+                entry.labelMat.opacity = 0.96;
+            } else {
+                entry.labelSprite.scale.set(12.8, 3.2, 1);
+                entry.labelMat.opacity = 0.78;
+            }
+        }
+    }
+}
+
 function createStarfieldAndConstellations() {
     const STAR_RADIUS = 75.0;
     const starSprite = createStarSpriteTexture();
@@ -496,50 +645,88 @@ function createStarfieldAndConstellations() {
     scene.add(starfieldPointsMesh);
 
     constellationsGroup = new THREE.Group();
-    const constellationLines = [];
-    const zodiacStarPositions = [];
+    // Transforma o referencial equatorial celeste (RA/Dec J2000) para o referencial da Eclíptica da cena,
+    // alinhando o plano do Zodíaco ao plano horizontal XZ do Sol e o Polo Norte Celeste ao eixo terrestre.
+    constellationsGroup.rotation.x = -AXIAL_TILT_RAD;
+
+    constellationsLabelsGroup = new THREE.Group();
+    constellationsGroup.add(constellationsLabelsGroup);
+    constellationEntries.clear();
+    _lastConstellationHighlightKey = '';
 
     for (const c of CONSTELLATIONS) {
         const starCoords = c.stars.map(([ra, dec]) => raDecToXYZ(ra, dec, STAR_RADIUS * 0.99));
 
+        const starPosArr = [];
+        let cx = 0, cy = 0, cz = 0;
         for (const [x, y, z] of starCoords) {
-            zodiacStarPositions.push(x, y, z);
+            starPosArr.push(x, y, z);
+            cx += x;
+            cy += y;
+            cz += z;
         }
 
+        const linePosArr = [];
         for (const [s1, s2] of c.lines) {
             const p1 = starCoords[s1], p2 = starCoords[s2];
             if (p1 && p2) {
-                constellationLines.push(p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
+                linePosArr.push(p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
             }
         }
+
+        const lineGeo = new THREE.BufferGeometry();
+        lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePosArr, 3));
+        const lineMat = new THREE.LineBasicMaterial({
+            color: 0x38bdf8,
+            opacity: 0.45,
+            transparent: true,
+            depthTest: true,
+            depthWrite: false
+        });
+        constellationsGroup.add(new THREE.LineSegments(lineGeo, lineMat));
+
+        const starGeoC = new THREE.BufferGeometry();
+        starGeoC.setAttribute('position', new THREE.Float32BufferAttribute(starPosArr, 3));
+        const starMatC = new THREE.PointsMaterial({
+            size: 0.95,
+            map: starSprite,
+            color: 0xfacc15,
+            transparent: true,
+            opacity: 1.0,
+            depthTest: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
+        });
+        constellationsGroup.add(new THREE.Points(starGeoC, starMatC));
+
+        // Rótulo 3D posicionado sobre o centroide da constelação na esfera celeste
+        const centroid = new THREE.Vector3(cx, cy, cz).normalize().multiplyScalar(STAR_RADIUS * 0.93);
+        const labelTex = createConstellationLabelTexture(c.name, 'normal');
+        const labelMat = new THREE.SpriteMaterial({
+            map: labelTex,
+            transparent: true,
+            opacity: 0.78,
+            depthTest: true,
+            depthWrite: false
+        });
+        const labelSprite = new THREE.Sprite(labelMat);
+        labelSprite.position.set(centroid.x, centroid.y + 2.8, centroid.z);
+        labelSprite.scale.set(12.8, 3.2, 1);
+        constellationsLabelsGroup.add(labelSprite);
+
+        constellationEntries.set(c.id, {
+            id: c.id,
+            name: c.name,
+            lineMat,
+            starMat: starMatC,
+            labelMat,
+            labelSprite,
+            role: 'normal'
+        });
     }
 
-    const constLineGeo = new THREE.BufferGeometry();
-    constLineGeo.setAttribute('position', new THREE.Float32BufferAttribute(constellationLines, 3));
-    const constLineMat = new THREE.LineBasicMaterial({
-        color: 0x38bdf8,
-        opacity: 0.45,
-        transparent: true,
-        depthTest: true,
-        depthWrite: false
-    });
-    constellationsGroup.add(new THREE.LineSegments(constLineGeo, constLineMat));
-
-    const zodiacStarGeo = new THREE.BufferGeometry();
-    zodiacStarGeo.setAttribute('position', new THREE.Float32BufferAttribute(zodiacStarPositions, 3));
-    const zodiacStarMat = new THREE.PointsMaterial({
-        size: 0.95,
-        map: starSprite,
-        color: 0xfacc15,
-        transparent: true,
-        opacity: 1.0,
-        depthTest: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending
-    });
-    constellationsGroup.add(new THREE.Points(zodiacStarGeo, zodiacStarMat));
-
     constellationsGroup.visible = (state.activeTab !== 'tab-math' && state.showConstellations);
+    constellationsLabelsGroup.visible = (state.activeTab !== 'tab-math' && state.showConstellations && state.showConstellationLabels);
     scene.add(constellationsGroup);
 }
 
@@ -900,6 +1087,7 @@ function switchTab(newTab) {
         }
         if (starfieldPointsMesh) starfieldPointsMesh.visible = state.showStars;
         if (constellationsGroup) constellationsGroup.visible = state.showConstellations;
+        updateConstellationHighlights(null, null);
         if (polarAxisLineGroup) polarAxisLineGroup.visible = false;
         if (eclipticPlaneMesh) eclipticPlaneMesh.visible = false;
         if (sunVisualGroup) sunVisualGroup.visible = false;
@@ -1076,7 +1264,19 @@ function updateAstronomicalState() {
 
     if (spanSeasonDate) spanSeasonDate.textContent = info.dateFormatted;
     if (spanSunDecl) spanSunDecl.textContent = `${info.sunDeclDeg >= 0 ? '+' : ''}${info.sunDeclDeg.toFixed(1)}° (${info.sunDeclDeg >= 0 ? 'Norte' : 'Sul'})`;
+    if (spanZodiac) spanZodiac.textContent = info.sunZodiac;
     if (valDay) valDay.textContent = `Dia ${Math.max(1, Math.min(365, Math.floor(state.dayOfYear)))}`;
+
+    const captionEl = document.getElementById('orrery-caption-text');
+    if (captionEl) {
+        captionEl.innerHTML = `O Sol é projetado contra <strong>${info.sunZodiac}</strong>. À meia-noite, o céu aponta para <strong>${info.midnightZodiac}</strong>.`;
+    }
+    const ophiuchusNote = document.getElementById('orrery-ophiuchus-note');
+    if (ophiuchusNote) {
+        ophiuchusNote.classList.toggle('is-highlighted', Boolean(info.isOphiuchusWindow));
+    }
+
+    updateConstellationHighlights(info.sunZodiacId, info.midnightZodiacId);
 
     const inputDateDay = document.getElementById('input-date-day');
     const selectDateMonth = document.getElementById('select-date-month');
@@ -1118,10 +1318,12 @@ function renderMiniOrrery(info) {
     const h = canvas.height;
     const cx = w / 2;
     const cy = h / 2;
-    const orbitRadius = 60;
+    const orbitRadius = 52;
 
     ctx.clearRect(0, 0, w, h);
 
+    // Órbita circular de referência (vista de cima do Polo Norte da Eclíptica +Y,
+    // perfeitamente alinhada com o referencial 3D: +X à direita, -Z para cima)
     ctx.beginPath();
     ctx.arc(cx, cy, orbitRadius, 0, Math.PI * 2);
     ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
@@ -1130,21 +1332,28 @@ function renderMiniOrrery(info) {
     ctx.stroke();
     ctx.setLineDash([]);
 
+    // Posições orbitais reais da Terra nos equinócios e solstícios (sentido anti-horário prógrado):
+    // 20/Mar: Terra à esquerda (-X), olhando para +X (Peixes)
+    // 21/Jun: Terra embaixo (+Z), Polo Norte inclinado para cima (-Z, em direção ao Sol), olhando para Gêmeos
+    // 22/Set: Terra à direita (+X), olhando para -X (Virgem)
+    // 21/Dez: Terra no topo (-Z), Polo Norte inclinado para cima (-Z, oposto ao Sol), olhando para Sagitário
     const seasonMarkers = [
-        { angle: 0, label: '20/Mar' },
-        { angle: Math.PI / 2, label: '21/Jun' },
-        { angle: Math.PI, label: '22/Set' },
-        { angle: 3 * Math.PI / 2, label: '21/Dez' }
+        { angle: Math.PI, label: '20/Mar', dx: -22, dy: 0 },
+        { angle: 3 * Math.PI / 2, label: '21/Jun', dx: 0, dy: 14 },
+        { angle: 0, label: '22/Set', dx: 22, dy: 0 },
+        { angle: Math.PI / 2, label: '21/Dez', dx: 0, dy: -12 }
     ];
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.42)';
     ctx.font = '9px monospace';
     ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     for (const sm of seasonMarkers) {
-        const mx = cx + (orbitRadius + 14) * Math.cos(sm.angle);
-        const my = cy - (orbitRadius + 14) * Math.sin(sm.angle);
-        ctx.fillText(sm.label, mx, my + 3);
+        const mx = cx + orbitRadius * Math.cos(sm.angle) + sm.dx;
+        const my = cy - orbitRadius * Math.sin(sm.angle) + sm.dy;
+        ctx.fillText(sm.label, mx, my);
     }
 
+    // Sol no centro
     const solGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 18);
     solGrad.addColorStop(0, '#ffffff');
     solGrad.addColorStop(0.3, '#facc15');
@@ -1156,41 +1365,79 @@ function renderMiniOrrery(info) {
 
     ctx.fillStyle = '#f59e0b';
     ctx.beginPath();
-    ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 6.5, 0, Math.PI * 2);
     ctx.fill();
 
-    const earthX = cx + orbitRadius * Math.cos(info.lambdaOrbit);
-    const earthY = cy - orbitRadius * Math.sin(info.lambdaOrbit);
+    // Posição heliocêntrica da Terra (oposta à longitude eclíptica solar λ)
+    const cosL = Math.cos(info.lambdaOrbit);
+    const sinL = Math.sin(info.lambdaOrbit);
+    const earthX = cx - orbitRadius * cosL;
+    const earthY = cy + orbitRadius * sinL;
+
+    // Linha de visada Terra → Sol → Constelação solar (mesma direção 3D: +cosL, -sinL)
+    const sightLen = orbitRadius + 24;
+    const sightX = cx + sightLen * cosL;
+    const sightY = cy - sightLen * sinL;
 
     ctx.beginPath();
     ctx.moveTo(earthX, earthY);
-    const sightX = cx - (orbitRadius + 22) * Math.cos(info.lambdaOrbit);
-    const sightY = cy + (orbitRadius + 22) * Math.sin(info.lambdaOrbit);
     ctx.lineTo(sightX, sightY);
-    ctx.strokeStyle = 'rgba(236, 72, 153, 0.6)';
-    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = 'rgba(250, 204, 21, 0.65)';
+    ctx.lineWidth = 1.3;
     ctx.stroke();
 
-    ctx.fillStyle = '#ec4899';
-    ctx.font = 'bold 9px sans-serif';
-    ctx.fillText(info.sunZodiac.split(' ')[0], sightX, sightY);
-
-    ctx.fillStyle = '#38bdf8';
+    // Pequena seta na ponta da linha de visada solar
+    const headLen = 5;
+    const ang = Math.atan2(sightY - earthY, sightX - earthX);
     ctx.beginPath();
-    ctx.arc(earthX, earthY, 5, 0, Math.PI * 2);
+    ctx.moveTo(sightX, sightY);
+    ctx.lineTo(sightX - headLen * Math.cos(ang - 0.5), sightY - headLen * Math.sin(ang - 0.5));
+    ctx.lineTo(sightX - headLen * Math.cos(ang + 0.5), sightY - headLen * Math.sin(ang + 0.5));
+    ctx.closePath();
+    ctx.fillStyle = '#facc15';
     ctx.fill();
 
+    // Rótulo em pílula da constelação atrás do Sol (com clamp seguro nas bordas)
+    const labelText = `☀ ${info.sunZodiacShort}`;
+    ctx.font = 'bold 9.5px Inter, system-ui, sans-serif';
+    const tw = ctx.measureText(labelText).width;
+    const pillW = tw + 10;
+    const pillH = 15;
+    const lx = Math.max(pillW / 2 + 4, Math.min(w - pillW / 2 - 4, sightX));
+    const ly = Math.max(pillH / 2 + 3, Math.min(h - pillH / 2 - 3, sightY));
+
+    ctx.fillStyle = 'rgba(10, 15, 29, 0.88)';
+    ctx.strokeStyle = 'rgba(250, 204, 21, 0.7)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(lx - pillW / 2, ly - pillH / 2, pillW, pillH, 7);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#facc15';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(labelText, lx, ly + 0.5);
+
+    // Disco da Terra
+    ctx.fillStyle = '#38bdf8';
+    ctx.beginPath();
+    ctx.arc(earthX, earthY, 5.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eixo de inclinação projetado na eclíptica (sempre alinhado ao eixo -Z / solstícios)
     ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1.8;
     ctx.beginPath();
     ctx.moveTo(earthX, earthY - 6);
     ctx.lineTo(earthX, earthY + 6);
     ctx.stroke();
 
-    // Indicador do Polo Norte (amarelo) alinhado com o eixo dos solstícios
+    // Indicador do Polo Norte (amarelo) apontando para cima (-Z), igual ao 3D:
+    // Em 21/Jun (Terra embaixo) aponta PARA o Sol; em 21/Dez (Terra no topo) aponta PARA FORA do Sol
     ctx.fillStyle = '#facc15';
     ctx.beginPath();
-    ctx.arc(earthX, earthY + 5, 2, 0, Math.PI * 2);
+    ctx.arc(earthX, earthY - 5, 2.2, 0, Math.PI * 2);
     ctx.fill();
 }
 
@@ -1487,6 +1734,17 @@ function setupUIListeners() {
             if (constellationsGroup && state.activeTab !== 'tab-math') {
                 constellationsGroup.visible = state.showConstellations;
             }
+            const info = getZodiacConstellationInfo(state.dayOfYear);
+            updateConstellationHighlights(info.sunZodiacId, info.midnightZodiacId);
+        });
+    }
+
+    const toggleConstellationLabels = document.getElementById('toggle-constellation-labels');
+    if (toggleConstellationLabels) {
+        toggleConstellationLabels.addEventListener('change', (e) => {
+            state.showConstellationLabels = e.target.checked;
+            const info = getZodiacConstellationInfo(state.dayOfYear);
+            updateConstellationHighlights(info.sunZodiacId, info.midnightZodiacId);
         });
     }
 

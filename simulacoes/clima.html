@@ -396,12 +396,14 @@
                             <div class="mini-orrery-header">
                                 <span>Órbita Terrestre (Vista da Eclíptica)</span>
                                 <span id="label-orrery-month"
-                                    style="font-family: monospace; color: #facc15;">21/Jun</span>
+                                    style="font-family: monospace; color: var(--accent-color);">21/Jun</span>
                             </div>
                             <canvas id="canvas-mini-orrery" width="280" height="180"></canvas>
-                            <div class="mini-orrery-caption">
-                                O Sol é projetado contra a <strong>Constelação de Gêmeos</strong>. À meia-noite, a Terra
-                                olha para <strong>Sagitário</strong>.
+                            <div class="mini-orrery-caption" id="orrery-caption-text">
+                                O Sol é projetado contra <strong>Gêmeos (Gemini)</strong>. À meia-noite, o céu aponta para <strong>Sagitário (Sagittarius)</strong>.
+                            </div>
+                            <div class="mini-orrery-note" id="orrery-ophiuchus-note">
+                                Nota astronômica (J2000): usamos os limites reais das 12 constelações clássicas; entre 30/Nov e 17/Dez o Sol também atravessa Ofiúco (13ª constelação da eclíptica).
                             </div>
                         </div>
 
@@ -519,6 +521,13 @@
                                 <span class="switch-label">Plano da Eclíptica</span>
                                 <label class="sim-switch">
                                     <input type="checkbox" id="toggle-ecliptic-plane" checked>
+                                    <span class="slider-round"></span>
+                                </label>
+                            </div>
+                            <div class="switch-container">
+                                <span class="switch-label">Rótulos & Destaque das Constelações 3D</span>
+                                <label class="sim-switch">
+                                    <input type="checkbox" id="toggle-constellation-labels" checked>
                                     <span class="slider-round"></span>
                                 </label>
                             </div>
