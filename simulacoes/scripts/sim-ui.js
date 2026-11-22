@@ -9,6 +9,21 @@
 
 // --- CACHE GLOBAL DE ÍCONES SVG ---
 const svgCache = new Map();
+const elementIconTokens = new WeakMap();
+
+/**
+ * Analisa uma string SVG validando ausência de erros de parse XML
+ * @param {string} svgText
+ * @returns {SVGElement|null}
+ */
+function parseSVGElement(svgText) {
+    if (!svgText || typeof svgText !== 'string') return null;
+    if (typeof DOMParser === 'undefined') return null;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svgText, 'image/svg+xml');
+    if (doc.querySelector('parsererror')) return null;
+    return doc.querySelector('svg');
+}
 
 /**
  * Busca o conteúdo de um arquivo SVG e armazena em cache
@@ -16,11 +31,16 @@ const svgCache = new Map();
  * @returns {Promise<string|null>}
  */
 export async function getSVGContent(iconName) {
-    const src = `../assets/icons/${iconName}.svg`;
+    const cleanName = String(iconName || '').replace(/\.svg$/i, '').trim();
+    if (!cleanName) return null;
+    const src = `../assets/icons/${cleanName}.svg`;
     if (svgCache.has(src)) return svgCache.get(src);
     try {
         const res = await fetch(src);
+        if (!res.ok) return null;
         const text = await res.text();
+        if (!text || !text.includes('<svg')) return null;
+        if (typeof DOMParser !== 'undefined' && !parseSVGElement(text)) return null;
         svgCache.set(src, text);
         return text;
     } catch (e) {
@@ -29,20 +49,33 @@ export async function getSVGContent(iconName) {
 }
 
 /**
- * Substitui ou insere um ícone SVG nativo dinamicamente mantendo currentColor
+ * Substitui ou insere um ícone SVG nativo dinamicamente mantendo currentColor e classes existentes
  * @param {HTMLElement} containerEl - Elemento container (ex: botão)
  * @param {string} iconName - Nome do ícone (sem .svg)
  */
 export async function setElementIcon(containerEl, iconName) {
+    if (!containerEl || typeof containerEl.querySelector !== 'function' || typeof containerEl.prepend !== 'function') {
+        return;
+    }
+    const requestToken = (elementIconTokens.get(containerEl) || 0) + 1;
+    elementIconTokens.set(containerEl, requestToken);
+
     const svgText = await getSVGContent(iconName);
-    if (!svgText) return;
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(svgText, 'image/svg+xml');
-    const newSvg = doc.querySelector('svg');
+    if (elementIconTokens.get(containerEl) !== requestToken) return;
+    const newSvg = parseSVGElement(svgText);
     if (!newSvg) return;
-    newSvg.setAttribute('class', 'icon-svg');
 
     const existingIcon = containerEl.querySelector('.icon-svg');
+    const preservedClasses = existingIcon
+        ? (existingIcon.getAttribute('class') || 'icon-svg')
+        : 'icon-svg';
+    newSvg.setAttribute('class', preservedClasses);
+    if (existingIcon?.hasAttribute('aria-hidden')) {
+        newSvg.setAttribute('aria-hidden', existingIcon.getAttribute('aria-hidden'));
+    } else {
+        newSvg.setAttribute('aria-hidden', 'true');
+    }
+
     if (existingIcon) {
         existingIcon.replaceWith(newSvg);
     } else {
@@ -53,10 +86,15 @@ export async function setElementIcon(containerEl, iconName) {
 /**
  * Transforma todas as tags <img> com class="icon-svg" em código SVG inline
  * permitindo que currentColor e variáveis CSS funcionem perfeitamente.
+ * @param {Document|HTMLElement|string} [root=document] - Escopo de busca opcional
  */
-export async function inlineSVGImages() {
-    const images = document.querySelectorAll('img.icon-svg');
+export async function inlineSVGImages(root = document) {
+    const scope = typeof root === 'string' ? document.querySelector(root) : (root || document);
+    if (!scope || typeof scope.querySelectorAll !== 'function') return;
+
+    const images = scope.querySelectorAll('img.icon-svg');
     for (const img of images) {
+        if (!img.parentNode) continue;
         const src = img.getAttribute('src');
         if (!src || !src.endsWith('.svg')) continue;
 
@@ -66,20 +104,27 @@ export async function inlineSVGImages() {
         } else {
             try {
                 const res = await fetch(src);
+                if (!res.ok) continue;
                 svgText = await res.text();
+                if (!svgText || !svgText.includes('<svg')) continue;
+                if (!parseSVGElement(svgText)) continue;
                 svgCache.set(src, svgText);
             } catch (e) {
                 continue;
             }
         }
 
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(svgText, 'image/svg+xml');
-        const svg = doc.querySelector('svg');
+        if (!img.parentNode) continue;
+        const svg = parseSVGElement(svgText);
         if (svg) {
             svg.setAttribute('class', img.getAttribute('class') || 'icon-svg');
             if (img.id) svg.setAttribute('id', img.id);
             if (img.getAttribute('style')) svg.setAttribute('style', img.getAttribute('style'));
+            if (img.hasAttribute('aria-hidden')) {
+                svg.setAttribute('aria-hidden', img.getAttribute('aria-hidden'));
+            } else if (!img.getAttribute('alt')) {
+                svg.setAttribute('aria-hidden', 'true');
+            }
             img.replaceWith(svg);
         }
     }
@@ -103,7 +148,7 @@ export function setGlobalAccent(color) {
  * @param {HTMLElement|string} target - Seletor ou elemento do botão
  * @param {Function} [onToggleCallback] - Callback: (isActive, state, btnEl) => void
  * @param {Object} [options] - Opções adicionais ({ enableSpaceShortcut, syncFooterBadge })
- * @returns {Object} Controlador com .toggle(), .setState(val), .getState(), .isActive()
+ * @returns {Object} Controlador com .toggle(), .setState(val, triggerCallback), .getState(), .isActive()
  */
 export function initToggleButton(target, onToggleCallback, options = {}) {
     const btn = typeof target === 'string' ? document.querySelector(target) : target;
@@ -118,7 +163,17 @@ export function initToggleButton(target, onToggleCallback, options = {}) {
     const iconIdle = btn.getAttribute('data-icon-idle') || 'play';
     const iconActive = btn.getAttribute('data-icon-active') || 'pause';
 
-    let state = parseInt(btn.getAttribute('data-state') || '0', 10);
+    const normalizeToggleState = (value) => {
+        if (typeof value === 'string') {
+            const trimmed = value.trim().toLowerCase();
+            return (trimmed === '1' || trimmed === 'true') ? 1 : 0;
+        }
+        return value ? 1 : 0;
+    };
+
+    let state = normalizeToggleState(btn.getAttribute('data-state'));
+    let transitionSeq = 0;
+    let latestIconPromise = Promise.resolve();
 
     const syncStatusBadges = (isActive) => {
         if (!syncFooterBadge) return;
@@ -128,7 +183,7 @@ export function initToggleButton(target, onToggleCallback, options = {}) {
         }
     };
 
-    const renderState = async () => {
+    const renderStateSync = () => {
         const isActive = state === 1;
         btn.classList.toggle('is-active', isActive);
         btn.classList.toggle('active', isActive);
@@ -141,22 +196,36 @@ export function initToggleButton(target, onToggleCallback, options = {}) {
         }
 
         syncStatusBadges(isActive);
-        await setElementIcon(btn, isActive ? iconActive : iconIdle);
     };
 
-    btn.addEventListener('click', async (e) => {
-        if (e.isTrigger) return;
-        state = state === 0 ? 1 : 0;
-        await renderState();
+    const syncIconAsync = () => {
+        const isActive = state === 1;
+        return setElementIcon(btn, isActive ? iconActive : iconIdle);
+    };
 
-        btn.dispatchEvent(new CustomEvent('toggle', {
-            detail: { active: state === 1, state: state },
-            bubbles: true
-        }));
+    const applyState = (nextState, triggerCallback = false) => {
+        const seq = ++transitionSeq;
+        state = nextState;
+        renderStateSync();
+        latestIconPromise = syncIconAsync();
 
-        if (typeof onToggleCallback === 'function') {
-            onToggleCallback(state === 1, state, btn);
+        if (triggerCallback) {
+            btn.dispatchEvent(new CustomEvent('toggle', {
+                detail: { active: nextState === 1, state: nextState },
+                bubbles: true
+            }));
+
+            if (transitionSeq === seq && typeof onToggleCallback === 'function') {
+                onToggleCallback(nextState === 1, nextState, btn);
+            }
         }
+
+        return latestIconPromise;
+    };
+
+    btn.addEventListener('click', (e) => {
+        if (e.isTrigger || btn.disabled || btn.classList.contains('is-disabled')) return;
+        applyState(state === 0 ? 1 : 0, true);
     });
 
     if (enableSpaceShortcut && !btn.dataset.spaceBound) {
@@ -164,13 +233,22 @@ export function initToggleButton(target, onToggleCallback, options = {}) {
         window.addEventListener('keydown', (e) => {
             if (e.code !== 'Space' && e.key !== ' ') return;
             if (e.ctrlKey || e.altKey || e.metaKey) return;
+            if (!btn.isConnected || btn.disabled || btn.classList.contains('is-disabled')) return;
 
             const activeEl = document.activeElement;
             const tag = activeEl ? activeEl.tagName : '';
-            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || activeEl?.isContentEditable) {
+            if (
+                tag === 'INPUT' ||
+                tag === 'TEXTAREA' ||
+                tag === 'SELECT' ||
+                tag === 'BUTTON' ||
+                tag === 'A' ||
+                activeEl?.isContentEditable ||
+                activeEl?.getAttribute?.('role') === 'button'
+            ) {
                 return;
             }
-            if (document.querySelector('.sim-modal-overlay.is-open')) {
+            if (document.querySelector('.sim-modal-overlay:not(.hidden)')) {
                 return;
             }
 
@@ -179,14 +257,12 @@ export function initToggleButton(target, onToggleCallback, options = {}) {
         });
     }
 
-    renderState();
+    renderStateSync();
+    latestIconPromise = syncIconAsync();
 
     return {
         toggle: () => btn.click(),
-        setState: async (newState) => {
-            state = newState ? 1 : 0;
-            await renderState();
-        },
+        setState: (newState, triggerCallback = false) => applyState(normalizeToggleState(newState), triggerCallback),
         getState: () => state,
         isActive: () => state === 1
     };
@@ -194,23 +270,37 @@ export function initToggleButton(target, onToggleCallback, options = {}) {
 
 /**
  * Sincroniza bidirecionalmente um Slider (range) com um Input Numérico (Dual-Input)
- * Valida limites min/max no blur e atualiza fluidamente em tempo real.
+ * Valida limites min/max no blur/change, evita disparos duplicados e notifica espelhos de Modo Foco.
  * @param {HTMLInputElement|string} sliderTarget - Seletor ou elemento do slider (range)
  * @param {HTMLInputElement|string} numTarget - Seletor ou elemento do input numérico
  * @param {Function} [onChangeCallback] - Callback: (value, sliderEl, numEl) => void
- * @returns {Object} Controlador com .getValue(), .setValue(val)
+ * @returns {Object} Controlador com .getValue(), .setValue(val, triggerCallback)
  */
 export function syncDualSlider(sliderTarget, numTarget, onChangeCallback) {
     const slider = typeof sliderTarget === 'string' ? document.querySelector(sliderTarget) : sliderTarget;
     const numInput = typeof numTarget === 'string' ? document.querySelector(numTarget) : numTarget;
     if (!slider || !numInput) return null;
 
-    const min = parseFloat(slider.min) || 0;
-    const max = parseFloat(slider.max) || 100;
+    const parsedMin = parseFloat(slider.min);
+    const parsedMax = parseFloat(slider.max);
+    const min = Number.isFinite(parsedMin) ? parsedMin : 0;
+    const max = Number.isFinite(parsedMax) ? parsedMax : 100;
+
+    const formatNum = (v) => (Number.isInteger(v) ? v : parseFloat(v.toFixed(3)));
+    let lastNotifiedVal = parseFloat(slider.value);
+    let syncingFromNumber = false;
+
+    const notifyMirrorSlider = () => {
+        syncingFromNumber = true;
+        slider.dispatchEvent(new Event('input', { bubbles: true }));
+        syncingFromNumber = false;
+    };
 
     const handleSliderInput = () => {
+        if (syncingFromNumber) return;
         const val = parseFloat(slider.value);
-        numInput.value = Number.isInteger(val) ? val : parseFloat(val.toFixed(3));
+        numInput.value = formatNum(val);
+        lastNotifiedVal = val;
         if (typeof onChangeCallback === 'function') {
             onChangeCallback(val, slider, numInput);
         }
@@ -218,15 +308,30 @@ export function syncDualSlider(sliderTarget, numTarget, onChangeCallback) {
 
     const handleNumberInput = (e) => {
         let val = parseFloat(numInput.value);
-        if (isNaN(val)) return;
+        if (Number.isNaN(val)) {
+            if (e.type === 'change' || e.type === 'blur') {
+                const fallback = Number.isFinite(lastNotifiedVal) ? lastNotifiedVal : min;
+                numInput.value = formatNum(fallback);
+                slider.value = fallback;
+                notifyMirrorSlider();
+            }
+            return;
+        }
 
         if (e.type === 'change' || e.type === 'blur') {
             if (val < min) val = min;
             if (val > max) val = max;
-            numInput.value = Number.isInteger(val) ? val : parseFloat(val.toFixed(3));
+            numInput.value = formatNum(val);
         }
 
-        slider.value = val;
+        const clamped = Math.max(min, Math.min(max, val));
+        slider.value = clamped;
+        notifyMirrorSlider();
+
+        if ((e.type === 'change' || e.type === 'blur') && val === lastNotifiedVal) {
+            return;
+        }
+        lastNotifiedVal = val;
         if (typeof onChangeCallback === 'function') {
             onChangeCallback(val, slider, numInput);
         }
@@ -239,11 +344,16 @@ export function syncDualSlider(sliderTarget, numTarget, onChangeCallback) {
 
     return {
         getValue: () => parseFloat(slider.value),
-        setValue: (val) => {
-            slider.value = val;
-            numInput.value = val;
-            if (typeof onChangeCallback === 'function') {
-                onChangeCallback(val, slider, numInput);
+        setValue: (val, triggerCallback = true) => {
+            const numVal = parseFloat(val);
+            if (!Number.isFinite(numVal)) return;
+            const clamped = Math.max(min, Math.min(max, numVal));
+            slider.value = clamped;
+            numInput.value = formatNum(clamped);
+            lastNotifiedVal = clamped;
+            notifyMirrorSlider();
+            if (triggerCallback && typeof onChangeCallback === 'function') {
+                onChangeCallback(clamped, slider, numInput);
             }
         }
     };
@@ -281,8 +391,25 @@ const LIGHT_PLOT_COLOR_MAP = {
     '#94a3b8': '#475569'
 };
 
+function normalizeHexColor(color) {
+    if (typeof color !== 'string') return '';
+    const c = color.trim();
+    if (/^#[0-9a-fA-F]{3}$/.test(c)) {
+        return `#${c[1]}${c[1]}${c[2]}${c[2]}${c[3]}${c[3]}`;
+    }
+    return c;
+}
+
+function withHexAlpha(color, alphaHex, fallbackRgba) {
+    const norm = normalizeHexColor(color);
+    if (/^#[0-9a-fA-F]{6}$/.test(norm)) {
+        return `${norm}${alphaHex}`;
+    }
+    return fallbackRgba;
+}
+
 function resolvePlotCurveColor(rawColor, isLight, fallbackColor) {
-    const c = (rawColor || fallbackColor || '#38bdf8').trim();
+    const c = normalizeHexColor(rawColor || fallbackColor || '#38bdf8');
     if (!isLight) return c;
     return LIGHT_PLOT_COLOR_MAP[c.toLowerCase()] || c;
 }
@@ -406,7 +533,10 @@ export class RealtimePlot {
         this.unit = options.unit || '';
         this.title = options.title || '';
 
-        this.color = options.color || '#38bdf8';
+        this.explicitColor = typeof options.color === 'string' && options.color.trim() !== ''
+            ? options.color.trim()
+            : null;
+        this.color = this.explicitColor || '#38bdf8';
         this.minVal = options.minVal !== undefined ? options.minVal : -1.2;
         this.maxVal = options.maxVal !== undefined ? options.maxVal : 1.2;
         this.autoScale = Boolean(options.autoScale);
@@ -420,11 +550,28 @@ export class RealtimePlot {
 
         attachPlotCardControls(this);
 
+        this._onResize = () => this.resize();
+        this._onThemeChange = () => this.render();
+        this._resizeObserver = null;
+
         this.resize();
-        window.addEventListener('resize', () => this.resize());
-        window.addEventListener('themechange', () => this.render());
+        window.addEventListener('resize', this._onResize);
+        window.addEventListener('themechange', this._onThemeChange);
         if (window.ResizeObserver && this.canvas.parentElement) {
-            new ResizeObserver(() => this.resize()).observe(this.canvas.parentElement);
+            this._resizeObserver = new ResizeObserver(this._onResize);
+            this._resizeObserver.observe(this.canvas.parentElement);
+        }
+    }
+
+    destroy() {
+        window.removeEventListener('resize', this._onResize);
+        window.removeEventListener('themechange', this._onThemeChange);
+        if (this._resizeObserver) {
+            this._resizeObserver.disconnect();
+            this._resizeObserver = null;
+        }
+        if (_activeViewerPlot === this) {
+            _activeViewerPlot = null;
         }
     }
 
@@ -602,13 +749,14 @@ export class RealtimePlot {
         ctx.lineTo(0, height);
         ctx.closePath();
 
-        const rawStroke = getComputedStyle(document.documentElement).getPropertyValue('--accent-hud').trim() ||
+        const rawStroke = this.explicitColor ||
+                          getComputedStyle(document.documentElement).getPropertyValue('--accent-hud').trim() ||
                           getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() ||
                           this.color;
         const strokeColor = resolvePlotCurveColor(rawStroke, tc.theme === 'light', tc.cyan);
 
         const areaGrad = ctx.createLinearGradient(0, 0, 0, height);
-        areaGrad.addColorStop(0, strokeColor.startsWith('#') ? `${strokeColor}44` : 'rgba(56, 189, 248, 0.25)');
+        areaGrad.addColorStop(0, withHexAlpha(strokeColor, '44', 'rgba(56, 189, 248, 0.25)'));
         areaGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = areaGrad;
         ctx.fill();
@@ -680,11 +828,28 @@ export class MultiSeriesPlot {
 
         attachPlotCardControls(this);
 
+        this._onResize = () => this.resize();
+        this._onThemeChange = () => this.render();
+        this._resizeObserver = null;
+
         this.resize();
-        window.addEventListener('resize', () => this.resize());
-        window.addEventListener('themechange', () => this.render());
+        window.addEventListener('resize', this._onResize);
+        window.addEventListener('themechange', this._onThemeChange);
         if (window.ResizeObserver && this.canvas.parentElement) {
-            new ResizeObserver(() => this.resize()).observe(this.canvas.parentElement);
+            this._resizeObserver = new ResizeObserver(this._onResize);
+            this._resizeObserver.observe(this.canvas.parentElement);
+        }
+    }
+
+    destroy() {
+        window.removeEventListener('resize', this._onResize);
+        window.removeEventListener('themechange', this._onThemeChange);
+        if (this._resizeObserver) {
+            this._resizeObserver.disconnect();
+            this._resizeObserver = null;
+        }
+        if (_activeViewerPlot === this) {
+            _activeViewerPlot = null;
         }
     }
 
@@ -1039,7 +1204,7 @@ function pauseSimulationIfRunning(plotInstance) {
     if (plotInstance && typeof plotInstance.onOpenFullscreen === 'function') {
         plotInstance.onOpenFullscreen(plotInstance);
     }
-    const btnPlay = document.getElementById('btn-play-sim');
+    const btnPlay = document.querySelector('#btn-play-sim, #canvas-transport-toolbar .btn-toggle');
     if (btnPlay) {
         const isRunning = btnPlay.getAttribute('data-state') === '1' || btnPlay.classList.contains('is-active');
         if (isRunning) {
@@ -1088,7 +1253,7 @@ function ensurePlotViewerModal() {
                             <span id="pv-modal-badge-text">Últimos 80 pts</span>
                         </div>
                     </div>
-                    <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+                    <button type="button" class="sim-modal-close" data-modal-close title="Fechar (Esc)" aria-label="Fechar">✕</button>
                 </div>
                 <div class="sim-modal-body">
                     <div class="plot-viewer-stats">
@@ -1143,7 +1308,12 @@ function ensurePlotViewerModal() {
         }
     }
 
-    const modalCtrl = initModal(overlay);
+    const modalCtrl = initModal(overlay, {
+        onClose: () => {
+            _activeViewerPlot = null;
+            _viewerHoverRatio = null;
+        }
+    });
     const pvCanvas = overlay.querySelector('#pv-canvas');
 
     const updateHoverFromEvent = (e) => {
@@ -1294,6 +1464,7 @@ function refreshPlotViewerModal(plot) {
 }
 
 function renderPlotViewerCanvas(plot) {
+    if (!plot) return;
     const overlay = document.getElementById('sim-plot-viewer-modal');
     const canvas = overlay?.querySelector('#pv-canvas');
     if (!canvas) return;
@@ -1454,7 +1625,8 @@ function renderPlotViewerCanvas(plot) {
     }
 
     // 2. Desenho das curvas
-    const rawAccentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-hud').trim() ||
+    const rawAccentColor = plot.explicitColor ||
+                           getComputedStyle(document.documentElement).getPropertyValue('--accent-hud').trim() ||
                            tc.accent ||
                            plot.color || tc.cyan;
     const accentColor = resolvePlotCurveColor(rawAccentColor, isLight, tc.cyan);
@@ -1491,7 +1663,7 @@ function renderPlotViewerCanvas(plot) {
         ctx.lineTo(getX(0), padTop + plotH);
         ctx.closePath();
         const grad = ctx.createLinearGradient(0, padTop, 0, padTop + plotH);
-        grad.addColorStop(0, accentColor.startsWith('#') ? `${accentColor}33` : 'rgba(56, 189, 248, 0.20)');
+        grad.addColorStop(0, withHexAlpha(accentColor, '33', 'rgba(56, 189, 248, 0.20)'));
         grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = grad;
         ctx.fill();
@@ -1628,9 +1800,14 @@ function exportPlotPNG(plot) {
     outCanvas.height = pvCanvas.height;
     const outCtx = outCanvas.getContext('2d');
 
-    const bgMain = getComputedStyle(document.documentElement).getPropertyValue('--bg-main').trim() || '#09090d';
-    outCtx.fillStyle = bgMain;
+    const tc = getThemeColors();
+    const baseFill = tc.theme === 'light' ? '#fafaf9' : (tc.bgMain || '#0c0a09');
+    outCtx.fillStyle = baseFill;
     outCtx.fillRect(0, 0, outCanvas.width, outCanvas.height);
+    if (tc.plotBg && tc.plotBg !== baseFill) {
+        outCtx.fillStyle = tc.plotBg;
+        outCtx.fillRect(0, 0, outCanvas.width, outCanvas.height);
+    }
     outCtx.drawImage(pvCanvas, 0, 0);
 
     const a = document.createElement('a');
@@ -1667,6 +1844,9 @@ export function openPlotFullscreenModal(plotInstance) {
  * @param {string} [options.storageKey] - Chave personalizada para o sessionStorage
  * @returns {Object} Controlador com .open(), .close(), .toggle()
  */
+// Pilha global de modais abertos (ordem real de abertura, independente da ordem no DOM)
+const _openModalStack = [];
+
 export function initModal(modalTarget, options = {}) {
     const modal = typeof modalTarget === 'string' ? document.querySelector(modalTarget) : modalTarget;
     if (!modal) return null;
@@ -1674,10 +1854,42 @@ export function initModal(modalTarget, options = {}) {
     const {
         triggerSelector = null,
         autoOpenFirstSession = false,
-        storageKey = `sim_onboarding_seen_${window.location.pathname}`
+        storageKey = `sim_onboarding_seen_${window.location.pathname}`,
+        onOpen = null,
+        onClose = null
     } = options;
 
+    if (!modal.getAttribute('role')) {
+        modal.setAttribute('role', 'dialog');
+    }
+    modal.setAttribute('aria-modal', 'true');
+
+    const titleEl = modal.querySelector('.sim-modal-title');
+    if (titleEl && !modal.getAttribute('aria-labelledby') && !modal.getAttribute('aria-label')) {
+        if (!titleEl.id) {
+            titleEl.id = `${modal.id || 'sim-modal'}-title`;
+        }
+        modal.setAttribute('aria-labelledby', titleEl.id);
+    }
+
+    const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const getFocusableElements = () => Array.from(modal.querySelectorAll(FOCUSABLE_SELECTOR)).filter(el => {
+        if (el.closest('.hidden, [hidden]')) return false;
+        const style = getComputedStyle(el);
+        return style.display !== 'none' && style.visibility !== 'hidden';
+    });
+
+    let previousFocus = null;
+
     const open = () => {
+        if (!modal.classList.contains('hidden')) return;
+        previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+        const existingIdx = _openModalStack.indexOf(modal);
+        if (existingIdx !== -1) _openModalStack.splice(existingIdx, 1);
+        _openModalStack.push(modal);
+        modal.style.zIndex = String(1000 + _openModalStack.length * 10);
+
         modal.classList.remove('hidden');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
@@ -1695,14 +1907,43 @@ export function initModal(modalTarget, options = {}) {
                 throwOnError: false
             });
         }
+
+        const containerEl = modal.querySelector('.sim-modal-container') || modal;
+        if (!containerEl.hasAttribute('tabindex')) {
+            containerEl.setAttribute('tabindex', '-1');
+        }
+        requestAnimationFrame(() => {
+            if (modal.classList.contains('hidden')) return;
+            const focusables = getFocusableElements();
+            const target = focusables[0] || containerEl;
+            target?.focus({ preventScroll: true });
+        });
+
+        if (typeof onOpen === 'function') {
+            onOpen(modal);
+        }
     };
 
     const close = () => {
+        if (modal.classList.contains('hidden')) return;
+        const stackIdx = _openModalStack.indexOf(modal);
+        if (stackIdx !== -1) _openModalStack.splice(stackIdx, 1);
+        modal.style.zIndex = '';
+
         modal.classList.add('hidden');
         modal.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
+        if (!document.querySelector('.sim-modal-overlay:not(.hidden)')) {
+            document.body.style.overflow = '';
+        }
         if (autoOpenFirstSession) {
             try { sessionStorage.setItem(storageKey, '1'); } catch (_) {}
+        }
+        if (previousFocus && document.contains(previousFocus)) {
+            previousFocus.focus({ preventScroll: true });
+        }
+        previousFocus = null;
+        if (typeof onClose === 'function') {
+            onClose(modal);
         }
     };
 
@@ -1715,8 +1956,38 @@ export function initModal(modalTarget, options = {}) {
     });
 
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+        if (e.defaultPrevented || modal.classList.contains('hidden')) return;
+        const topModal = _openModalStack.length > 0
+            ? _openModalStack[_openModalStack.length - 1]
+            : Array.from(document.querySelectorAll('.sim-modal-overlay:not(.hidden)')).pop();
+        if (topModal !== modal) return;
+
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
             close();
+            return;
+        }
+
+        if (e.key === 'Tab') {
+            const focusables = getFocusableElements();
+            if (focusables.length === 0) {
+                e.preventDefault();
+                return;
+            }
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+            if (e.shiftKey) {
+                if (document.activeElement === first || !modal.contains(document.activeElement)) {
+                    e.preventDefault();
+                    last.focus();
+                }
+            } else {
+                if (document.activeElement === last || !modal.contains(document.activeElement)) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
         }
     });
 
@@ -1996,7 +2267,11 @@ export function initSidebarCollapse({
     // Atalho de Teclado: Tecla 'F' ou '[' para alternar o painel lateral no desktop
     document.addEventListener('keydown', (e) => {
         if (window.innerWidth <= 900) return;
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        const target = e.target;
+        const tag = target ? target.tagName : '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable) return;
+        if (document.querySelector('.sim-modal-overlay:not(.hidden)')) return;
         if (e.key === 'f' || e.key === 'F' || e.key === '[') {
             toggle();
         }
@@ -2022,16 +2297,39 @@ export function initTabs(root = document, onTabChange = null) {
     if (!el) return;
 
     const tabNavs = el.querySelectorAll('.tab-nav');
-    tabNavs.forEach(nav => {
+    tabNavs.forEach((nav, navIdx) => {
+        nav.setAttribute('role', 'tablist');
         const buttons = nav.querySelectorAll('.tab-btn');
         const panelContainer = nav.closest('.controls-panel')?.querySelector('.panel-body') || el;
         const panes = panelContainer.querySelectorAll('.tab-pane, .tab-content');
+
+        buttons.forEach((btn, btnIdx) => {
+            btn.setAttribute('role', 'tab');
+            if (!btn.id) {
+                btn.id = `tab-btn-${navIdx}-${btn.dataset.tab || btnIdx}`;
+            }
+            if (btn.dataset.tab) {
+                btn.setAttribute('aria-controls', btn.dataset.tab);
+            }
+        });
+
+        panes.forEach(pane => {
+            pane.setAttribute('role', 'tabpanel');
+            const paneKey = pane.id || pane.dataset.tab;
+            const ownerBtn = Array.from(buttons).find(b => b.dataset.tab === paneKey);
+            if (ownerBtn && ownerBtn.id) {
+                pane.setAttribute('aria-labelledby', ownerBtn.id);
+            }
+        });
 
         const switchTab = (targetId) => {
             if (!targetId) return;
 
             buttons.forEach(b => {
-                b.classList.toggle('active', b.dataset.tab === targetId);
+                const isSelected = b.dataset.tab === targetId;
+                b.classList.toggle('active', isSelected);
+                b.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+                b.setAttribute('tabindex', isSelected ? '0' : '-1');
             });
 
             panes.forEach(pane => {
@@ -2039,12 +2337,14 @@ export function initTabs(root = document, onTabChange = null) {
                 if (matches) {
                     pane.classList.add('active');
                     pane.style.display = 'block';
+                    pane.removeAttribute('aria-hidden');
                     if (typeof initKaTeXAutoRender === 'function') {
                         initKaTeXAutoRender(pane);
                     }
                 } else {
                     pane.classList.remove('active');
                     pane.style.display = 'none';
+                    pane.setAttribute('aria-hidden', 'true');
                 }
             });
 
@@ -2056,16 +2356,33 @@ export function initTabs(root = document, onTabChange = null) {
                 detail: { tabId: targetId },
                 bubbles: true
             }));
-            document.dispatchEvent(new CustomEvent('tabchange', {
-                detail: { tabId: targetId },
-                bubbles: true
-            }));
         };
 
         buttons.forEach(btn => {
             btn.addEventListener('click', () => {
+                if (btn.disabled || btn.classList.contains('disabled')) return;
                 switchTab(btn.dataset.tab);
             });
+        });
+
+        nav.addEventListener('keydown', (e) => {
+            const enabledBtns = Array.from(buttons).filter(b => !b.disabled && !b.classList.contains('disabled'));
+            if (enabledBtns.length === 0) return;
+            const currentIdx = enabledBtns.indexOf(document.activeElement);
+            if (currentIdx === -1) return;
+
+            let nextIdx = -1;
+            if (e.key === 'ArrowRight') nextIdx = (currentIdx + 1) % enabledBtns.length;
+            else if (e.key === 'ArrowLeft') nextIdx = (currentIdx - 1 + enabledBtns.length) % enabledBtns.length;
+            else if (e.key === 'Home') nextIdx = 0;
+            else if (e.key === 'End') nextIdx = enabledBtns.length - 1;
+
+            if (nextIdx !== -1) {
+                e.preventDefault();
+                const nextBtn = enabledBtns[nextIdx];
+                nextBtn.focus();
+                switchTab(nextBtn.dataset.tab);
+            }
         });
 
         // Sincronização inicial da aba ativa no DOM
@@ -2176,7 +2493,6 @@ export function initBottomSheet(opts = {}) {
         settingsBtn.title = 'Configurações e Parâmetros';
         settingsBtn.setAttribute('aria-label', 'Configurações e Parâmetros');
         settingsBtn.setAttribute('aria-expanded', 'false');
-        settingsBtn.innerHTML = '<img src="../assets/icons/gear.svg" class="icon-svg" alt="Configurações">';
         canvasArea.appendChild(settingsBtn);
         setElementIcon(settingsBtn, 'gear');
     }
@@ -2242,17 +2558,22 @@ export function initBottomSheet(opts = {}) {
         });
 
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && window.innerWidth <= 900 && isOpen) {
-                applyState('peek');
-            }
+            if (e.key !== 'Escape' || window.innerWidth > 900 || !isOpen) return;
+            if (e.defaultPrevented || document.querySelector('.sim-modal-overlay:not(.hidden)')) return;
+            applyState('peek');
         });
     }
 
     // Listener de redimensionamento de janela
     window.addEventListener('resize', () => {
         if (window.innerWidth > 900) {
+            isOpen = false;
+            currentState = 'peek';
             panel.classList.remove('sheet-peek', 'sheet-half', 'sheet-expanded', 'mobile-panel-open');
-            if (settingsBtn) settingsBtn.classList.remove('is-active');
+            if (settingsBtn) {
+                settingsBtn.classList.remove('is-active');
+                settingsBtn.setAttribute('aria-expanded', 'false');
+            }
         }
     });
 
@@ -2321,6 +2642,10 @@ export function initFocusMirrorToolbar(options = {}) {
     container.classList.add('canvas-toolbar', 'pos-top-left', 'focus-mirror-toolbar');
     if (onlyInFocusMode) {
         container.classList.add('focus-mirror-only-focus');
+        container.classList.remove('is-visible');
+    } else {
+        container.classList.remove('focus-mirror-only-focus');
+        container.classList.add('is-visible');
     }
 
     // 1.1 Empilhamento Vertical Automático no Canto Superior Esquerdo (.canvas-top-left-stack)
@@ -2365,29 +2690,37 @@ export function initFocusMirrorToolbar(options = {}) {
         });
     }
 
-    // Pool de MutationObservers ativos para evitar memory leaks
+    // Pool de MutationObservers e AbortController ativos para evitar memory leaks
     let activeObservers = [];
+    let rebuildAbortController = null;
+    let rebuildSeq = 0;
+    let navRebuildTimer = null;
+    let lastTabChangeTs = 0;
 
     const cleanupObservers = () => {
         activeObservers.forEach(obs => obs.disconnect());
         activeObservers = [];
+        if (rebuildAbortController) {
+            rebuildAbortController.abort();
+            rebuildAbortController = null;
+        }
     };
 
     /**
      * Detecta o contexto operacional ou aba atualmente ativa na interface
      */
     const detectActiveContext = () => {
-        // 1. Seletor de Modo Segmentado (ex: 1. Base, 2. Construir, etc.)
-        const activeSegment = document.querySelector('.mode-selector .segment-btn.active, .segmented-control .segment-btn.active');
-        if (activeSegment) {
-            const mode = activeSegment.dataset.mode || activeSegment.dataset.tab;
-            if (mode) return mode;
-        }
-
-        // 2. Subpainéis visíveis no DOM
+        // 1. Subpainéis visíveis no DOM (ex: matrizes.html)
         const visibleSubpane = document.querySelector('.subpane-controls:not(.hidden)');
         if (visibleSubpane && visibleSubpane.id) {
             return visibleSubpane.id.replace(/^subpane-controls-/, '').replace(/^pane-/, '');
+        }
+
+        // 2. Seletor de Modo explicitamente navegacional (.mode-selector, #mode-selector ou [data-focus-nav])
+        const activeSegment = document.querySelector('.mode-selector .segment-btn.active, #mode-selector .segment-btn.active, [data-focus-nav] .segment-btn.active');
+        if (activeSegment) {
+            const mode = activeSegment.dataset.mode || activeSegment.dataset.tab;
+            if (mode) return mode;
         }
 
         // 3. Abas tradicionais ativas (.tab-btn.active)
@@ -2460,6 +2793,11 @@ export function initFocusMirrorToolbar(options = {}) {
      * Reconstrói a barra de ferramentas flutuante para o contexto especificado
      */
     const rebuild = async (targetContext = null) => {
+        const seq = ++rebuildSeq;
+        if (navRebuildTimer) {
+            clearTimeout(navRebuildTimer);
+            navRebuildTimer = null;
+        }
         cleanupObservers();
         container.innerHTML = '';
 
@@ -2491,6 +2829,9 @@ export function initFocusMirrorToolbar(options = {}) {
         }
 
         container.style.display = '';
+
+        rebuildAbortController = new AbortController();
+        const { signal } = rebuildAbortController;
 
         // Cria os espelhos dinâmicos
         for (const orig of matched) {
@@ -2557,6 +2898,9 @@ export function initFocusMirrorToolbar(options = {}) {
                     const isActive = orig.classList.contains('is-active') || orig.classList.contains('active') || orig.getAttribute('data-state') === '1';
                     btn.classList.toggle('is-active', isActive);
                     btn.classList.toggle('active', isActive);
+                    if (controlType === 'toggle' || orig.hasAttribute('aria-pressed')) {
+                        btn.setAttribute('aria-pressed', `${isActive}`);
+                    }
 
                     const isDisabled = orig.disabled || orig.classList.contains('is-disabled');
                     btn.disabled = isDisabled;
@@ -2575,6 +2919,22 @@ export function initFocusMirrorToolbar(options = {}) {
                 // Observer de mutações no elemento original
                 const obs = new MutationObserver(() => {
                     syncButtonClasses();
+
+                    // Sincroniza ícone dinâmico (ex: play <-> pause em botões toggle sem data-focus-icon fixo)
+                    if (!customIcon) {
+                        const origIcon = orig.querySelector('.icon-svg, svg');
+                        const mirrorIcon = btn.querySelector('.icon-svg, svg');
+                        const origIsSvg = origIcon?.tagName?.toLowerCase() === 'svg';
+                        const mirrorIsSvg = mirrorIcon?.tagName?.toLowerCase() === 'svg';
+                        if (origIcon && mirrorIcon && origIcon.outerHTML !== mirrorIcon.outerHTML) {
+                            // Evita regredir um <svg> já inlinado no espelho para um <img> ainda pendente no original
+                            if (origIsSvg || !mirrorIsSvg) {
+                                mirrorIcon.replaceWith(origIcon.cloneNode(true));
+                            }
+                        } else if (origIcon && !mirrorIcon) {
+                            btn.prepend(origIcon.cloneNode(true));
+                        }
+                    }
 
                     // Se for toggle sem data-focus-label fixo, atualiza texto dinâmico
                     if (rawLabel === null) {
@@ -2607,6 +2967,7 @@ export function initFocusMirrorToolbar(options = {}) {
                     sel.appendChild(newOpt);
                 });
                 sel.value = orig.value;
+                sel.disabled = orig.disabled || orig.classList.contains('is-disabled');
 
                 // Clone -> Original
                 sel.addEventListener('change', () => {
@@ -2620,7 +2981,7 @@ export function initFocusMirrorToolbar(options = {}) {
                         sel.value = orig.value;
                     }
                 };
-                orig.addEventListener('change', onOrigChange);
+                orig.addEventListener('change', onOrigChange, { signal });
 
                 const obs = new MutationObserver(() => {
                     sel.disabled = orig.disabled || orig.classList.contains('is-disabled');
@@ -2648,10 +3009,15 @@ export function initFocusMirrorToolbar(options = {}) {
 
             // --- CASO 4: SLIDERS COMPACTOS ---
             else if (controlType === 'slider') {
+                const sourceInput = (orig.tagName === 'INPUT' && orig.type === 'range')
+                    ? orig
+                    : orig.querySelector('input[type="range"]');
+                if (!sourceInput) continue;
+
                 const sliderBox = document.createElement('div');
                 sliderBox.className = 'focus-mirror-slider';
 
-                const label = orig.getAttribute('data-focus-label');
+                const label = orig.getAttribute('data-focus-label') || sourceInput.getAttribute('data-focus-label');
                 if (label) {
                     const lblSpan = document.createElement('span');
                     lblSpan.textContent = label;
@@ -2660,24 +3026,59 @@ export function initFocusMirrorToolbar(options = {}) {
 
                 const range = document.createElement('input');
                 range.type = 'range';
-                range.min = orig.min || '0';
-                range.max = orig.max || '100';
-                range.step = orig.step || '1';
-                range.value = orig.value;
+                range.min = (sourceInput.min !== undefined && sourceInput.min !== '') ? sourceInput.min : '0';
+                range.max = (sourceInput.max !== undefined && sourceInput.max !== '') ? sourceInput.max : '100';
+                range.step = sourceInput.step || '1';
+                range.value = sourceInput.value;
+                range.disabled = Boolean(sourceInput.disabled || orig.classList.contains('is-disabled'));
+                if (label) range.setAttribute('aria-label', label);
+
+                const dualContainer = sourceInput.closest('.sim-dual-slider') || orig.closest('.sim-dual-slider');
+                const unitText = dualContainer?.querySelector('.dual-input-unit')?.textContent?.trim() || '';
+                const stepStr = range.step || '1';
+                const decimals = stepStr.includes('.') ? Math.min(3, stepStr.split('.')[1].length) : 0;
+                const formatSliderVal = (v) => {
+                    const num = parseFloat(v);
+                    const formatted = Number.isFinite(num) ? num.toFixed(decimals) : `${v}`;
+                    return unitText ? `${formatted} ${unitText}` : formatted;
+                };
+
+                const valSpan = document.createElement('span');
+                valSpan.className = 'slider-mirror-val';
+                valSpan.textContent = formatSliderVal(sourceInput.value);
 
                 range.addEventListener('input', () => {
-                    orig.value = range.value;
-                    orig.dispatchEvent(new Event('input', { bubbles: true }));
+                    sourceInput.value = range.value;
+                    valSpan.textContent = formatSliderVal(range.value);
+                    sourceInput.dispatchEvent(new Event('input', { bubbles: true }));
                 });
                 range.addEventListener('change', () => {
-                    orig.value = range.value;
-                    orig.dispatchEvent(new Event('change', { bubbles: true }));
+                    sourceInput.value = range.value;
+                    valSpan.textContent = formatSliderVal(range.value);
+                    sourceInput.dispatchEvent(new Event('change', { bubbles: true }));
                 });
 
-                const onOrigInput = () => { range.value = orig.value; };
-                orig.addEventListener('input', onOrigInput);
+                const onOrigInput = () => {
+                    if (range.value !== sourceInput.value) {
+                        range.value = sourceInput.value;
+                    }
+                    valSpan.textContent = formatSliderVal(sourceInput.value);
+                };
+                sourceInput.addEventListener('input', onOrigInput, { signal });
+                sourceInput.addEventListener('change', onOrigInput, { signal });
+
+                const syncDisabled = () => {
+                    range.disabled = Boolean(sourceInput.disabled || sourceInput.classList.contains('is-disabled') || orig.classList.contains('is-disabled'));
+                };
+                const obs = new MutationObserver(syncDisabled);
+                obs.observe(sourceInput, { attributes: true, attributeFilter: ['disabled', 'class'] });
+                if (orig !== sourceInput) {
+                    obs.observe(orig, { attributes: true, attributeFilter: ['class'] });
+                }
+                activeObservers.push(obs);
 
                 sliderBox.appendChild(range);
+                sliderBox.appendChild(valSpan);
                 container.appendChild(sliderBox);
             }
 
@@ -2686,8 +3087,9 @@ export function initFocusMirrorToolbar(options = {}) {
             }
         }
 
-        // Inline SVGs recém-adicionados para herdar cores
-        await inlineSVGImages();
+        // Inline SVGs recém-adicionados no escopo da toolbar para herdar cores
+        await inlineSVGImages(container);
+        if (seq !== rebuildSeq) return;
 
         if (typeof onRebuild === 'function') {
             onRebuild(activeCtx, container);
@@ -2696,18 +3098,22 @@ export function initFocusMirrorToolbar(options = {}) {
 
     // Listeners Automáticos de Navegação por Abas e Modos
     const handleNavClick = (e) => {
-        const btn = e.target.closest('.segment-btn, .tab-btn, [data-mode], [data-tab]');
-        if (btn) {
-            // Aguarda atualização da classe .active no DOM
-            setTimeout(() => {
-                const mode = btn.dataset.mode || btn.dataset.tab;
-                rebuild(mode || null);
-            }, 30);
+        const btn = e.target.closest('.tab-btn, .mode-selector .segment-btn, #mode-selector .segment-btn, [data-focus-nav] .segment-btn');
+        if (!btn) return;
+        // Evita reconstrução duplicada quando initTabs já disparou 'tabchange' sincronamente neste clique
+        if (btn.classList.contains('tab-btn') && (performance.now() - lastTabChangeTs) < 50) {
+            return;
         }
+        if (navRebuildTimer) clearTimeout(navRebuildTimer);
+        navRebuildTimer = setTimeout(() => {
+            navRebuildTimer = null;
+            rebuild(null);
+        }, 30);
     };
     document.addEventListener('click', handleNavClick);
 
     const handleTabChange = (e) => {
+        lastTabChangeTs = performance.now();
         const tabId = e.detail?.tabId;
         rebuild(tabId || null);
     };
@@ -2720,6 +3126,11 @@ export function initFocusMirrorToolbar(options = {}) {
         rebuild: (ctx) => rebuild(ctx),
         getContainer: () => container,
         destroy: () => {
+            if (navRebuildTimer) {
+                clearTimeout(navRebuildTimer);
+                navRebuildTimer = null;
+            }
+            rebuildSeq++;
             cleanupObservers();
             document.removeEventListener('click', handleNavClick);
             document.removeEventListener('tabchange', handleTabChange);
@@ -3092,7 +3503,30 @@ export class MatrixTensorEditor {
                 if (this.options.labels && this.options.labels[r] && this.options.labels[r][c]) {
                     const sub = document.createElement('span');
                     sub.className = 'cell-sub';
-                    sub.textContent = this.options.labels[r][c];
+                    const rawLabel = String(this.options.labels[r][c]);
+                    if (/[\\^_{}]/.test(rawLabel)) {
+                        if (window.katex && typeof window.katex.render === 'function') {
+                            renderMath(sub, rawLabel, { displayMode: false });
+                        } else {
+                            // Fallback limpo em HTML (ex: a_{11} -> a<sub>11</sub>) + upgrade KaTeX no load
+                            const subMatch = rawLabel.match(/^([A-Za-z0-9]+)_\{([^}]+)\}$/);
+                            if (subMatch) {
+                                sub.textContent = subMatch[1];
+                                const subTag = document.createElement('sub');
+                                subTag.textContent = subMatch[2];
+                                sub.appendChild(subTag);
+                            } else {
+                                sub.textContent = rawLabel;
+                            }
+                            window.addEventListener('load', () => {
+                                if (window.katex && typeof window.katex.render === 'function') {
+                                    renderMath(sub, rawLabel, { displayMode: false });
+                                }
+                            }, { once: true });
+                        }
+                    } else {
+                        sub.textContent = rawLabel;
+                    }
                     cell.appendChild(sub);
                 }
 
@@ -3148,10 +3582,16 @@ export class MatrixTensorEditor {
         if (this.options.dim === 2) {
             analysis = eigen2x2(M);
         } else if (this.options.dim === 3) {
+            const isSym = this.options.symmetric || (
+                Math.abs(M[0][1] - M[1][0]) < 1e-9 &&
+                Math.abs(M[0][2] - M[2][0]) < 1e-9 &&
+                Math.abs(M[1][2] - M[2][1]) < 1e-9
+            );
             analysis = {
                 trace: trace3x3(M),
                 determinant: det3x3(M),
-                ...diagonalizeSymmetric3x3(M)
+                isSymmetric: isSym,
+                ...(isSym ? diagonalizeSymmetric3x3(M) : { values: null, vectors: null })
             };
         }
         this.options.onChange(M, analysis);
@@ -3160,25 +3600,28 @@ export class MatrixTensorEditor {
 
 /**
  * Define o estado semântico de um campo ou controle (.is-valid, .is-invalid, .is-warning, .is-ready, .is-disabled).
- * Atualiza classes CSS, acessibilidade (aria-invalid) e mensagem de apoio (.field-hint).
+ * Atualiza classes CSS, acessibilidade (aria-invalid/aria-disabled), bloqueio de inputs internos em 'disabled'
+ * e mensagem de apoio (.field-hint).
  * @param {HTMLElement|string} target - Elemento ou seletor CSS do controle ou container
- * @param {'valid'|'invalid'|'warning'|'ready'|'disabled'|null} state - Novo estado semântico
+ * @param {'valid'|'invalid'|'warning'|'ready'|'disabled'|'neutral'|null} state - Novo estado semântico
  * @param {string} [hintText] - Texto explicativo opcional para exibir no .field-hint
  */
 export function setFieldState(target, state = null, hintText = '') {
     const el = typeof target === 'string' ? document.querySelector(target) : target;
     if (!el) return;
 
+    const normalizedState = (!state || state === 'neutral' || state === 'normal') ? null : state;
+
     el.classList.remove('is-valid', 'is-invalid', 'is-warning', 'is-ready', 'is-disabled');
 
-    if (state) {
-        el.classList.add(`is-${state}`);
-        if (state === 'invalid') {
+    if (normalizedState) {
+        el.classList.add(`is-${normalizedState}`);
+        if (normalizedState === 'invalid') {
             el.setAttribute('aria-invalid', 'true');
         } else {
             el.removeAttribute('aria-invalid');
         }
-        if (state === 'disabled') {
+        if (normalizedState === 'disabled') {
             el.setAttribute('aria-disabled', 'true');
         } else {
             el.removeAttribute('aria-disabled');
@@ -3186,6 +3629,26 @@ export function setFieldState(target, state = null, hintText = '') {
     } else {
         el.removeAttribute('aria-invalid');
         el.removeAttribute('aria-disabled');
+    }
+
+    const innerControls = el.matches?.('input, select, textarea, button')
+        ? [el]
+        : Array.from(el.querySelectorAll?.('input, select, textarea, button') || []);
+
+    if (normalizedState === 'disabled') {
+        innerControls.forEach(ctrl => {
+            if (!ctrl.disabled) {
+                ctrl.disabled = true;
+                ctrl.dataset.disabledByFieldState = 'true';
+            }
+        });
+    } else {
+        innerControls.forEach(ctrl => {
+            if (ctrl.dataset.disabledByFieldState === 'true') {
+                ctrl.disabled = false;
+                delete ctrl.dataset.disabledByFieldState;
+            }
+        });
     }
 
     let hintEl = el.querySelector?.('.field-hint');
@@ -3197,7 +3660,7 @@ export function setFieldState(target, state = null, hintText = '') {
     }
     if (hintEl) {
         hintEl.textContent = hintText || '';
-        hintEl.className = 'field-hint' + (state ? ` is-${state}` : '');
+        hintEl.className = 'field-hint' + (normalizedState ? ` is-${normalizedState}` : '');
     }
 }
 
@@ -3206,9 +3669,11 @@ export function setFieldState(target, state = null, hintText = '') {
 // =============================================================================
 
 const THEME_STORAGE_KEY = 'sim_theme';
-const THEME_COLOR_DARK = '#0f172a';
-const THEME_COLOR_LIGHT = '#ffffff';
+const THEME_COLOR_DARK = '#1c1917';
+const THEME_COLOR_LIGHT = '#fafaf9';
 
+// Espelho inline de assets/icons/sun.svg e assets/icons/moon.svg para boot instantâneo sem latência de fetch.
+// Manter sincronizado caso os SVGs em assets/icons/{sun,moon}.svg sejam alterados.
 const THEME_ICON_SUN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M6.34 17.66l-1.41 1.41"/><path d="M19.07 4.93l-1.41 1.41"/></svg>`;
 const THEME_ICON_MOON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`;
 
@@ -3222,7 +3687,7 @@ export function getTheme() {
 
 /**
  * Extrai em tempo real as cores semânticas do tema ativo diretamente das variáveis CSS.
- * Projetado para alimentar gráficos 2D (RealtimePlot / MultiSeriesPlot) e, na Fase 2, os canvas das simulações.
+ * Projetado para alimentar gráficos 2D (RealtimePlot / MultiSeriesPlot) e canvas das simulações.
  */
 export function getThemeColors() {
     const s = getComputedStyle(document.documentElement);
@@ -3232,30 +3697,30 @@ export function getThemeColors() {
 
     return {
         theme,
-        bgMain: read('--bg-main', isLight ? '#f4f4f5' : '#070b16'),
-        bgSurface: read('--bg-surface', isLight ? '#ffffff' : '#0f172a'),
-        bgCard: read('--bg-card', isLight ? '#ffffff' : 'rgba(30, 41, 59, 0.65)'),
+        bgMain: read('--bg-main', isLight ? '#e7e5e4' : '#0c0a09'),
+        bgSurface: read('--bg-surface', isLight ? '#fafaf9' : '#1c1917'),
+        bgCard: read('--bg-card', isLight ? '#ffffff' : 'rgba(41, 37, 36, 0.65)'),
         bgCanvas: read('--bg-canvas', '#070b16'),
-        accent: read('--accent-color', isLight ? '#18181b' : '#facc15'),
-        accentFg: read('--accent-fg', isLight ? '#ffffff' : '#0f172a'),
-        textPrimary: read('--text-primary', isLight ? '#09090b' : '#f8fafc'),
-        textSecondary: read('--text-secondary', isLight ? '#52525b' : '#94a3b8'),
-        textMuted: read('--text-muted', isLight ? '#71717a' : '#64748b'),
-        border: read('--border-color', isLight ? 'rgba(9, 9, 11, 0.14)' : 'rgba(255, 255, 255, 0.10)'),
-        plotBg: read('--plot-bg', isLight ? '#fafafa' : 'rgba(0, 0, 0, 0.40)'),
-        plotGrid: read('--plot-grid', isLight ? 'rgba(9, 9, 11, 0.09)' : 'rgba(255, 255, 255, 0.08)'),
-        plotAxis: read('--plot-axis', isLight ? 'rgba(9, 9, 11, 0.26)' : 'rgba(255, 255, 255, 0.22)'),
-        plotText: read('--plot-text', isLight ? 'rgba(9, 9, 11, 0.68)' : 'rgba(255, 255, 255, 0.65)'),
-        plotCrosshair: read('--plot-crosshair', isLight ? 'rgba(9, 9, 11, 0.42)' : 'rgba(255, 255, 255, 0.45)'),
-        plotTooltipBg: read('--plot-tooltip-bg', isLight ? 'rgba(255, 255, 255, 0.96)' : 'rgba(15, 23, 42, 0.92)'),
-        plotTooltipBorder: read('--plot-tooltip-border', isLight ? 'rgba(9, 9, 11, 0.18)' : 'rgba(255, 255, 255, 0.18)'),
-        plotTooltipText: read('--plot-tooltip-text', isLight ? '#09090b' : '#f8fafc'),
-        canvasGrid: read('--canvas-grid', isLight ? 'rgba(9, 9, 11, 0.10)' : 'rgba(255, 255, 255, 0.08)'),
-        canvasText: read('--canvas-text', isLight ? '#09090b' : '#f8fafc'),
-        cyan: read('--color-cyan', isLight ? '#0284c7' : '#38bdf8'),
+        accent: read('--accent-color', isLight ? '#1e1b4b' : '#818cf8'),
+        accentFg: read('--accent-fg', isLight ? '#ffffff' : '#0c0a09'),
+        textPrimary: read('--text-primary', isLight ? '#0f172a' : '#f8fafc'),
+        textSecondary: read('--text-secondary', isLight ? '#334155' : '#94a3b8'),
+        textMuted: read('--text-muted', isLight ? '#475569' : '#94a3b8'),
+        border: read('--border-color', isLight ? '#64748b' : 'rgba(255, 255, 255, 0.28)'),
+        plotBg: read('--plot-bg', isLight ? '#fafaf9' : 'rgba(0, 0, 0, 0.40)'),
+        plotGrid: read('--plot-grid', isLight ? 'rgba(15, 23, 42, 0.11)' : 'rgba(255, 255, 255, 0.08)'),
+        plotAxis: read('--plot-axis', isLight ? 'rgba(15, 23, 42, 0.30)' : 'rgba(255, 255, 255, 0.22)'),
+        plotText: read('--plot-text', isLight ? 'rgba(15, 23, 42, 0.72)' : 'rgba(255, 255, 255, 0.65)'),
+        plotCrosshair: read('--plot-crosshair', isLight ? 'rgba(30, 27, 75, 0.50)' : 'rgba(255, 255, 255, 0.45)'),
+        plotTooltipBg: read('--plot-tooltip-bg', isLight ? 'rgba(255, 255, 255, 0.98)' : 'rgba(28, 25, 23, 0.94)'),
+        plotTooltipBorder: read('--plot-tooltip-border', isLight ? '#64748b' : 'rgba(255, 255, 255, 0.28)'),
+        plotTooltipText: read('--plot-tooltip-text', isLight ? '#0f172a' : '#f8fafc'),
+        canvasGrid: read('--canvas-grid', isLight ? 'rgba(15, 23, 42, 0.12)' : 'rgba(255, 255, 255, 0.08)'),
+        canvasText: read('--canvas-text', isLight ? '#0f172a' : '#f8fafc'),
+        cyan: read('--color-cyan', isLight ? '#0369a1' : '#38bdf8'),
         emerald: read('--color-emerald', isLight ? '#15803d' : '#22c55e'),
         purple: read('--color-purple', isLight ? '#7e22ce' : '#a855f7'),
-        rose: read('--color-rose', isLight ? '#e11d48' : '#f43f5e'),
+        rose: read('--color-rose', isLight ? '#e11d48' : '#fb7185'),
         pink: read('--color-pink', isLight ? '#db2777' : '#f472b6'),
         orange: read('--color-orange', isLight ? '#c2410c' : '#fb923c')
     };
@@ -3306,8 +3771,9 @@ export function setTheme(theme, options = {}) {
         syncThemeToggleButton(btn, normalized);
     });
 
-    if (_activeViewerPlot) {
-        renderPlotViewerCanvas();
+    const viewerOverlay = document.getElementById('sim-plot-viewer-modal');
+    if (_activeViewerPlot && viewerOverlay && !viewerOverlay.classList.contains('hidden')) {
+        renderPlotViewerCanvas(_activeViewerPlot);
     }
 
     window.dispatchEvent(new CustomEvent('themechange', {

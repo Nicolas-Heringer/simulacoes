@@ -37,7 +37,11 @@ import {
     MatrixTensorEditor,
     setFieldState,
     getTheme,
-    onThemeChange
+    getThemeColors,
+    setTheme,
+    toggleTheme,
+    onThemeChange,
+    initThemeToggle
 } from './sim-ui.js';
 
 // Re-exporta todos os controladores e utilitários para retrocompatibilidade
@@ -71,10 +75,16 @@ export {
     solveEigenvaluesSymmetric3x3,
     diagonalizeSymmetric3x3,
     MatrixTensorEditor,
-    setFieldState
+    setFieldState,
+    getTheme,
+    getThemeColors,
+    setTheme,
+    toggleTheme,
+    onThemeChange,
+    initThemeToggle
 };
 
-// Catálogo Canônico Completo: 74 Ícones Vetoriais SVG em assets/icons/
+// Catálogo Canônico Completo: 75 Ícones Vetoriais SVG em assets/icons/
 const ICONS_LIST = [
     // Transporte, Navegação & UI (19)
     'play', 'pause', 'step', 'refresh', 'refresh-cw', 'rotate',
@@ -103,7 +113,6 @@ const ICONS_LIST = [
     'radial-inward', 'radial-outward'
 ];
 
-let clickCount = 0;
 let scene, camera, renderer, controls;
 let currentMesh = null, wireMesh = null, pointsMesh = null;
 let testLight = null;
@@ -131,6 +140,7 @@ function initThreeScene() {
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.domElement.id = 'simulationCanvas';
     container.appendChild(renderer.domElement);
 
     controls = new OrbitControls(camera, renderer.domElement);
@@ -271,12 +281,12 @@ const COMPONENT_TARGETS = ['nav', 'btn', 'card', 'slider', 'switch', 'hud', 'div
 
 const SWATCH_SLOTS = {
     light: ['#b45309', '#0369a1', '#0f766e', '#1e1b4b', '#be123c'],
-    dark:  ['#facc15', '#38bdf8', '#2dd4bf', '#818cf8', '#f43f5e']
+    dark:  ['#facc15', '#38bdf8', '#2dd4bf', '#818cf8', '#fb7185']
 };
 
 const NEUTRAL_TOKENS = {
     light: { default: '#18181b', divider: '#475569' },
-    dark:  { default: '#e2e8f0', divider: '#64748b' }
+    dark:  { default: '#e2e8f0', divider: '#94a3b8' }
 };
 
 const SURFACE_PRESETS = {
@@ -444,12 +454,13 @@ function applyWorkbenchStateToDOM() {
     root.style.setProperty('--border-strong', brd.borderStrong);
 
     // 3. Estilo de Divisores
-    root.setAttribute('data-divider-style', state.dividers || 'minimal');
+    root.setAttribute('data-divider-style', state.dividers || 'clean');
 
     // 4. Cor Global + Componentes
     const globalColor = resolveComponentColor(mode, state, 'global');
     root.style.setProperty('--accent-color', globalColor);
     root.style.setProperty('--accent-color-hover', globalColor);
+    root.style.setProperty('--accent-fg', mode === 'light' ? '#ffffff' : '#0c0a09');
 
     COMPONENT_TARGETS.forEach(target => {
         const resolved = resolveComponentColor(mode, state, target);
@@ -549,6 +560,7 @@ function buildExportCSS() {
         const surf = SURFACE_PRESETS[mode][st.surface];
         const brd = BORDER_PRESETS[mode][st.borders];
         const globalCol = resolveComponentColor(mode, st, 'global');
+        const accentFg = mode === 'light' ? '#ffffff' : '#0c0a09';
         const lines = [
             `${selector} {`,
             `    /* Paleta Base: ${st.paletteId} | Superfície: ${st.surface} | Bordas: ${st.borders} | Divisores: ${st.dividers} */`,
@@ -561,7 +573,9 @@ function buildExportCSS() {
             `    --border-color: ${brd.borderColor};`,
             `    --border-subtle: ${brd.borderSubtle};`,
             `    --border-strong: ${brd.borderStrong};`,
-            `    --accent-color: ${globalCol};`
+            `    --accent-color: ${globalCol};`,
+            `    --accent-color-hover: ${globalCol};`,
+            `    --accent-fg: ${accentFg};`
         ];
         COMPONENT_TARGETS.forEach(t => {
             const val = st.components[t];
@@ -573,7 +587,12 @@ function buildExportCSS() {
         return lines.join('\n');
     };
 
-    return `${formatModeBlock('dark', ':root')}\n\n${formatModeBlock('light', ':root[data-theme="light"]')}`;
+    const currentDivStyle = workbenchState[getTheme()]?.dividers || 'clean';
+    const dividerComment = currentDivStyle === 'clean'
+        ? `/* Divisores padrão (Limpo): sem necessidade de atributo extra em <html> */`
+        : `/* Divisores (${currentDivStyle}): aplique data-divider-style="${currentDivStyle}" no elemento <html> */`;
+
+    return `${dividerComment}\n\n${formatModeBlock('dark', ':root')}\n\n${formatModeBlock('light', ':root[data-theme="light"]')}`;
 }
 
 function setupListeners() {
@@ -585,12 +604,10 @@ function setupListeners() {
         onResize: onWindowResize
     });
 
-    // --- CONTROLE DE BOTTOM SHEET (MOBILE & TABLETS <= 900PX) ---
+    // --- CONTROLE DE PAINEL FLUTUANTE MOBILE (MOBILE & TABLETS <= 900PX) ---
     initBottomSheet({
         panelSelector: '.controls-panel',
-        handleSelector: '#sheet-drag-handle',
-        tabNavSelector: '.tab-nav',
-        collapseBtnSelector: '#btn-collapse-sidebar',
+        triggerSelector: '#btn-mobile-settings',
         defaultState: 'peek'
     });
 
@@ -682,10 +699,10 @@ function setupListeners() {
         }
 
         // Mantém o Workbench aberto enquanto o usuário testa abas, controles do painel lateral
-        // ou alterna entre Modo Claro e Modo Escuro no cabeçalho; fecha apenas ao clicar no ✕,
+        // ou alterna entre Modo Claro e Modo Escuro no cabeçalho; fecha ao clicar no ✕,
         // no botão de toggle da barra ou diretamente sobre o palco 3D (#simulationCanvas).
         document.addEventListener('click', (e) => {
-            if (e.target && e.target.id === 'simulationCanvas') {
+            if (e.target && (e.target.id === 'simulationCanvas' || e.target === renderer?.domElement)) {
                 colorTooltip.classList.add('hidden');
             }
         });
@@ -792,26 +809,20 @@ function setupListeners() {
         isSimRunning = active;
 
         const headerBadge = document.getElementById('header-status-badge');
-        const footerBadge = document.getElementById('footer-status-badge');
         const footerText = document.getElementById('footer-status-text');
-        const fpsVal = document.getElementById('hud-fps-val');
 
         if (active) {
-            if (headerBadge) headerBadge.innerHTML = '<span class="status-dot"></span><span>Executando</span>';
+            if (headerBadge) {
+                headerBadge.classList.remove('idle');
+                headerBadge.innerHTML = '<span class="status-dot"></span><span>Executando</span>';
+            }
             if (footerText) footerText.textContent = 'Simulação Ativa';
-            if (footerBadge) footerBadge.classList.add('badge-accent');
-            if (fpsVal) {
-                fpsVal.textContent = '60 fps (Ativo)';
-                fpsVal.style.color = 'var(--color-emerald, #22c55e)';
-            }
         } else {
-            if (headerBadge) headerBadge.innerHTML = '<span class="status-dot"></span><span>Pausado</span>';
-            if (footerText) footerText.textContent = 'Simulação Pausada';
-            if (footerBadge) footerBadge.classList.remove('badge-accent');
-            if (fpsVal) {
-                fpsVal.textContent = 'Pausado (0 fps)';
-                fpsVal.style.color = 'var(--color-yellow, #facc15)';
+            if (headerBadge) {
+                headerBadge.classList.add('idle');
+                headerBadge.innerHTML = '<span class="status-dot"></span><span>Pausado</span>';
             }
+            if (footerText) footerText.textContent = 'Simulação Pausada';
         }
     });
 
@@ -819,9 +830,8 @@ function setupListeners() {
     const btnStep = document.getElementById('btn-transport-step');
     if (btnStep) {
         btnStep.addEventListener('click', () => {
-            if (isSimRunning) {
-                if (playControl) playControl.setState(0);
-                isSimRunning = false;
+            if (isSimRunning && playControl) {
+                playControl.setState(0, true);
             }
             simTime += 0.05 * simTimeScale;
             if (currentMesh) {
@@ -836,9 +846,8 @@ function setupListeners() {
     const btnReset = document.getElementById('btn-demo-secondary');
     if (btnReset) {
         btnReset.addEventListener('click', () => {
-            if (isSimRunning) {
-                if (playControl) playControl.setState(0);
-                isSimRunning = false;
+            if (isSimRunning && playControl) {
+                playControl.setState(0, true);
             }
             simTime = 0.0;
             if (currentMesh) {
@@ -848,16 +857,12 @@ function setupListeners() {
             }
             const headerBadge = document.getElementById('header-status-badge');
             const footerText = document.getElementById('footer-status-text');
-            const footerBadge = document.getElementById('footer-status-badge');
-            const fpsVal = document.getElementById('hud-fps-val');
 
-            if (headerBadge) headerBadge.innerHTML = '<span class="status-dot"></span><span>Pronto</span>';
-            if (footerText) footerText.textContent = 'Simulação Reiniciada';
-            if (footerBadge) footerBadge.classList.remove('badge-accent');
-            if (fpsVal) {
-                fpsVal.textContent = 'Pronto (60 fps)';
-                fpsVal.style.color = 'var(--color-emerald, #22c55e)';
+            if (headerBadge) {
+                headerBadge.classList.remove('idle');
+                headerBadge.innerHTML = '<span class="status-dot"></span><span>Pronto</span>';
             }
+            if (footerText) footerText.textContent = 'Simulação Pronta';
         });
     }
 
@@ -874,26 +879,44 @@ function setupListeners() {
         });
     }
 
-    // Botão de Ação Primária de Demonstração na Aba 1
-    const btnDemoAction = document.getElementById('btn-demo-action');
-    if (btnDemoAction) {
-        btnDemoAction.addEventListener('click', () => {
-            if (currentMesh) {
-                currentMesh.rotation.x += 0.35;
-                if (wireMesh) wireMesh.rotation.x = currentMesh.rotation.x;
-                if (pointsMesh) pointsMesh.rotation.x = currentMesh.rotation.x;
+    // Botão de Ação Primária, Botões de Tom e Ações de Câmera (Aba 1 & Canvas)
+    const applyPulseRotation = (dx = 0.35, dy = 0) => {
+        if (currentMesh) {
+            currentMesh.rotation.x += dx;
+            currentMesh.rotation.y += dy;
+            if (wireMesh) wireMesh.rotation.copy(currentMesh.rotation);
+            if (pointsMesh) pointsMesh.rotation.copy(currentMesh.rotation);
+        }
+    };
+
+    document.getElementById('btn-demo-action')?.addEventListener('click', () => applyPulseRotation(0.35, 0));
+    document.getElementById('btn-demo-tone-cyan')?.addEventListener('click', () => applyPulseRotation(0, 0.45));
+    document.getElementById('btn-demo-outline')?.addEventListener('click', () => applyPulseRotation(-0.35, -0.35));
+
+    const resetCameraView = (x = 0, y = 0, z = 3.8) => {
+        if (!camera || !controls) return;
+        camera.position.set(x, y, z);
+        controls.target.set(0, 0, 0);
+        controls.update();
+    };
+    document.getElementById('btn-canvas-reset-cam')?.addEventListener('click', () => resetCameraView(0, 0, 3.8));
+    document.getElementById('btn-view-x')?.addEventListener('click', () => resetCameraView(3.8, 0, 0));
+    document.getElementById('btn-view-y')?.addEventListener('click', () => resetCameraView(0, 3.8, 0.01));
+    document.getElementById('btn-view-z')?.addEventListener('click', () => resetCameraView(0, 0, 3.8));
+
+    // Toggle de demonstração do Tooltip de Inspeção (.cell-tooltip)
+    const demoTooltip = document.getElementById('demo-cell-tooltip');
+    const btnToggleTooltipDemo = document.getElementById('btn-toggle-tooltip-demo');
+    if (demoTooltip && btnToggleTooltipDemo) {
+        btnToggleTooltipDemo.addEventListener('click', () => {
+            const visible = demoTooltip.classList.toggle('visible');
+            btnToggleTooltipDemo.classList.toggle('is-active', visible);
+            if (visible) {
+                demoTooltip.style.left = '24px';
+                demoTooltip.style.top = '112px';
             }
         });
     }
-
-    // Speed Selector Pills (Legado)
-    document.querySelectorAll('#transport-speed-pills .speed-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('#transport-speed-pills .speed-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            simTimeScale = parseFloat(btn.dataset.speed || '1.0');
-        });
-    });
 
     // --- INICIALIZAÇÃO DOS GRÁFICOS EM TEMPO REAL (ABA 4) ---
     const plotCanvas = document.getElementById('plot-canvas');
@@ -948,17 +971,6 @@ function setupListeners() {
     // --- INICIALIZAÇÃO DO MODAL DE INSTRUÇÕES INICIAIS (1ª SESSÃO + BOTÃO DICAS) ---
     initOnboardingModal('#modal-onboarding', {
         triggerSelector: '#btn-open-onboarding'
-    });
-
-    // --- CLIQUE E CONTADORES DE TESTE ---
-    const registerClick = () => {
-        clickCount++;
-        const spanClicks = document.getElementById('hud-click-count');
-        if (spanClicks) spanClicks.textContent = `${clickCount}`;
-    };
-
-    document.querySelectorAll('.btn-primary, .btn-secondary, .btn-preset, .segment-btn, .btn-icon, .sim-btn, .speed-btn').forEach(b => {
-        b.addEventListener('click', registerClick);
     });
 
     // Preset Grid Active Toggle
@@ -1019,9 +1031,12 @@ function setupListeners() {
     });
 
     // --- SLIDERS SINCRONIZADOS (DUAL-INPUT) ---
+    const geomLabels = { sphere: 'Esfera Geodésica', cube: 'Cubo Poligonal', torus: 'Torus / Toroide' };
     syncDualSlider('#slider-demo-radius', '#input-demo-radius', (rad) => {
         const hudRadius = document.getElementById('hud-sphere-radius');
-        if (hudRadius) hudRadius.textContent = rad.toFixed(2);
+        if (hudRadius) hudRadius.textContent = `${rad.toFixed(2)} m`;
+        const tipRadius = document.getElementById('tooltip-demo-radius');
+        if (tipRadius) tipRadius.textContent = `${rad.toFixed(2)} m`;
         const steps = parseInt(document.getElementById('slider-demo-steps')?.value || 16);
         const meshType = document.getElementById('select-demo-mesh')?.value || 'sphere';
         buildMeshGeometry(meshType, rad, steps);
@@ -1039,6 +1054,11 @@ function setupListeners() {
             const rad = parseFloat(document.getElementById('slider-demo-radius')?.value || 1.0);
             const steps = parseInt(document.getElementById('slider-demo-steps')?.value || 16);
             buildMeshGeometry(e.target.value, rad, steps);
+            const label = geomLabels[e.target.value] || e.target.value;
+            const infoBadge = document.getElementById('demo-canvas-info-badge');
+            if (infoBadge) infoBadge.textContent = `Cena 3D · ${label}`;
+            const tipGeom = document.getElementById('tooltip-demo-geom');
+            if (tipGeom) tipGeom.textContent = label.split(' ')[0];
         });
     }
 
@@ -1138,39 +1158,70 @@ function setupSemanticStateDemo() {
     applyDemoState('valid');
 }
 
-/** Configura a demonstração do MatrixTensorEditor 2x2 */
+/** Configura a demonstração do MatrixTensorEditor 2x2 e Tensor Simétrico 3x3 */
 function setupMatrixEditorDemo() {
     const containerEl = document.getElementById('demo-matrix-editor');
-    if (!containerEl) return;
+    if (containerEl) {
+        const detEl = document.getElementById('matrix-demo-det');
+        const trEl = document.getElementById('matrix-demo-tr');
+        const eigEl = document.getElementById('matrix-demo-eig');
 
-    const detEl = document.getElementById('matrix-demo-det');
-    const trEl = document.getElementById('matrix-demo-tr');
-    const eigEl = document.getElementById('matrix-demo-eig');
-
-    const updateReadout = (analysis) => {
-        if (!analysis) return;
-        if (detEl) detEl.textContent = analysis.determinant.toFixed(2);
-        if (trEl) trEl.textContent = analysis.trace.toFixed(2);
-        if (eigEl) {
-            if (analysis.isReal) {
-                eigEl.textContent = `${analysis.eigenvalues[0].toFixed(2)}, ${analysis.eigenvalues[1].toFixed(2)}`;
-            } else {
-                const { re, im } = analysis.eigenvalues[0];
-                eigEl.textContent = `${re.toFixed(2)} ± ${Math.abs(im).toFixed(2)}i`;
+        const updateReadout = (analysis) => {
+            if (!analysis) return;
+            if (detEl) detEl.textContent = analysis.determinant.toFixed(2);
+            if (trEl) trEl.textContent = analysis.trace.toFixed(2);
+            if (eigEl) {
+                if (analysis.isReal) {
+                    eigEl.textContent = `${analysis.eigenvalues[0].toFixed(2)}, ${analysis.eigenvalues[1].toFixed(2)}`;
+                } else {
+                    const { re, im } = analysis.eigenvalues[0];
+                    eigEl.textContent = `${re.toFixed(2)} ± ${Math.abs(im).toFixed(2)}i`;
+                }
             }
-        }
-    };
+        };
 
-    const editor = new MatrixTensorEditor(containerEl, {
-        dim: 2,
-        symmetric: false,
-        step: 0.1,
-        labels: [['a_{11}', 'a_{12}'], ['a_{21}', 'a_{22}']],
-        initialValue: [[1.2, 0.4], [0.2, 1.0]],
-        onChange: (_M, analysis) => updateReadout(analysis)
-    });
+        const editor = new MatrixTensorEditor(containerEl, {
+            dim: 2,
+            symmetric: false,
+            step: 0.1,
+            labels: [['a_{11}', 'a_{12}'], ['a_{21}', 'a_{22}']],
+            initialValue: [[1.2, 0.4], [0.2, 1.0]],
+            onChange: (_M, analysis) => updateReadout(analysis)
+        });
 
-    editor.notifyChange();
+        editor.notifyChange();
+    }
+
+    const tensorEl = document.getElementById('demo-tensor3-editor');
+    if (tensorEl) {
+        const invEl = document.getElementById('tensor3-demo-inv');
+        const eig3El = document.getElementById('tensor3-demo-eig');
+
+        const tensorEditor = new MatrixTensorEditor(tensorEl, {
+            dim: 3,
+            symmetric: true,
+            step: 0.2,
+            labels: [
+                ['I_{xx}', 'I_{xy}', 'I_{xz}'],
+                ['I_{yx}', 'I_{yy}', 'I_{yz}'],
+                ['I_{zx}', 'I_{zy}', 'I_{zz}']
+            ],
+            initialValue: [
+                [3.0, 0.4, 0.0],
+                [0.4, 2.0, 0.2],
+                [0.0, 0.2, 1.0]
+            ],
+            onChange: (_M, analysis) => {
+                if (!analysis) return;
+                if (invEl) invEl.textContent = `${analysis.trace.toFixed(2)} / ${analysis.determinant.toFixed(2)}`;
+                if (eig3El && Array.isArray(analysis.values)) {
+                    eig3El.textContent = analysis.values.map(v => v.toFixed(2)).join(', ');
+                }
+            }
+        });
+
+        tensorEditor.notifyChange();
+    }
 }
 
 /** Configura o playground de fórmulas matemáticas interativas dinâmicas via KaTeX */
@@ -1214,11 +1265,13 @@ function populateIconGallery() {
 
     gallery.innerHTML = '';
     ICONS_LIST.forEach(name => {
-        const card = document.createElement('div');
+        const card = document.createElement('button');
+        card.type = 'button';
         card.className = 'icon-card';
         card.title = `Copiar código HTML do ícone ${name}.svg`;
+        card.setAttribute('aria-label', `Copiar HTML do ícone ${name}.svg`);
         card.innerHTML = `
-            <img src="../assets/icons/${name}.svg" class="icon-svg" style="width: 22px; height: 22px;" alt="${name}">
+            <img src="../assets/icons/${name}.svg" class="icon-svg" alt="${name}">
             <span class="icon-card-name">${name}.svg</span>
         `;
         card.addEventListener('click', () => {
@@ -1230,7 +1283,7 @@ function populateIconGallery() {
         gallery.appendChild(card);
     });
 
-    inlineSVGImages();
+    inlineSVGImages(gallery);
 }
 
 window.addEventListener('DOMContentLoaded', async () => {

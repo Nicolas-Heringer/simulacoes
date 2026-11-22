@@ -1,28 +1,30 @@
 ---
 name: desenvolver-simulacao
 description: >-
-  Criação, refatoração, modernização e manutenção de simulações científicas e matemáticas
-  no padrão Design System 2.0 (sim-ui.js, ui_lab.html como fonte da verdade canônica, layout
-  responsivo desktop/mobile bottom-sheet, Three.js, KaTeX e 71 ícones nativos). Use sempre que
-  o usuário pedir para criar uma nova simulação, migrar uma simulação legada, adicionar
-  controles físicos, criar novos componentes de UI ou ajustar a interface.
+  Guia operacional para criação, refatoração, modernização e manutenção de simulações
+  científicas e matemáticas no padrão Design System 2.0 (sim-ui.js, ui_lab.html como fonte
+  da verdade canônica, temas claro/escuro com blindagem do palco, painel flutuante mobile,
+  Three.js, KaTeX, 75 ícones SVG nativos e validação automatizada via validate-ds.js).
+  Acionado em tarefas de criação de simulações, migração de páginas legadas, adição de
+  controles físicos ou evolução de componentes do Design System.
 ---
 
 # Workflow: Desenvolvimento e Modernização de Simulações Científicas
 
-Este guia operacional orienta a criação do zero, a refatoração de simulações interativas e a evolução de componentes para a plataforma, assegurando conformidade estrita com o **Design System 2.0** e com a vitrine canônica **`ui_lab`**.
+Este guia operacional orienta a criação do zero, a refatoração de simulações interativas e a evolução de componentes para a plataforma, assegurando conformidade estrita com o **Design System 2.0**, com a vitrine canônica **`ui_lab`** e com o validador automatizado **`validate-ds.js`**.
 
 ---
 
 ## 1. Documentos e Recursos de Referência (Fonte da Verdade)
 
 Ao executar este fluxo, consulte obrigatoriamente os arquivos de referência:
-* **Vitrine Canônica de Componentes (HTML)**: [`simulacoes/ui_lab.html`](../../../../simulacoes/ui_lab.html)
-* **Vitrine Canônica de Controladores (JS)**: [`simulacoes/scripts/ui_lab.js`](../../../../simulacoes/scripts/ui_lab.js)
-* **Biblioteca Central de UI**: [`simulacoes/scripts/sim-ui.js`](../../../../simulacoes/scripts/sim-ui.js)
-* **Folha de Estilos do Design System**: [`simulacoes/css/design-system.css`](../../../../simulacoes/css/design-system.css)
+* **Vitrine Canônica de Componentes (HTML)**: [`simulacoes/ui_lab.html`](../../../../../simulacoes/ui_lab.html)
+* **Vitrine Canônica de Controladores (JS)**: [`simulacoes/scripts/ui_lab.js`](../../../../../simulacoes/scripts/ui_lab.js)
+* **Biblioteca Central de UI**: [`simulacoes/scripts/sim-ui.js`](../../../../../simulacoes/scripts/sim-ui.js)
+* **Folha de Estilos do Design System**: [`simulacoes/css/design-system.css`](../../../../../simulacoes/css/design-system.css)
+* **Validador Automatizado (CI Gate)**: [`simulacoes/scripts/validate-ds.js`](../../../../../simulacoes/scripts/validate-ds.js)
 * **Especificação Completa de Componentes**: [references/design-system-guide.md](./references/design-system-guide.md)
-* **Catálogo de Ícones Nativos (71 SVGs)**: [references/icon-catalog.md](./references/icon-catalog.md)
+* **Catálogo de Ícones Nativos (75 SVGs)**: [references/icon-catalog.md](./references/icon-catalog.md)
 * **Template HTML Base**: [templates/simulacao-template.html](./templates/simulacao-template.html)
 * **Template JS Modular**: [templates/simulacao-template.js](./templates/simulacao-template.js)
 
@@ -33,86 +35,79 @@ Ao executar este fluxo, consulte obrigatoriamente os arquivos de referência:
 ## 2. Procedimento 1: Criando uma Nova Simulação do Zero
 
 1. **Consulta ao Catálogo (`ui_lab.html`) e Scaffold do HTML**:
-   * Crie o arquivo `simulacoes/<nome>.html` copiando a estrutura de [templates/simulacao-template.html](./templates/simulacao-template.html).
-   * Atualize a tag `<title>` e a importação do script final (`scripts/<nome>.js`). Inclua `<script src="../theme-init.js"></script>` antes de `css/design-system.css` para boot sem piscada do tema salvo. O cabeçalho `.sim-header` contém `.btn-back` à esquerda e `.sim-header-actions` com `#btn-theme-toggle` e `#btn-open-onboarding` (`.btn-header-action`) à direita (sem título no header).
-   * Configure a navegação por abas usando `.tab-nav` com botões `.tab-btn[data-tab="..."]` e painéis `.tab-pane`.
-   * Insira os controles necessários baseando-se exclusivamente nas marcações de `simulacoes/ui_lab.html`:
-     - `.canvas-toolbar.pos-bottom-center` (`#canvas-transport-toolbar`) flutuando na base de `.canvas-area` para controle temporal (Play/Pause, Passo, Reset e Velocidade Cíclica), mantendo o menu lateral limpo.
-     - `.sim-dual-slider` para parâmetros numéricos contínuos.
-     - `.sim-switch` e `.segmented-control` para opções booleanas ou modos discretos.
-     - `.sim-readout` (`.sim-readout-row` + `.tone-*`) para painéis de grandezas calculadas.
-     - `.sim-plot-card` para gráficos `RealtimePlot` ou `MultiSeriesPlot`.
-     - Container para `MatrixTensorEditor` caso a simulação envolva matrizes $2\times 2$ ou tensores $3\times 3$.
-     - Atributos `data-focus-control` nos controles essenciais que devem aparecer na barra flutuante durante o Modo Foco (`F`).
-   * Configure o modal `#modal-onboarding` com linguagem simples, direta e focada na intuição de interação com a simulação (sem ícones dentro de `.onboarding-card-title` e sem equações densas; símbolos isolados simples são permitidos).
-   * Configure a teoria e equações KaTeX em `.theory-card` na aba de teoria e/ou no modal `.sim-modal-overlay`.
+   * Crie `simulacoes/<nome>.html` a partir de [templates/simulacao-template.html](./templates/simulacao-template.html).
+   * Atualize `<title>` e o `<script type="module" src="scripts/<nome>.js">`. Mantenha `<meta name="theme-color" content="#1c1917">` e `<script src="../theme-init.js"></script>` antes de `css/design-system.css` para boot sem piscada.
+   * Mantenha `.sim-header` com `.btn-back` à esquerda e `.sim-header-actions` contendo `#btn-theme-toggle` e `#btn-open-onboarding` à direita.
+   * Estruture abas com `<div class="tab-nav" role="tablist">`, botões `<button type="button" class="tab-btn" data-tab="...">` e painéis `.tab-pane` (sem `style="display: none;"` inline).
+   * Insira controles exclusivamente a partir de `simulacoes/ui_lab.html`:
+     - `#canvas-transport-toolbar` (`.canvas-toolbar.pos-bottom-center`) dentro de `.canvas-area`.
+     - `#btn-mobile-settings` (`.canvas-btn-settings`) dentro de `.canvas-area`.
+     - `.slider-container.sim-dual-slider` para parâmetros contínuos (com `data-focus-control="slider"` diretamente no `<input type="range">`).
+     - `.sim-switch`, `.segmented-control`, `select.sim-control` e `.sim-readout` (com `.tone-*` quando aplicável).
+     - `.sim-plot-card` para `RealtimePlot` ou `MultiSeriesPlot`; container para `MatrixTensorEditor` quando houver matrizes/tensores.
+   * Configure `#modal-onboarding` com linguagem intuitiva, **sem ícones dentro de `.onboarding-card-title`**, preservando `#onboarding-qr-panel` e `#btn-toggle-onboarding-qr`.
+   * Registre o arquivo `<nome>.html` no catálogo `KNOWN_SIMULATIONS` em `simulacoes/scripts/sim-ui.js` para a geração canônica do QR Code.
 
 2. **Scaffold do JavaScript**:
    * Crie `simulacoes/scripts/<nome>.js` a partir de [templates/simulacao-template.js](./templates/simulacao-template.js).
-   * Importe os controladores necessários de `./sim-ui.js`: `initSidebarCollapse`, `initBottomSheet`, `initTabs`, `initFocusMirrorToolbar`, `initToggleButton`, `syncDualSlider`, `setFieldState`, `RealtimePlot`, `MultiSeriesPlot`, `MatrixTensorEditor`, `initModal`, `inlineSVGImages`, `initKaTeXAutoRender`, `renderMath`.
-   * Conecte cada grandeza física com `syncDualSlider('#slider-id', '#num-id', callback)`.
-   * **Desacoplamento Física vs. Apresentação**: Separe estritamente `stepPhysics(dt)` (avanço temporal executado apenas quando `state.isRunning === true`) de `updateVisualScene()` (*Presentation Pass* que sincroniza meshes, `ArrowHelper`, visibilidades e renderiza a cena). Todo listener de controle (`syncDualSlider`, switches, seletores, reset) deve chamar `updateVisualScene()` para atualizar o canvas imediatamente mesmo com a simulação pausada.
-   * Utilize `setFieldState(target, state, hintText)` sempre que precisar indicar estados semânticos (`.is-valid`, `.is-warning`, `.is-invalid`, `.is-ready`, `.is-disabled`).
-   * Finalize a inicialização chamando `await inlineSVGImages()` e `initKaTeXAutoRender()`.
+   * Importe os controladores necessários de `./sim-ui.js`: `initSidebarCollapse`, `initBottomSheet`, `initTabs`, `initFocusMirrorToolbar`, `initToggleButton`, `syncDualSlider`, `setFieldState`, `RealtimePlot`, `MultiSeriesPlot`, `MatrixTensorEditor`, `initModal`, `initOnboardingModal`, `getTheme`, `getThemeColors`, `onThemeChange`, `initThemeToggle`, `inlineSVGImages`, `initKaTeXAutoRender`, `renderMath`.
+   * Conecte os controles de transporte sincronizando `playControl.setState(0, true)` em Passo Único e Reset para garantir que `state.isRunning` seja atualizado corretamente.
+   * **Desacoplamento Física vs. Apresentação**: mantenha `stepPhysics(dt)` isolado (executado apenas com `state.isRunning === true` ou passo único) e invoque `updateVisualScene()` em todo controle de interface para atualização imediata mesmo pausado.
+   * Finalize com `await inlineSVGImages()` e `initKaTeXAutoRender(document.body)`.
 
-3. **Verificação de Estilos Complementares**:
-   * O estilo principal é suprido integralmente por `css/design-system.css`.
-   * Se a simulação exigir regras específicas de layout interno do canvas, crie `css/<nome>.css` contendo apenas regras de domínio restrito, derivando todas as cores de `var(--accent-color)` e das variáveis semânticas do `:root`.
+3. **Estilos Complementares**:
+   * Crie `simulacoes/css/<nome>.css` apenas para regras restritas ao domínio do palco/canvas, consumindo exclusivamente tokens CSS de `:root` / `--stage-*` (evite hexadecimais hardcoded na UI).
 
 ---
 
 ## 3. Procedimento 2: Migrando uma Simulação Legada para o DS 2.0
 
-Para atualizar uma simulação existente que ainda não segue o Design System 2.0:
+1. **Migração do `<head>` e Layout HTML**:
+   * Garantir `viewport-fit=cover, interactive-widget=resizes-content`, `<meta name="theme-color" content="#1c1917">` e `<script src="../theme-init.js"></script>` antes de `css/design-system.css`.
+   * Migrar `<header>` para `.sim-header` com `.btn-back` à esquerda e `.sim-header-actions` (`#btn-theme-toggle` + `#btn-open-onboarding`) à direita.
+   * Envolver área visual e painel em `<main class="sim-layout">` com `<div class="canvas-area">` contendo `#three-container` (ou `<canvas>`), `.canvas-top-left-stack` (`#focus-context-toolbar` sem `style="display: none;"`), `.canvas-top-actions` (`#btn-expand-sidebar`), `#canvas-transport-toolbar` (`.canvas-toolbar.pos-bottom-center`) e `#btn-mobile-settings` (`.canvas-btn-settings`).
+   * Migrar a barra lateral para `<aside class="controls-panel">` com `<div class="tab-nav" role="tablist">`, `.panel-body` (com `.tab-pane`) e `.panel-footer` (`.sim-badge.idle` + `#footer-sim-timer`). Remover qualquer `.sheet-drag-handle` ou `.sim-transport-bar` legado.
 
-1. **Substituição do Layout HTML**:
-   * Migrar `<header>` para a estrutura `.sim-header` com `.btn-back` à esquerda e `.sim-header-actions` (`#btn-open-onboarding`) à direita.
-   * Envolver a área visual e controles em `<main class="sim-layout">`.
-   * Envolver o canvas em `<div class="canvas-area">` com `#three-container` (ou `<canvas>`) e as ações flutuantes (`.canvas-top-actions`).
-   * Substituir barras laterais antigas por `<aside class="controls-panel">` contendo:
-     - `.sheet-drag-handle` (essencial para mobile).
-     - `.tab-nav` com botões `.tab-btn[data-tab="..."]`.
-     - `.panel-body` rolável contendo `.tab-pane`.
-     - `.panel-footer` com `.sim-badge` de status e timer.
-
-2. **Refatoração dos Controles (Alinhamento com `ui_lab.html`)**:
-   * Substituir inputs e sliders avulsos pela estrutura `.sim-dual-slider`.
-   * Substituir botões de Play/Pausa antigos por `.sim-transport-bar` com botão toggle.
-   * Substituir tabelas ou inputs de matrizes avulsos por `MatrixTensorEditor` e gráficos externos (ex.: Chart.js) por `RealtimePlot` ou `MultiSeriesPlot`.
-   * Substituir listas de valores estáticos por blocos `.sim-readout`.
-   * Substituir ícones de bibliotecas externas pelos 71 SVGs nativos de `../assets/icons/` com a classe `icon-svg`.
+2. **Refatoração dos Controles e Onboarding**:
+   * Substituir sliders avulsos por `.slider-container.sim-dual-slider`, matrizes avulsas por `MatrixTensorEditor`, gráficos externos por `RealtimePlot`/`MultiSeriesPlot`, e ícones externos pelos **75 SVGs** de `../assets/icons/` com `.icon-svg`.
+   * Atualizar modais para `.sim-modal-overlay.hidden` > `.sim-modal-container` + `[data-modal-close]` (removendo `.sim-modal-content` e `.sim-modal-close-btn` legados).
+   * Garantir `#modal-onboarding` com `#onboarding-qr-panel` e sem ícones em `.onboarding-card-title`.
 
 3. **Refatoração do JavaScript**:
-   * Converter o script para módulo ES (`type="module"`).
-   * Importar e inicializar `initSidebarCollapse`, `initBottomSheet`, `initTabs`, `initFocusMirrorToolbar`, `inlineSVGImages` e `initKaTeXAutoRender` de `./sim-ui.js`.
-   * Adicionar anotações `data-focus-control` nos controles prioritários para popularem a barra flutuante no Modo Foco sem duplicação de listeners.
-   * Garantir `touch-action: none;` no container do canvas e usar Pointer Events (`pointerdown`, `pointermove`, `pointerup`).
+   * Converter para ES Module (`type="module"`), inicializar `initSidebarCollapse`, `initBottomSheet` (sem opções legadas), `initTabs`, `initOnboardingModal`, `initFocusMirrorToolbar`, `inlineSVGImages` e `initKaTeXAutoRender`.
+   * Usar `getThemeColors()` e `onThemeChange()` em canvas 2D adaptáveis ao tema claro/escuro.
+   * Garantir `touch-action: none` no canvas e Pointer Events (`pointerdown`, `pointermove`, `pointerup`).
 
 ---
 
-## 4. Procedimento 3: Criando ou Evoluindo um Componente no Design System
+## 4. Procedimento 3: Evoluindo um Componente no Design System
 
-Sempre que uma simulação demandar um componente inédito que ainda não exista no Design System:
-1. **Proibição de Solução Local Isolada**: Não crie o componente apenas no CSS/JS da simulação específica se ele tiver utilidade estrutural ou de controle de UI.
-2. **Implementação Centralizada**: Adicione os estilos genéricos baseados em tokens em `simulacoes/css/design-system.css` e o controlador em `simulacoes/scripts/sim-ui.js`.
-3. **Demonstração Obrigatória no `ui_lab`**: Adicione imediatamente um exemplo funcional e interativo do novo componente em `simulacoes/ui_lab.html` e exporte/inicialize-o em `simulacoes/scripts/ui_lab.js`.
-4. **Atualização da Documentação**: Documente a assinatura e o HTML padrão em [references/design-system-guide.md](./references/design-system-guide.md) (e em [references/icon-catalog.md](./references/icon-catalog.md) caso novos ícones SVG sejam adicionados em `assets/icons/`).
+1. **Centralização**: Implemente o estilo baseado em tokens em `simulacoes/css/design-system.css` e o controlador em `simulacoes/scripts/sim-ui.js`.
+2. **Paridade no `ui_lab`**: Demonstre o novo componente em `simulacoes/ui_lab.html` e re-exporte/inicialize-o em `simulacoes/scripts/ui_lab.js`.
+3. **Documentação**: Atualize [references/design-system-guide.md](./references/design-system-guide.md) (e [references/icon-catalog.md](./references/icon-catalog.md) se adicionar novos SVGs em `assets/icons/`).
 
 ---
 
-## 5. Checklist de Qualidade Obrigatório
+## 5. Validação Obrigatória (Antes de Concluir)
 
-Antes de concluir qualquer tarefa de simulação ou UI, verifique os seguintes pontos:
-- [ ] Todos os componentes utilizados na simulação existem e seguem a marcação canônica de `simulacoes/ui_lab.html`.
-- [ ] Se algum componente ou ícone novo foi criado no projeto, ele foi adicionado ao `ui_lab.html` / `ui_lab.js` e ao catálogo do plugin.
-- [ ] O layout possui as duas experiências: Desktop (com modo foco `F`) e Mobile (Painel Flutuante acionado por `#btn-mobile-settings`).
-- [ ] A `<meta name="viewport">` inclui `viewport-fit=cover, interactive-widget=resizes-content` e não há uso de `vh` puro em regras de layout (utiliza `var(--app-height)` e `var(--safe-bottom)`).
-- [ ] O botão de engrenagem `#btn-mobile-settings` está presente no canto inferior direito de `.canvas-area` (ou injetado automaticamente via `initBottomSheet()`).
-- [ ] A navegação de abas utiliza `initTabs()` (ou mapeamento equivalente sem conflitos) e re-renderiza fórmulas KaTeX.
-- [ ] Os controles vitais para Modo Foco possuem `data-focus-control` e são sincronizados via `initFocusMirrorToolbar()`.
-- [ ] Os sliders de parâmetros físicos estão sincronizados bidirecionalmente com os inputs numéricos via `syncDualSlider()`.
-- [ ] Estados de validação ou prontidão utilizam `setFieldState()` (`.is-valid`, `.is-invalid`, `.is-warning`, `.is-ready`, `.is-disabled`) e `.field-hint`.
-- [ ] Todos os ícones utilizam `../assets/icons/<nome>.svg` com a classe `.icon-svg` e `inlineSVGImages()`.
-- [ ] Todas as equações matemáticas estão formatadas com KaTeX (`$$...$$` ou `$...$`) e inicializadas com `initKaTeXAutoRender()`.
-- [ ] Não há cores hexadecimais arbitrárias soltas sobrescrevendo os tokens do `:root`.
-- [ ] O redimensionamento de janela (`resize`) ajusta a câmera e o renderer Three.js / Canvas 2D sem distorção visual.
+Antes de finalizar qualquer tarefa em simulações ou no Design System, execute obrigatoriamente no terminal:
+
+```bash
+node simulacoes/scripts/validate-ds.js
+```
+
+Para auditorias completas durante migrações ou criação de novas simulações, execute também o modo estrito:
+
+```bash
+node simulacoes/scripts/validate-ds.js --strict
+```
+
+### Checklist de Conformidade Final
+- [ ] `node simulacoes/scripts/validate-ds.js` encerra com código `0` (zero erros).
+- [ ] Todos os componentes seguem a marcação canônica de `simulacoes/ui_lab.html`.
+- [ ] Tema Claro/Escuro validado (`theme-init.js`, `theme-color="#1c1917"`, `#btn-theme-toggle`, blindagem do palco).
+- [ ] Experiência Desktop (Modo Foco `F`, foco visível via `Tab`) e Mobile (`<= 900px`, `#btn-mobile-settings`, `var(--app-height)` e `var(--safe-bottom)` sem `vh` puro).
+- [ ] Transporte flutuante em `#canvas-transport-toolbar` com desacoplamento `stepPhysics(dt)` vs. `updateVisualScene()` e `setState(0, true)` em Step/Reset.
+- [ ] `data-focus-control="slider"` posicionado diretamente no `<input type="range">` e sincronizado via `initFocusMirrorToolbar()`.
+- [ ] Onboarding `#modal-onboarding` com `#onboarding-qr-panel` e sem ícones em `.onboarding-card-title`.
+- [ ] Apenas ícones válidos dos **75 SVGs** de `assets/icons/` + `inlineSVGImages()` + `initKaTeXAutoRender()`.

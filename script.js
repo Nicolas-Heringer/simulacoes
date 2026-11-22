@@ -270,7 +270,7 @@ function initHomeThemeToggle() {
 
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) {
-      meta.setAttribute("content", isLight ? "#ffffff" : "#0f172a");
+      meta.setAttribute("content", isLight ? "#fafaf9" : "#161412");
     }
 
     if (persist) {

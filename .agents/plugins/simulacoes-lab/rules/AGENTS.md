@@ -1,51 +1,39 @@
-# Regras de Engenharia para Simulações Científicas
+# Regras de Engenharia para Simulações Científicas (Design System 2.0)
 
-Este conjunto de regras define os padrões de arquitetura, interface e performance para todas as simulações científicas e matemáticas do projeto.
-
----
-
-## 1. Arquitetura de Arquivos, Fonte da Verdade e Dependências
-* **Localização**: Arquivos HTML residem em `simulacoes/`, scripts JS em `simulacoes/scripts/` e folhas de estilo complementares em `simulacoes/css/`.
-* **Fonte da Verdade Canônica (`ui_lab`)**: A página `simulacoes/ui_lab.html` e o script `simulacoes/scripts/ui_lab.js` constituem o catálogo vivo e oficial de todos os componentes de interface permitidos no projeto.
-  * **Restrição Estrita de Catálogo**: Os agentes SÓ podem inserir controles, botões, sliders, switches, seletores, readouts, gráficos, editores matriciais, badges e modais que existam e estejam demonstrados em `simulacoes/ui_lab.html` e `simulacoes/scripts/ui_lab.js`. É estritamente proibido inventar marcações HTML/CSS de controles avulsos fora do padrão.
-  * **Regra de Sincronização Obrigatória**: Sempre que um novo componente genérico, variante de estado ou controlador for adicionado a `simulacoes/css/design-system.css` ou `simulacoes/scripts/sim-ui.js`, ele DEVE ser obrigatoriamente incluído e demonstrado em `simulacoes/ui_lab.html` e `simulacoes/scripts/ui_lab.js`, além de documentado nas referências do plugin.
-* **CSS Base**: Toda página DEVE incluir `<link rel="stylesheet" href="css/design-system.css">`.
-* **JavaScript Modular**: Toda simulação DEVE ser estruturada em ES Modules (`<script type="module" src="scripts/...js">`) e importar controladores de UI a partir de `./sim-ui.js`.
-* **Biblioteca 3D**: Three.js deve ser importado via importmap padronizado (`three` e `three/addons/`).
-* **Fórmulas Matemáticas**: Renderização via KaTeX CDN inicializada com `initKaTeXAutoRender()` e atualizações dinâmicas via `renderMath()` / `renderMathToString()` de `./sim-ui.js`.
+Invariantes obrigatórios para toda simulação científica e matemática do projeto. Para procedimentos passo a passo, templates e catálogo completo, consulte a skill `desenvolver-simulacao`.
 
 ---
 
-## 2. Padrões Visuais & Tokens de Design
-* **Cores e Superfícies**: É proibido codificar cores hexadecimais soltas para elementos de interface. Utilize estritamente os tokens de `:root` (`--bg-main`, `--bg-surface`, `--bg-card`, `--accent-color`, `--color-cyan`, `--color-emerald`, `--color-purple`, `--color-rose`, `--color-orange`, etc.) e as classes utilitárias de tom (`.tone-accent`, `.tone-cyan`, `.tone-emerald`, `.tone-purple`, `.tone-pink`, `.tone-rose`, `.tone-orange`).
-* **Ícones Vetoriais**: Use apenas os 71 ícones SVG nativos de `../assets/icons/` através de `<img src="../assets/icons/<nome>.svg" class="icon-svg">` e converta-os via `inlineSVGImages()`. Os ícones adaptam-se automaticamente à cor do texto via `currentColor`.
-* **Nomenclatura Semântica**: Classes CSS e IDs de componentes devem refletir sua função no design system (ex.: `.sim-dual-slider`, `.sim-transport-bar`, `.sim-plot-card`, `.sim-readout`), nunca o domínio exclusivo de uma física em particular (ex.: evite `.temperatura-slider`).
+## 1. Arquitetura, Fonte da Verdade e Dependências
+* **Estrutura**: HTML em `simulacoes/`, scripts ES Modules em `simulacoes/scripts/` e estilos complementares opcionais em `simulacoes/css/`.
+* **Fonte da Verdade Canônica (`ui_lab`)**: `simulacoes/ui_lab.html` e `simulacoes/scripts/ui_lab.js` são o catálogo oficial de componentes.
+  * **Restrição Estrita**: Só utilize componentes, controles e padrões existentes no `ui_lab`. É proibido inventar marcações HTML/CSS avulsas fora do padrão.
+  * **Sincronização Obrigatória**: Qualquer novo componente, variante ou controlador adicionado a `design-system.css` ou `sim-ui.js` DEVE ser demonstrado em `ui_lab.html` / `ui_lab.js` e documentado nas referências do plugin.
+* **Boot de Tema e CSS Base**: Toda página DEVE incluir `<script src="../theme-init.js"></script>` imediatamente antes de `<link rel="stylesheet" href="css/design-system.css">` (zero-FOUC), além do botão `#btn-theme-toggle` em `.sim-header-actions`.
+* **Módulos e Bibliotecas**: Scripts em ES Modules importando de `./sim-ui.js`, Three.js via `importmap` padronizado e matemática via KaTeX CDN (`initKaTeXAutoRender()`, `renderMath()`, `renderMathToString()`).
 
 ---
 
-## 3. Controles & Componentes Obrigatórios (`sim-ui.js`)
-* **Navegação por Abas**: Painéis com múltiplas abas devem utilizar `.tab-nav` com botões `.tab-btn[data-tab="..."]` e painéis `.tab-pane`, inicializados via `initTabs()`.
-* **Sliders Numéricos**: Parâmetros físicos devem utilizar a estrutura `.sim-dual-slider` sincronizada via `syncDualSlider(sliderSelector, numberInputSelector, onChange)`.
-* **Evolução Temporal (Barra Flutuante no Canvas) e Desacoplamento Física vs. Apresentação**: Simulações que evoluem no tempo DEVEM implementar a barra flutuante de transporte `.canvas-toolbar.pos-bottom-center` (`#canvas-transport-toolbar`) diretamente dentro de `.canvas-area` (nunca dentro do painel lateral `.controls-panel`, mantendo a sidebar limpa) e o botão toggle com `initToggleButton()`. É estritamente obrigatório separar:
-  * `stepPhysics(dt)`: Responsável exclusivamente por integrar equações diferenciais, atualizar variáveis dinâmicas e avançar o relógio $t$. Executa **apenas** quando `state.isRunning === true` (ou em avanços manuais de passo único).
-  * `updateVisualScene()` (*Presentation Pass*): Responsável por sincronizar visibilidade de meshes/camadas, recalcular escalas e direções de vetores (`ArrowHelper`), atualizar geometrias estáticas/dinâmicas e renderizar o canvas. Todo controle de interface (`syncDualSlider`, `change` em switches/checkboxes, seletores de modo, botões de ação e reset) DEVE invocar explicitamente `updateVisualScene()` (e `updateReadouts()`) para garantir feedback visual imediato mesmo quando a simulação estiver pausada (`isRunning === false`).
-* **Estados Semânticos de Intencionalidade**: Validação de entradas, alertas físicos e prontidão de ações devem ser comunicados via `setFieldState(target, state, hintText)` aplicando `.is-valid`, `.is-invalid`, `.is-warning`, `.is-ready` ou `.is-disabled` acompanhados de `.field-hint`.
-* **Telemetria 2D e Espaço de Fase**: Plotagens em tempo real de uma única grandeza devem usar `RealtimePlot`; múltiplas curvas simultâneas (ex.: energias cinética, potencial e total) ou retratos de espaço de fase $(x, p)$ devem usar `MultiSeriesPlot` dentro de `.sim-plot-card`.
-* **Álgebra Linear e Tensores**: Entradas matriciais $2\times 2$ ou $3\times 3$ e cálculo de invariantes (determinante, traço, autovalores e diagonalização simétrica) devem utilizar `MatrixTensorEditor` e os solvers exportados por `sim-ui.js`.
-* **Leituras Numéricas e Badges**: Resumos de grandezas calculadas no painel devem utilizar `.sim-readout` (`.sim-readout-title`, `.sim-readout-row`, `.sim-readout-label`, `.sim-readout-value`), e avisos no canvas devem usar `.sim-hud` ou `.canvas-info-badge`.
-* **Barra Flutuante de Modo Foco**: Controles que sobem para o menu flutuante em tela cheia/foco DEVEM utilizar a convenção declarativa `data-focus-control` (`action`, `toggle`, `select`, `slider`, `badge`) e ser inicializados via `initFocusMirrorToolbar()`. É proibido duplicar marcação HTML ou adicionar listeners manuais para replicar botões no canvas.
-* **Teoria & Deduções**: Conteúdo pedagógico e deduções formais devem ser apresentados em `.theory-card` na aba "Teoria" ou em modal imersivo via `initModal()`.
+## 2. Padrões Visuais, Temas e Tokens
+* **Sem Hexadecimais Soltos na UI**: Utilize estritamente os tokens de `:root` e `:root[data-theme="light"]` (**Superfície Papel**: `#1c1917` escuro / `#fafaf9` claro; contornos `--ui-border-width: 1.5px`; divisores Limpo padrão) e as classes `.tone-*` (`.tone-accent`, `.tone-cyan`, `.tone-emerald`, `.tone-purple`, `.tone-pink`, `.tone-rose`, `.tone-orange`), válidas em textos/readouts/badges e controles interativos.
+* **Blindagem do Palco Escuro**: O palco (`.canvas-area` e filhos diretos `.canvas-area > *`) permanece escuro no Modo Claro; utilize os tokens `--stage-*` para elementos da cena 3D/2D e `getThemeColors()` / `onThemeChange()` para gráficos 2D.
+* **75 Ícones Vetoriais Nativos**: Utilize apenas os **75 SVGs** de `../assets/icons/<nome>.svg` com `.icon-svg` e `inlineSVGImages()`.
 
 ---
 
-## 4. Responsividade, Viewport Dinâmico e Telas Táteis
-* **Meta Viewport Obrigatória**: Toda página HTML DEVE incluir `<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">` e `<meta name="theme-color" content="#0f172a">`.
-* **Proibição de `vh` Puro e Uso Obrigatório de Safe Areas**: É proibido utilizar `100vh` ou unidades `vh` puras em alturas de containers estruturais (`.sim-layout`, `.controls-panel`, modais), pois barras inferiores de navegadores mobile (ex.: Microsoft Edge, Chrome, Safari) ocultam o fundo de `100vh`. Utilize estritamente `var(--app-height)` (`100dvh` com fallback automático) ou porcentagens da área útil, e some obrigatoriamente `var(--safe-bottom)` (`env(safe-area-inset-bottom, 0px)`) na base e `bottom` de todos os elementos ancorados na borda inferior (`#canvas-transport-toolbar`, `.canvas-btn-settings`, `.sim-hud`).
-* **Desktop**: Suporte a Modo Foco com recolhimento lateral via `initSidebarCollapse()` e atalho de teclado `F` (ou `[`).
-* **Mobile / Tablet (<= 900px)**: Suporte obrigatório a Painel Flutuante sob demanda acionado pelo botão de engrenagem `#btn-mobile-settings` (`.canvas-btn-settings`) no canto inferior direito via `initBottomSheet()` (que inicializa automaticamente `initViewportFix()` para monitorar `visualViewport` e teclado virtual `.is-keyboard-open`, fechando ao tocar no canvas ou no ⚙).
-* **Canvas 3D e 2D**: O container do canvas DEVE possuir a propriedade CSS `touch-action: none;` e utilizar eventos unificados de ponteiro (`pointerdown`, `pointermove`, `pointerup`) para prevenir que gestos de pinça, arraste ou órbita capturem a rolagem nativa do navegador.
+## 3. Controles, Física e Onboarding (`sim-ui.js`)
+* **Abas e Sliders**: Navegação com `<div class="tab-nav" role="tablist">` + `.tab-btn[data-tab]` + `.tab-pane` via `initTabs()`; parâmetros contínuos com `.slider-container.sim-dual-slider` via `syncDualSlider()`.
+* **Transporte Flutuante e Desacoplamento Física vs. Apresentação**: Simulações temporais DEVEM usar `#canvas-transport-toolbar` (`.canvas-toolbar.pos-bottom-center`) dentro de `.canvas-area` (proibido usar `.sim-transport-bar` legado na sidebar) com `initToggleButton()`. Separe estritamente:
+  * `stepPhysics(dt)`: executa **apenas** quando `state.isRunning === true` (ou em passo único).
+  * `updateVisualScene()`: *Presentation Pass* chamado por todo controle de UI para feedback visual imediato mesmo pausado.
+* **Estados Semânticos (`setFieldState`)**: Comunica `.is-valid`, `.is-invalid`, `.is-warning`, `.is-ready` e `.is-disabled` alterando **apenas** `.field-hint` e `.icon-svg` (sem repintar contornos/inputs/sliders), além de desabilitar inputs internos em `'disabled'`.
+* **Telemetria, Álgebra Linear e Modo Foco**: Gráficos em `.sim-plot-card` via `RealtimePlot` / `MultiSeriesPlot`; matrizes/tensores via `MatrixTensorEditor`; leituras via `.sim-readout`, `.sim-hud` e `.canvas-info-badge`; Modo Foco declarativo via `data-focus-control` (`slider` sempre no `<input type="range">`, nunca na `<div>`) e `initFocusMirrorToolbar()`.
+* **Onboarding Simplificado e Teoria**: `#modal-onboarding` via `initOnboardingModal()` com linguagem intuitiva, **sem ícones em `.onboarding-card-title`**, e painel `#onboarding-qr-panel` + `#btn-toggle-onboarding-qr`; deduções formais em `.theory-card` ou `.sim-modal-overlay.hidden` via `initModal()`.
 
 ---
 
-## 5. Fluxo de Trabalho & Procedimentos
-Para criar uma nova simulação do zero, migrar uma página legada ou expandir componentes do Design System 2.0, consulte e execute a skill `desenvolver-simulacao`.
+## 4. Responsividade, Viewport e Validação Obrigatória
+* **Meta Tags**: `<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">` e `<meta name="theme-color" content="#1c1917">`.
+* **Proibição de `vh` Puro e Safe Areas**: Utilize `var(--app-height)` e some `var(--safe-bottom)` em elementos ancorados na base.
+* **Desktop & Mobile**: Modo Foco desktop (`initSidebarCollapse()`, tecla `F`/`[`), Painel Flutuante mobile `<= 900px` (`#btn-mobile-settings` + `initBottomSheet()`, sem `.sheet-drag-handle` legado), `touch-action: none` no canvas e Pointer Events.
+* **Gate Automatizado**: Antes de encerrar qualquer alteração no Design System ou em simulações, execute `node simulacoes/scripts/validate-ds.js` e corrija todos os erros reportados.

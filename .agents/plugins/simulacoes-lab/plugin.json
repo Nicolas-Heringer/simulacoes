@@ -1,4 +1,8 @@
 {
   "name": "simulacoes-lab",
-  "description": "Design System, templates, regras de arquitetura e automações para simulações educacionais e científicas interativas."
+  "description": "Design System 2.0, templates, regras de arquitetura e validações para simulações educacionais e científicas interativas.",
+  "author": {
+    "name": "Nicolas Heringer"
+  },
+  "repository": "https://github.com/Nicolas-Heringer/simulacoes"
 }

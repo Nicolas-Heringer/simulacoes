@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#1c1917">
     <title>{{TITULO_SIMULACAO}} - Plataforma Científica</title>
     
     <!-- Favicon, Boot de Tema (Zero-FOUC) e Design System CSS -->
@@ -38,7 +38,7 @@
             <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
                 <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
             </button>
-            <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
+            <button type="button" id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
             </button>
@@ -58,7 +58,7 @@
 
             <!-- Grupo de Ações do Topo Direito (Reabrir Controles no Modo Foco) -->
             <div class="canvas-top-actions">
-                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
+                <button type="button" id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
                 </button>
@@ -66,7 +66,7 @@
 
             <!-- Barra Flutuante de Transporte / Playback (Padrão Canônico DS 2.0) -->
             <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
-                <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
+                <button type="button" class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
                         data-state="0"
                         data-text-idle="Executar"
                         data-text-active="Pausar"
@@ -76,14 +76,14 @@
                     <img src="../assets/icons/play.svg" class="icon-svg" alt="Play">
                     <span class="btn-text">Executar</span>
                 </button>
-                <button class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
+                <button type="button" class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)" aria-label="Avançar 1 passo">
                     <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
                 </button>
-                <button class="toolbar-btn" id="btn-reset-sim" title="Reiniciar (t = 0)">
+                <button type="button" class="toolbar-btn" id="btn-reset-sim" title="Reiniciar (t = 0)" aria-label="Reiniciar simulação">
                     <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                 </button>
                 <span class="toolbar-divider"></span>
-                <button class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
+                <button type="button" class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
                     1.0×
                 </button>
             </div>
@@ -98,16 +98,16 @@
         <aside class="controls-panel">
 
             <!-- Topo: Barra de Abas Expansíveis -->
-            <div class="tab-nav">
-                <button class="tab-btn active" id="tab-btn-params" data-tab="panel-tab-params">
+            <div class="tab-nav" role="tablist">
+                <button type="button" class="tab-btn active" id="tab-btn-params" data-tab="panel-tab-params">
                     <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Parâmetros">
                     <span class="tab-label">Parâmetros</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-theory" data-tab="panel-tab-theory">
+                <button type="button" class="tab-btn" id="tab-btn-theory" data-tab="panel-tab-theory">
                     <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                     <span class="tab-label">Teoria</span>
                 </button>
-                <button class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
+                <button type="button" class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)" aria-label="Recolher painel lateral">
                     <img src="../assets/icons/collapse.svg" class="icon-svg" alt="Recolher">
                 </button>
             </div>
@@ -135,7 +135,7 @@
                     </div>
                 </div>
 
-                <div id="panel-tab-theory" class="tab-pane" style="display: none;">
+                <div id="panel-tab-theory" class="tab-pane">
                     <div class="theory-card">
                         <h4><img src="../assets/icons/book-open.svg" class="icon-svg icon-accent" alt="Teoria"> Fundamentação Física</h4>
                         <p>Descrição do modelo físico e formulação matemática:</p>
@@ -163,7 +163,7 @@
                     <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                     <span>{{TITULO_SIMULACAO}} — Guia Rápido</span>
                 </div>
-                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+                <button type="button" class="sim-modal-close" data-modal-close title="Fechar (Esc)" aria-label="Fechar">✕</button>
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">

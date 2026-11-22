@@ -82,12 +82,10 @@ function setupUI() {
         onResize: onWindowResize
     });
 
-    // Mobile Bottom Sheet
+    // Painel Flutuante Mobile (<= 900px)
     initBottomSheet({
         panelSelector: '.controls-panel',
-        handleSelector: '#sheet-drag-handle',
-        tabNavSelector: '.tab-nav',
-        collapseBtnSelector: '#btn-collapse-sidebar',
+        triggerSelector: '#btn-mobile-settings',
         defaultState: 'peek'
     });
 
@@ -108,15 +106,17 @@ function setupUI() {
 
     // Passo Único (dt)
     document.getElementById('btn-step-sim')?.addEventListener('click', () => {
-        if (state.isRunning) playControl.setState(0);
+        if (state.isRunning) playControl.setState(0, true);
         stepPhysics(0.016);
         updateVisualScene();
     });
 
     // Reset
     document.getElementById('btn-reset-sim')?.addEventListener('click', () => {
-        if (state.isRunning) playControl.setState(0);
+        if (state.isRunning) playControl.setState(0, true);
         state.time = 0;
+        const statusEl = document.getElementById('footer-status-text');
+        if (statusEl) statusEl.textContent = 'Simulação Pronta';
         updateTimerDisplay();
         updateVisualScene();
     });

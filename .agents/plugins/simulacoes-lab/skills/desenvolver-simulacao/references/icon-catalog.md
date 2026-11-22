@@ -1,6 +1,6 @@
 # Catálogo de Ícones Nativos (`assets/icons/`)
 
-Todos os **71 ícones vetoriais** estão disponíveis em `assets/icons/` e adaptam-se automaticamente à cor do texto via `currentColor` quando carregados com a classe `.icon-svg` e processados por `inlineSVGImages()`.
+Todos os **75 ícones vetoriais** estão disponíveis em `assets/icons/` e adaptam-se automaticamente à cor do texto via `currentColor` quando carregados com a classe `.icon-svg` e processados por `inlineSVGImages()`.
 
 ## Sintaxe Padrão de Uso
 ```html
@@ -14,7 +14,7 @@ Todos os **71 ícones vetoriais** estão disponíveis em `assets/icons/` e adapt
 
 ---
 
-## Tabela Completa dos 71 Ícones por Categoria
+## Tabela Completa dos 75 Ícones por Categoria
 
 ### 1. Transporte, Navegação & Interface (19 ícones)
 | Nome do Ícone | Arquivo | Finalidade Sugerida |
@@ -67,11 +67,12 @@ Todos os **71 ícones vetoriais** estão disponíveis em `assets/icons/` e adapt
 | `pinch` | `pinch.svg` | Pinça compacta para zoom |
 | `screen-rotate` | `screen-rotate.svg` | Rotação de tela (Retrato / Paisagem) |
 
-### 4. Clima, Geofísica, Ecologia & Termodinâmica (10 ícones)
+### 4. Clima, Geofísica, Ecologia & Termodinâmica (11 ícones)
 | Nome do Ícone | Arquivo | Finalidade Sugerida |
 | :--- | :--- | :--- |
 | `globe` | `globe.svg` | Planeta, Coordenadas globais, Esfera |
-| `sun` | `sun.svg` | Sol, Insolação, Verão, Fonte de luz |
+| `sun` | `sun.svg` | Sol, Insolação, Verão, Fonte de luz, Tema Claro |
+| `moon` | `moon.svg` | Lua, Noite, Fase lunar, Alternância para Tema Escuro |
 | `snowflake` | `snowflake.svg` | Inverno, Criogenia, Baixa temperatura |
 | `leaf` | `leaf.svg` | Outono, Ecologia, Populações |
 | `flower` | `flower.svg` | Primavera, Biologia, Padrões naturais |

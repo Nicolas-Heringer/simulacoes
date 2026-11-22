@@ -57,7 +57,7 @@
     --accent-slider: var(--accent-color);
     --accent-switch: var(--accent-color);
     --accent-hud: var(--accent-color);
-    --accent-divider: #64748b;
+    --accent-divider: #94a3b8;
     --ui-border-width: 1.5px;
 
     /* Cores Semânticas Auxiliares */
@@ -65,7 +65,7 @@
     --color-cyan-glow: rgba(56, 189, 248, 0.35);
     --color-emerald: #22c55e;
     --color-purple: #a855f7;
-    --color-rose: #f43f5e;
+    --color-rose: #fb7185;
     --color-pink: #f472b6;
     --color-orange: #fb923c;
 
@@ -79,7 +79,7 @@
     /* Tipografia e Cores de Texto */
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --text-muted: #94a3b8;
     --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-mono: 'JetBrains Mono', 'Courier New', monospace;
 
@@ -157,15 +157,12 @@
     --accent-color: #1e1b4b;
     --accent-color-hover: #131136;
     --accent-fg: #ffffff;
-    --accent-warm: #1e1b4b;
-    --accent-card: #1e1b4b;
-    --accent-hud: #0369a1;
     --accent-subtle: rgba(30, 27, 75, 0.10);
     --accent-glow: rgba(30, 27, 75, 0.22);
 
     /* Cores Semânticas calibradas para alto contraste sobre fundo claro */
-    --color-cyan: #0284c7;
-    --color-cyan-glow: rgba(2, 132, 199, 0.24);
+    --color-cyan: #0369a1;
+    --color-cyan-glow: rgba(3, 105, 161, 0.24);
     --color-emerald: #15803d;
     --color-purple: #7e22ce;
     --color-rose: #e11d48;
@@ -175,7 +172,7 @@
     /* Tipografia Editorial */
     --text-primary: #0f172a;
     --text-secondary: #334155;
-    --text-muted: #64748b;
+    --text-muted: #475569;
 
     /* Contornos "Forte" (1.5px com borda escura bem definida) */
     --border-color: #64748b;
@@ -209,10 +206,6 @@
    (barras flutuantes de transporte, HUDs, cabeçalhos de osciloscópio e overlays),
    alterando apenas os menus (.sim-header, .controls-panel) e o contorno externo do palco.
    ============================================================================= */
-.canvas-area {
-    border: var(--ui-border-width, 1.5px) solid var(--border-color);
-}
-
 :root[data-theme="light"] .canvas-area > * {
     color-scheme: dark;
     --bg-main: #0c0a09;
@@ -229,7 +222,7 @@
     --bg-recessed: rgba(0, 0, 0, 0.45);
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --text-muted: #94a3b8;
     --border-color: rgba(255, 255, 255, 0.28);
     --border-subtle: rgba(255, 255, 255, 0.18);
     --border-strong: rgba(255, 255, 255, 0.45);
@@ -243,119 +236,20 @@
     --accent-slider: #818cf8;
     --accent-switch: #818cf8;
     --accent-hud: #818cf8;
-    --accent-divider: #64748b;
+    --accent-divider: #94a3b8;
     --accent-subtle: rgba(129, 140, 248, 0.15);
     --accent-glow: rgba(129, 140, 248, 0.35);
     --color-cyan: #38bdf8;
     --color-cyan-glow: rgba(56, 189, 248, 0.35);
     --color-emerald: #22c55e;
     --color-purple: #a855f7;
-    --color-rose: #f43f5e;
+    --color-rose: #fb7185;
     --color-pink: #f472b6;
     --color-orange: #fb923c;
     --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
     --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.45);
     --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.60);
     --shadow-popover: 0 12px 36px rgba(0, 0, 0, 0.70);
-}
-
-/* Reforço Estrutural Parametrizável de Contornos (--ui-border-width = 1.5px nos dois temas), Divisores de Seção & Destaques */
-.controls-panel,
-.sim-header {
-    border-width: var(--ui-border-width, 1.5px);
-    border-color: var(--border-subtle);
-}
-
-.slider-container,
-.sim-plot-card,
-.sim-readout,
-.theory-card,
-.onboarding-card,
-.matrix-box,
-.btn-preset,
-.segmented-control,
-.segmented-grid,
-.tab-nav {
-    border-width: var(--ui-border-width, 1.5px);
-    border-color: var(--border-subtle);
-    box-shadow: var(--shadow-sm);
-}
-
-.slider-container:hover,
-.sim-plot-card:hover,
-.sim-readout:hover,
-.theory-card:hover {
-    border-color: var(--border-color);
-}
-
-.dual-input-wrapper,
-.plot-canvas-wrapper,
-select.sim-control,
-input[type="number"].sim-input,
-input[type="text"].sim-input,
-.matrix-cell input[type="number"],
-.matrix-cell input[type="text"],
-.matrix-input,
-button.btn-secondary,
-button.btn-outline,
-.btn-header-action {
-    border-width: var(--ui-border-width, 1.5px);
-    border-color: var(--border-color);
-}
-
-/* Estilos Comutáveis de Divisores de Seção (.sim-divider-label): Limpo (clean = padrão), Minimal e Cápsula (pill) */
-.sim-divider-label,
-.sim-divider-label > span {
-    color: var(--accent-divider, var(--text-secondary));
-    font-weight: 700;
-    transition: all var(--trans-fast);
-}
-
-.sim-divider-label::before,
-.sim-divider-label::after {
-    height: 1.5px;
-    background: color-mix(in srgb, var(--accent-divider, var(--border-color)) 45%, var(--border-color));
-}
-
-html[data-divider-style="minimal"] .sim-divider-label,
-html[data-divider-style="minimal"] .sim-divider-label > span {
-    color: var(--accent-divider, var(--text-muted));
-    font-weight: 600;
-}
-
-html[data-divider-style="minimal"] .sim-divider-label::before,
-html[data-divider-style="minimal"] .sim-divider-label::after {
-    height: 1px;
-    background: var(--border-color);
-}
-
-html[data-divider-style="pill"] .sim-divider-label > span {
-    background: color-mix(in srgb, var(--accent-divider, var(--accent-color)) 11%, transparent);
-    border: 1.5px solid color-mix(in srgb, var(--accent-divider, var(--accent-color)) 32%, transparent);
-    color: var(--accent-divider, var(--accent-color));
-    padding: 2px 10px;
-    border-radius: 999px;
-    font-weight: 700;
-}
-
-html[data-divider-style="pill"] .sim-divider-label::before {
-    height: 1.5px;
-    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-divider, var(--accent-color)) 45%, var(--border-color)));
-}
-
-html[data-divider-style="pill"] .sim-divider-label::after {
-    height: 1.5px;
-    background: linear-gradient(90deg, color-mix(in srgb, var(--accent-divider, var(--accent-color)) 45%, var(--border-color)), transparent);
-}
-
-/* Ícones de destaque (.icon-accent) e cartões teóricos */
-:root[data-theme="light"] .icon-accent,
-:root[data-theme="light"] .theory-card h4 .icon-svg {
-    color: var(--accent-card, var(--accent-color, #1e1b4b));
-}
-
-:root[data-theme="light"] .theory-card {
-    border-left: 3.5px solid var(--accent-card, var(--accent-color, #1e1b4b));
 }
 
 @supports (height: 100dvh) {
@@ -387,6 +281,12 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Acessibilidade de Teclado: Anel de foco nítido e consistente em ambos os temas */
+:is(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
 /* Scrollbar Global */
 ::-webkit-scrollbar {
     width: 6px;
@@ -415,7 +315,7 @@ body {
     height: var(--header-height, 52px);
     flex-shrink: 0;
     background-color: var(--bg-surface);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: var(--ui-border-width, 1.5px) solid var(--border-subtle);
     box-shadow: var(--shadow-sm);
     z-index: 100;
 }
@@ -428,6 +328,7 @@ body {
     color: var(--text-secondary);
     font-size: 0.88rem;
     font-weight: 500;
+    border-radius: var(--radius-sm);
     transition: color var(--trans-fast), transform var(--trans-fast);
 }
 
@@ -448,7 +349,7 @@ body {
     justify-content: center;
     gap: 6px;
     background: var(--bg-subtle);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     border-radius: var(--radius-sm);
     padding: 6px 12px;
     font-size: 0.80rem;
@@ -501,7 +402,7 @@ body {
     align-items: center;
     background-color: var(--bg-canvas);
     border-radius: var(--radius-lg);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     overflow: hidden;
     position: relative;
     height: 100%;
@@ -543,7 +444,7 @@ body {
     background-color: var(--bg-panel);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: 14px 14px 10px 14px;
     display: flex;
@@ -674,13 +575,19 @@ body {
     margin-bottom: 0;
 }
 
-.control-group label {
+.control-group label:not(.sim-switch) {
     font-size: 0.82rem;
     color: var(--text-secondary);
     font-weight: 500;
+    display: block;
+    line-height: 1.35;
+}
+
+.control-group label:not(.sim-switch):has(> .icon-svg) {
     display: flex;
     align-items: center;
     gap: 6px;
+    flex-wrap: wrap;
 }
 
 /* Separadores de Seção (Suportam tanto <hr> quanto <div>) */
@@ -707,25 +614,64 @@ div.sim-divider-glow {
     margin: 14px 0;
 }
 
+/* Estilos Comutáveis de Divisores de Seção (.sim-divider-label): Limpo (clean = padrão), Minimal e Cápsula (pill) */
 .sim-divider-label {
     display: flex;
     align-items: center;
     gap: 10px;
     margin: 16px 0 10px 0;
-    color: var(--text-muted);
+    color: var(--accent-divider, var(--text-secondary));
     font-size: 0.72rem;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     user-select: none;
+    transition: color var(--trans-fast);
+}
+
+.sim-divider-label > span {
+    color: var(--accent-divider, var(--text-secondary));
+    font-weight: 700;
+    transition: all var(--trans-fast);
 }
 
 .sim-divider-label::before,
 .sim-divider-label::after {
     content: '';
     flex: 1;
+    height: 1.5px;
+    background: color-mix(in srgb, var(--accent-divider, var(--border-color)) 45%, var(--border-color));
+}
+
+html[data-divider-style="minimal"] .sim-divider-label,
+html[data-divider-style="minimal"] .sim-divider-label > span {
+    color: var(--accent-divider, var(--text-muted));
+    font-weight: 600;
+}
+
+html[data-divider-style="minimal"] .sim-divider-label::before,
+html[data-divider-style="minimal"] .sim-divider-label::after {
     height: 1px;
     background: var(--border-color);
+}
+
+html[data-divider-style="pill"] .sim-divider-label > span {
+    background: color-mix(in srgb, var(--accent-divider, var(--accent-color)) 11%, transparent);
+    border: 1.5px solid color-mix(in srgb, var(--accent-divider, var(--accent-color)) 32%, transparent);
+    color: var(--accent-divider, var(--accent-color));
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+html[data-divider-style="pill"] .sim-divider-label::before {
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-divider, var(--accent-color)) 45%, var(--border-color)));
+}
+
+html[data-divider-style="pill"] .sim-divider-label::after {
+    height: 1.5px;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--accent-divider, var(--accent-color)) 45%, var(--border-color)), transparent);
 }
 
 /* =============================================================================
@@ -740,7 +686,7 @@ button.sim-btn {
     justify-content: center;
     gap: 8px;
     background-color: transparent;
-    border: 1px solid var(--accent-btn, var(--accent-color));
+    border: var(--ui-border-width, 1.5px) solid var(--accent-btn, var(--accent-color));
     color: var(--accent-btn, var(--accent-color));
     padding: 11px 18px;
     border-radius: var(--radius-md);
@@ -883,7 +829,7 @@ button.btn-outline {
     justify-content: center;
     gap: 8px;
     background-color: var(--bg-subtle);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     color: var(--text-primary);
     padding: 10px 16px;
     border-radius: var(--radius-md);
@@ -928,13 +874,14 @@ button.btn-outline:disabled {
     font-size: 0.80rem;
     font-weight: 600;
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-subtle);
     border-radius: var(--radius-md);
     color: var(--text-primary);
     cursor: pointer;
     transition: all var(--trans-fast);
     text-align: center;
     user-select: none;
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-preset:hover:not(:disabled) {
@@ -1038,7 +985,13 @@ button.btn-outline:disabled {
     background: var(--bg-card);
     padding: 10px 12px;
     border-radius: var(--radius-md);
-    border: 1px solid var(--border-subtle);
+    border: var(--ui-border-width, 1.5px) solid var(--border-subtle);
+    box-shadow: var(--shadow-sm);
+    transition: border-color var(--trans-fast);
+}
+
+.slider-container:hover {
+    border-color: var(--border-color);
 }
 
 .slider-header {
@@ -1069,7 +1022,15 @@ button.btn-outline:disabled {
     font-size: 0.82rem;
     color: var(--text-secondary);
     font-weight: 500;
+    display: block;
+    line-height: 1.35;
     user-select: none;
+}
+
+.sim-dual-slider .slider-label:has(> .icon-svg) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .dual-input-wrapper {
@@ -1079,13 +1040,18 @@ button.btn-outline:disabled {
     background: var(--bg-recessed);
     padding: 2px 6px;
     border-radius: var(--radius-sm);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
 }
 
 .dual-input-wrapper:focus-within {
     border-color: var(--accent-slider, var(--accent-color));
     box-shadow: 0 0 8px color-mix(in srgb, var(--accent-slider, var(--accent-color)) 30%, transparent);
+}
+
+.dual-input-wrapper:has(.dual-input-number:focus-visible) {
+    outline: 2px solid var(--accent-slider, var(--accent-color));
+    outline-offset: 2px;
 }
 
 .dual-input-number {
@@ -1101,6 +1067,10 @@ button.btn-outline:disabled {
     padding: 2px 0;
     -moz-appearance: textfield;
     appearance: textfield;
+}
+
+.dual-input-number:focus-visible {
+    outline: none;
 }
 
 .dual-input-number::-webkit-inner-spin-button,
@@ -1124,10 +1094,24 @@ input[type="range"].sim-slider {
     background: transparent;
     padding: 6px 0;
     cursor: pointer;
+    border-radius: var(--radius-xs);
 }
 
-input[type="range"].sim-slider:focus {
+input[type="range"].sim-slider:focus:not(:focus-visible) {
     outline: none;
+}
+
+input[type="range"].sim-slider:focus-visible {
+    outline: 2px solid var(--accent-slider, var(--accent-color));
+    outline-offset: 2px;
+}
+
+input[type="range"].sim-slider:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-slider, var(--accent-color)) 35%, transparent);
+}
+
+input[type="range"].sim-slider:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-slider, var(--accent-color)) 35%, transparent);
 }
 
 input[type="range"].sim-slider::-webkit-slider-runnable-track {
@@ -1179,19 +1163,30 @@ input[type="range"].sim-slider:hover::-moz-range-thumb {
 select.sim-control {
     appearance: none;
     background-color: var(--bg-input);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     color: var(--text-primary);
-    padding: 10px 14px;
+    padding: 10px 34px 10px 14px;
     border-radius: var(--radius-md);
     font-family: inherit;
     font-size: 0.88rem;
     cursor: pointer;
-    outline: none;
     transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
     background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
     background-repeat: no-repeat;
     background-position: right 14px center;
     background-size: 10px auto;
+}
+
+:root[data-theme="light"] select.sim-control {
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23334155%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+}
+
+:root[data-theme="light"] .canvas-area select.sim-control {
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+}
+
+select.sim-control:focus:not(:focus-visible) {
+    outline: none;
 }
 
 select.sim-control:focus,
@@ -1208,14 +1203,18 @@ select.sim-control option {
 input[type="number"].sim-input,
 input[type="text"].sim-input {
     background-color: var(--bg-input);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     color: var(--text-primary);
     padding: 9px 12px;
     border-radius: var(--radius-md);
     font-family: inherit;
     font-size: 0.88rem;
-    outline: none;
     transition: border-color var(--trans-fast);
+}
+
+input[type="number"].sim-input:focus:not(:focus-visible),
+input[type="text"].sim-input:focus:not(:focus-visible) {
+    outline: none;
 }
 
 input[type="number"].sim-input:focus,
@@ -1252,9 +1251,11 @@ input[type="text"].sim-input:focus {
 }
 
 .sim-switch input {
+    position: absolute;
     opacity: 0;
-    width: 0;
-    height: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
 }
 
 .slider-round {
@@ -1290,6 +1291,12 @@ input[type="text"].sim-input:focus {
     background-color: var(--accent-fg);
 }
 
+.sim-switch input:focus-visible + .slider-round {
+    outline: 2px solid var(--accent-switch, var(--accent-color));
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-switch, var(--accent-color)) 25%, transparent);
+}
+
 /* Controles Segmentados Universais (Pills / Segmented Controls) */
 .segmented-control,
 .segmented-grid {
@@ -1299,7 +1306,13 @@ input[type="text"].sim-input:focus {
     background: var(--bg-recessed);
     padding: 4px;
     border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-subtle);
+    box-shadow: var(--shadow-sm);
+}
+
+.segmented-control.segmented-grid-3,
+.segmented-grid.segmented-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
 }
 
 .segment-btn,
@@ -1346,7 +1359,8 @@ input[type="text"].sim-input:focus {
     -webkit-backdrop-filter: blur(12px);
     padding: 4px;
     border-radius: var(--radius-lg);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-subtle);
+    box-shadow: var(--shadow-sm);
 }
 
 .tab-btn {
@@ -1402,14 +1416,16 @@ input[type="text"].sim-input:focus {
     transform: translateX(0);
 }
 
-/* Hover na Aba Inativa: Expande suavemente ao passar o mouse */
-.tab-btn:hover:not(.active):not(.disabled) {
+/* Hover / Foco de teclado na Aba Inativa: Expande suavemente */
+.tab-btn:hover:not(.active):not(.disabled),
+.tab-btn:focus-visible:not(.active):not(.disabled) {
     color: var(--text-primary);
     background: var(--bg-hover);
     border-color: color-mix(in srgb, var(--accent-nav, var(--accent-color)) 35%, transparent);
 }
 
-.tab-btn:hover:not(.active):not(.disabled) .tab-label {
+.tab-btn:hover:not(.active):not(.disabled) .tab-label,
+.tab-btn:focus-visible:not(.active):not(.disabled) .tab-label {
     max-width: 140px;
     opacity: 0.95;
     transform: translateX(0);
@@ -1553,13 +1569,18 @@ input[type="text"].sim-input:focus {
    ============================================================================= */
 .sim-plot-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: 10px 12px;
     display: flex;
     flex-direction: column;
     gap: 8px;
     box-shadow: var(--shadow-sm);
+    transition: border-color var(--trans-fast);
+}
+
+.sim-plot-card:hover {
+    border-color: var(--border-color);
 }
 
 .plot-header {
@@ -1609,8 +1630,12 @@ input[type="text"].sim-input:focus {
     height: 84px;
     background: var(--plot-bg);
     border-radius: var(--radius-md);
-    border: 1px solid var(--border-subtle);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     overflow: hidden;
+}
+
+.plot-canvas-wrapper.plot-canvas-tall {
+    height: 110px;
 }
 
 .sim-plot-canvas {
@@ -1687,7 +1712,7 @@ input[type="text"].sim-input:focus {
     color: var(--accent-card, var(--accent-color));
     margin-bottom: 6px;
     padding-bottom: 4px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border-subtle);
     font-size: 0.82rem;
 }
 
@@ -1711,13 +1736,43 @@ input[type="text"].sim-input:focus {
 /* Card Didático Teórico com KaTeX - Fundo Sólido */
 .theory-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: 14px 16px;
     margin-top: 10px;
     font-size: 0.80rem;
     line-height: 1.6;
     color: var(--text-secondary);
+    box-shadow: var(--shadow-sm);
+    transition: border-color var(--trans-fast);
+}
+
+.theory-card:hover {
+    border-color: var(--border-color);
+}
+
+:root[data-theme="light"] .theory-card {
+    border-left: 3.5px solid var(--accent-card, var(--accent-color));
+}
+
+:root[data-theme="light"] .theory-card:hover {
+    border-left-color: var(--accent-card, var(--accent-color));
+}
+
+/* Visor Reativo de Fórmula Matemática (.sim-math-display) */
+.sim-math-display {
+    background: var(--bg-recessed);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 12px 10px;
+    text-align: center;
+    font-size: 1.15rem;
+    color: var(--text-primary);
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: auto;
 }
 
 .theory-card h4 {
@@ -1919,6 +1974,10 @@ input[type="text"].sim-input:focus {
     max-width: 540px;
 }
 
+.sim-modal-overlay.modal-onboarding:has(.onboarding-qr-panel:not(.hidden)) .sim-modal-container {
+    max-width: 600px;
+}
+
 .onboarding-intro {
     font-size: 0.88rem;
     line-height: 1.55;
@@ -1935,12 +1994,13 @@ input[type="text"].sim-input:focus {
 
 .onboarding-card {
     background: var(--bg-subtle);
-    border: 1px solid var(--border-subtle);
+    border: var(--ui-border-width, 1.5px) solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 12px;
     display: flex;
     flex-direction: column;
     gap: 6px;
+    box-shadow: var(--shadow-sm);
 }
 
 .onboarding-card-title {
@@ -1986,6 +2046,8 @@ input[type="text"].sim-input:focus {
 }
 
 .onboarding-qr-canvas {
+    width: 180px;
+    height: 180px;
     background: #ffffff;
     border-radius: var(--radius-sm);
     box-shadow: var(--shadow-md);
@@ -2033,24 +2095,28 @@ input[type="text"].sim-input:focus {
 
 .onboarding-qr-url-row {
     display: flex;
+    flex-direction: column;
     gap: 8px;
-    align-items: center;
+    align-items: stretch;
     margin-top: 4px;
 }
 
 .onboarding-qr-url-input {
-    flex: 1;
+    width: 100%;
     min-width: 0;
     background: var(--bg-surface);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
     font-family: var(--font-mono);
     font-size: 0.76rem;
     padding: 7px 10px;
-    outline: none;
     user-select: all;
     transition: border-color var(--trans-fast), color var(--trans-fast);
+}
+
+.onboarding-qr-url-input:focus:not(:focus-visible) {
+    outline: none;
 }
 
 .onboarding-qr-url-input:focus {
@@ -2117,6 +2183,11 @@ input[type="text"].sim-input:focus {
 .theory-card h4 .icon-svg,
 .interactive-hint .icon-svg {
     color: var(--accent-text, var(--accent-color));
+}
+
+:root[data-theme="light"] .icon-accent,
+:root[data-theme="light"] .theory-card h4 .icon-svg {
+    color: var(--accent-card, var(--accent-color));
 }
 
 .icon-spin {
@@ -2222,6 +2293,17 @@ input[type="text"].sim-input:focus {
     justify-content: space-between;
 }
 
+.flex-wrap-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.w-full {
+    width: 100%;
+}
+
 .preview-box {
     background: var(--bg-recessed);
     border: 1px dashed var(--border-color);
@@ -2280,11 +2362,14 @@ input[type="text"].sim-input:focus {
 .theme-dot-btn {
     width: 16px;
     height: 16px;
+    padding: 0;
+    appearance: none;
     border-radius: 50%;
-    border: 2px solid transparent;
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
     cursor: pointer;
     transition: transform var(--trans-fast), border-color var(--trans-fast), box-shadow var(--trans-fast);
     flex-shrink: 0;
+    position: relative;
 }
 
 .toolbar-dot:hover,
@@ -2294,9 +2379,9 @@ input[type="text"].sim-input:focus {
 
 .toolbar-dot.active,
 .theme-dot-btn.active {
-    border-color: var(--text-primary);
+    border: 2px solid var(--text-primary);
     transform: scale(1.15);
-    box-shadow: 0 0 10px currentColor;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25), 0 0 10px currentColor;
 }
 
 /* Botão de Ação / Disparo do Popover na Toolbar */
@@ -2477,9 +2562,12 @@ input[type="text"].sim-input:focus {
     font-size: 0.74rem;
     font-family: inherit;
     border-radius: var(--radius-sm);
-    outline: none;
     cursor: pointer;
     transition: border-color var(--trans-fast);
+}
+
+.focus-mirror-select:focus:not(:focus-visible) {
+    outline: none;
 }
 
 .focus-mirror-select:hover,
@@ -2673,7 +2761,7 @@ input[type="text"].sim-input:focus {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    border: 1px solid rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.42);
 }
 
 .structure-pill-group {
@@ -2732,9 +2820,10 @@ input[type="text"].sim-input:focus {
 .color-dot {
     width: 16px;
     height: 16px;
+    padding: 0;
     border-radius: 50%;
     background: var(--c);
-    border: 1.5px solid rgba(0, 0, 0, 0.18);
+    border: 1.5px solid rgba(255, 255, 255, 0.42);
     cursor: pointer;
     transition: transform var(--trans-fast), border-color var(--trans-fast), box-shadow var(--trans-fast);
     flex-shrink: 0;
@@ -2866,15 +2955,22 @@ input[type="text"].sim-input:focus {
 
 .icon-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: var(--ui-border-width, 1.5px) solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 10px 6px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 6px;
+    color: var(--text-primary);
+    font-family: inherit;
     cursor: pointer;
     transition: all var(--trans-fast);
+}
+
+.icon-card .icon-svg {
+    width: 22px;
+    height: 22px;
 }
 
 .icon-card:hover {
@@ -2933,6 +3029,18 @@ input[type="text"].sim-input:focus {
         display: none !important;
     }
 
+    /* Alvos táteis mínimos no cabeçalho mobile */
+    .btn-back {
+        min-height: 36px;
+        padding: 6px 4px;
+    }
+
+    .btn-header-action,
+    .btn-header-action.btn-theme-toggle {
+        min-width: 38px;
+        min-height: 38px;
+    }
+
     /* Barra de ferramentas compacta no topo esquerdo */
     .canvas-top-left-stack {
         top: 10px;
@@ -2951,6 +3059,12 @@ input[type="text"].sim-input:focus {
         gap: 5px;
     }
 
+    .canvas-toolbar .toolbar-btn {
+        min-height: 36px;
+        min-width: 36px;
+        padding: 6px 10px;
+    }
+
     /* Barra de transporte na base central (alinhada ao botão de engrenagem) */
     .canvas-toolbar.pos-bottom-center {
         top: auto;
@@ -2958,6 +3072,12 @@ input[type="text"].sim-input:focus {
         left: 50%;
         transform: translateX(-50%);
         z-index: 65;
+    }
+
+    #canvas-transport-toolbar .toolbar-btn {
+        min-height: 40px;
+        min-width: 40px;
+        padding: 6px 10px;
     }
 
     /* Botão de Configurações (Engrenagem) no Canto Inferior Direito */
@@ -2968,13 +3088,13 @@ input[type="text"].sim-input:focus {
         position: absolute;
         bottom: calc(12px + var(--safe-bottom));
         right: max(12px, var(--safe-right));
-        width: 38px;
-        height: 38px;
+        width: 42px;
+        height: 42px;
         border-radius: var(--radius-pill);
         background: var(--bg-glass);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border: 1px solid var(--border-color);
+        border: var(--ui-border-width, 1.5px) solid var(--border-color);
         color: var(--text-primary);
         box-shadow: var(--shadow-md);
         cursor: pointer;
@@ -3002,8 +3122,15 @@ input[type="text"].sim-input:focus {
 
     .toolbar-dot,
     .theme-dot-btn {
-        width: 22px;
-        height: 22px;
+        width: 24px;
+        height: 24px;
+    }
+
+    .toolbar-dot::after,
+    .theme-dot-btn::after {
+        content: '';
+        position: absolute;
+        inset: -6px;
     }
 
     /* Grupo de ações no topo direito */
@@ -3016,25 +3143,11 @@ input[type="text"].sim-input:focus {
     }
 
     .canvas-btn-floating {
-        padding: 5px 8px;
+        min-height: 36px;
+        min-width: 36px;
+        padding: 6px 9px;
         font-size: 0.74rem;
         gap: 5px;
-    }
-
-    /* Em telas estreitas (< 560px), oculta textos para economizar espaço e evitar sobreposição */
-    @media (max-width: 560px) {
-        .canvas-btn-floating .btn-label-text {
-            display: none;
-        }
-        .canvas-btn-floating {
-            padding: 5px 7px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .canvas-toolbar span:first-child {
-            display: none;
-        }
     }
 
     /* Oculta dica interativa no mobile para não poluir o 3D */
@@ -3045,7 +3158,7 @@ input[type="text"].sim-input:focus {
     /* HUD de diagnóstico compacto acima da barra inferior */
     .sim-hud {
         position: absolute;
-        bottom: calc(58px + var(--safe-bottom));
+        bottom: calc(64px + var(--safe-bottom));
         left: max(10px, var(--safe-left));
         right: auto;
         max-width: calc(100vw - 20px);
@@ -3066,25 +3179,42 @@ input[type="text"].sim-input:focus {
         top: 48px;
         left: max(10px, var(--safe-left));
         right: max(10px, var(--safe-right));
-        width: auto;
+        min-width: 0;
+        width: calc(100vw - 20px - var(--safe-left) - var(--safe-right));
         max-width: 360px;
         z-index: 100;
+    }
+
+    .canvas-top-left-stack:has(.sim-popover:not(.hidden)),
+    .canvas-top-left-stack:has(.color-tooltip-popover:not(.hidden)) {
+        z-index: 90;
+    }
+
+    .canvas-top-left-stack > .sim-popover,
+    .canvas-top-left-stack > .color-tooltip-popover {
+        width: 100%;
+        max-width: 360px;
+    }
+
+    .popover-body,
+    .color-tooltip-body {
+        max-height: clamp(120px, calc(var(--app-height) - 372px), 440px);
     }
 
     /* O Painel de Controles vira um Card Inferior Flutuante sob demanda (acima da barra inferior) */
     .controls-panel {
         position: absolute;
-        bottom: calc(58px + var(--safe-bottom));
+        bottom: calc(64px + var(--safe-bottom));
         left: max(10px, var(--safe-left));
         right: max(10px, var(--safe-right));
         width: auto;
         max-width: none;
         height: 54%;
-        max-height: calc(100% - 70px - var(--safe-bottom));
+        max-height: calc(100% - 76px - var(--safe-bottom));
         padding: 10px 12px;
         z-index: 60;
         border-radius: 18px;
-        border: 1px solid var(--border-color);
+        border: var(--ui-border-width, 1.5px) solid var(--border-color);
         background: var(--bg-glass-strong);
         backdrop-filter: blur(18px);
         -webkit-backdrop-filter: blur(18px);
@@ -3117,20 +3247,83 @@ input[type="text"].sim-input:focus {
 
     /* Ajuste da Barra de Abas no Mobile (sem botão redundante de fechar) */
     .tab-nav {
-        padding: 2px 4px 8px 4px;
+        padding: 4px;
         flex-shrink: 0;
         gap: 4px;
         overflow-x: auto;
     }
 
     .tab-btn {
-        padding: 6px 10px;
+        min-height: 38px;
+        padding: 8px 10px;
         font-size: 0.8rem;
+    }
+
+    .segment-btn,
+    .btn-segment,
+    .plot-keep-records-btn,
+    .plot-expand-btn {
+        min-height: 36px;
+    }
+
+    .sim-modal-close,
+    .popover-close {
+        min-width: 36px;
+        min-height: 36px;
     }
 
     /* Oculta o botão de recolher sidebar no mobile (fechamento via engrenagem ou toque fora) */
     .btn-collapse-sidebar {
         display: none !important;
+    }
+}
+
+/* Em telas estreitas (<= 560px), oculta rótulos de botões flutuantes para evitar sobreposição */
+@media (max-width: 560px) {
+    .canvas-btn-floating .btn-label-text {
+        display: none;
+    }
+    .canvas-btn-floating {
+        padding: 6px 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .canvas-toolbar > span:first-child {
+        display: none;
+    }
+}
+
+/* Em telas muito estreitas (<= 440px), compacta toolbars para nunca colidir com ações laterais */
+@media (max-width: 440px) {
+    .canvas-toolbar .btn-label-text {
+        display: none;
+    }
+
+    .canvas-top-left-stack > .canvas-toolbar {
+        max-width: calc(100% - 46px);
+    }
+
+    #canvas-transport-toolbar {
+        left: max(10px, var(--safe-left));
+        transform: none;
+        max-width: calc(100% - 68px - var(--safe-left) - var(--safe-right));
+        padding: 4px 6px;
+        gap: 4px;
+    }
+
+    #canvas-transport-toolbar .btn-text {
+        display: none;
+    }
+
+    #canvas-transport-toolbar .toolbar-btn {
+        min-width: 38px;
+        min-height: 38px;
+        padding: 6px 8px;
+    }
+
+    .color-override-row {
+        flex-wrap: wrap;
     }
 }
 
@@ -3172,9 +3365,12 @@ button:disabled,
     cursor: not-allowed;
 }
 
+.control-group.is-disabled,
 .sim-dual-slider.is-disabled,
 .slider-container.is-disabled,
-.sim-switch.is-disabled {
+.sim-switch.is-disabled,
+input.sim-input.is-disabled,
+select.sim-control.is-disabled {
     opacity: 0.4;
     pointer-events: none;
 }
@@ -3208,12 +3404,18 @@ button:disabled,
    ============================================================================= */
 .sim-readout {
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 10px 12px;
     display: flex;
     flex-direction: column;
     gap: 6px;
+    box-shadow: var(--shadow-sm);
+    transition: border-color var(--trans-fast);
+}
+
+.sim-readout:hover {
+    border-color: var(--border-color);
 }
 
 .sim-readout-title {
@@ -3248,14 +3450,6 @@ button:disabled,
     color: var(--text-primary);
 }
 
-.tone-accent  { color: var(--accent-color); }
-.tone-cyan    { color: var(--color-cyan); }
-.tone-emerald { color: var(--color-emerald); }
-.tone-purple  { color: var(--color-purple); }
-.tone-pink    { color: var(--color-pink); }
-.tone-rose    { color: var(--color-rose); }
-.tone-orange  { color: var(--color-orange); }
-
 .canvas-info-badge {
     position: absolute;
     top: 15px;
@@ -3285,9 +3479,10 @@ button:disabled,
     align-items: center;
     justify-content: center;
     background: var(--bg-recessed);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 10px 14px;
+    box-shadow: var(--shadow-sm);
     transition: border-color var(--trans-normal), box-shadow var(--trans-normal);
 }
 
@@ -3349,15 +3544,20 @@ button:disabled,
     height: 34px;
     text-align: center;
     background-color: var(--bg-surface);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
     font-family: var(--font-mono);
     font-weight: 600;
     font-size: 0.90rem;
     padding: 4px 6px;
-    outline: none;
     transition: all var(--trans-fast);
+}
+
+.matrix-cell input[type="number"]:focus:not(:focus-visible),
+.matrix-cell input[type="text"]:focus:not(:focus-visible),
+.matrix-input:focus:not(:focus-visible) {
+    outline: none;
 }
 
 .matrix-cell input[type="number"]:focus,
@@ -3513,8 +3713,8 @@ button:disabled,
     position: relative;
     width: 100%;
     height: 340px;
-    background: var(--bg-main);
-    border: 1px solid var(--border-color);
+    background: var(--plot-bg);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     border-radius: var(--radius-lg);
     overflow: hidden;
     touch-action: none;
@@ -3542,7 +3742,7 @@ button:disabled,
 
     .sim-modal-overlay.modal-plot-viewer .sim-modal-container {
         width: calc(100vw - 24px);
-        max-height: 90dvh;
+        max-height: calc(var(--app-height) * 0.90);
     }
 
     .plot-viewer-stats {
@@ -3563,6 +3763,109 @@ button:disabled,
     .plot-viewer-footer-left,
     .plot-viewer-footer-right {
         justify-content: space-between;
+    }
+}
+
+/* =============================================================================
+   11. CLASSES DE TOM SEMÂNTICO (.tone-*)
+   Aplicáveis em textos/readouts/badges E controles interativos (.btn-primary,
+   .btn-secondary, .btn-preset, .sim-dual-slider, .sim-switch). Sobrescrevem
+   localmente os tokens --accent-* sem afetar controles sem .tone-*.
+   ============================================================================= */
+.tone-accent {
+    color: var(--accent-color);
+}
+
+.tone-cyan {
+    color: var(--color-cyan);
+    --accent-color: var(--color-cyan);
+    --accent-btn: var(--color-cyan);
+    --accent-slider: var(--color-cyan);
+    --accent-switch: var(--color-cyan);
+    --accent-card: var(--color-cyan);
+    --accent-hud: var(--color-cyan);
+}
+
+.tone-emerald {
+    color: var(--color-emerald);
+    --accent-color: var(--color-emerald);
+    --accent-btn: var(--color-emerald);
+    --accent-slider: var(--color-emerald);
+    --accent-switch: var(--color-emerald);
+    --accent-card: var(--color-emerald);
+    --accent-hud: var(--color-emerald);
+}
+
+.tone-purple {
+    color: var(--color-purple);
+    --accent-color: var(--color-purple);
+    --accent-btn: var(--color-purple);
+    --accent-slider: var(--color-purple);
+    --accent-switch: var(--color-purple);
+    --accent-card: var(--color-purple);
+    --accent-hud: var(--color-purple);
+}
+
+.tone-pink {
+    color: var(--color-pink);
+    --accent-color: var(--color-pink);
+    --accent-btn: var(--color-pink);
+    --accent-slider: var(--color-pink);
+    --accent-switch: var(--color-pink);
+    --accent-card: var(--color-pink);
+    --accent-hud: var(--color-pink);
+}
+
+.tone-rose {
+    color: var(--color-rose);
+    --accent-color: var(--color-rose);
+    --accent-btn: var(--color-rose);
+    --accent-slider: var(--color-rose);
+    --accent-switch: var(--color-rose);
+    --accent-card: var(--color-rose);
+    --accent-hud: var(--color-rose);
+}
+
+.tone-orange {
+    color: var(--color-orange);
+    --accent-color: var(--color-orange);
+    --accent-btn: var(--color-orange);
+    --accent-slider: var(--color-orange);
+    --accent-switch: var(--color-orange);
+    --accent-card: var(--color-orange);
+    --accent-hud: var(--color-orange);
+}
+
+button.btn-secondary:not(:disabled):is(.tone-accent, .tone-cyan, .tone-emerald, .tone-purple, .tone-pink, .tone-rose, .tone-orange),
+button.btn-outline:not(:disabled):is(.tone-accent, .tone-cyan, .tone-emerald, .tone-purple, .tone-pink, .tone-rose, .tone-orange) {
+    border-color: var(--accent-btn, var(--accent-color));
+    color: var(--accent-btn, var(--accent-color));
+}
+
+/* =============================================================================
+   12. ACESSIBILIDADE: REDUÇÃO DE MOVIMENTO (prefers-reduced-motion)
+   ============================================================================= */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+
+    .icon-spin,
+    .status-dot,
+    .particle-stem,
+    .particle-head,
+    .mouse-click-left,
+    .mouse-click-right,
+    .oscillate-body,
+    .mouse-drag-sway,
+    .canvas-btn-floating.active .icon-spin,
+    .canvas-btn-action.active .icon-spin {
+        animation: none !important;
     }
 }
 
