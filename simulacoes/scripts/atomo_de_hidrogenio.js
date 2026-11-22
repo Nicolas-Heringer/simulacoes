@@ -665,23 +665,11 @@ window.addEventListener('DOMContentLoaded', async () => {
         onResize: onWindowResize
     });
 
-    const layoutEl = document.querySelector('.sim-layout');
     initBottomSheet({
         panelSelector: '.controls-panel',
-        handleSelector: '#sheet-drag-handle',
-        tabNavSelector: '.tab-nav',
-        collapseBtnSelector: '#btn-collapse-sidebar',
-        defaultState: 'peek',
-        onStateChange: (state) => {
-            if (layoutEl) {
-                layoutEl.classList.toggle('mobile-sheet-peek', state === 'peek');
-            }
-        }
+        triggerSelector: '#btn-mobile-settings',
+        defaultState: 'peek'
     });
-
-    if (layoutEl && window.innerWidth <= 900) {
-        layoutEl.classList.add('mobile-sheet-peek');
-    }
 
     // Barra Flutuante em Modo Foco
     initFocusMirrorToolbar({

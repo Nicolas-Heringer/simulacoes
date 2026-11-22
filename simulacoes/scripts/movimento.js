@@ -210,6 +210,9 @@ class MovimentoSimulation {
 
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.scale(dpr, dpr);
+
+        this.ctx.clearRect(0, 0, this.width, this.height);
+        this.render();
     }
 
     setupDesignSystemControls() {
@@ -225,8 +228,7 @@ class MovimentoSimulation {
         // 2. Botão de Passo Único (+0.1s)
         document.getElementById('btn-step-sim')?.addEventListener('click', () => {
             if (this.isPlaying) {
-                this.playControl?.setState(0);
-                this.pause();
+                this.playControl?.setState(0, true);
             }
             this.step(0.1);
         });
@@ -285,12 +287,10 @@ class MovimentoSimulation {
             onResize: () => this.resize()
         });
 
-        // 9. Mobile Bottom Sheet
+        // 9. Painel Flutuante Mobile
         initBottomSheet({
             panelSelector: '.controls-panel',
-            handleSelector: '#sheet-drag-handle',
-            tabNavSelector: '.tab-nav',
-            collapseBtnSelector: '#btn-collapse-sidebar',
+            triggerSelector: '#btn-mobile-settings',
             defaultState: 'peek'
         });
 
@@ -644,8 +644,7 @@ class MovimentoSimulation {
 
     setMotionType(type) {
         if (this.isPlaying) {
-            this.playControl?.setState(0);
-            this.pause();
+            this.playControl?.setState(0, true);
         }
 
         this.motionType = type;
@@ -779,7 +778,7 @@ class MovimentoSimulation {
     start() {
         this.isPlaying = true;
         this.footerStatusText.textContent = 'Simulação em Andamento';
-        this.footerStatusBadge.className = 'sim-badge badge-active';
+        this.footerStatusBadge.className = 'sim-badge';
 
         if (this.recordingA.length === 0) {
             if (this.motionType !== 'manual') {
@@ -797,15 +796,14 @@ class MovimentoSimulation {
     pause() {
         this.isPlaying = false;
         this.footerStatusText.textContent = 'Pausado';
-        this.footerStatusBadge.className = 'sim-badge';
+        this.footerStatusBadge.className = 'sim-badge idle';
         this.updateUI();
         this.render();
     }
 
     step(dt = 0.1) {
         if (this.isPlaying) {
-            this.playControl?.setState(0);
-            this.pause();
+            this.playControl?.setState(0, true);
         }
         this.advancePhysics(dt);
         this.updateUI();
@@ -813,8 +811,12 @@ class MovimentoSimulation {
     }
 
     reset() {
-        this.isPlaying = false;
-        this.playControl?.setState(0);
+        if (this.isPlaying) {
+            this.playControl?.setState(0, true);
+        } else {
+            this.isPlaying = false;
+            this.playControl?.setState(0, false);
+        }
 
         this.t = 0.0;
         this.xA = this.motionType !== 'manual' ? this.s0A : 0.0;
@@ -837,7 +839,7 @@ class MovimentoSimulation {
         this.targetAxisRotate = 0.0;
 
         this.footerStatusText.textContent = 'Simulação Pronta';
-        this.footerStatusBadge.className = 'sim-badge';
+        this.footerStatusBadge.className = 'sim-badge idle';
 
         if (this.sliderPos) this.sliderPos.value = this.xA;
         if (this.inputPos) this.inputPos.value = this.xA;
@@ -919,8 +921,7 @@ class MovimentoSimulation {
         if (this.recordingA.length === 0) return;
 
         if (this.isPlaying) {
-            this.playControl?.setState(0);
-            this.pause();
+            this.playControl?.setState(0, true);
         }
 
         this.mode = '2D_CONVENTIONAL';
@@ -1151,7 +1152,7 @@ class MovimentoSimulation {
         this.drawArrow(this.width - margin + 14, axisY, 0);
 
         // Marcações Limpas na Régua (a cada 5m)
-        ctx.font = '600 15px sans-serif';
+        ctx.font = this.width < 420 ? '600 11px sans-serif' : '600 15px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
 
@@ -1161,21 +1162,21 @@ class MovimentoSimulation {
             const tickX = margin + norm * effectiveWidth;
 
             const isOrigin = meter === 0;
-            ctx.strokeStyle = isOrigin ? 'var(--accent-color, #facc15)' : 'rgba(148, 163, 184, 0.4)';
+            ctx.strokeStyle = isOrigin ? '#facc15' : 'rgba(148, 163, 184, 0.4)';
             ctx.lineWidth = isOrigin ? 2 : 1;
             ctx.beginPath();
             ctx.moveTo(tickX, axisY - (isOrigin ? 8 : 5));
             ctx.lineTo(tickX, axisY + (isOrigin ? 8 : 5));
             ctx.stroke();
 
-            ctx.fillStyle = isOrigin ? 'var(--accent-color, #facc15)' : '#94a3b8';
-            ctx.fillText(`${meter}m`, tickX, axisY + 9);
+            ctx.fillStyle = isOrigin ? '#facc15' : '#94a3b8';
+            ctx.fillText(`${meter}m`, tickX, axisY + 20);
         }
 
-        ctx.font = 'bold 18px sans-serif';
+        ctx.font = 'bold 16px sans-serif';
         ctx.fillStyle = '#38bdf8';
-        ctx.textAlign = 'left';
-        ctx.fillText('Eixo s [m]', this.width - margin + 22, axisY - 8);
+        ctx.textAlign = 'right';
+        ctx.fillText('Eixo s [m]', this.width - margin + 12, axisY - 28);
 
         // 3. Rastro Estroboscópico (Marcadores a cada 1s)
         this.drawStrobeTrail(this.strobePointsA, '#facc15', laneA_Y);

@@ -17,7 +17,9 @@ import {
     initTabs,
     initFocusMirrorToolbar,
     initKaTeXAutoRender,
-    initOnboardingModal
+    initOnboardingModal,
+    getThemeColors,
+    onThemeChange
 } from './sim-ui.js';
 
 // =============================================================================
@@ -460,7 +462,7 @@ function updateStatusBadges() {
         }
     } else {
         if (headerBadge) headerBadge.innerHTML = '<span class="status-dot"></span><span>Pausado (Pronto)</span>';
-        if (footerText) footerText.textContent = 'Pausada (Em Espera)';
+        if (footerText) footerText.textContent = simTime === 0 ? 'Simulação Pronta' : 'Pausada (Em Espera)';
         if (footerBadge) {
             footerBadge.classList.add('idle');
             footerBadge.classList.remove('badge-accent');
@@ -538,20 +540,22 @@ function updateReadouts() {
     if (telVrms) telVrms.textContent = `${vrms.toFixed(2)} px/f`;
     if (telWaves) telWaves.textContent = `${circulos.length}`;
     if (telStatus) {
+        telStatus.classList.remove('tone-emerald', 'tone-cyan', 'tone-accent');
         if (particles.length === 0) {
             telStatus.textContent = 'Inativo';
             telStatus.style.color = 'var(--text-muted)';
         } else {
+            telStatus.style.color = '';
             const diff = temperatura - TEMP_LIMIT;
             if (Math.abs(diff) < 0.02) {
                 telStatus.textContent = 'Equilíbrio';
-                telStatus.style.color = 'var(--color-emerald, #22c55e)';
+                telStatus.classList.add('tone-emerald');
             } else if (diff > 0) {
                 telStatus.textContent = 'Resfriando';
-                telStatus.style.color = 'var(--color-cyan, #38bdf8)';
+                telStatus.classList.add('tone-cyan');
             } else {
                 telStatus.textContent = 'Aquecendo';
-                telStatus.style.color = 'var(--color-yellow, #facc15)';
+                telStatus.classList.add('tone-accent');
             }
         }
     }
@@ -631,12 +635,10 @@ function setupEventListeners() {
         }
     });
 
-    // --- BOTTOM SHEET MOBILE (<= 900PX) ---
+    // --- PAINEL FLUTUANTE MOBILE (<= 900PX) ---
     initBottomSheet({
         panelSelector: '.controls-panel',
-        handleSelector: '#sheet-drag-handle',
-        tabNavSelector: '.tab-nav',
-        collapseBtnSelector: '#btn-collapse-sidebar',
+        triggerSelector: '#btn-mobile-settings',
         defaultState: 'peek'
     });
 
@@ -686,7 +688,7 @@ function setupEventListeners() {
                 if (defaultBtn) defaultBtn.classList.add('active');
             }
             if (isRunning && playControl) {
-                playControl.setState(0);
+                playControl.setState(0, true);
             }
             isRunning = false;
             simTime += 0.016;
@@ -710,7 +712,7 @@ function setupEventListeners() {
     // Botão de Reset na Barra Flutuante
     const resetAction = () => {
         if (isRunning && playControl) {
-            playControl.setState(0);
+            playControl.setState(0, true);
         }
         isRunning = false;
         if (template && template !== 'none') {
@@ -897,6 +899,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     reiniciarSistema('none');
 
     // Inicializa os Mini-Gráficos de Telemetria com Escala Dinâmica Automática
+    const themeColors = getThemeColors();
     const canvasPlotK = document.getElementById('canvas-plot-k');
     if (canvasPlotK) {
         plotEnergia = new RealtimePlot(canvasPlotK, {
@@ -907,7 +910,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             minSpan: 1.0,
             maxLabelSelector: '#axis-k-max',
             minLabelSelector: '#axis-k-min',
-            color: '#22c55e'
+            color: themeColors.emerald
         });
     }
 
@@ -920,10 +923,18 @@ window.addEventListener('DOMContentLoaded', async () => {
             autoScale: true,
             minSpan: 0.2,
             maxLabelSelector: '#axis-t-max',
-            minLabelSelector: '#axis-t-min',
-            color: '#facc15'
+            minLabelSelector: '#axis-t-min'
         });
     }
+
+    onThemeChange(() => {
+        if (plotEnergia) {
+            const cTheme = getThemeColors().emerald;
+            plotEnergia.explicitColor = cTheme;
+            plotEnergia.color = cTheme;
+            plotEnergia.render();
+        }
+    });
 
     updateVisualScene();
     anima();

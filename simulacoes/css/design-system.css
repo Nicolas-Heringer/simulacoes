@@ -1811,6 +1811,34 @@ input[type="text"].sim-input:focus {
     font-size: 0.95em;
 }
 
+/* Bloco de Citação / Referência Bibliográfica (.biblio-ref) */
+.biblio-ref {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--accent-subtle);
+    border: var(--ui-border-width, 1.5px) solid color-mix(in srgb, var(--accent-color) 25%, var(--border-subtle));
+    border-left: 3.5px solid var(--accent-color);
+    border-radius: var(--radius-sm);
+    font-size: 0.80rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.biblio-ref strong {
+    color: var(--text-primary);
+}
+
+.biblio-ref a {
+    color: var(--accent-text, var(--accent-color));
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: opacity var(--trans-fast);
+}
+
+.biblio-ref a:hover {
+    opacity: 0.85;
+}
+
 /* =============================================================================
    MODAL DIDÁTICO DE TEORIA & FÓRMULAS (.sim-modal-overlay / .sim-modal-container)
    ============================================================================= */

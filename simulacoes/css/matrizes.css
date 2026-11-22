@@ -10,7 +10,8 @@
     gap: 6px;
 }
 
-.transport-mode-group.hidden {
+.transport-mode-group.hidden,
+.control-group.hidden {
     display: none !important;
 }
 
@@ -84,7 +85,7 @@
     padding: 0 2px;
 }
 
-/* --- MATRIX 2x2 DISPLAY & INPUTS (MODOS 1 E 4) --- */
+/* --- EXTENSÕES DO EDITOR DE MATRIZ 2x2 (MODOS 1, 3 E 4) --- */
 .group-title {
     font-size: 0.85rem;
     font-weight: 600;
@@ -94,59 +95,13 @@
 }
 
 .matrix-box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg-recessed);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
     padding: 12px 16px;
     margin-bottom: 6px;
-    transition: border-color var(--trans-normal), box-shadow var(--trans-normal);
-}
-
-.matrix-bracket {
-    font-size: 0;
-    color: transparent;
-    user-select: none;
-    width: 10px;
-    align-self: stretch;
-    margin: 2px 0;
-    border-color: var(--text-secondary);
-    border-style: solid;
-    border-width: 0;
-    opacity: 0.85;
-    flex-shrink: 0;
-    transition: border-color var(--trans-fast), opacity var(--trans-fast);
-}
-
-.matrix-bracket.left {
-    border-left-width: 2px;
-    border-top-width: 2px;
-    border-bottom-width: 2px;
-    border-top-left-radius: 3px;
-    border-bottom-left-radius: 3px;
-}
-
-.matrix-bracket.right {
-    border-right-width: 2px;
-    border-top-width: 2px;
-    border-bottom-width: 2px;
-    border-top-right-radius: 3px;
-    border-bottom-right-radius: 3px;
 }
 
 .matrix-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
     gap: 10px 14px;
     padding: 0 12px;
-}
-
-.matrix-cell {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
 .matrix-input-wrap {
@@ -160,17 +115,9 @@
 .matrix-cell input[type="text"] {
     width: 78px;
     height: 38px;
-    text-align: center;
-    background-color: var(--bg-surface);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    color: var(--text-primary);
-    font-family: var(--font-mono);
-    font-weight: 600;
     font-size: 0.95rem;
-    outline: none;
-    transition: all var(--trans-fast);
     -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 .matrix-cell input[type="number"]::-webkit-outer-spin-button,
@@ -220,6 +167,7 @@
 .cell-i input {
     border-color: color-mix(in srgb, var(--accent-color) 45%, transparent);
 }
+
 .cell-i input:focus {
     border-color: var(--accent-color);
     box-shadow: 0 0 8px color-mix(in srgb, var(--accent-color) 35%, transparent);
@@ -229,16 +177,10 @@
 .cell-j input {
     border-color: color-mix(in srgb, var(--color-cyan) 45%, transparent);
 }
+
 .cell-j input:focus {
     border-color: var(--color-cyan);
     box-shadow: 0 0 8px color-mix(in srgb, var(--color-cyan) 40%, transparent);
-}
-
-.cell-sub {
-    font-size: 0.68rem;
-    color: var(--text-secondary);
-    margin-top: 2px;
-    font-family: var(--font-mono);
 }
 
 /* --- MATRIZ FUNCIONAL (MODO 3) --- */
@@ -254,180 +196,46 @@
     text-align: center;
 }
 
-/* --- READOUT CARD ESPECÍFICO --- */
-.readout-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
+/* --- LEITURAS COMPLEMENTARES (MODOS 2 E 3) --- */
+.construir-katex-matrix {
+    margin: 4px 0;
 }
 
-.readout-header {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--border-subtle);
-    display: flex;
-    align-items: center;
-    gap: 6px;
+.readout-row-divider {
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 6px;
 }
 
-.readout-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    font-size: 0.82rem;
+.surface-telemetry-card {
+    margin-bottom: 8px;
+    border-left: 3px solid var(--accent-color);
 }
 
-.readout-label {
-    color: var(--text-secondary);
+.surface-telemetry-card.surface-circle {
+    border-left-color: var(--color-purple);
 }
 
-.readout-value {
-    font-family: var(--font-mono);
-    font-weight: 600;
+.surface-telemetry-card.surface-square {
+    border-left-color: var(--color-emerald);
 }
 
-.highlight-yellow { color: var(--accent-color); }
-.highlight-cyan   { color: var(--color-cyan); }
-.highlight-green  { color: var(--color-emerald); }
-.highlight-purple { color: var(--color-purple); }
-.highlight-pink   { color: var(--color-pink); }
-.highlight-rose   { color: var(--color-rose); }
-
-/* --- BOTÕES E FILEIRAS --- */
-.button-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 4px;
+.surface-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    flex-shrink: 0;
 }
 
-.btn-action {
-    flex: 1;
-    padding: 9px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    font-weight: 600;
-    font-size: 0.82rem;
-    cursor: pointer;
-    transition: all var(--trans-fast);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
+.surface-circle .surface-dot {
+    background: var(--color-purple);
 }
 
-.btn-action.primary {
-    background-color: var(--accent-color);
-    color: var(--accent-fg);
-    border-color: var(--accent-color);
+.surface-square .surface-dot {
+    background: var(--color-emerald);
 }
 
-.btn-action.primary:hover {
-    background-color: var(--accent-color-hover);
-    box-shadow: 0 0 12px color-mix(in srgb, var(--accent-color) 35%, transparent);
-}
-
-.btn-action.secondary {
-    background-color: var(--bg-subtle);
-    color: var(--text-primary);
-}
-
-.btn-action.secondary:hover {
-    background-color: var(--bg-hover);
-}
-
-.btn-action.secondary.active {
-    background-color: color-mix(in srgb, var(--accent-color) 18%, transparent);
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-    box-shadow: 0 0 10px color-mix(in srgb, var(--accent-color) 25%, transparent);
-}
-
-/* --- BARRA DE CONTEXTO RÁPIDO NO MODO FOCO (CANTO SUPERIOR ESQUERDO) --- */
-.focus-context-toolbar {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    z-index: 60;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(-8px);
-    transition: opacity var(--trans-normal), transform var(--trans-normal);
-}
-
-.sim-layout.sidebar-collapsed .focus-context-toolbar {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
-}
-
-.focus-toolbar-pane {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.focus-toolbar-pane.hidden {
-    display: none !important;
-}
-
-.focus-badge-det {
-    font-family: var(--font-mono);
-    font-size: 0.76rem;
-    font-weight: 600;
-    color: var(--accent-color);
-    background: var(--bg-recessed);
-    padding: 3px 8px;
-    border-radius: var(--radius-sm);
-    border: 1px solid color-mix(in srgb, var(--accent-color) 30%, transparent);
-}
-
-.focus-select {
-    background: var(--bg-input);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    padding: 4px 6px;
-    font-size: 0.74rem;
-    border-radius: var(--radius-sm);
-    outline: none;
-    cursor: pointer;
-}
-
-/* --- MINI-GRÁFICO DE TELEMETRIA (MODO 4) --- */
-.telemetry-container {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.telemetry-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.78rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
-.telemetry-canvas {
-    width: 100%;
-    height: 70px;
-    display: block;
-    background: var(--plot-bg);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-subtle);
-}
-
-/* Sub-panes de controle por modo */
+/* --- SUB-PANES DE CONTROLE POR MODO --- */
 .subpane-controls,
 .subpane-theory {
     display: flex;
@@ -446,7 +254,7 @@
 }
 
 /* =============================================================================
-   RESPONSIVIDADE MOBILE & TABLET (<= 900px e <= 480px)
+   RESPONSIVIDADE MOBILE & TABLET (<= 900px e <= 520px)
    ============================================================================= */
 @media (max-width: 900px) {
     /* Mantém a barra superior de etapas da Aba 2 centralizada no topo do canvas */
@@ -492,29 +300,26 @@
         font-size: 0.80rem;
     }
 
-    .readout-card {
-        padding: 9px 10px;
-        gap: 5px;
-    }
-
     /* Oculta barra de etapas quando o teclado virtual do celular está aberto */
     .is-keyboard-open #construir-stepper-toolbar {
         display: none !important;
     }
 }
 
-@media (max-width: 480px) {
-    /* Protege os badges e rótulos dos botões nas toolbars contra a regra genérica span:first-child */
+@media (max-width: 520px) {
+    /* Em telas estreitas, exibe o rótulo apenas na etapa ativa para caber confortavelmente em 320px */
     #construir-stepper-toolbar .stepper-badge {
-        display: inline-flex !important;
+        display: inline-flex;
         width: 17px;
         height: 17px;
         font-size: 0.66rem;
     }
 
-    #construir-stepper-toolbar .btn-text,
-    #canvas-transport-toolbar .btn-text {
-        display: inline !important;
+    #construir-stepper-toolbar .stepper-btn:not(.active) .btn-text {
+        display: none;
+    }
+
+    #construir-stepper-toolbar .stepper-btn.active .btn-text {
         font-size: 0.72rem;
     }
 
@@ -540,10 +345,5 @@
     #mode-tab-nav .tab-btn .icon-svg {
         width: 14px;
         height: 14px;
-    }
-
-    /* Desloca levemente a barra de transporte para a esquerda para nunca colidir com o botão ⚙ */
-    .canvas-toolbar.pos-bottom-center {
-        left: calc(50% - 18px);
     }
 }

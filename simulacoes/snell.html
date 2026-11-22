@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
     <!-- Metadados da Página -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#1c1917">
     <title>Lei de Snell — Ray Tracing em Meios Contínuos</title>
 
     <meta name="description"
@@ -40,7 +40,7 @@
             <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
                 <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
             </button>
-            <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
+            <button type="button" id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
             </button>
@@ -67,11 +67,11 @@
 
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
-                <button id="btn-quick-clear" class="canvas-btn-floating" title="Limpar feixes e rastros ópticos">
+                <button type="button" id="btn-quick-clear" class="canvas-btn-floating" title="Limpar feixes e rastros ópticos">
                     <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Limpar">
                     <span class="btn-label-text">Limpar Rastros</span>
                 </button>
-                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Painel de Controles (F)">
+                <button type="button" id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Painel de Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
                 </button>
@@ -81,7 +81,7 @@
             <div class="sim-hud" id="sim-hud">
                 <div class="hud-item">
                     <span class="hud-label">Índice $n$:</span>
-                    <span class="hud-val" id="hudNValue" style="color: var(--accent-hud, var(--accent-color));">n = 1.000</span>
+                    <span class="hud-val tone-accent" id="hudNValue">n = 1.000</span>
                 </div>
                 <div class="hud-item">
                     <span class="hud-label">Posição:</span>
@@ -93,8 +93,25 @@
                 </div>
                 <div class="hud-item">
                     <span class="hud-label">Feixes Ativos:</span>
-                    <span class="hud-val" id="hudRaysCount" style="color: var(--color-emerald, #22c55e);">0</span>
+                    <span class="hud-val tone-emerald" id="hudRaysCount">0</span>
                 </div>
+            </div>
+
+            <!-- Barra Flutuante de Transporte (Padrão Canônico DS 2.0) -->
+            <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
+                <button type="button" class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
+                        data-state="1"
+                        data-text-idle="Executar"
+                        data-text-active="Pausar"
+                        data-icon-idle="play"
+                        data-icon-active="pause"
+                        title="Executar / Pausar Propagação (Espaço)">
+                    <img src="../assets/icons/pause.svg" class="icon-svg" alt="Pausar">
+                    <span class="btn-text">Pausar</span>
+                </button>
+                <button type="button" class="toolbar-btn" id="btn-reset-sim" title="Limpar feixes e rastros">
+                    <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Limpar">
+                </button>
             </div>
 
             <!-- Botão de Configurações Mobile (Canto Inferior Direito) -->
@@ -107,16 +124,16 @@
         <aside class="controls-panel">
 
             <!-- Topo: Barra de Abas Expansíveis -->
-            <div class="tab-nav">
-                <button class="tab-btn active" data-tab="panel-tab-params" id="tab-btn-params" title="Parâmetros da Simulação">
+            <div class="tab-nav" role="tablist">
+                <button type="button" class="tab-btn active" data-tab="panel-tab-params" id="tab-btn-params" title="Parâmetros da Simulação">
                     <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Parâmetros">
                     <span class="tab-label">Parâmetros</span>
                 </button>
-                <button class="tab-btn" data-tab="panel-tab-theory" id="tab-btn-theory" title="Fundamentação Teórica & Dedução">
+                <button type="button" class="tab-btn" data-tab="panel-tab-theory" id="tab-btn-theory" title="Fundamentação Teórica & Dedução">
                     <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                     <span class="tab-label">Teoria</span>
                 </button>
-                <button class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
+                <button type="button" class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
                     <img src="../assets/icons/collapse.svg" class="icon-svg" alt="Recolher">
                 </button>
             </div>
@@ -135,26 +152,6 @@
                             </div>
                         </div>
                         <p class="tab-subtitle">Ray tracing contínuo governado pelo gradiente de refração $\nabla n(x,y)$.</p>
-                    </div>
-
-                    <!-- Barra de Controle e Ações -->
-                    <div class="sim-transport-bar">
-                        <div class="transport-controls-row">
-                            <button class="btn-primary btn-toggle transport-btn-play" id="btnPlayPause"
-                                    data-focus-control="toggle"
-                                    data-state="1"
-                                    data-text-idle="Executar"
-                                    data-text-active="Pausar"
-                                    data-icon-idle="play"
-                                    data-icon-active="pause">
-                                <img src="../assets/icons/pause.svg" class="icon-svg" alt="Pausar">
-                                <span class="btn-text">Pausar</span>
-                            </button>
-                            <button class="btn-secondary" id="btnLimparFeixes" data-focus-control="action" title="Limpar feixes e rastros">
-                                <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Limpar">
-                                <span>Limpar</span>
-                            </button>
-                        </div>
                     </div>
 
                     <div class="sim-divider-label"><span>Perfil do Meio Óptico</span></div>
@@ -274,7 +271,7 @@
                 </div>
 
                 <!-- ABA 2: TEORIA E DEDUÇÃO MATEMÁTICA -->
-                <div class="tab-pane" id="panel-tab-theory" style="display: none;">
+                <div class="tab-pane" id="panel-tab-theory">
                     <div class="tab-header">
                         <div class="tab-header-row">
                             <h3 class="tab-title">Fundamentação Teórica</h3>
@@ -323,7 +320,7 @@
                                 Comprimentos de onda menores (azul/violeta) sofrem maior deflexão que comprimentos de onda maiores (vermelho).
                             </p>
                             
-                            <button class="btn-secondary" id="btn-open-theory-modal" style="width: 100%; margin-top: 12px;">
+                            <button type="button" class="btn-secondary w-full" id="btn-open-theory-modal">
                                 <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                                 Ver Dedução Matemática Completa
                             </button>
@@ -333,7 +330,7 @@
                     <!-- Referência Bibliográfica -->
                     <div class="control-group">
                         <div class="biblio-ref">
-                            📖 <strong>Referência:</strong> Cap. 2.6 (<em>A equação dos raios</em>) de <a
+                            <strong>Referência:</strong> Cap. 2.6 (<em>A equação dos raios</em>) de <a
                                 href="https://www.livrosabertos.abcd.usp.br/portaldelivrosUSP/catalog/download/96/80/396?inline=1"
                                 target="_blank" rel="noopener noreferrer">Óptica Moderna — Fundamentos e Aplicações</a> (S. C. Zilio, IFSC-USP).
                         </div>
@@ -363,7 +360,7 @@
                     <img src="../assets/icons/book-open.svg" class="icon-svg icon-accent" alt="Teoria">
                     <span>Fundamentação Teórica: Ray Tracing em Meios Contínuos</span>
                 </div>
-                <button class="sim-modal-close" data-modal-close title="Fechar Modal (Esc)">✕</button>
+                <button type="button" class="sim-modal-close" data-modal-close title="Fechar Modal (Esc)" aria-label="Fechar">✕</button>
             </div>
 
             <div class="sim-modal-body">
@@ -411,7 +408,7 @@
 
             <div class="sim-modal-footer">
                 <span class="sim-modal-hint">Pressione <kbd>Esc</kbd> para fechar</span>
-                <button class="btn-primary" data-modal-close style="min-width: 100px;">Entendido</button>
+                <button type="button" class="btn-primary" data-modal-close>Entendido</button>
             </div>
         </div>
     </div>
@@ -426,7 +423,7 @@
                     <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                     <span>Lei de Snell & Ray Tracing Contínuo — Guia Rápido</span>
                 </div>
-                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+                <button type="button" class="sim-modal-close" data-modal-close title="Fechar (Esc)" aria-label="Fechar">✕</button>
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
@@ -498,8 +495,8 @@
         </div>
     </div>
 
-    <!-- Script Principal da Simulação (ES Module com Cache-Buster) -->
-    <script type="module" src="scripts/snell.js?v=2.2"></script>
+    <!-- Script Principal da Simulação (ES Module) -->
+    <script type="module" src="scripts/snell.js"></script>
 </body>
 
 </html>

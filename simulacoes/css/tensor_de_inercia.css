@@ -20,42 +20,12 @@
     display: block;
 }
 
-/* --- EIXO DE ROTAÇÃO (PRESETS) --- */
-.axis-preset-row {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-}
-
-.axis-btn {
-    padding: 7px 6px;
-    font-size: 0.8rem;
-    background-color: var(--bg-subtle);
-    color: var(--text-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.axis-btn:hover {
-    background-color: var(--bg-hover);
-    color: var(--text-primary);
-}
-
-.axis-btn.active {
-    background-color: color-mix(in srgb, var(--accent-color) 15%, transparent);
-    color: var(--accent-color);
-    border-color: var(--accent-color);
-    box-shadow: 0 0 8px color-mix(in srgb, var(--accent-color) 25%, transparent);
-}
-
 /* --- ENTRADAS DE EIXO PERSONALIZADO --- */
 .custom-axis-inputs {
     margin-top: 6px;
     padding: 8px 10px;
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     border-radius: var(--radius-md);
     display: flex;
     flex-direction: column;
@@ -81,49 +51,6 @@
     max-width: 90px;
 }
 
-/* --- BOTÕES DE AÇÃO --- */
-.button-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 4px;
-}
-
-.btn-action {
-    flex: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 8px 12px;
-    border-radius: var(--radius-md);
-    font-family: var(--font-family);
-    font-weight: 600;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-action.primary {
-    background-color: var(--accent-color);
-    color: var(--accent-fg);
-    border: 1px solid var(--accent-color);
-}
-
-.btn-action.primary:hover {
-    filter: brightness(1.1);
-    box-shadow: 0 0 12px color-mix(in srgb, var(--accent-color) 35%, transparent);
-}
-
-.btn-action.secondary {
-    background-color: var(--bg-subtle);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-}
-
-.btn-action.secondary:hover {
-    background-color: var(--bg-hover);
-}
-
 /* --- LISTA DE MASSAS PONTUAIS (Parte 2) --- */
 .mass-list {
     display: flex;
@@ -140,14 +67,14 @@
     gap: 6px;
     padding: 6px 8px;
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     border-radius: var(--radius-sm);
     font-size: 0.8rem;
-    transition: border-color 0.2s;
+    transition: border-color var(--trans-fast);
 }
 
 .mass-item:hover {
-    border-color: color-mix(in srgb, var(--accent-color) 30%, transparent);
+    border-color: color-mix(in srgb, var(--accent-color) 35%, transparent);
 }
 
 .mass-item .color-dot {
@@ -161,9 +88,10 @@
     width: 48px;
     padding: 2px 4px;
     background: var(--bg-surface);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
+    font-family: var(--font-mono);
     font-weight: 500;
     text-align: center;
     font-size: 0.8rem;
@@ -181,9 +109,9 @@
     color: var(--color-rose);
     cursor: pointer;
     font-size: 0.95rem;
-    padding: 0 4px;
-    opacity: 0.7;
-    transition: opacity 0.2s;
+    padding: 2px 5px;
+    opacity: 0.75;
+    transition: opacity var(--trans-fast);
 }
 
 .mass-item .btn-remove:hover {
@@ -207,12 +135,14 @@
     margin: 6px 0 10px 0;
 }
 
-.matrix-bracket {
+.tensor-matrix .matrix-bracket {
     font-family: 'Times New Roman', serif;
     font-size: 3.6rem;
     font-weight: 200;
     color: var(--text-muted);
     line-height: 1;
+    width: auto;
+    border: none;
     user-select: none;
 }
 
@@ -246,14 +176,14 @@
     color: var(--color-cyan);
 }
 
-/* --- MINI RENDERER DO ELIPSOIDE --- */
+/* --- MINI RENDERER DO ELIPSOIDE (PALCO 3D ESCURO BLINDADO) --- */
 #ellipsoid-container {
     width: 100%;
     height: 170px;
     border-radius: var(--radius-md);
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--border-color);
+    background: var(--bg-canvas);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     margin: 6px 0;
 }
 
@@ -265,14 +195,7 @@
     margin-top: 6px;
 }
 
-/* --- BOTÃO DE DIAGONALIZAÇÃO --- */
-#diagonalize-btn {
-    width: 100%;
-    padding: 11px;
-    font-size: 0.9rem;
-    letter-spacing: 0.3px;
-}
-
+/* --- ANIMAÇÃO DE DESTAQUE NA DIAGONALIZAÇÃO --- */
 @keyframes pulseGlow {
     0%   { box-shadow: 0 0 6px color-mix(in srgb, var(--accent-color) 35%, transparent); }
     100% { box-shadow: 0 0 16px color-mix(in srgb, var(--accent-color) 75%, transparent); }
@@ -280,4 +203,10 @@
 
 .pulse-glow {
     animation: pulseGlow 1s infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pulse-glow {
+        animation: none;
+    }
 }

@@ -1023,23 +1023,30 @@ function initUI() {
     // Barra de Transporte (Play / Pause)
     playControl = initToggleButton('#btn-play-sim', (active) => {
         state.isPlaying = active;
+        const footerBadge = document.getElementById('footer-status-badge');
         const footerStatusText = document.getElementById('footer-status-text');
+        if (footerBadge) {
+            footerBadge.classList.toggle('idle', !active);
+        }
         if (footerStatusText) {
             footerStatusText.textContent = active ? 'Girando Corpo' : 'Pausado';
         }
     });
 
-    // Reset da Rotação
+    // Reset da Rotação (Pausa e restaura estado — Padrão DS 2.0)
     document.getElementById('btn-reset-sim')?.addEventListener('click', () => {
-        state.isPlaying = false;
-        if (playControl) playControl.setState(0);
+        if (state.isPlaying && playControl) {
+            playControl.setState(0, true);
+        } else {
+            state.isPlaying = false;
+        }
         state.time = 0;
         animationGroup.rotation.set(0, 0, 0);
         animationGroup.quaternion.identity();
+        const footerBadge = document.getElementById('footer-status-badge');
         const footerStatusText = document.getElementById('footer-status-text');
-        if (footerStatusText) {
-            footerStatusText.textContent = 'Pausado';
-        }
+        if (footerBadge) footerBadge.classList.add('idle');
+        if (footerStatusText) footerStatusText.textContent = 'Simulação Pronta';
         rebuildScene();
     });
 
@@ -1066,7 +1073,11 @@ function initUI() {
         toolbarTarget: '#focus-context-toolbar',
         scopeSelector: '.controls-panel'
     });
-    initBottomSheet('#controls-panel');
+    initBottomSheet({
+        panelSelector: '#controls-panel',
+        triggerSelector: '#btn-mobile-settings',
+        defaultState: 'peek'
+    });
     initOnboardingModal('#modal-onboarding', { triggerSelector: '#btn-open-onboarding' });
     initKaTeXAutoRender();
 
@@ -1096,9 +1107,13 @@ function showPartControls() {
 
 function updatePlayButton() {
     if (playControl) {
-        playControl.setState(state.isPlaying ? 1 : 0);
+        playControl.setState(state.isPlaying ? 1 : 0, false);
     }
+    const footerBadge = document.getElementById('footer-status-badge');
     const footerStatusText = document.getElementById('footer-status-text');
+    if (footerBadge) {
+        footerBadge.classList.toggle('idle', !state.isPlaying);
+    }
     if (footerStatusText) {
         footerStatusText.textContent = state.isPlaying ? 'Girando Corpo' : 'Pausado';
     }
@@ -1138,7 +1153,7 @@ function updateMassList() {
             <span class="mass-label">z</span>
             <input type="number" value="${m.position.z.toFixed(1)}" step="0.5"
                    data-idx="${i}" data-field="pz" class="mass-field" />
-            <button class="btn-remove" data-idx="${i}">✕</button>
+            <button type="button" class="btn-remove" data-idx="${i}" aria-label="Remover massa ${i + 1}" title="Remover massa">✕</button>
         `;
         container.appendChild(div);
     });

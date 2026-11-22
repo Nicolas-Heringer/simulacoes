@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
     <!-- Metadados da Página -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#1c1917">
     <title>Transformações Matriciais 2D — Interpretação Geométrica & Sistemas Dinâmicos</title>
 
     <meta name="description"
@@ -40,7 +40,7 @@
             <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
                 <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
             </button>
-            <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
+            <button type="button" id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
             </button>
@@ -53,22 +53,22 @@
         <div class="canvas-area">
             <!-- Container de Tela Cheia (Todos os 4 Modos) -->
             <div class="canvas-single-container" id="canvas-single-container">
-                <canvas id="simCanvas" style="touch-action: none;"></canvas>
+                <canvas id="simCanvas"></canvas>
             </div>
 
             <!-- Seletor Flutuante das 3 Etapas no Topo Central (Exclusivo do Modo 2: Construir) -->
             <div class="canvas-toolbar pos-top-center hidden" id="construir-stepper-toolbar">
-                <button class="toolbar-btn stepper-btn active" data-step="1" title="Etapa 1: Ajuste os vetores iniciais î, ĵ e o vetor v">
+                <button type="button" class="toolbar-btn stepper-btn active" data-step="1" title="Etapa 1: Ajuste os vetores iniciais î, ĵ e o vetor v">
                     <span class="stepper-badge">1</span>
                     <span class="btn-text">Espaço Inicial</span>
                 </button>
                 <span class="stepper-arrow" aria-hidden="true">→</span>
-                <button class="toolbar-btn stepper-btn" data-step="2" title="Etapa 2: Defina para onde vão os vetores transformados î' e ĵ'">
+                <button type="button" class="toolbar-btn stepper-btn" data-step="2" title="Etapa 2: Defina para onde vão os vetores transformados î' e ĵ'">
                     <span class="stepper-badge">2</span>
                     <span class="btn-text">Espaço Transformado</span>
                 </button>
                 <span class="stepper-arrow" aria-hidden="true">→</span>
-                <button class="toolbar-btn stepper-btn" data-step="3" title="Etapa 3: Visualize a transformação animada e o deslocamento de v">
+                <button type="button" class="toolbar-btn stepper-btn" data-step="3" title="Etapa 3: Visualize a transformação animada e o deslocamento de v">
                     <span class="stepper-badge">3</span>
                     <span class="btn-text">Evolução</span>
                 </button>
@@ -76,7 +76,7 @@
 
             <!-- Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
-                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Painel de Controles (F)">
+                <button type="button" id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Painel de Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
                 </button>
@@ -91,11 +91,11 @@
             <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
                 <!-- Modo 1: Base -->
                 <div class="transport-mode-group" data-transport-mode="base">
-                    <button class="toolbar-btn btn-toggle" id="base-btnApply" title="Aplicar Matriz de Transformação">
+                    <button type="button" class="toolbar-btn btn-toggle" id="base-btnApply" title="Aplicar Matriz de Transformação">
                         <img src="../assets/icons/play.svg" class="icon-svg" alt="Aplicar">
                         <span class="btn-text">Aplicar Matriz</span>
                     </button>
-                    <button class="toolbar-btn" id="base-btnReset" title="Restaurar espaço para a base canônica">
+                    <button type="button" class="toolbar-btn" id="base-btnReset" title="Restaurar espaço para a base canônica">
                         <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                         <span class="btn-text">Resetar</span>
                     </button>
@@ -103,11 +103,11 @@
 
                 <!-- Modo 2: Construir -->
                 <div class="transport-mode-group hidden" data-transport-mode="construir">
-                    <button class="toolbar-btn btn-toggle" id="construir-btnAnimate" title="Animar evolução de v até v'">
+                    <button type="button" class="toolbar-btn btn-toggle" id="construir-btnAnimate" title="Animar evolução de v até v'">
                         <img src="../assets/icons/play.svg" class="icon-svg" alt="Animar">
                         <span class="btn-text">Animar $\vec{v} \to \vec{v}'$</span>
                     </button>
-                    <button class="toolbar-btn" id="construir-btnReset" title="Restaurar posições iniciais">
+                    <button type="button" class="toolbar-btn" id="construir-btnReset" title="Restaurar posições iniciais">
                         <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                         <span class="btn-text">Resetar</span>
                     </button>
@@ -115,43 +115,43 @@
 
                 <!-- Modo 3: Funções -->
                 <div class="transport-mode-group hidden" data-transport-mode="funcoes">
-                    <button class="toolbar-btn btn-toggle" id="fn-btnPlay"
+                    <button type="button" class="toolbar-btn btn-toggle" id="fn-btnPlay"
                             data-state="0" data-text-idle="Evoluir" data-text-active="Pausar"
                             data-icon-idle="play" data-icon-active="pause" title="Evoluir no Tempo / Pausar">
                         <img src="../assets/icons/play.svg" class="icon-svg" alt="Play">
                         <span class="btn-text">Evoluir</span>
                     </button>
-                    <button class="toolbar-btn" id="fn-btnStep" title="Avançar Passo temporal (Δt)">
+                    <button type="button" class="toolbar-btn" id="fn-btnStep" title="Avançar Passo temporal (Δt)">
                         <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
                     </button>
-                    <button class="toolbar-btn" id="fn-btnReset" title="Reiniciar tempo (t = 0)">
+                    <button type="button" class="toolbar-btn" id="fn-btnReset" title="Reiniciar tempo (t = 0)">
                         <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                     </button>
                     <span class="toolbar-divider"></span>
-                    <button class="toolbar-btn speed-cycle-btn" id="fn-btnSpeedCycle" data-speed="1.0" title="Alternar Velocidade Temporal">
+                    <button type="button" class="toolbar-btn speed-cycle-btn" id="fn-btnSpeedCycle" data-speed="1.0" title="Alternar Velocidade Temporal">
                         1.0×
                     </button>
                 </div>
 
                 <!-- Modo 4: Dinâmico -->
                 <div class="transport-mode-group hidden" data-transport-mode="dinamico">
-                    <button class="toolbar-btn btn-toggle" id="dyn-btnPlay"
+                    <button type="button" class="toolbar-btn btn-toggle" id="dyn-btnPlay"
                             data-state="0" data-text-idle="Integrar" data-text-active="Pausar"
                             data-icon-idle="play" data-icon-active="pause" title="Integrar Fluxo / Pausar">
                         <img src="../assets/icons/play.svg" class="icon-svg" alt="Play">
                         <span class="btn-text">Integrar</span>
                     </button>
-                    <button class="toolbar-btn" id="dyn-btnStep" title="Avançar Passo (Δt)">
+                    <button type="button" class="toolbar-btn" id="dyn-btnStep" title="Avançar Passo (Δt)">
                         <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
                     </button>
-                    <button class="toolbar-btn" id="dyn-btnReset" title="Reiniciar sementes nas posições originais">
+                    <button type="button" class="toolbar-btn" id="dyn-btnReset" title="Reiniciar sementes nas posições originais">
                         <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                     </button>
-                    <button class="toolbar-btn" id="dyn-btnClear" title="Limpar todas as trajetórias">
+                    <button type="button" class="toolbar-btn" id="dyn-btnClear" title="Limpar todas as trajetórias">
                         <img src="../assets/icons/snowflake.svg" class="icon-svg" alt="Limpar">
                     </button>
                     <span class="toolbar-divider"></span>
-                    <button class="toolbar-btn speed-cycle-btn" id="dyn-btnSpeedCycle" data-speed="1.0" title="Alternar Velocidade Temporal">
+                    <button type="button" class="toolbar-btn speed-cycle-btn" id="dyn-btnSpeedCycle" data-speed="1.0" title="Alternar Velocidade Temporal">
                         1.0×
                     </button>
                 </div>
@@ -167,27 +167,27 @@
         <aside class="controls-panel" id="controls-panel">
 
             <!-- Navegação por Abas dos 4 Modos (Padrão DS 2.0) -->
-            <nav class="tab-nav" id="mode-tab-nav">
-                <button class="tab-btn active" data-tab="tab-base" data-mode="base" title="1. Base & Operadores Lineares">
+            <div class="tab-nav" id="mode-tab-nav" role="tablist">
+                <button type="button" class="tab-btn active" data-tab="tab-base" data-mode="base" title="1. Base & Operadores Lineares">
                     <img src="../assets/icons/matrix-basis.svg" class="icon-svg" alt="Base">
                     <span class="tab-label">1. Base</span>
                 </button>
-                <button class="tab-btn" data-tab="tab-construir" data-mode="construir" title="2. Construir Operador por Imagens">
+                <button type="button" class="tab-btn" data-tab="tab-construir" data-mode="construir" title="2. Construir Operador por Imagens">
                     <img src="../assets/icons/axis-3d.svg" class="icon-svg" alt="Construir">
                     <span class="tab-label">2. Construir</span>
                 </button>
-                <button class="tab-btn" data-tab="tab-funcoes" data-mode="funcoes" title="3. Matrizes Não-Lineares M(x,y,t)">
+                <button type="button" class="tab-btn" data-tab="tab-funcoes" data-mode="funcoes" title="3. Matrizes Não-Lineares M(x,y,t)">
                     <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="Funções">
                     <span class="tab-label">3. Funções</span>
                 </button>
-                <button class="tab-btn" data-tab="tab-dinamico" data-mode="dinamico" title="4. Sistemas Dinâmicos Contínuos">
+                <button type="button" class="tab-btn" data-tab="tab-dinamico" data-mode="dinamico" title="4. Sistemas Dinâmicos Contínuos">
                     <img src="../assets/icons/motion-oscillate.svg" class="icon-svg" alt="Dinâmico">
                     <span class="tab-label">4. Dinâmico</span>
                 </button>
-                <button class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Recolher painel (F)">
+                <button type="button" class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Recolher painel (F)">
                     <img src="../assets/icons/collapse.svg" class="icon-svg" alt="Recolher">
                 </button>
-            </nav>
+            </div>
 
             <div class="panel-body">
 
@@ -202,7 +202,7 @@
                             <div class="sim-matrix-tensor-editor">
                                 <div class="matrix-box" id="base-matrix-box">
                                     <span class="matrix-bracket left" aria-hidden="true">[</span>
-                                    <div class="matrix-grid">
+                                    <div class="matrix-grid matrix-grid-2x2">
                                         <div class="matrix-cell cell-i">
                                             <div class="matrix-input-wrap">
                                                 <input type="number" id="base-m11" step="0.1" value="" data-default="1" class="sim-input" aria-label="i_x">
@@ -254,26 +254,28 @@
                         </div>
 
                         <!-- Slider de Ângulo de Rotação -->
-                        <div class="control-group" id="base-rotationGroup" style="display: none;">
-                            <label class="control-label" for="base-rotSlider">Ângulo de Rotação (θ)</label>
-                            <div class="sim-dual-slider tone-cyan" data-focus-control="slider" data-focus-label="θ">
-                                <input type="range" id="base-rotSlider" min="-180" max="180" step="5" value="45">
-                                <div class="dual-number-wrapper">
-                                    <input type="number" id="base-rotNum" class="sim-input dual-number" min="-180" max="180" step="5" value="45">
-                                    <span class="dual-unit">°</span>
+                        <div class="control-group hidden" id="base-rotationGroup">
+                            <div class="slider-container sim-dual-slider tone-cyan">
+                                <div class="slider-header">
+                                    <label class="slider-label" for="base-rotSlider">Ângulo de Rotação ($\theta$)</label>
+                                    <div class="dual-input-wrapper">
+                                        <input type="number" id="base-rotNum" class="dual-input-number" min="-180" max="180" step="5" value="45" aria-label="Ângulo de rotação em graus">
+                                        <span class="dual-input-unit">°</span>
+                                    </div>
                                 </div>
+                                <input type="range" class="sim-slider" id="base-rotSlider" min="-180" max="180" step="5" value="45" data-focus-control="slider" data-focus-order="2" data-focus-label="θ">
                             </div>
                         </div>
 
                         <!-- Superfícies de Prova (Toggle de Camadas) -->
                         <div class="control-group">
                             <label class="group-title">Figuras de Prova (Deformação de Área)</label>
-                            <div class="button-row">
-                                <button id="base-btnAddCircle" class="btn-action secondary" data-focus-control="action" data-focus-order="2" data-focus-label="Círculo" data-focus-icon="particle-circle" title="Alternar Círculo de Prova">
+                            <div class="control-grid-2x2">
+                                <button type="button" id="base-btnAddCircle" class="btn-secondary" data-focus-control="action" data-focus-order="3" data-focus-label="Círculo" data-focus-icon="particle-circle" title="Alternar Círculo de Prova">
                                     <img src="../assets/icons/particle-circle.svg" class="icon-svg" alt="">
                                     <span>Círculo</span>
                                 </button>
-                                <button id="base-btnAddSquare" class="btn-action secondary" data-focus-control="action" data-focus-order="3" data-focus-label="Quadrado" data-focus-icon="particle-grid" title="Alternar Quadrado de Prova">
+                                <button type="button" id="base-btnAddSquare" class="btn-secondary" data-focus-control="action" data-focus-order="4" data-focus-label="Quadrado" data-focus-icon="particle-grid" title="Alternar Quadrado de Prova">
                                     <img src="../assets/icons/particle-grid.svg" class="icon-svg" alt="">
                                     <span>Quadrado</span>
                                 </button>
@@ -281,19 +283,22 @@
                         </div>
 
                         <!-- Leitura do Determinante & Intuição Geométrica -->
-                        <div class="sim-readout readout-card">
-                            <div class="sim-readout-title readout-header">📐 Geometria do Espaço</div>
-                            <div class="sim-readout-row readout-item">
-                                <span class="sim-readout-label readout-label">Determinante det(M)</span>
-                                <span class="sim-readout-value readout-value highlight-yellow" id="base-detVal" data-focus-control="badge" data-focus-order="4" title="Determinante det(M)">1.00</span>
+                        <div class="sim-readout">
+                            <div class="sim-readout-title">
+                                <img src="../assets/icons/matrix-basis.svg" class="icon-svg icon-accent" alt="">
+                                <span>Geometria do Espaço</span>
                             </div>
-                            <div class="sim-readout-row readout-item">
-                                <span class="sim-readout-label readout-label">Fator de Área</span>
-                                <span class="sim-readout-value readout-value highlight-cyan" id="base-detAreaText">1.00x (Preservada)</span>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Determinante det(M)</span>
+                                <span class="sim-readout-value tone-accent" id="base-detVal" data-focus-control="badge" data-focus-order="5" title="Determinante det(M)">1.00</span>
                             </div>
-                            <div class="sim-readout-row readout-item">
-                                <span class="sim-readout-label readout-label">Orientação</span>
-                                <span class="sim-readout-value readout-value highlight-green" id="base-detOrientText">Preservada (+)</span>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Fator de Área</span>
+                                <span class="sim-readout-value tone-cyan" id="base-detAreaText">1.00x (Preservada)</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Orientação</span>
+                                <span class="sim-readout-value tone-emerald" id="base-detOrientText">Preservada (+)</span>
                             </div>
                         </div>
 
@@ -327,34 +332,40 @@
                 <!-- ======================================================= -->
                 <!-- ABA 2: MODO CONSTRUIR                                   -->
                 <!-- ======================================================= -->
-                <div class="tab-pane" id="tab-construir" style="display: none;">
+                <div class="tab-pane" id="tab-construir">
                     <div class="subpane-controls" id="subpane-controls-construir">
 
                         <!-- Operador Matricial Determinado -->
-                        <div class="sim-readout readout-card" id="construir-system-card">
-                            <div class="sim-readout-title readout-header">🔧 Operador Construído ($M = P \cdot B^{-1}$)</div>
-                            <div id="construir-katex-matrix" style="margin: 4px 0;"></div>
-                            <div class="sim-readout-row readout-item" style="border-top: 1px solid var(--border-subtle); padding-top: 6px;">
-                                <span class="sim-readout-label readout-label">Determinante $\det(M)$</span>
-                                <span class="sim-readout-value readout-value highlight-yellow" id="construir-val-detm" data-focus-control="badge" data-focus-order="1" title="Determinante det(M)">1.00</span>
+                        <div class="sim-readout" id="construir-system-card">
+                            <div class="sim-readout-title">
+                                <img src="../assets/icons/axis-3d.svg" class="icon-svg icon-accent" alt="">
+                                <span>Operador Construído ($M = P \cdot B^{-1}$)</span>
+                            </div>
+                            <div id="construir-katex-matrix" class="construir-katex-matrix"></div>
+                            <div class="sim-readout-row readout-row-divider">
+                                <span class="sim-readout-label">Determinante $\det(M)$</span>
+                                <span class="sim-readout-value tone-accent" id="construir-val-detm" data-focus-control="badge" data-focus-order="1" title="Determinante det(M)">1.00</span>
                             </div>
                             <div class="field-hint" data-for="construir-system-card"></div>
                         </div>
 
                         <!-- Telemetria do Vetor Transportado e Vetor Deslocamento -->
-                        <div class="sim-readout readout-card">
-                            <div class="sim-readout-title readout-header">🚀 Evolução do Vetor de Prova</div>
-                            <div class="sim-readout-row readout-item">
-                                <span class="sim-readout-label readout-label">Vetor Inicial $\vec{v}$</span>
-                                <span class="sim-readout-value readout-value" style="color: #f472b6;">(<span id="construir-val-vx">2.00</span>, <span id="construir-val-vy">1.00</span>)</span>
+                        <div class="sim-readout">
+                            <div class="sim-readout-title">
+                                <img src="../assets/icons/compass.svg" class="icon-svg icon-accent" alt="">
+                                <span>Evolução do Vetor de Prova</span>
                             </div>
-                            <div class="sim-readout-row readout-item">
-                                <span class="sim-readout-label readout-label">Vetor Transformado $\vec{v}'$</span>
-                                <span class="sim-readout-value readout-value highlight-pink">(<span id="construir-val-vpx">2.50</span>, <span id="construir-val-vpy">2.50</span>)</span>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Vetor Inicial $\vec{v}$</span>
+                                <span class="sim-readout-value tone-pink">(<span id="construir-val-vx">2.00</span>, <span id="construir-val-vy">1.00</span>)</span>
                             </div>
-                            <div class="sim-readout-row readout-item">
-                                <span class="sim-readout-label readout-label">Deslocamento $\vec{d} = \vec{v}' - \vec{v}$</span>
-                                <span class="sim-readout-value readout-value highlight-rose">(<span id="construir-val-dx">0.50</span>, <span id="construir-val-dy">1.50</span>)</span>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Vetor Transformado $\vec{v}'$</span>
+                                <span class="sim-readout-value tone-pink">(<span id="construir-val-vpx">2.50</span>, <span id="construir-val-vpy">2.50</span>)</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Deslocamento $\vec{d} = \vec{v}' - \vec{v}$</span>
+                                <span class="sim-readout-value tone-rose">(<span id="construir-val-dx">0.50</span>, <span id="construir-val-dy">1.50</span>)</span>
                             </div>
                         </div>
 
@@ -387,14 +398,14 @@
                 <!-- ======================================================= -->
                 <!-- ABA 3: MODO FUNÇÕES                                     -->
                 <!-- ======================================================= -->
-                <div class="tab-pane" id="tab-funcoes" style="display: none;">
+                <div class="tab-pane" id="tab-funcoes">
                     <div class="subpane-controls" id="subpane-controls-funcoes">
                         <div class="control-group">
                             <label class="group-title">Matriz Funcional $M(x, y, t)$</label>
                             <div class="sim-matrix-tensor-editor">
                                 <div class="matrix-box" id="funcoes-matrix-box">
                                     <span class="matrix-bracket left" aria-hidden="true">[</span>
-                                    <div class="matrix-grid matrix-grid-fn">
+                                    <div class="matrix-grid matrix-grid-2x2 matrix-grid-fn">
                                         <div class="matrix-cell matrix-cell-fn">
                                             <input type="text" id="fn-m11" value="1" class="sim-input" placeholder="M₁₁(x,y,t)" aria-label="M11(x,y,t)">
                                         </div>
@@ -444,12 +455,12 @@
                         <!-- Superfícies de Prova (Toggle de Camadas) -->
                         <div class="control-group">
                             <label class="group-title">Figuras de Prova (Deformação Local)</label>
-                            <div class="button-row">
-                                <button id="fn-btnAddCircle" class="btn-action secondary" data-focus-control="action" data-focus-order="2" data-focus-label="Círculo" data-focus-icon="particle-circle" title="Alternar Círculo de Prova">
+                            <div class="control-grid-2x2">
+                                <button type="button" id="fn-btnAddCircle" class="btn-secondary" data-focus-control="action" data-focus-order="2" data-focus-label="Círculo" data-focus-icon="particle-circle" title="Alternar Círculo de Prova">
                                     <img src="../assets/icons/particle-circle.svg" class="icon-svg" alt="">
                                     <span>Círculo</span>
                                 </button>
-                                <button id="fn-btnAddSquare" class="btn-action secondary" data-focus-control="action" data-focus-order="3" data-focus-label="Quadrado" data-focus-icon="particle-grid" title="Alternar Quadrado de Prova">
+                                <button type="button" id="fn-btnAddSquare" class="btn-secondary" data-focus-control="action" data-focus-order="3" data-focus-label="Quadrado" data-focus-icon="particle-grid" title="Alternar Quadrado de Prova">
                                     <img src="../assets/icons/particle-grid.svg" class="icon-svg" alt="">
                                     <span>Quadrado</span>
                                 </button>
@@ -475,14 +486,14 @@
                 <!-- ======================================================= -->
                 <!-- ABA 4: MODO DINÂMICO                                    -->
                 <!-- ======================================================= -->
-                <div class="tab-pane" id="tab-dinamico" style="display: none;">
+                <div class="tab-pane" id="tab-dinamico">
                     <div class="subpane-controls" id="subpane-controls-dinamico">
                         <div class="control-group">
                             <label class="group-title">Sistema Dinâmico Linear $\dot{\vec{x}} = M\vec{x}$</label>
                             <div class="sim-matrix-tensor-editor">
                                 <div class="matrix-box" id="dyn-matrix-box">
                                     <span class="matrix-bracket left" aria-hidden="true">[</span>
-                                    <div class="matrix-grid">
+                                    <div class="matrix-grid matrix-grid-2x2">
                                         <div class="matrix-cell">
                                             <input type="number" id="dyn-m11" step="0.1" value="0.0" class="sim-input" aria-label="a">
                                         </div>
@@ -519,12 +530,12 @@
                         <!-- Distribuição de Sementes -->
                         <div class="control-group">
                             <label class="group-title">Sementes & Trajetórias Orbitais</label>
-                            <div class="button-row">
-                                <button id="dyn-btnSeedCircle" class="btn-action secondary" data-focus-control="action" data-focus-order="2" data-focus-label="Círculo" data-focus-icon="particle-circle" title="Semear Círculo">
+                            <div class="control-grid-2x2">
+                                <button type="button" id="dyn-btnSeedCircle" class="btn-secondary" data-focus-control="action" data-focus-order="2" data-focus-label="Círculo" data-focus-icon="particle-circle" title="Semear Círculo">
                                     <img src="../assets/icons/particle-circle.svg" class="icon-svg" alt="">
                                     <span>Semear Círculo</span>
                                 </button>
-                                <button id="dyn-btnSeedGrid" class="btn-action secondary" data-focus-control="action" data-focus-order="3" data-focus-label="Grade" data-focus-icon="particle-grid" title="Semear Grade">
+                                <button type="button" id="dyn-btnSeedGrid" class="btn-secondary" data-focus-control="action" data-focus-order="3" data-focus-label="Grade" data-focus-icon="particle-grid" title="Semear Grade">
                                     <img src="../assets/icons/particle-grid.svg" class="icon-svg" alt="">
                                     <span>Semear Grade</span>
                                 </button>
@@ -532,19 +543,22 @@
                         </div>
 
                         <!-- Classificação do Ponto de Equilíbrio (Enxuta) -->
-                        <div class="sim-readout readout-card">
-                            <div class="sim-readout-title readout-header">⚖️ Classificação de Poincaré (0,0)</div>
-                            <div class="sim-readout-row readout-item">
-                                <span class="sim-readout-label readout-label">Topologia</span>
-                                <span class="sim-readout-value readout-value highlight-cyan" id="dyn-readout-type">Centro (Estável)</span>
+                        <div class="sim-readout">
+                            <div class="sim-readout-title">
+                                <img src="../assets/icons/focus.svg" class="icon-svg icon-accent" alt="">
+                                <span>Classificação de Poincaré (0,0)</span>
                             </div>
-                            <div class="sim-readout-row readout-item">
-                                <span class="sim-readout-label readout-label">Autovalores ($\lambda_1, \lambda_2$)</span>
-                                <span class="sim-readout-value readout-value highlight-yellow" id="dyn-readout-eigen">0.00 ± 2.00i</span>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Topologia</span>
+                                <span class="sim-readout-value tone-cyan" id="dyn-readout-type">Centro (Estável)</span>
                             </div>
-                            <div class="sim-readout-row readout-item">
-                                <span class="sim-readout-label readout-label">Invariantes ($\tau, \Delta$)</span>
-                                <span class="sim-readout-value readout-value" id="dyn-readout-invariants">tr = 0.00 | det = 4.00</span>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Autovalores ($\lambda_1, \lambda_2$)</span>
+                                <span class="sim-readout-value tone-accent" id="dyn-readout-eigen">0.00 ± 2.00i</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Invariantes ($\tau, \Delta$)</span>
+                                <span class="sim-readout-value" id="dyn-readout-invariants">tr = 0.00 | det = 4.00</span>
                             </div>
                         </div>
 
@@ -572,9 +586,9 @@
             <footer class="panel-footer">
                 <div class="sim-badge" id="footer-status-badge">
                     <span class="status-dot"></span>
-                    <span id="footer-status-text">Espaço Cartesiano $\mathbb{R}^2$</span>
+                    <span id="footer-status-text">Modo 1: Base Canônica</span>
                 </div>
-                <span class="footer-meta" id="footer-sim-info">DS 2.0 • 4 Modos Integrados</span>
+                <span class="footer-meta" id="footer-sim-info">4 Modos</span>
             </footer>
         </aside>
     </main>
@@ -588,7 +602,7 @@
                     <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                     <span>Transformações Matriciais 2D — Guia Rápido</span>
                 </div>
-                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+                <button type="button" class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">

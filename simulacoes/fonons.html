@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#1c1917">
     <title>Fônons & Dinâmica de Redes Cristalinas - Plataforma Científica</title>
     
     <meta name="description"
@@ -19,16 +19,7 @@
     <!-- Suporte a Fórmulas Matemáticas com KaTeX -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"
-        onload="renderMathInElement(document.body, {
-            delimiters: [
-                {left: '$$', right: '$$', display: true},
-                {left: '$', right: '$', display: false},
-                {left: '\\(', right: '\\)', display: false},
-                {left: '\\[', right: '\\]', display: true}
-            ],
-            throwOnError: false
-        });"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <!-- Cabeçalho da Simulação -->
@@ -42,7 +33,7 @@
             <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
                 <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
             </button>
-            <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
+            <button type="button" id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
             </button>
@@ -78,7 +69,7 @@
 
             <!-- Topo Direito: apenas reabertura do painel -->
             <div class="canvas-top-actions">
-                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
+                <button type="button" id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
                 </button>
@@ -86,20 +77,20 @@
 
             <!-- Barra Flutuante de Transporte / Playback -->
             <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
-                <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
+                <button type="button" class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
                         data-state="0" data-text-idle="Executar" data-text-active="Pausar"
                         data-icon-idle="play" data-icon-active="pause" title="Executar / Pausar">
                     <img src="../assets/icons/play.svg" class="icon-svg" alt="Executar">
                     <span class="btn-text">Executar</span>
                 </button>
-                <button class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
+                <button type="button" class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
                     <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
                 </button>
-                <button class="toolbar-btn" id="btn-reset-sim" title="Zerar Vibrações (t = 0)">
+                <button type="button" class="toolbar-btn" id="btn-reset-sim" title="Zerar Vibrações (t = 0)">
                     <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                 </button>
                 <span class="toolbar-divider"></span>
-                <button class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
+                <button type="button" class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
                     1.0×
                 </button>
             </div>
@@ -114,16 +105,16 @@
         <aside class="controls-panel">
 
             <!-- Topo: Barra de Abas Expansíveis -->
-            <div class="tab-nav">
-                <button class="tab-btn active" id="tab-btn-params" data-tab="panel-tab-params">
-                    <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Parâmetros">
+            <div class="tab-nav" role="tablist">
+                <button type="button" class="tab-btn active" id="tab-btn-params" data-tab="panel-tab-params">
+                    <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Parâmetros">
                     <span class="tab-label">Parâmetros</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-theory" data-tab="panel-tab-theory">
-                    <img src="../assets/icons/compass.svg" class="icon-svg" alt="Teoria">
+                <button type="button" class="tab-btn" id="tab-btn-theory" data-tab="panel-tab-theory">
+                    <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                     <span class="tab-label">Teoria</span>
                 </button>
-                <button class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
+                <button type="button" class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
                     <img src="../assets/icons/collapse.svg" class="icon-svg" alt="Recolher">
                 </button>
             </div>
@@ -154,7 +145,7 @@
                             <option value="planar" data-focus-short="Planar ∥">Frente Planar (onda plana em x)</option>
                             <option value="transversal" data-focus-short="Transv. ⊥">Cisalhamento Transversal (onda plana em y)</option>
                         </select>
-                        <button type="button" class="btn-secondary" id="btn-perturbar" style="margin-top: 8px; width: 100%;"
+                        <button type="button" class="btn-secondary w-full" id="btn-perturbar"
                                 data-focus-control="action" data-focus-label="" data-focus-order="3"
                                 title="Perturbar a rede">
                             <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="">
@@ -232,7 +223,7 @@
                 </div>
 
                 <!-- ABA 2: TEORIA -->
-                <div id="panel-tab-theory" class="tab-pane" style="display: none;">
+                <div id="panel-tab-theory" class="tab-pane">
                     <div class="theory-card">
                         <h4>1. Dinâmica da Rede Cristalina 2D</h4>
                         <p>Cada átomo de massa $M$ está acoplado elasticamente a seus quatro vizinhos mais próximos na aproximação harmônica por molas com constante elástica $K$. Pela Lei de Hooke:</p>
@@ -259,7 +250,7 @@
             <div class="panel-footer">
                 <div class="sim-badge idle" id="footer-status-badge">
                     <span class="status-dot"></span>
-                    <span id="footer-status-text">Pausado</span>
+                    <span id="footer-status-text">Simulação Pronta</span>
                 </div>
                 <span class="footer-meta" id="footer-sim-timer">t = 0.00s</span>
             </div>
@@ -276,7 +267,7 @@
                     <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                     <span>Fônons & Dinâmica de Redes Cristalinas — Guia Rápido</span>
                 </div>
-                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+                <button type="button" class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">

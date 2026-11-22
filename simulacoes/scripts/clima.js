@@ -1975,9 +1975,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     initBottomSheet({
         panelSelector: '.controls-panel',
-        handleSelector: '#sheet-drag-handle',
-        tabNavSelector: '.tab-nav',
-        collapseBtnSelector: '#btn-collapse-sidebar',
+        triggerSelector: '#btn-mobile-settings',
         defaultState: 'peek'
     });
 

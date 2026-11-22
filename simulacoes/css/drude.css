@@ -9,7 +9,7 @@
     width: 100%;
     height: 100%;
     cursor: default;
-    background-color: var(--bg-canvas, #070b16);
+    background-color: var(--bg-canvas);
     touch-action: none;
 }
 
@@ -28,29 +28,6 @@
     line-height: 1;
 }
 
-/* Bloco de citação bibliográfica */
-.biblio-ref {
-    margin-top: 10px;
-    padding: 10px 12px;
-    background: var(--accent-subtle);
-    border-left: 3px solid var(--accent-color);
-    border-radius: var(--radius-xs);
-    font-size: 0.82rem;
-    line-height: 1.45;
-    color: var(--text-secondary);
+#btn-open-theory-modal {
+    margin-top: 12px;
 }
-
-.biblio-ref strong {
-    color: var(--text-primary);
-}
-
-.biblio-ref a {
-    color: var(--accent-color);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-    transition: opacity 0.2s ease;
-}
-
-.biblio-ref a:hover {
-    opacity: 0.85;
-}

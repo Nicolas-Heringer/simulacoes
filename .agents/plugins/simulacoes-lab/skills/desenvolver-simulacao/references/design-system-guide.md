@@ -343,7 +343,8 @@ Posicionar dentro de `.canvas-area`. Não utilize `.sim-transport-bar` legado na
 </div>
 ```
 
-### 3.8 Teoria, Visor Dinâmico KaTeX e Modais (`.theory-card`, `.sim-math-display`, `.sim-modal-overlay`)
+### 3.8 Teoria, Visor Dinâmico KaTeX, Referência Bibliográfica e Modais (`.theory-card`, `.sim-math-display`, `.biblio-ref`, `.sim-modal-overlay`)
+* **Referência Bibliográfica (`.biblio-ref`)**: bloco padronizado para citações e links bibliográficos na aba de Teoria (com suporte nativo aos temas Claro e Escuro).
 * **Modal de Teoria**: sempre inicia com `.hidden`, usa `.sim-modal-container` (nunca `.sim-modal-content`) e fecha via `[data-modal-close]` / `.sim-modal-close` (nunca `.sim-modal-close-btn`).
 * **Modal de Onboarding (`#modal-onboarding`)**: linguagem direta focada na intuição de uso, **sem ícones dentro de `.onboarding-card-title`**, e incluindo o painel de compartilhamento `#onboarding-qr-panel` + `#btn-toggle-onboarding-qr`.
 ```html
@@ -352,6 +353,10 @@ Posicionar dentro de `.canvas-area`. Não utilize `.sim-transport-bar` legado na
     <p>Evolução temporal governada pelo Hamiltoniano:</p>
     $$i\hbar \frac{\partial}{\partial t}|\psi(t)\rangle = \hat{H}|\psi(t)\rangle$$
     <div id="math-live-display" class="sim-math-display"></div>
+</div>
+
+<div class="biblio-ref">
+    <strong>Referência:</strong> Título da Obra (Autor, Editora).
 </div>
 
 <!-- Modal Imersivo (.sim-modal-overlay.hidden) -->
@@ -398,7 +403,7 @@ Sempre importe de `./sim-ui.js`:
   * Retorno: `{ toggle(), setState(newState, triggerCallback = false), getState(), isActive() }`.
 * `syncDualSlider(sliderTarget, numTarget, onChangeCallback)` — Sincroniza `<input type="range">` e `<input type="number">` bidirecionalmente, com clamping `min`/`max` seguro (`Number.isFinite`), sem disparo duplicado em `change`+`blur`, e sincronizando o espelho do Modo Foco.
   * Retorno: `{ getValue(), setValue(val, triggerCallback = true) }`.
-* `setFieldState(target, state = null, hintText = '')` — Aplica `'valid' | 'invalid' | 'warning' | 'ready' | 'disabled' | 'neutral' | null`, atualiza `aria-invalid`/`aria-disabled`, desabilita inputs internos em `'disabled'` e atualiza `.field-hint`.
+* `setFieldState(target, state = null, hintText = '')` — Aplica `'valid' | 'invalid' | 'warning' | 'ready' | 'disabled' | 'neutral' | null`, atualiza `aria-invalid`/`aria-disabled`, desabilita inputs internos em `'disabled'` e atualiza `.field-hint` (aceita tanto o container quanto o próprio elemento `.field-hint`).
 
 ### 4.3 Layout, Abas, Modo Foco, Mobile & Modais
 * `initTabs(root = document, onTabChange = null)` — Configura `role="tablist"`, `role="tab"`, `aria-selected`, `aria-controls`, `role="tabpanel"`, navegação por setas (`ArrowLeft`/`ArrowRight`/`Home`/`End`), auto-render KaTeX na aba ativa e dispara evento único `tabchange`.

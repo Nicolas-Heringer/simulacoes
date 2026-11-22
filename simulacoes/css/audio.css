@@ -3,18 +3,10 @@
    Estilos específicos do domínio acústico, osciloscópio e espectro FFT
    ============================================================================= */
 
-/* --- ÁREA PRINCIPAL DO CANVAS --- */
+/* --- ÁREA PRINCIPAL DO CANVAS (Mantém palco escuro blindado nos dois temas) --- */
 .canvas-area {
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow: hidden;
-    height: 100%;
-    min-height: 0;
-    padding: 14px;
-    background-color: var(--bg-surface);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-color);
+    padding: 12px;
+    background-color: var(--bg-canvas);
 }
 
 /* --- PALCO DE VISUALIZAÇÃO DOS GRÁFICOS --- */
@@ -26,14 +18,14 @@
     display: flex;
     overflow: hidden;
     border-radius: var(--radius-md);
-    background-color: #030712;
+    background-color: var(--bg-canvas);
 }
 
 /* Container Individual de Cada Canvas */
 .audio-canvas-container {
     display: flex;
     flex-direction: column;
-    background-color: #030712;
+    background-color: var(--bg-canvas);
     overflow: hidden;
     transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
                 border-color 0.25s ease,
@@ -45,7 +37,7 @@
     position: relative;
     width: 100%;
     height: 100%;
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-subtle);
     border-radius: var(--radius-md);
     z-index: 1;
 }
@@ -57,8 +49,8 @@
     right: 14px;
     width: 320px;
     height: 185px;
-    background: rgba(10, 15, 29, 0.94);
-    border: 1.5px solid color-mix(in srgb, var(--accent-color) 55%, transparent);
+    background: var(--bg-glass-strong);
+    border: var(--ui-border-width, 1.5px) solid color-mix(in srgb, var(--accent-color) 55%, transparent);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-lg), 0 0 18px color-mix(in srgb, var(--accent-color) 18%, transparent);
     z-index: 12;
@@ -69,8 +61,7 @@
 
 .audio-canvas-container.canvas-pip:hover {
     border-color: var(--accent-color);
-    background: rgba(10, 15, 29, 0.98);
-    box-shadow: var(--shadow-xl), 0 0 24px color-mix(in srgb, var(--accent-color) 32%, transparent);
+    box-shadow: var(--shadow-popover), 0 0 24px color-mix(in srgb, var(--accent-color) 32%, transparent);
     transform: translateY(-2px);
 }
 
@@ -82,8 +73,8 @@
     left: 8px;
     font-size: 0.65rem;
     font-weight: 600;
-    color: var(--text-muted);
-    background: rgba(0, 0, 0, 0.6);
+    color: var(--text-secondary);
+    background: var(--bg-recessed);
     padding: 1px 6px;
     border-radius: var(--radius-sm);
     pointer-events: none;
@@ -102,7 +93,7 @@
     justify-content: space-between;
     gap: 8px;
     padding: 6px 12px;
-    background: rgba(15, 23, 42, 0.88);
+    background: var(--bg-glass);
     border-bottom: 1px solid var(--border-subtle);
     font-size: 0.80rem;
     color: var(--text-secondary);
@@ -113,7 +104,7 @@
 /* Na miniatura PiP no desktop, cabeçalho compacto */
 .canvas-pip .canvas-header-bar {
     padding: 4px 8px;
-    background: rgba(15, 23, 42, 0.92);
+    background: var(--bg-glass-strong);
 }
 
 .canvas-pip .canvas-header-title {
@@ -158,11 +149,11 @@
     display: inline-flex;
     align-items: center;
     padding: 2px 8px;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-pill);
     font-size: 0.72rem;
     font-family: var(--font-mono);
     font-weight: 600;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-subtle);
     border: 1px solid var(--border-subtle);
     color: var(--text-secondary);
 }
@@ -175,7 +166,7 @@
 
 /* Botões do Cabeçalho do Canvas */
 .badge-btn {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--bg-subtle);
     border: 1px solid var(--border-color);
     color: var(--text-secondary);
     padding: 3px 8px;
@@ -183,14 +174,14 @@
     font-size: 0.72rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--trans-fast);
     display: inline-flex;
     align-items: center;
     gap: 4px;
 }
 
 .badge-btn:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--bg-hover);
     color: var(--text-primary);
     border-color: var(--border-focus);
 }
@@ -202,15 +193,12 @@
     box-shadow: 0 0 8px color-mix(in srgb, var(--accent-color) 25%, transparent);
 }
 
-
 /* Elementos Canvas 2D */
 .audio-canvas-container canvas {
-    width: 100% !important;
-    height: 100% !important;
-    max-width: none !important;
-    max-height: none !important;
-    object-fit: fill !important;
+    width: 100%;
+    height: 100%;
     flex: 1;
+    min-height: 0;
     display: block;
     cursor: crosshair;
     touch-action: none;
@@ -222,11 +210,11 @@
     top: 42px;
     left: 14px;
     padding: 4px 10px;
-    background: rgba(15, 23, 42, 0.90);
+    background: var(--bg-glass-strong);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-pill);
     font-family: var(--font-mono);
     font-size: 0.74rem;
     font-weight: 600;
@@ -242,181 +230,70 @@
     display: none;
 }
 
-/* --- ELEMENTOS DE GAVETA MOBILE (DRAWER) --- */
-.drawer-header-mobile,
-.mobile-drawer-backdrop {
-    display: none;
+/* Feedback de permissão do microfone */
+#micFieldHint {
+    margin-bottom: 6px;
 }
 
 /* =============================================================================
    RESPONSIVIDADE: MOBILE E TELAS TÁTEIS (<= 900px)
-   Dois gráficos empilhados verticalmente e gaveta sob demanda
+   Dois gráficos empilhados verticalmente + Painel Flutuante DS 2.0
    ============================================================================= */
 @media (max-width: 900px) {
-    /* 1. O Canvas ocupa a área útil inteira sem sobreposição de bottom sheet */
     .canvas-area {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        min-height: 100%;
-        padding: 10px;
-        padding-bottom: 0;
-        border-radius: 0;
-        border: none;
+        padding: 10px 10px 0 10px;
     }
 
-    /* 2. Palco dos Canvases: Empilhado Verticalmente (50% / 50%) */
     .canvas-stage {
-        flex-direction: column !important;
-        gap: 8px !important;
-        padding-bottom: 64px !important; /* Espaço seguro garantido para a barra de transporte */
-        background: transparent !important;
+        flex-direction: column;
+        gap: 8px;
+        padding-bottom: calc(66px + var(--safe-bottom));
+        background: transparent;
     }
 
-    /* Ambos os containers tornam-se cartões normais no fluxo da coluna */
+    /* Ambos os containers tornam-se cartões empilhados na coluna */
     .audio-canvas-container.canvas-main,
     .audio-canvas-container.canvas-pip {
-        position: relative !important;
-        top: auto !important;
-        left: auto !important;
-        right: auto !important;
-        bottom: auto !important;
-        width: 100% !important;
-        flex: 1 1 0 !important;
-        min-height: 135px !important;
-        border: 1px solid var(--border-color) !important;
-        border-radius: var(--radius-md) !important;
-        box-shadow: var(--shadow-sm) !important;
-        transform: none !important;
-        cursor: default !important;
-        background-color: #030712 !important;
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        bottom: auto;
+        width: 100%;
+        height: auto;
+        flex: 1 1 0;
+        min-height: 135px;
+        border: var(--ui-border-width, 1.5px) solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        transform: none;
+        cursor: default;
+        background-color: var(--bg-canvas);
     }
 
-    /* Oculta a indicação de clique do PiP no mobile */
     .canvas-pip::after {
-        display: none !important;
+        display: none;
     }
 
-    /* Cabeçalho dos gráficos em duas linhas (wrap) no mobile:
-       Linha 1: Título com ícone
-       Linha 2: Métricas e Controles essenciais em largura total */
     .canvas-header-bar {
-        flex-wrap: wrap !important;
-        gap: 4px 8px !important;
-        padding: 6px 10px !important;
-        background: rgba(15, 23, 42, 0.90) !important;
-        border-bottom: 1px solid var(--border-subtle) !important;
+        flex-wrap: wrap;
+        gap: 4px 8px;
+        padding: 6px 10px;
     }
 
     .canvas-header-title {
-        width: 100% !important;
-        display: flex !important;
-        align-items: center !important;
-        font-size: 0.78rem !important;
-        gap: 6px !important;
+        width: 100%;
+        font-size: 0.78rem;
     }
 
     .canvas-header-controls {
-        width: 100% !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        margin-right: 0 !important;
-        gap: 6px !important;
+        width: 100%;
+        justify-content: space-between;
+        margin-right: 0;
     }
 
     .canvas-metric-badge {
         font-size: 0.68rem;
         padding: 2px 6px;
-    }
-
-    /* 3. Barra Flutuante de Transporte na Base */
-    .canvas-toolbar.pos-bottom-center {
-        bottom: calc(10px + var(--safe-bottom, 0px)) !important;
-        z-index: 30 !important;
-    }
-
-    /* 4. Drawer Lateral sob Demanda (Substitui o Bottom Sheet) */
-    .controls-panel {
-        position: fixed !important;
-        top: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        left: auto !important;
-        width: 320px !important;
-        max-width: 86vw !important;
-        height: var(--app-height, 100dvh) !important;
-        max-height: var(--app-height, 100dvh) !important;
-        padding-bottom: calc(12px + var(--safe-bottom, 0px)) !important;
-        transform: translateX(100%);
-        transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1) !important;
-        z-index: 1000 !important;
-        border-radius: var(--radius-xl) 0 0 var(--radius-xl) !important;
-        border: none !important;
-        border-left: 1.5px solid var(--border-color) !important;
-        background: var(--bg-glass-strong) !important;
-        backdrop-filter: blur(20px) !important;
-        -webkit-backdrop-filter: blur(20px) !important;
-        box-shadow: var(--shadow-popover) !important;
-    }
-
-    .controls-panel.mobile-drawer-open {
-        transform: translateX(0) !important;
-    }
-
-    .sheet-drag-handle {
-        display: none !important;
-    }
-
-    /* Cabeçalho do Drawer com botão de Fechar */
-    .drawer-header-mobile {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 12px 16px;
-        border-bottom: 1px solid var(--border-subtle);
-        background: var(--bg-surface);
-    }
-
-    .drawer-title {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 600;
-        font-size: 0.95rem;
-        color: var(--text-primary);
-    }
-
-    #btn-close-drawer {
-        background: transparent;
-        border: 1px solid var(--border-color);
-        color: var(--text-secondary);
-        width: 32px;
-        height: 32px;
-        border-radius: var(--radius-full);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-    }
-
-    /* Backdrop para fechar o Drawer ao tocar fora */
-    .mobile-drawer-backdrop {
-        display: block;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.65);
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-        z-index: 998;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.28s ease;
-    }
-
-    .mobile-drawer-backdrop.active {
-        opacity: 1;
-        pointer-events: auto;
     }
 }

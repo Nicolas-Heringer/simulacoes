@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Átomo de Hidrogênio — Estilos Específicos
+   Átomo de Hidrogênio — Estilos Específicos (Design System 2.0)
    ========================================================================== */
 
 /* ---------- Container Three.js ---------- */
@@ -20,8 +20,8 @@
 
 #three-container canvas {
     display: block;
-    width: 100% !important;
-    height: 100% !important;
+    width: 100%;
+    height: 100%;
 }
 
 /* ---------- Orbital Badge ---------- */
@@ -35,7 +35,7 @@
         color-mix(in srgb, var(--accent-color) 11%, var(--bg-card)) 0%,
         var(--bg-card) 100%
     );
-    border: 1px solid color-mix(in srgb, var(--accent-color) 35%, transparent);
+    border: var(--ui-border-width, 1.5px) solid color-mix(in srgb, var(--accent-color) 35%, transparent);
     border-radius: 14px;
     padding: 14px 16px 12px;
     text-align: center;
@@ -79,20 +79,11 @@
     color: var(--text-primary);
 }
 
-.toolbar-orbital-badge .badge-math {
-    font-size: 0.88em;
-    font-weight: 400;
-    margin-left: 4px;
-    display: inline-block;
-    vertical-align: baseline;
-    letter-spacing: normal;
-}
-
 .orbital-energy {
     display: block;
     font-size: 0.80rem;
     color: var(--text-secondary);
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-mono);
     letter-spacing: 0.04em;
 }
 
@@ -109,7 +100,7 @@
     align-items: center;
     gap: 5px;
     background: var(--bg-recessed);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     border-radius: 10px;
     padding: 9px 6px 7px;
     transition: border-color 0.25s, background 0.25s;
@@ -126,15 +117,16 @@
     color: var(--accent-color);
     letter-spacing: 0.02em;
     line-height: 1;
+    cursor: pointer;
 }
 
-.qn-select {
+select.sim-control.qn-select {
     width: 100%;
     text-align: center;
-    padding: 5px 2px !important;
-    font-size: 0.88rem !important;
-    background-image: none !important; /* remove seta padrão — não precisa num select pequeno */
-    border-radius: 6px !important;
+    padding: 5px 2px;
+    font-size: 0.88rem;
+    background-image: none; /* remove seta padrão — não precisa num select pequeno */
+    border-radius: 6px;
 }
 
 .qn-desc {
@@ -145,18 +137,10 @@
     line-height: 1;
 }
 
-/* ---------- Slider com valor inline ---------- */
-.slider-val {
-    float: right;
-    color: var(--accent-color);
-    font-size: 0.88rem;
-    font-variant-numeric: tabular-nums;
-}
-
 /* ---------- Legenda de cores ---------- */
 .color-legend {
     background: var(--bg-recessed);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     border-radius: 10px;
     padding: 12px 14px;
 }
@@ -208,9 +192,10 @@
     margin-top: 5px;
 }
 
-/* Classe utilitária para ocultar */
-.hidden {
-    display: none !important;
+/* Ocultação escopada apenas às legendas (preserva transição de .sim-modal-overlay.hidden) */
+#legend-fase.hidden,
+#legend-density.hidden {
+    display: none;
 }
 
 /* ---------- Status ---------- */
@@ -233,148 +218,10 @@
     50%       { opacity: 0.30; }
 }
 
-/* ---------- Menu de Contexto Flutuante (Canto Superior Esquerdo) ---------- */
-.quantum-context-toolbar {
-    display: none; /* Oculto por padrão quando sidebar visível */
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    z-index: 45;
-}
-
-/* Ativa automaticamente quando a sidebar for recolhida (Modo Foco) */
-.sim-layout.sidebar-collapsed .quantum-context-toolbar {
-    display: inline-flex;
-    animation: fadeInSlideDown 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes fadeInSlideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.toolbar-orbital-title {
-    color: var(--accent-color);
-    font-size: 1.1rem;
-    line-height: 1;
-    display: inline-flex;
-    align-items: center;
-}
-
-.toolbar-orbital-badge {
-    font-weight: 700;
-    font-size: 0.78rem;
-    color: var(--accent-color);
-    background: var(--accent-subtle);
-    border: 1px solid color-mix(in srgb, var(--accent-color) 35%, transparent);
-    border-radius: var(--radius-sm);
-    padding: 2px 7px;
-    letter-spacing: 0.03em;
-}
-
-.quick-qn-group {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.quick-qn-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--accent-color);
-    margin-right: -2px;
-}
-
-.quick-qn-select {
-    appearance: none;
-    background: var(--bg-input);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    padding: 3px 6px;
-    border-radius: var(--radius-sm);
-    font-size: 0.76rem;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    text-align: center;
-    outline: none;
-    transition: border-color var(--trans-fast), background var(--trans-fast);
-}
-
-.quick-qn-select:hover,
-.quick-qn-select:focus {
-    border-color: var(--accent-color);
-    background: var(--bg-surface-elevated);
-}
-
-/* Popover Quântico */
-#quantum-popover {
-    top: 52px;
-    left: 15px;
-    min-width: 290px;
-    max-width: 320px;
-}
-
-.quantum-popover-content {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.orbital-badge-compact {
-    padding: 8px 12px;
-    border-radius: 10px;
-}
-
-.orbital-badge-compact .orbital-name {
-    font-size: 1.15rem;
-}
-
-.orbital-badge-compact .orbital-energy {
-    font-size: 0.72rem;
-}
-
-.popover-field-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.popover-field-label {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
-.popover-field-select {
-    padding: 5px 8px !important;
-    font-size: 0.8rem !important;
-    min-width: 130px;
-}
-
-.popover-field-col {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.popover-slider-title-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* Lista de Instruções com Ícones */
+/* ---------- Lista de Instruções com Ícones ---------- */
 .sim-instructions-list {
     list-style: none;
-    padding: 0 !important;
+    padding: 0;
     margin: 8px 0 0 0;
     display: flex;
     flex-direction: column;
@@ -387,7 +234,7 @@
     gap: 9px;
     font-size: 0.82rem;
     color: var(--text-secondary);
-    margin-bottom: 0 !important;
+    margin-bottom: 0;
 }
 
 .sim-instructions-list .icon-svg {
@@ -419,60 +266,22 @@
 /* Alternância Desktop vs. Mobile para instruções */
 @media (min-width: 901px) {
     .mobile-only {
-        display: none !important;
+        display: none;
     }
 }
 
 @media (max-width: 900px) {
     .desktop-only {
-        display: none !important;
-    }
-
-    /* No mobile, ativa o menu de contexto quando o bottom sheet estiver em 'peek' (minimizado) */
-    .sim-layout.mobile-sheet-peek .quantum-context-toolbar {
-        display: inline-flex;
-    }
-
-    /* Oculta o menu de contexto se o bottom sheet for expandido para evitar poluição visual */
-    .sim-layout:not(.mobile-sheet-peek):not(.sidebar-collapsed) .quantum-context-toolbar {
         display: none;
     }
 }
 
-/* Telas compactas (smartphones < 560px) */
 @media (max-width: 560px) {
-    .quantum-context-toolbar {
-        top: 8px;
-        left: 8px;
-        padding: 4px 6px;
-        gap: 4px;
-        font-size: 0.72rem;
-        max-width: calc(100vw - 75px);
-    }
-
-    .quick-qn-group {
-        gap: 3px;
-    }
-
-    .quick-qn-select {
-        padding: 2px 4px;
-        font-size: 0.70rem;
-    }
-
-    .toolbar-orbital-badge {
-        font-size: 0.70rem;
-        padding: 1px 5px;
-    }
-
-    .quantum-context-toolbar .toolbar-btn span {
-        display: none; /* Exibe apenas o ícone nos botões da toolbar para caber em telas menores */
-    }
-
     .qn-cell {
         padding: 7px 4px 5px;
     }
 
-    .qn-select {
-        font-size: 0.82rem !important;
+    select.sim-control.qn-select {
+        font-size: 0.82rem;
     }
 }

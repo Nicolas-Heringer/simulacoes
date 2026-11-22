@@ -446,12 +446,10 @@ function setupEventListeners() {
         }
     });
 
-    // --- BOTTOM SHEET MOBILE (<= 900PX) ---
+    // --- PAINEL FLUTUANTE MOBILE (<= 900PX) ---
     initBottomSheet({
         panelSelector: '.controls-panel',
-        handleSelector: '#sheet-drag-handle',
-        tabNavSelector: '.tab-nav',
-        collapseBtnSelector: '#btn-collapse-sidebar',
+        triggerSelector: '#btn-mobile-settings',
         defaultState: 'peek'
     });
 
@@ -464,28 +462,40 @@ function setupEventListeners() {
         scopeSelector: '.controls-panel'
     });
 
-    // --- PLAY / PAUSE COM TOGGLE BUTTON ---
-    playControl = initToggleButton('#btnPlayPause', (active) => {
+    // --- PLAY / PAUSE NA BARRA FLUTUANTE DE TRANSPORTE ---
+    playControl = initToggleButton('#btn-play-sim', (active) => {
         isPaused = !active;
         const headerBadge = document.getElementById('header-status-badge');
         const footerBadge = document.getElementById('footer-status-badge');
         const footerText = document.getElementById('footer-status-text');
 
-        if (active) {
-            if (headerBadge) headerBadge.innerHTML = '<span class="status-dot"></span><span>Ativo</span>';
-            if (footerText) footerText.textContent = 'Simulação Ativa';
-            if (footerBadge) footerBadge.classList.add('badge-accent');
-        } else {
-            if (headerBadge) headerBadge.innerHTML = '<span class="status-dot"></span><span>Pausado</span>';
-            if (footerText) footerText.textContent = 'Simulação Pausada';
-            if (footerBadge) footerBadge.classList.remove('badge-accent');
+        if (headerBadge) {
+            headerBadge.classList.toggle('idle', !active);
+            headerBadge.innerHTML = active
+                ? '<span class="status-dot"></span><span>Ativo</span>'
+                : '<span class="status-dot"></span><span>Pausado</span>';
+        }
+        if (footerBadge) {
+            footerBadge.classList.toggle('idle', !active);
+        }
+        if (footerText) {
+            footerText.textContent = active ? 'Simulação Ativa' : 'Simulação Pausada';
         }
     });
 
-    // --- BOTÕES DE LIMPAR RASTROS ---
-    const btnLimpar = document.getElementById('btnLimparFeixes');
+    // --- BOTÕES DE RESET (PAUSA + ZERA) E LIMPAR RASTROS ---
+    const btnResetSim = document.getElementById('btn-reset-sim');
     const btnQuickClear = document.getElementById('btn-quick-clear');
-    if (btnLimpar) btnLimpar.addEventListener('click', clearTrails);
+    if (btnResetSim) {
+        btnResetSim.addEventListener('click', () => {
+            if (!isPaused && playControl) {
+                playControl.setState(0, true);
+            }
+            clearTrails();
+            const footerText = document.getElementById('footer-status-text');
+            if (footerText) footerText.textContent = 'Simulação Pronta';
+        });
+    }
     if (btnQuickClear) btnQuickClear.addEventListener('click', clearTrails);
 
     // --- SELETOR DE PERFIL N(X,Y) ---
@@ -680,7 +690,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     updateHudAngle();
 
     // Inicializa o Web Worker
-    worker = new Worker('scripts/snell.worker.js?v=' + Date.now());
+    worker = new Worker('scripts/snell.worker.js');
     worker.onmessage = (e) => {
         if (e.data.error) {
             console.error('[Worker]', e.data.error);

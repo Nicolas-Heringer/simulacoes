@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
     <!-- Metadados da Página -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#1c1917">
     <title>Cinemática em uma dimensão</title>
 
     <meta name="description"
@@ -41,7 +41,7 @@
             <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
                 <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
             </button>
-            <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
+            <button type="button" id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
             </button>
@@ -62,17 +62,17 @@
 
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
-                <button id="btn-toggle-view" class="canvas-btn-floating"
+                <button type="button" id="btn-toggle-view" class="canvas-btn-floating"
                     title="Alternar entre Pista 1D e Gráfico Espaço-Tempo">
-                    <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Gráfico">
+                    <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="Gráfico">
                     <span class="btn-label-text" id="lbl-toggle-view">Ver Gráfico 2D</span>
                 </button>
-                <button id="btn-toggle-axis" class="canvas-btn-floating" style="display: none;"
+                <button type="button" id="btn-toggle-axis" class="canvas-btn-floating" style="display: none;"
                     title="Alternar eixos: s(t) convencional ou t(s) desdobrado">
                     <img src="../assets/icons/compass.svg" class="icon-svg" alt="Eixos">
                     <span class="btn-label-text" id="lbl-toggle-axis">Visão Convencional (t no X)</span>
                 </button>
-                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar"
+                <button type="button" id="btn-expand-sidebar" class="canvas-btn-expand-sidebar"
                     title="Expandir Painel de Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
@@ -81,30 +81,30 @@
 
             <!-- Controles Flutuantes de Zoom do Gráfico 2D -->
             <div class="canvas-zoom-toolbar" id="canvasZoomToolbar" style="display: none;">
-                <button id="btn-zoom-in" class="zoom-btn" title="Aumentar Zoom (Scroll Up)">+</button>
+                <button type="button" id="btn-zoom-in" class="zoom-btn" title="Aumentar Zoom (Scroll Up)" aria-label="Aumentar zoom">+</button>
                 <span class="zoom-badge" id="lbl-zoom-level">100%</span>
-                <button id="btn-zoom-out" class="zoom-btn" title="Diminuir Zoom (Scroll Down)">−</button>
-                <button id="btn-zoom-reset" class="zoom-btn" title="Centralizar e Redefinir Zoom">
+                <button type="button" id="btn-zoom-out" class="zoom-btn" title="Diminuir Zoom (Scroll Down)" aria-label="Diminuir zoom">−</button>
+                <button type="button" id="btn-zoom-reset" class="zoom-btn" title="Centralizar e Redefinir Zoom" aria-label="Redefinir zoom">
                     <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                 </button>
             </div>
 
             <!-- Barra Flutuante de Transporte (#canvas-transport-toolbar) -->
             <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
-                <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
+                <button type="button" class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
                         data-state="0" data-text-idle="Executar" data-text-active="Pausar"
                         data-icon-idle="play" data-icon-active="pause" title="Executar / Pausar">
                     <img src="../assets/icons/play.svg" class="icon-svg" alt="Executar">
                     <span class="btn-text">Executar</span>
                 </button>
-                <button class="toolbar-btn" id="btn-step-sim" title="Avançar 0.1s (Δt)">
+                <button type="button" class="toolbar-btn" id="btn-step-sim" title="Avançar 0.1s (Δt)">
                     <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
                 </button>
-                <button class="toolbar-btn" id="btn-reset-sim" title="Reiniciar (t = 0)">
+                <button type="button" class="toolbar-btn" id="btn-reset-sim" title="Reiniciar (t = 0)">
                     <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                 </button>
                 <span class="toolbar-divider"></span>
-                <button class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
+                <button type="button" class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
                     1.0×
                 </button>
             </div>
@@ -119,24 +119,24 @@
         <aside class="controls-panel">
 
             <!-- Topo: Barra de Abas Expansíveis Separadas por Modo -->
-            <div class="tab-nav">
-                <button class="tab-btn active" id="tab-btn-manual" data-tab="panel-tab-manual" title="Modo Manual">
-                    <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Manual">
+            <div class="tab-nav" role="tablist">
+                <button type="button" class="tab-btn active" id="tab-btn-manual" data-tab="panel-tab-manual" title="Modo Manual">
+                    <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Manual">
                     <span class="tab-label">Manual</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-eq1" data-tab="panel-tab-eq1" title="1 Corpo por Função Horária">
-                    <img src="../assets/icons/step.svg" class="icon-svg" alt="1 Corpo">
+                <button type="button" class="tab-btn" id="tab-btn-eq1" data-tab="panel-tab-eq1" title="1 Corpo por Função Horária">
+                    <img src="../assets/icons/particle-moving.svg" class="icon-svg" alt="1 Corpo">
                     <span class="tab-label">1 Corpo</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-eq2" data-tab="panel-tab-eq2" title="2 Corpos e Encontro">
-                    <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="2 Corpos">
+                <button type="button" class="tab-btn" id="tab-btn-eq2" data-tab="panel-tab-eq2" title="2 Corpos e Encontro">
+                    <img src="../assets/icons/particles-double.svg" class="icon-svg" alt="2 Corpos">
                     <span class="tab-label">2 Corpos</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-theory" data-tab="panel-tab-theory" title="Teoria">
-                    <img src="../assets/icons/compass.svg" class="icon-svg" alt="Teoria">
+                <button type="button" class="tab-btn" id="tab-btn-theory" data-tab="panel-tab-theory" title="Teoria">
+                    <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                     <span class="tab-label">Teoria</span>
                 </button>
-                <button class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
+                <button type="button" class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
                     <img src="../assets/icons/collapse.svg" class="icon-svg" alt="Recolher">
                 </button>
             </div>
@@ -181,13 +181,14 @@
                                 </div>
                             </div>
                             <input type="range" class="sim-slider" id="sliderPos" min="-15" max="15" step="0.5"
-                                value="0.0">
+                                value="0.0" data-focus-control="slider" data-focus-label="s" data-focus-order="1">
                         </div>
                     </div>
 
                     <div class="control-group">
-                        <button id="btnPanelToggleViewManual" class="btn-secondary" style="width: 100%;">
-                            <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Gráfico">
+                        <button type="button" id="btnPanelToggleViewManual" class="btn-secondary w-full"
+                            data-focus-control="action" data-focus-label="Gráfico 2D" data-focus-icon="chart-line" data-focus-order="2">
+                            <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="Gráfico">
                             <span class="lbl-panel-graph">Ver Gráfico Espaço-Tempo (2D)</span>
                         </button>
                     </div>
@@ -196,7 +197,7 @@
                 <!-- ======================================================= -->
                 <!-- ABA 2: 1 MÓVEL POR FUNÇÃO HORÁRIA                       -->
                 <!-- ======================================================= -->
-                <div id="panel-tab-eq1" class="tab-pane" style="display: none;">
+                <div id="panel-tab-eq1" class="tab-pane">
                     <div class="tab-header">
                         <div class="tab-header-row">
                             <h3 class="tab-title">Função Horária da Posição</h3>
@@ -227,10 +228,10 @@
                                 </div>
                             </div>
                             <input type="range" class="sim-slider" id="sliderS0A" min="-15" max="15" step="0.5"
-                                value="-5.0">
+                                value="-5.0" data-focus-control="slider" data-focus-label="s₀" data-focus-order="1">
                         </div>
 
-                        <div class="slider-container sim-dual-slider" style="margin-top: 10px;">
+                        <div class="slider-container sim-dual-slider slider-spaced">
                             <div class="slider-header">
                                 <label for="sliderV0A" class="slider-label">Velocidade ($v_0$)</label>
                                 <div class="dual-input-wrapper">
@@ -240,11 +241,11 @@
                                 </div>
                             </div>
                             <input type="range" class="sim-slider" id="sliderV0A" min="-10" max="10" step="0.5"
-                                value="3.0">
+                                value="3.0" data-focus-control="slider" data-focus-label="v₀" data-focus-order="2">
                         </div>
 
                         <!-- Switch de Aceleração Opcional -->
-                        <div class="switch-container" style="margin-top: 12px;">
+                        <div class="switch-container switch-spaced">
                             <span class="switch-label">Incluir Aceleração (MRUV)</span>
                             <label class="sim-switch">
                                 <input type="checkbox" id="chk-accel-single">
@@ -252,7 +253,7 @@
                             </label>
                         </div>
 
-                        <div class="slider-container sim-dual-slider" id="group-accel-single" style="display: none; margin-top: 10px;">
+                        <div class="slider-container sim-dual-slider slider-spaced" id="group-accel-single" style="display: none;">
                             <div class="slider-header">
                                 <label for="sliderAA" class="slider-label">Aceleração ($a$)</label>
                                 <div class="dual-input-wrapper">
@@ -267,8 +268,9 @@
                     </div>
 
                     <div class="control-group">
-                        <button id="btnPanelToggleViewEq1" class="btn-secondary" style="width: 100%;">
-                            <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Gráfico">
+                        <button type="button" id="btnPanelToggleViewEq1" class="btn-secondary w-full"
+                            data-focus-control="action" data-focus-label="Gráfico 2D" data-focus-icon="chart-line" data-focus-order="3">
+                            <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="Gráfico">
                             <span class="lbl-panel-graph">Ver Gráfico Espaço-Tempo (2D)</span>
                         </button>
                     </div>
@@ -277,7 +279,7 @@
                 <!-- ======================================================= -->
                 <!-- ABA 3: 2 MÓVEIS (ENCONTRO DE CORPOS)                    -->
                 <!-- ======================================================= -->
-                <div id="panel-tab-eq2" class="tab-pane" style="display: none;">
+                <div id="panel-tab-eq2" class="tab-pane">
                     <div class="tab-header">
                         <h3 class="tab-title">Encontro de Dois Móveis</h3>
                         <p class="tab-subtitle">Compare as trajetórias e observe o ponto de cruzamento.</p>
@@ -317,7 +319,7 @@
                                     </div>
                                 </div>
                                 <input type="range" class="sim-slider" id="sliderV0A_dual" min="-10" max="10"
-                                    step="0.5" value="3.0">
+                                    step="0.5" value="3.0" data-focus-control="slider" data-focus-label="v₀A" data-focus-order="1">
                             </div>
 
                             <div class="switch-container">
@@ -377,7 +379,7 @@
                                     </div>
                                 </div>
                                 <input type="range" class="sim-slider" id="sliderV0B" min="-10" max="10" step="0.5"
-                                    value="-2.0">
+                                    value="-2.0" data-focus-control="slider" data-focus-label="v₀B" data-focus-order="2">
                             </div>
 
                             <div class="switch-container">
@@ -404,8 +406,9 @@
                     </div>
 
                     <div class="control-group">
-                        <button id="btnPanelToggleViewEq2" class="btn-secondary" style="width: 100%;">
-                            <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Gráfico">
+                        <button type="button" id="btnPanelToggleViewEq2" class="btn-secondary w-full"
+                            data-focus-control="action" data-focus-label="Gráfico 2D" data-focus-icon="chart-line" data-focus-order="3">
+                            <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="Gráfico">
                             <span class="lbl-panel-graph">Ver Gráfico Espaço-Tempo (2D)</span>
                         </button>
                     </div>
@@ -414,7 +417,7 @@
                 <!-- ======================================================= -->
                 <!-- ABA 4: TEORIA E FUNDAMENTAÇÃO                           -->
                 <!-- ======================================================= -->
-                <div id="panel-tab-theory" class="tab-pane" style="display: none;">
+                <div id="panel-tab-theory" class="tab-pane">
                     <div class="tab-header">
                         <h3 class="tab-title">Fundamentação Teórica</h3>
                         <p class="tab-subtitle">Cinemática Escalar para o Ensino Médio: Funções Horárias e Encontro.</p>
@@ -444,9 +447,9 @@
                         $$s_A(t_e) = s_B(t_e)$$
                     </div>
 
-                    <div style="margin-top: 16px;">
-                        <button class="btn-primary" id="btn-abrir-modal-teoria" style="width: 100%;">
-                            <img src="../assets/icons/compass.svg" class="icon-svg" alt="Teoria">
+                    <div class="theory-modal-cta">
+                        <button type="button" class="btn-primary w-full" id="btn-abrir-modal-teoria">
+                            <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                             <span>Ver Dedução Completa & Dicas ENEM</span>
                         </button>
                     </div>
@@ -456,11 +459,11 @@
 
             <!-- Base: Rodapé Fixo de Telemetria -->
             <div class="panel-footer">
-                <div class="sim-badge" id="footer-status-badge">
+                <div class="sim-badge idle" id="footer-status-badge">
                     <span class="status-dot"></span>
                     <span id="footer-status-text">Simulação Pronta</span>
                 </div>
-                <span class="footer-meta" id="footer-sim-timer">t = 0.00s</span>
+                <span class="footer-meta" id="footer-sim-timer" data-focus-control="badge" data-focus-order="10" data-focus-tab="global">t = 0.00s</span>
             </div>
 
         </aside>
@@ -472,10 +475,10 @@
         <div class="sim-modal-container">
             <div class="sim-modal-header">
                 <div class="sim-modal-title">
-                    <img src="../assets/icons/compass.svg" class="icon-svg icon-accent" alt="Teoria">
+                    <img src="../assets/icons/book-open.svg" class="icon-svg icon-accent" alt="Teoria">
                     <span>Cinemática Escalar: Funções Horárias e Encontro de Móveis</span>
                 </div>
-                <button class="sim-modal-close" data-modal-close title="Fechar Modal (Esc)">✕</button>
+                <button type="button" class="sim-modal-close" data-modal-close title="Fechar Modal (Esc)">✕</button>
             </div>
 
             <div class="sim-modal-body">
@@ -523,7 +526,7 @@
 
             <div class="sim-modal-footer">
                 <span class="sim-modal-hint">Pressione <kbd>Esc</kbd> para fechar</span>
-                <button class="btn-primary" data-modal-close style="min-width: 100px;">Entendido</button>
+                <button type="button" class="btn-primary" data-modal-close>Entendido</button>
             </div>
         </div>
     </div>
@@ -538,7 +541,7 @@
                     <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                     <span>Funções Horárias & Cinemática Escalar — Guia Rápido</span>
                 </div>
-                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+                <button type="button" class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">

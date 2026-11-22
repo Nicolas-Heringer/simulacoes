@@ -189,12 +189,10 @@ document.addEventListener("DOMContentLoaded", () => {
         scopeSelector: '.controls-panel'
     });
 
-    // 4. Inicializa o Bottom Sheet Responsivo para Mobile (<= 900px)
+    // 4. Inicializa o Painel Flutuante Responsivo para Mobile (<= 900px)
     initBottomSheet({
         panelSelector: '.controls-panel',
-        handleSelector: '#sheet-drag-handle',
-        tabNavSelector: '.tab-nav',
-        collapseBtnSelector: '#btn-collapse-sidebar',
+        triggerSelector: '#btn-mobile-settings',
         defaultState: 'peek'
     });
 
@@ -305,7 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (hudAmplitude) {
             const sign = val >= 0 ? '+' : '';
             hudAmplitude.textContent = `ψ = ${sign}${val.toFixed(2)}`;
-            hudAmplitude.style.color = Math.abs(val) < 0.1 ? 'var(--color-emerald, #22c55e)' : 'var(--accent-hud, var(--accent-color))';
+            hudAmplitude.classList.toggle('tone-emerald', Math.abs(val) < 0.1);
         }
     }
 
@@ -321,7 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (hudCoords) hudCoords.textContent = `(x: -, y: -)`;
         if (hudAmplitude) {
             hudAmplitude.textContent = `ψ = 0.00`;
-            hudAmplitude.style.color = '';
+            hudAmplitude.classList.remove('tone-emerald');
         }
     });
 

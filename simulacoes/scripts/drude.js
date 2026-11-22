@@ -605,12 +605,10 @@ document.addEventListener('DOMContentLoaded', () => {
         scopeSelector: '.controls-panel'
     });
 
-    // 5. Inicializa o Bottom Sheet Responsivo para Mobile (<= 900px)
+    // 5. Inicializa o Painel Flutuante Responsivo para Mobile (<= 900px)
     initBottomSheet({
         panelSelector: '.controls-panel',
-        handleSelector: '#sheet-drag-handle',
-        tabNavSelector: '.tab-nav',
-        collapseBtnSelector: '#btn-collapse-sidebar',
+        triggerSelector: '#btn-mobile-settings',
         defaultState: 'peek'
     });
 
@@ -644,7 +642,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnStepSim) {
         btnStepSim.addEventListener('click', () => {
             if (isRunning && playControl) {
-                playControl.setState(0);
+                playControl.setState(0, true);
             }
             simTime += (1 / 60) * simSpeed;
             updateFisica(1.0);
@@ -656,9 +654,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 10. Botão de Reset
+    // 10. Botão de Reset (pausa e reinicia estado — Padrão DS 2.0)
     if (btnResetSim) {
         btnResetSim.addEventListener('click', () => {
+            if (isRunning && playControl) {
+                playControl.setState(0, true);
+            }
+            if (footerStatusText) {
+                footerStatusText.textContent = 'Simulação Pronta';
+            }
             inicializarEletrons();
             colisoesContador = 0;
             colisoesPorSegundo = 0;

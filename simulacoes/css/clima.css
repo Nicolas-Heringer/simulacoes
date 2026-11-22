@@ -25,34 +25,26 @@
 }
 
 /* ---------- Botão de Rotação Automática Flutuante ---------- */
-.canvas-btn-floating .icon-spin {
-    animation: none !important;
-}
-
-.canvas-btn-floating.active .icon-spin {
-    animation: sim-spin 8s linear infinite !important;
-}
-
-@keyframes sim-spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+/* Mantém ícone estático quando inativo; quando ativo herda .canvas-btn-floating.active .icon-spin do DS 2.0 (respeitando prefers-reduced-motion) */
+.canvas-btn-floating:not(.active) .icon-spin {
+    animation: none;
 }
 
 /* ---------- Seletor de Módulos (Pills em Parâmetros) ---------- */
 .stage-nav-pills {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
+    display: flex;
+    gap: 3px;
     background: var(--bg-recessed);
     padding: 4px;
     border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     margin-bottom: 14px;
 }
 
 .stage-pill {
+    flex: 1 1 auto;
     padding: 7px 4px;
-    font-size: 0.72rem;
+    font-size: 0.70rem;
     font-weight: 600;
     border-radius: var(--radius-sm);
     background: transparent;
@@ -62,8 +54,6 @@
     text-align: center;
     transition: all var(--trans-fast);
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .stage-pill:hover {
@@ -90,7 +80,7 @@
         color-mix(in srgb, var(--color-cyan) 12%, var(--bg-card)) 0%,
         var(--bg-card) 100%
     );
-    border: 1px solid color-mix(in srgb, var(--color-cyan) 35%, transparent);
+    border: var(--ui-border-width, 1.5px) solid color-mix(in srgb, var(--color-cyan) 35%, transparent);
     border-radius: var(--radius-lg);
     padding: 10px 14px;
     text-align: center;
@@ -143,28 +133,32 @@
     max-width: 100%;
 }
 
-/* ---------- Estabilidade de Linha em Sliders ---------- */
-.slider-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-    font-size: 0.78rem;
-    margin-bottom: 4px;
+/* ---------- Espaçamentos Auxiliares ---------- */
+.clima-btn-spacer {
+    margin-top: 8px;
 }
 
-.slider-header span,
-.slider-header label {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.clima-slider-spacer {
+    margin-top: 10px;
 }
 
-.slider-val {
-    font-family: var(--font-mono);
-    white-space: nowrap;
-    flex-shrink: 0;
+.clima-theory-cta {
+    margin-top: 14px;
+}
+
+.clima-highlight-card {
+    border-color: color-mix(in srgb, var(--color-cyan) 45%, transparent);
+    background: color-mix(in srgb, var(--color-cyan) 7%, var(--bg-card));
+}
+
+.clima-link-wrap {
+    margin: 16px 0;
+}
+
+.clima-card-footnote {
+    font-size: 0.80rem;
+    color: var(--text-muted);
+    line-height: 1.45;
 }
 
 /* ---------- Dual-Input de Calendário (Dia & Mês Sincronizados) ---------- */
@@ -173,7 +167,7 @@
     align-items: center;
     gap: 4px;
     background: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     padding: 2px 6px;
     border-radius: var(--radius-sm);
     transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
@@ -242,6 +236,10 @@
     transition: color var(--trans-fast);
 }
 
+:root[data-theme="light"] .date-select-month {
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23334155%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+}
+
 .date-select-month:hover,
 .date-select-month:focus {
     color: var(--accent-color);
@@ -253,59 +251,7 @@
     font-family: var(--font-sans);
 }
 
-/* ---------- Tooltip Flutuante de Inspeção de Célula (Hover) ---------- */
-.cell-tooltip {
-    position: absolute;
-    background: var(--bg-glass-strong);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid color-mix(in srgb, var(--color-cyan) 45%, transparent);
-    border-radius: var(--radius-md);
-    padding: 10px 14px;
-    font-size: 0.76rem;
-    color: var(--text-primary);
-    pointer-events: none;
-    z-index: 100;
-    opacity: 0;
-    transform: translate(15px, 15px);
-    transition: opacity 0.15s ease, transform 0.1s ease-out;
-    box-shadow: var(--shadow-popover);
-    min-width: 210px;
-}
-
-.cell-tooltip.visible {
-    opacity: 1;
-}
-
-.tooltip-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-weight: 700;
-    color: var(--color-cyan);
-    margin-bottom: 6px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid var(--border-color);
-    font-size: 0.82rem;
-}
-
-.tooltip-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 3px;
-}
-
-.tooltip-lbl {
-    color: var(--text-secondary);
-}
-
-.tooltip-v {
-    font-family: var(--font-mono);
-    font-weight: 600;
-    color: var(--accent-color);
-}
-
+/* ---------- Complemento de Tooltip de Inspeção de Célula ---------- */
 .tooltip-geo {
     font-style: italic;
     color: var(--text-secondary);
@@ -323,7 +269,7 @@
     background: var(--bg-recessed);
     padding: 4px;
     border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     margin-top: 6px;
 }
 
@@ -396,7 +342,7 @@
 /* ---------- Mini-Orrery (Mapa da Órbita Terrestre na Aba 3) ---------- */
 .mini-orrery-container {
     background: var(--bg-card);
-    border: 1.5px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 10px;
     margin-top: 10px;
@@ -417,11 +363,16 @@
     margin-bottom: 6px;
 }
 
+.orrery-month-badge {
+    font-family: var(--font-mono);
+    color: var(--accent-color);
+}
+
 #canvas-mini-orrery {
     width: 100%;
     height: 180px;
     border-radius: var(--radius-sm);
-    background: radial-gradient(circle at center, #0f172a 0%, #050814 100%);
+    background: radial-gradient(circle at center, var(--bg-canvas-inner) 0%, var(--bg-canvas) 100%);
     cursor: pointer;
 }
 
@@ -449,7 +400,7 @@
     font-weight: 600;
 }
 
-/* ---------- Legenda de Cores de Topologia ---------- */
+/* ---------- Legenda de Cores de Topologia (Paleta do Palco 3D) ---------- */
 .topology-legend {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -478,22 +429,12 @@
     flex-shrink: 0;
 }
 
-/* Linha com Toggle Switch */
-.toggle-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 0;
-    font-size: 0.82rem;
-    color: var(--text-secondary);
-}
+.topo-dot-pent { background: var(--stage-accent); }
+.topo-dot-hex { background: var(--stage-cyan); }
+.topo-dot-hept { background: var(--stage-pink); }
+.topo-dot-other { background: var(--stage-rose); }
 
-.toggle-row label {
-    cursor: pointer;
-    margin: 0;
-}
-
-/* Ajustes no HUD para alinhamento em modo lista */
+/* ---------- Ajustes no HUD ---------- */
 .sim-hud {
     min-width: 210px;
     max-width: 290px;
@@ -505,17 +446,22 @@
     margin: 4px 0;
 }
 
-/* Popover de Camadas & Exibição no Topo Esquerdo */
+.hud-val-gold {
+    color: var(--stage-accent);
+}
+
+/* Popover de Camadas & Exibição (gerenciado pela pilha .canvas-top-left-stack) */
 #layers-popover {
     min-width: 260px;
     max-width: 300px;
-    top: 52px;
-    left: 15px;
 }
 
-/* Barra Flutuante de Modo Foco Espelhada (Design System 2.0) */
-#focus-context-toolbar {
-    top: 56px;
+@media (max-width: 900px) {
+    .sim-hud {
+        min-width: 0;
+        max-width: calc(100vw - 20px - var(--safe-left) - var(--safe-right));
+        bottom: calc(66px + var(--safe-bottom));
+    }
 }
 
 @media (max-width: 640px) {
@@ -533,31 +479,29 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    background: #0284c7;
-    color: #ffffff !important;
-    text-decoration: none !important;
+    background: var(--color-cyan);
+    color: var(--accent-fg);
+    text-decoration: none;
     padding: 13px 18px;
     border-radius: var(--radius-md);
     font-weight: 600;
     font-size: 0.88rem;
-    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+    box-shadow: var(--shadow-md);
     transition: all var(--trans-fast);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    border: var(--ui-border-width, 1.5px) solid var(--color-cyan);
     text-align: center;
     width: 100%;
     cursor: pointer;
 }
 
 .external-sim-link:hover {
-    background: #0369a1;
-    color: #ffffff !important;
-    box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+    filter: brightness(0.92);
+    color: var(--accent-fg);
+    box-shadow: var(--shadow-lg);
     transform: translateY(-1px);
 }
 
 .external-sim-link .icon-svg {
-    filter: brightness(0) invert(1);
     width: 18px;
     height: 18px;
 }
-

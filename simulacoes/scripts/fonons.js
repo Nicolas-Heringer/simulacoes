@@ -484,12 +484,10 @@ function setupUI() {
         onResize: resizeCanvas
     });
 
-    // Mobile Bottom Sheet
+    // Painel Flutuante Mobile
     initBottomSheet({
         panelSelector: '.controls-panel',
-        handleSelector: '#sheet-drag-handle',
-        tabNavSelector: '.tab-nav',
-        collapseBtnSelector: '#btn-collapse-sidebar',
+        triggerSelector: '#btn-mobile-settings',
         defaultState: 'peek'
     });
 
@@ -533,7 +531,11 @@ function setupUI() {
     // Barra de Transporte Flutuante (Play / Pause)
     playControl = initToggleButton('#btn-play-sim', (active) => {
         state.isRunning = active;
+        const statusBadge = document.getElementById('footer-status-badge');
         const statusEl = document.getElementById('footer-status-text');
+        if (statusBadge) {
+            statusBadge.classList.toggle('idle', !active);
+        }
         if (statusEl) {
             statusEl.textContent = active ? 'Ondas em Propagação' : 'Pausado';
         }
@@ -542,7 +544,7 @@ function setupUI() {
     // Passo Único (Δt)
     document.getElementById('btn-step-sim')?.addEventListener('click', () => {
         if (state.isRunning && playControl) {
-            playControl.setState(0);
+            playControl.setState(0, true);
         }
         const dtStep = 0.016;
         sistema.atualizar(dtStep * state.speed, state.amortecimento);
@@ -557,8 +559,14 @@ function setupUI() {
         render();
     });
 
-    // Reset da Rede (Zera velocidades mantendo a posição de equilíbrio)
+    // Reset da Rede (Pausa e zera velocidades mantendo a posição de equilíbrio — Padrão DS 2.0)
     const handleReset = () => {
+        if (state.isRunning && playControl) {
+            playControl.setState(0, true);
+        }
+        const statusEl = document.getElementById('footer-status-text');
+        if (statusEl) statusEl.textContent = 'Simulação Pronta';
+
         for (let i = 0; i < sistema.particulas.length; i++) {
             const p = sistema.particulas[i];
             p.x = p.origX;

@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
     <!-- Metadados da Página -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#1c1917">
     <title>Tesselação de Voronoi & Dinâmica Climática Planetária — Design System 2.0</title>
 
     <meta name="description"
@@ -20,7 +20,7 @@
     <!-- Design System Unificado e Estilos Específicos -->
     <script src="../theme-init.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
-    <link rel="stylesheet" href="css/clima.css?v=3.6">
+    <link rel="stylesheet" href="css/clima.css">
 
     <!-- Suporte a Fórmulas Matemáticas com KaTeX -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
@@ -52,7 +52,7 @@
             <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
                 <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
             </button>
-            <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
+            <button type="button" id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
             </button>
@@ -72,20 +72,20 @@
 
                 <!-- Barra de Ferramentas Flutuante no Topo Esquerdo (Opções de Exibição / Camadas) -->
                 <div class="canvas-toolbar pos-top-left" id="display-toolbar">
-                    <button id="btn-toggle-layers-popover" class="toolbar-btn" title="Menu de Camadas & Exibição">
+                    <button type="button" id="btn-toggle-layers-popover" class="toolbar-btn" title="Menu de Camadas & Exibição">
                         <img src="../assets/icons/globe.svg" class="icon-svg" alt="Exibição">
                         <span>Exibição</span>
                     </button>
                     <div class="toolbar-divider"></div>
-                    <button id="btn-quick-generators" class="toolbar-btn active"
+                    <button type="button" id="btn-quick-generators" class="toolbar-btn active"
                         title="Alternar Pontos Geradores (Centros)">
                         <span class="btn-label-text">Centros</span>
                     </button>
-                    <button id="btn-quick-wireframe" class="toolbar-btn active"
+                    <button type="button" id="btn-quick-wireframe" class="toolbar-btn active"
                         title="Alternar Linhas das Células (Wireframe)">
                         <span class="btn-label-text">Wireframe</span>
                     </button>
-                    <button id="btn-quick-graticule" class="toolbar-btn active" title="Alternar Equador & Linhas de Grade">
+                    <button type="button" id="btn-quick-graticule" class="toolbar-btn active" title="Alternar Equador & Linhas de Grade">
                         <span class="btn-label-text">Grade</span>
                     </button>
                 </div>
@@ -98,7 +98,7 @@
                         <img src="../assets/icons/globe.svg" class="icon-svg icon-accent" alt="Exibição">
                         <span>Opções de Exibição</span>
                     </div>
-                    <button id="btn-close-layers-popover" class="popover-close" title="Fechar">✕</button>
+                    <button type="button" id="btn-close-layers-popover" class="popover-close" title="Fechar">✕</button>
                 </div>
                 <div class="popover-body">
                     <div class="switch-container">
@@ -130,11 +130,11 @@
 
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
-                <button id="btn-quick-autorotate" class="canvas-btn-floating" title="Alternar Rotação Axial da Terra">
+                <button type="button" id="btn-quick-autorotate" class="canvas-btn-floating" title="Alternar Rotação Axial da Terra">
                     <img src="../assets/icons/rotate.svg" class="icon-svg icon-spin" alt="Rotação">
                     <span class="btn-label-text" id="label-quick-autorotate">Rotação da Terra</span>
                 </button>
-                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar"
+                <button type="button" id="btn-expand-sidebar" class="canvas-btn-expand-sidebar"
                     title="Expandir Painel de Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
@@ -154,39 +154,39 @@
                 </div>
                 <div class="hud-item" id="hud-row-pent">
                     <span class="hud-label">Pentágonos ($F_5$):</span>
-                    <span class="hud-val" id="stat-pentagons" style="color: #facc15;">-</span>
+                    <span class="hud-val hud-val-gold" id="stat-pentagons">-</span>
                 </div>
                 <div class="hud-item" id="hud-row-hex">
                     <span class="hud-label">Hexágonos ($F_6$):</span>
-                    <span class="hud-val" id="stat-hexagons" style="color: #38bdf8;">-</span>
+                    <span class="hud-val tone-cyan" id="stat-hexagons">-</span>
                 </div>
                 <div class="hud-item" id="hud-row-hept">
                     <span class="hud-label">Heptágonos / Outros:</span>
-                    <span class="hud-val" id="stat-heptagons" style="color: #ec4899;">-</span>
+                    <span class="hud-val tone-pink" id="stat-heptagons">-</span>
                 </div>
 
                 <!-- Métricas Astronômicas da Etapa 3 -->
                 <div class="hud-item" id="hud-row-season-date" style="display: none;">
                     <span class="hud-label">Data Simulada:</span>
-                    <span class="hud-val" id="stat-season-date" style="color: #facc15;">21 de Junho</span>
+                    <span class="hud-val hud-val-gold" id="stat-season-date">21 de Junho</span>
                 </div>
                 <div class="hud-item" id="hud-row-sun-decl" style="display: none;">
                     <span class="hud-label">Declinação Solar ($\delta_\odot$):</span>
-                    <span class="hud-val" id="stat-sun-decl" style="color: #38bdf8;">+23.4° N</span>
+                    <span class="hud-val tone-cyan" id="stat-sun-decl">+23.4° N</span>
                 </div>
                 <div class="hud-item" id="hud-row-zodiac" style="display: none;">
                     <span class="hud-label">Sol no Zodíaco:</span>
-                    <span class="hud-val" id="stat-zodiac-sign" style="color: #a855f7;">Gêmeos (Gemini)</span>
+                    <span class="hud-val tone-purple" id="stat-zodiac-sign">Gêmeos (Gemini)</span>
                 </div>
 
                 <hr id="hud-separator">
                 <div class="hud-item" id="hud-row-thickness">
                     <span class="hud-label">Espessura Visual:</span>
-                    <span class="hud-val" id="stat-visual-thickness" style="color: #38bdf8;">-</span>
+                    <span class="hud-val tone-cyan" id="stat-visual-thickness">-</span>
                 </div>
                 <div class="hud-item" id="hud-row-exaggeration">
                     <span class="hud-label">Exagero Vertical:</span>
-                    <span class="hud-val" id="stat-exaggeration" style="color: #a855f7;">-</span>
+                    <span class="hud-val tone-purple" id="stat-exaggeration">-</span>
                 </div>
             </div>
 
@@ -200,16 +200,16 @@
         <aside class="controls-panel">
 
             <!-- Topo: Barra de Abas Expansíveis -->
-            <div class="tab-nav">
-                <button class="tab-btn active" id="tab-btn-params" data-tab="panel-tab-params" title="Parâmetros e Controles">
-                    <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Parâmetros">
+            <div class="tab-nav" role="tablist">
+                <button type="button" class="tab-btn active" id="tab-btn-params" data-tab="panel-tab-params" title="Parâmetros e Controles">
+                    <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Parâmetros">
                     <span class="tab-label">Parâmetros</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-theory" data-tab="panel-tab-theory" title="Fundamentação Teórica & Fórmulas">
-                    <img src="../assets/icons/compass.svg" class="icon-svg" alt="Teoria">
+                <button type="button" class="tab-btn" id="tab-btn-theory" data-tab="panel-tab-theory" title="Fundamentação Teórica & Fórmulas">
+                    <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                     <span class="tab-label">Teoria</span>
                 </button>
-                <button class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
+                <button type="button" class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
                     <img src="../assets/icons/collapse.svg" class="icon-svg" alt="Recolher">
                 </button>
             </div>
@@ -221,10 +221,10 @@
                 <div class="tab-pane active" id="panel-tab-params">
                     <!-- Seletor Segmentado de Etapas da Simulação -->
                     <div class="stage-nav-pills" id="stage-nav-pills">
-                        <button class="stage-pill active" id="btn-tab-math">1. Geometria</button>
-                        <button class="stage-pill" id="btn-tab-science">2. Planeta</button>
-                        <button class="stage-pill" id="btn-tab-seasons">3. Estações</button>
-                        <button class="stage-pill" id="btn-tab-atmosphere">4. Clima</button>
+                        <button type="button" class="stage-pill active" id="btn-tab-math">1. Geometria</button>
+                        <button type="button" class="stage-pill" id="btn-tab-science">2. Planeta</button>
+                        <button type="button" class="stage-pill" id="btn-tab-seasons">3. Estações</button>
+                        <button type="button" class="stage-pill" id="btn-tab-atmosphere">4. Clima</button>
                     </div>
 
                     <!-- ============================================================= -->
@@ -255,7 +255,7 @@
                                     step="50" value="500">
                             </div>
 
-                            <button id="btn-random-mesh" class="btn-preset" style="width: 100%; margin-top: 8px;">
+                            <button type="button" id="btn-random-mesh" class="btn-preset w-full clima-btn-spacer">
                                 <img src="../assets/icons/dice.svg" class="icon-svg" alt="Dado"> Sortear Novos Pontos
                             </button>
                         </div>
@@ -266,18 +266,17 @@
                         <!-- Algoritmo de Relaxamento de Lloyd -->
                         <div class="control-group">
                             <div class="control-grid-2x2">
-                                <button id="btn-auto-lloyd" class="btn-preset"
-                                    style="background: rgba(34, 197, 94, 0.2); border-color: #22c55e;"
+                                <button type="button" id="btn-auto-lloyd" class="btn-preset tone-emerald"
                                     data-focus-control="action" data-focus-order="1" data-focus-icon="play" data-focus-tooltip="Iniciar Relaxamento">
                                     <img src="../assets/icons/play.svg" class="icon-svg" alt="Play"> Iniciar Relaxamento
                                 </button>
-                                <button id="btn-step-lloyd" class="btn-preset"
+                                <button type="button" id="btn-step-lloyd" class="btn-preset"
                                     data-focus-control="action" data-focus-order="2" data-focus-icon="step" data-focus-tooltip="Passo Único (1x)">
                                     <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo"> Passo Único (1x)
                                 </button>
                             </div>
 
-                            <div class="slider-container sim-dual-slider" style="margin-top: 10px;">
+                            <div class="slider-container sim-dual-slider clima-slider-spacer">
                                 <div class="slider-header">
                                     <label for="slider-speed" class="slider-label">Velocidade de Relaxamento</label>
                                     <div class="dual-input-wrapper">
@@ -297,13 +296,13 @@
                         <!-- Legenda de Cores de Topologia -->
                         <div class="control-group">
                             <div class="topology-legend">
-                                <span class="topo-tag"><span class="topo-dot" style="background: #facc15;"></span>
+                                <span class="topo-tag"><span class="topo-dot topo-dot-pent"></span>
                                     Pentágonos (5 lados)</span>
-                                <span class="topo-tag"><span class="topo-dot" style="background: #38bdf8;"></span>
+                                <span class="topo-tag"><span class="topo-dot topo-dot-hex"></span>
                                     Hexágonos (6 lados)</span>
-                                <span class="topo-tag"><span class="topo-dot" style="background: #ec4899;"></span>
+                                <span class="topo-tag"><span class="topo-dot topo-dot-hept"></span>
                                     Heptágonos (7 lados)</span>
-                                <span class="topo-tag"><span class="topo-dot" style="background: #ef4444;"></span>
+                                <span class="topo-tag"><span class="topo-dot topo-dot-other"></span>
                                     Outros (&le;4 ou &ge;8)</span>
                             </div>
                         </div>
@@ -395,8 +394,7 @@
                         <div class="mini-orrery-container">
                             <div class="mini-orrery-header">
                                 <span>Órbita Terrestre (Vista da Eclíptica)</span>
-                                <span id="label-orrery-month"
-                                    style="font-family: monospace; color: var(--accent-color);">21/Jun</span>
+                                <span id="label-orrery-month" class="orrery-month-badge">21/Jun</span>
                             </div>
                             <canvas id="canvas-mini-orrery" width="280" height="180"></canvas>
                             <div class="mini-orrery-caption" id="orrery-caption-text">
@@ -455,13 +453,12 @@
                                     step="0.25" value="12">
                             </div>
 
-                            <div class="control-grid-2x2" style="margin-top: 8px;">
-                                <button id="btn-play-orbit" class="btn-preset"
-                                    style="background: rgba(56, 189, 248, 0.15); border-color: #38bdf8;"
+                            <div class="control-grid-2x2 clima-btn-spacer">
+                                <button type="button" id="btn-play-orbit" class="btn-preset tone-cyan"
                                     data-focus-control="action" data-focus-order="3" data-focus-icon="play" data-focus-tooltip="Translação Anual">
                                     <img src="../assets/icons/play.svg" class="icon-svg" alt="Play"> Translação Anual
                                 </button>
-                                <button id="btn-play-diurnal" class="btn-preset"
+                                <button type="button" id="btn-play-diurnal" class="btn-preset"
                                     data-focus-control="action" data-focus-order="4" data-focus-icon="rotate" data-focus-tooltip="Rotação Contínua">
                                     <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Rotação"> Rotação
                                     Contínua
@@ -475,16 +472,16 @@
                         <!-- Botões Rápidos das 4 Estações Cardeais -->
                         <div class="control-group">
                             <div class="control-grid-2x2">
-                                <button id="btn-season-jun" class="btn-preset active" title="21 de Junho">
+                                <button type="button" id="btn-season-jun" class="btn-preset active" title="21 de Junho">
                                     <img src="../assets/icons/sun.svg" class="icon-svg" alt="Sol"> Solstício Junho
                                 </button>
-                                <button id="btn-season-sep" class="btn-preset" title="22 de Setembro">
+                                <button type="button" id="btn-season-sep" class="btn-preset" title="22 de Setembro">
                                     <img src="../assets/icons/leaf.svg" class="icon-svg" alt="Outono"> Equinócio Set
                                 </button>
-                                <button id="btn-season-dec" class="btn-preset" title="21 de Dezembro">
+                                <button type="button" id="btn-season-dec" class="btn-preset" title="21 de Dezembro">
                                     <img src="../assets/icons/snowflake.svg" class="icon-svg" alt="Neve"> Solstício Dez
                                 </button>
-                                <button id="btn-season-mar" class="btn-preset" title="20 de Março">
+                                <button type="button" id="btn-season-mar" class="btn-preset" title="20 de Março">
                                     <img src="../assets/icons/flower.svg" class="icon-svg" alt="Primavera"> Equinócio
                                     Mar
                                 </button>
@@ -548,22 +545,21 @@
 
                         <!-- Card Didático: Link Direto para Plataforma de Referência -->
                         <div class="control-group">
-                            <div class="theory-card"
-                                style="border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.06);">
+                            <div class="theory-card clima-highlight-card">
                                 <h4><img src="../assets/icons/globe.svg" class="icon-svg icon-accent" alt="Globo">
                                     Simulação Planetária em Tempo Real</h4>
                                 <p>
                                     Para visualizar a dinâmica global de ventos, temperaturas e correntes calculada com
                                     dados reais de supercomputadores meteorológicos, recomendamos a plataforma aberta:
                                 </p>
-                                <p style="margin: 16px 0;">
+                                <p class="clima-link-wrap">
                                     <a href="https://earth.nullschool.net/pt/" target="_blank" rel="noopener noreferrer"
                                         class="external-sim-link">
                                         <img src="../assets/icons/globe.svg" class="icon-svg" alt="Globo">
                                         <span>Simulação climática NULLSCHOOL</span>
                                     </a>
                                 </p>
-                                <p style="font-size: 0.8rem; color: #94a3b8; line-height: 1.45;">
+                                <p class="clima-card-footnote">
                                     O <em>earth.nullschool</em> processa previsões numéricas globais geradas pelo
                                     NCEP/NOAA (GFS) e ECMWF, interpolando linhas de corrente e fluxos oceânicos sobre o
                                     globo terrestre interativo.
@@ -574,7 +570,7 @@
                 </div>
 
                 <!-- ABA 2: TEORIA E DEDUÇÃO MATEMÁTICA -->
-                <div class="tab-pane" id="panel-tab-theory" style="display: none;">
+                <div class="tab-pane" id="panel-tab-theory">
                     <div class="tab-header">
                         <div class="tab-header-row">
                             <h3 class="tab-title">Fundamentação Científica</h3>
@@ -642,9 +638,8 @@
                                 Dezembro, $\delta_\odot = -23{,}44^\circ$ (Sul aquecido).
                             </p>
 
-                            <button class="btn-secondary" id="btn-open-theory-modal"
-                                style="width: 100%; margin-top: 14px;">
-                                <img src="../assets/icons/compass.svg" class="icon-svg" alt="Teoria">
+                            <button type="button" class="btn-secondary w-full clima-theory-cta" id="btn-open-theory-modal">
+                                <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                                 Ver Dedução Matemática Completa
                             </button>
                         </div>
@@ -674,7 +669,7 @@
                     <img src="../assets/icons/compass.svg" class="icon-svg icon-accent" alt="Teoria">
                     <span>Fundamentação Teórica: Tesselação Esférica, Escala & Mecânica Celeste</span>
                 </div>
-                <button class="sim-modal-close" data-modal-close title="Fechar Modal (Esc)">✕</button>
+                <button type="button" class="sim-modal-close" data-modal-close title="Fechar Modal (Esc)">✕</button>
             </div>
 
             <div class="sim-modal-body">
@@ -747,7 +742,7 @@
 
             <div class="sim-modal-footer">
                 <span class="sim-modal-hint">Pressione <kbd>Esc</kbd> para fechar</span>
-                <button class="btn-primary" data-modal-close style="min-width: 100px;">Entendido</button>
+                <button type="button" class="btn-primary" data-modal-close>Entendido</button>
             </div>
         </div>
     </div>
@@ -762,7 +757,7 @@
                     <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                     <span>Tesselação de Voronoi & Clima Planetário — Guia Rápido</span>
                 </div>
-                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+                <button type="button" class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
@@ -843,7 +838,7 @@
     </div>
 
     <!-- Script Principal da Simulação -->
-    <script type="module" src="scripts/clima.js?v=3.8"></script>
+    <script type="module" src="scripts/clima.js"></script>
 </body>
 
 </html>

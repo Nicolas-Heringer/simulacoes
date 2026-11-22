@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
     <!-- Metadados da Página -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#1c1917">
     <title>Da Inércia ao Movimento Circular — Laboratório de Física</title>
 
     <meta name="description"
@@ -48,7 +48,7 @@
             <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
                 <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
             </button>
-            <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
+            <button type="button" id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
             </button>
@@ -61,7 +61,7 @@
         <!-- 1. Área do Canvas 3D / 2D com Menus Flutuantes -->
         <div class="canvas-area">
             <!-- Container do Renderizador Three.js -->
-            <div id="three-container" style="width: 100%; height: 100%; position: relative; touch-action: none;"></div>
+            <div id="three-container"></div>
 
             <!-- Pilha Vertical Automática no Canto Superior Esquerdo -->
             <div class="canvas-top-left-stack">
@@ -70,11 +70,11 @@
 
             <!-- Grupo de Ações Flutuantes no Topo Direito do Canvas -->
             <div class="canvas-top-actions">
-                <button id="btn-reset-camera" class="canvas-btn-floating" title="Centralizar Visão">
+                <button type="button" id="btn-reset-camera" class="canvas-btn-floating" title="Centralizar Visão">
                     <img src="../assets/icons/camera-reset.svg" class="icon-svg" alt="Câmera">
                     <span class="btn-label-text">Reset Visão</span>
                 </button>
-                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
+                <button type="button" id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
                 </button>
@@ -82,7 +82,7 @@
 
             <!-- Barra Flutuante de Transporte / Playback -->
             <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
-                <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
+                <button type="button" class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
                         data-state="0"
                         data-text-idle="Executar"
                         data-text-active="Pausar"
@@ -92,10 +92,10 @@
                     <img src="../assets/icons/play.svg" class="icon-svg" alt="Executar">
                     <span class="btn-text">Executar</span>
                 </button>
-                <button class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
+                <button type="button" class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
                     <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
                 </button>
-                <button class="toolbar-btn" id="btn-reset-sim" title="Reiniciar (t = 0)">
+                <button type="button" class="toolbar-btn" id="btn-reset-sim" title="Reiniciar (t = 0)">
                     <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                 </button>
             </div>
@@ -110,16 +110,16 @@
         <aside class="controls-panel">
 
             <!-- Topo: Barra de Abas Expansíveis com Botão de Modo Foco -->
-            <div class="tab-nav">
-                <button class="tab-btn active" data-tab="panel-tab-params" id="tab-btn-params" title="Parâmetros e Controles">
+            <div class="tab-nav" role="tablist">
+                <button type="button" class="tab-btn active" data-tab="panel-tab-params" id="tab-btn-params" title="Parâmetros e Controles">
                     <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Parâmetros">
                     <span class="tab-label">Parâmetros</span>
                 </button>
-                <button class="tab-btn" data-tab="panel-tab-theory" id="tab-btn-theory" title="Fundamentação Teórica">
+                <button type="button" class="tab-btn" data-tab="panel-tab-theory" id="tab-btn-theory" title="Fundamentação Teórica">
                     <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                     <span class="tab-label">Teoria</span>
                 </button>
-                <button class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
+                <button type="button" class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
                     <img src="../assets/icons/collapse.svg" class="icon-svg" alt="Recolher">
                 </button>
             </div>
@@ -131,13 +131,15 @@
                 <div class="tab-pane active" id="panel-tab-params">
                     
                     <!-- Seletor dos Modos Didáticos -->
-                    <div class="segmented-control" id="mode-selector" style="margin-bottom: 12px;">
-                        <button class="segment-btn active" data-mode="1">
-                            <img src="../assets/icons/motion-oscillate.svg" class="icon-svg" alt=""> 1. Inércia & Desvio
-                        </button>
-                        <button class="segment-btn" data-mode="2">
-                            <img src="../assets/icons/orbital.svg" class="icon-svg" alt=""> 2. Movimento Circular
-                        </button>
+                    <div class="control-group">
+                        <div class="segmented-control" id="mode-selector">
+                            <button type="button" class="segment-btn active" data-mode="1">
+                                <img src="../assets/icons/motion-oscillate.svg" class="icon-svg" alt=""> 1. Inércia & Desvio
+                            </button>
+                            <button type="button" class="segment-btn" data-mode="2">
+                                <img src="../assets/icons/orbital.svg" class="icon-svg" alt=""> 2. Movimento Circular
+                            </button>
+                        </div>
                     </div>
 
                     <!-- ============================================== -->
@@ -146,9 +148,9 @@
                     <div id="controls-mode-1">
                         <div class="sim-divider-label"><span>Ação de Força Resultante</span></div>
 
-                        <div style="margin-bottom: 12px;">
-                            <button class="btn-primary tone-rose" id="btn-apply-force-pulse" style="width: 100%; justify-content: center;"
-                                    data-focus-control="action" data-focus-label="Aplicar Força" data-focus-order="4">
+                        <div class="control-group">
+                            <button type="button" class="btn-primary tone-rose w-full" id="btn-apply-force-pulse"
+                                    data-focus-control="action" data-focus-mode="1" data-focus-label="Aplicar Força" data-focus-order="4">
                                 <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="">
                                 <span>Aplicar Força Lateral ($\vec{F}$)</span>
                             </button>
@@ -166,7 +168,7 @@
                                 </div>
                                 <input type="range" class="sim-slider" id="slider-m1-v0"
                                        min="1.0" max="15.0" step="0.5" value="6.0"
-                                       data-focus-control="slider" data-focus-label="v₀" data-focus-order="5">
+                                       data-focus-control="slider" data-focus-mode="1" data-focus-label="v₀" data-focus-order="5">
                             </div>
                             <span class="field-hint">Velocidade do movimento retilíneo uniforme.</span>
                         </div>
@@ -183,7 +185,7 @@
                                 </div>
                                 <input type="range" class="sim-slider" id="slider-m1-force"
                                        min="1.0" max="20.0" step="0.5" value="8.0"
-                                       data-focus-control="slider" data-focus-label="F" data-focus-order="6">
+                                       data-focus-control="slider" data-focus-mode="1" data-focus-label="F" data-focus-order="6">
                             </div>
                             <span class="field-hint">Magnitude da força transversal aplicada no desvio.</span>
                         </div>
@@ -200,7 +202,7 @@
                                 </div>
                                 <input type="range" class="sim-slider" id="slider-m1-mass"
                                        min="0.5" max="5.0" step="0.5" value="1.0"
-                                       data-focus-control="slider" data-focus-label="m" data-focus-order="7">
+                                       data-focus-control="slider" data-focus-mode="1" data-focus-label="m" data-focus-order="7">
                             </div>
                         </div>
 
@@ -248,25 +250,29 @@
                     <!-- ============================================== -->
                     <!-- CONTROLES ESPECÍFICOS: MODO 2 (MOVIMENTO CIRCULAR) -->
                     <!-- ============================================== -->
-                    <div id="controls-mode-2" style="display: none;">
+                    <div id="controls-mode-2" hidden>
                         <div class="sim-divider-label"><span>Representação da Inércia (Fantasma)</span></div>
 
                         <!-- Seletor entre Fuga Contínua e Construção Passo a Passo de Newton -->
-                        <div class="segmented-control" id="m2-ghost-mode-selector" style="margin-bottom: 12px;">
-                            <button class="segment-btn active" data-ghost-mode="stream">
-                                <img src="../assets/icons/motion-oscillate.svg" class="icon-svg" alt=""> Fuga Contínua
-                            </button>
-                            <button class="segment-btn" data-ghost-mode="newton">
-                                <img src="../assets/icons/matrix-basis.svg" class="icon-svg" alt=""> Passo de Newton
-                            </button>
+                        <div class="control-group">
+                            <div class="segmented-control" id="m2-ghost-mode-selector">
+                                <button type="button" class="segment-btn active" data-ghost-mode="stream">
+                                    <img src="../assets/icons/motion-oscillate.svg" class="icon-svg" alt=""> Fuga Contínua
+                                </button>
+                                <button type="button" class="segment-btn" data-ghost-mode="newton">
+                                    <img src="../assets/icons/matrix-basis.svg" class="icon-svg" alt=""> Passo de Newton
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Painel do Passo de Newton (visível apenas no modo newton) -->
-                        <div id="panel-m2-newton" style="display: none; margin-bottom: 12px;">
-                            <button class="btn-primary tone-cyan" id="btn-m2-newton-step" style="width: 100%; justify-content: center; margin-bottom: 10px;">
-                                <img src="../assets/icons/step.svg" class="icon-svg" alt="">
-                                <span>Avançar Passo de Newton ($\Delta t$)</span>
-                            </button>
+                        <div id="panel-m2-newton" hidden>
+                            <div class="control-group">
+                                <button type="button" class="btn-primary tone-cyan w-full" id="btn-m2-newton-step">
+                                    <img src="../assets/icons/step.svg" class="icon-svg" alt="">
+                                    <span>Avançar Passo de Newton ($\Delta t$)</span>
+                                </button>
+                            </div>
                             <div class="control-group">
                                 <div class="slider-container sim-dual-slider tone-cyan">
                                     <div class="slider-header">
@@ -286,9 +292,9 @@
 
                         <div class="sim-divider-label"><span>Dinâmica Centrípeta</span></div>
 
-                        <div style="margin-bottom: 12px;">
-                            <button class="btn-secondary" id="btn-m2-cut-force" style="width: 100%; justify-content: center;"
-                                    data-focus-control="action" data-focus-label="Cortar Força" data-focus-order="4">
+                        <div class="control-group">
+                            <button type="button" class="btn-secondary w-full" id="btn-m2-cut-force"
+                                    data-focus-control="action" data-focus-mode="2" data-focus-label="Cortar Força" data-focus-order="4">
                                 <img src="../assets/icons/refresh.svg" class="icon-svg" alt="">
                                 <span id="btn-m2-cut-text">Cortar Força Centrípeta ($\vec{F}_c = 0$)</span>
                             </button>
@@ -306,7 +312,7 @@
                                 </div>
                                 <input type="range" class="sim-slider" id="slider-m2-radius"
                                        min="2.0" max="10.0" step="0.5" value="5.0"
-                                       data-focus-control="slider" data-focus-label="r" data-focus-order="5">
+                                       data-focus-control="slider" data-focus-mode="2" data-focus-label="r" data-focus-order="5">
                             </div>
                             <span class="field-hint">Distância do centro de rotação ao corpo.</span>
                         </div>
@@ -323,7 +329,7 @@
                                 </div>
                                 <input type="range" class="sim-slider" id="slider-m2-speed"
                                        min="1.0" max="12.0" step="0.5" value="5.0"
-                                       data-focus-control="slider" data-focus-label="v" data-focus-order="6">
+                                       data-focus-control="slider" data-focus-mode="2" data-focus-label="v" data-focus-order="6">
                             </div>
                             <span class="field-hint">Módulo da velocidade tangencial constante no MCU.</span>
                         </div>
@@ -340,7 +346,7 @@
                                 </div>
                                 <input type="range" class="sim-slider" id="slider-m2-mass"
                                        min="0.5" max="5.0" step="0.5" value="1.0"
-                                       data-focus-control="slider" data-focus-label="m" data-focus-order="7">
+                                       data-focus-control="slider" data-focus-mode="2" data-focus-label="m" data-focus-order="7">
                             </div>
                         </div>
 
@@ -404,7 +410,7 @@
                 </div>
 
                 <!-- ABA 2: TEORIA E DEDUÇÕES -->
-                <div class="tab-pane" id="panel-tab-theory" style="display: none;">
+                <div class="tab-pane" id="panel-tab-theory">
                     <div class="tab-header">
                         <div class="tab-header-row">
                             <h3 class="tab-title">Fundamentação Newtoniana</h3>
@@ -484,7 +490,7 @@
                     <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                     <span>Da Inércia ao Movimento Circular — Guia Rápido</span>
                 </div>
-                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+                <button type="button" class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">

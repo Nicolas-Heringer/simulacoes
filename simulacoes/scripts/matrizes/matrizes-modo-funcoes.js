@@ -160,6 +160,9 @@ export class ModoFuncoes {
 
         if (btnStepFn) {
             btnStepFn.addEventListener('click', () => {
+                if (this.isPlaying && this.playToggleControl) {
+                    this.playToggleControl.setState(0, true);
+                }
                 this.t += 0.1;
                 this.updateTControls();
                 this.updatePlanoTransform();
@@ -168,6 +171,9 @@ export class ModoFuncoes {
 
         if (btnResetFn) {
             btnResetFn.addEventListener('click', () => {
+                if (this.isPlaying && this.playToggleControl) {
+                    this.playToggleControl.setState(0, true);
+                }
                 this.t = 0;
                 this.updateTControls();
                 this.updatePlanoTransform();
@@ -450,21 +456,22 @@ export class ModoFuncoes {
             const transArea = Math.abs(shoelace) / 2;
             const areaRatio = origArea > 0 ? transArea / origArea : 1;
 
-            const badgeColor = surf.type === 'circle' ? 'var(--color-purple)' : 'var(--color-emerald)';
-            const surfName = surf.type === 'circle' ? '🟣 Círculo' : '🟢 Quadrado';
+            const surfClass = surf.type === 'circle' ? 'surface-circle' : 'surface-square';
+            const surfName = surf.type === 'circle' ? 'Círculo' : 'Quadrado';
 
             html += `
-                <div class="sim-readout readout-card" style="margin-bottom: 8px; border-left: 3px solid ${badgeColor};">
-                    <div class="sim-readout-title readout-header">
+                <div class="sim-readout surface-telemetry-card ${surfClass}">
+                    <div class="sim-readout-title">
+                        <span class="surface-dot" aria-hidden="true"></span>
                         <span>${surfName} em (${cx.toFixed(1)}, ${cy.toFixed(1)})</span>
                     </div>
-                    <div class="sim-readout-row readout-item">
-                        <span class="sim-readout-label readout-label">Razão de Área ($A'/A_0$)</span>
-                        <span class="sim-readout-value readout-value highlight-cyan">${areaRatio.toFixed(2)}x (${transArea.toFixed(2)} / ${origArea.toFixed(2)})</span>
+                    <div class="sim-readout-row">
+                        <span class="sim-readout-label">Razão de Área ($A'/A_0$)</span>
+                        <span class="sim-readout-value tone-cyan">${areaRatio.toFixed(2)}x (${transArea.toFixed(2)} / ${origArea.toFixed(2)})</span>
                     </div>
-                    <div class="sim-readout-row readout-item">
-                        <span class="sim-readout-label readout-label">Jacobiana Local $|\det(J)|$</span>
-                        <span class="sim-readout-value readout-value highlight-yellow">${absDetJ.toFixed(2)}x</span>
+                    <div class="sim-readout-row">
+                        <span class="sim-readout-label">Jacobiana Local $|\\det(J)|$</span>
+                        <span class="sim-readout-value tone-accent">${absDetJ.toFixed(2)}x</span>
                     </div>
                 </div>
             `;
@@ -501,10 +508,11 @@ export class ModoFuncoes {
     }
 
     unmount() {
-        this.isPlaying = false;
-        cancelAnimationFrame(this.animRequestId);
         if (this.playToggleControl && this.playToggleControl.isActive()) {
-            this.playToggleControl.setState(0);
+            this.playToggleControl.setState(0, true);
+        } else {
+            this.isPlaying = false;
+            cancelAnimationFrame(this.animRequestId);
         }
         this.plano.probeSurfaces = [];
         this.plano.customTransformFn = null;

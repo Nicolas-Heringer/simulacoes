@@ -32,18 +32,18 @@
     flex-direction: column;
     gap: 10px;
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 12px 14px;
 }
 
 .equation-panel.theme-yellow {
-    border: 1px solid color-mix(in srgb, var(--accent-color) 32%, transparent);
+    border: var(--ui-border-width, 1.5px) solid color-mix(in srgb, var(--accent-color) 38%, transparent);
     background: linear-gradient(180deg, color-mix(in srgb, var(--accent-color) 6%, var(--bg-card)) 0%, var(--bg-card) 100%);
 }
 
 .equation-panel.theme-cyan {
-    border: 1px solid color-mix(in srgb, var(--color-cyan) 35%, transparent);
+    border: var(--ui-border-width, 1.5px) solid color-mix(in srgb, var(--color-cyan) 42%, transparent);
     background: linear-gradient(180deg, color-mix(in srgb, var(--color-cyan) 6%, var(--bg-card)) 0%, var(--bg-card) 100%);
 }
 
@@ -77,7 +77,7 @@
 /* Caixa de Exibição da Equação Matemática */
 .equation-box {
     background: var(--bg-recessed);
-    border: 1px solid var(--border-color);
+    border: var(--ui-border-width, 1.5px) solid var(--border-color);
     border-radius: var(--radius-md);
     padding: 8px 10px;
     text-align: center;
@@ -160,4 +160,25 @@
     padding: 0 6px;
     min-width: 44px;
     text-align: center;
+}
+
+/* Espaçamentos auxiliares no painel */
+.slider-spaced {
+    margin-top: 10px;
+}
+
+.switch-spaced {
+    margin-top: 12px;
+}
+
+.theory-modal-cta {
+    margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+    /* Mantém barra de zoom acima do botão de engrenagem e da barra de transporte no mobile */
+    .canvas-zoom-toolbar {
+        bottom: calc(66px + var(--safe-bottom));
+        right: max(12px, var(--safe-right));
+    }
 }

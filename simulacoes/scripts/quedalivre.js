@@ -445,12 +445,10 @@ function setupUI() {
         }
     });
 
-    // Mobile Bottom Sheet
+    // Painel Flutuante Mobile
     initBottomSheet({
         panelSelector: '.controls-panel',
-        handleSelector: '#sheet-drag-handle',
-        tabNavSelector: '.tab-nav',
-        collapseBtnSelector: '#btn-collapse-sidebar',
+        triggerSelector: '#btn-mobile-settings',
         defaultState: 'peek'
     });
 
@@ -485,7 +483,7 @@ function setupUI() {
     // Botão de Avanço Passo a Passo (Passo Único Δt)
     document.getElementById('btn-step-sim')?.addEventListener('click', () => {
         if (state.isRunning && playControl) {
-            playControl.setState(0);
+            playControl.setState(0, true);
         }
         const dtStep = 0.016 * state.speed;
         stepPhysics(dtStep);
@@ -501,8 +499,13 @@ function setupUI() {
         updateVisualScene();
     });
 
-    // Botões de Reinício (Reset)
+    // Botões de Reinício (Pausa e repõe a esfera — Padrão DS 2.0)
     const handleReset = () => {
+        if (state.isRunning && playControl) {
+            playControl.setState(0, true);
+        }
+        const statusEl = document.getElementById('footer-status-text');
+        if (statusEl) statusEl.textContent = 'Simulação Pronta';
         state.time = 0;
         resetBall();
         const timerEl = document.getElementById('footer-sim-timer');

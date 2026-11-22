@@ -86,16 +86,21 @@ export class ModoDinamico {
 
         if (btnStepDyn) {
             btnStepDyn.addEventListener('click', () => {
-                const wasPlaying = this.isPlaying;
+                if (this.isPlaying && this.playToggleControl) {
+                    this.playToggleControl.setState(0, true);
+                }
                 this.isPlaying = true;
                 this.stepPhysics(0.05);
-                this.isPlaying = wasPlaying;
+                this.isPlaying = false;
                 this.drawDynamicScene();
             });
         }
 
         if (btnResetDyn) {
             btnResetDyn.addEventListener('click', () => {
+                if (this.isPlaying && this.playToggleControl) {
+                    this.playToggleControl.setState(0, true);
+                }
                 this.resetSeeds();
                 this.drawDynamicScene();
             });
@@ -436,33 +441,33 @@ export class ModoDinamico {
 
         if (det < -1e-4) {
             classification = 'Ponto de Sela (Instável)';
-            toneClass = 'highlight-rose';
+            toneClass = 'tone-rose';
         } else if (Math.abs(det) < 1e-4) {
             classification = 'Degenerado (Neutro)';
-            toneClass = 'highlight-purple';
+            toneClass = 'tone-purple';
         } else {
             // det > 0
             if (disc < -1e-4) {
                 if (Math.abs(tr) < 1e-4) {
                     classification = 'Centro (Estável)';
-                    toneClass = 'highlight-cyan';
+                    toneClass = 'tone-cyan';
                 } else if (tr < 0) {
                     classification = 'Foco Atrator (Estável)';
-                    toneClass = 'highlight-green';
+                    toneClass = 'tone-emerald';
                 } else {
                     classification = 'Foco Repulsor (Instável)';
-                    toneClass = 'highlight-rose';
+                    toneClass = 'tone-rose';
                 }
             } else {
                 if (tr < 0) {
                     classification = 'Nó Atrator (Estável)';
-                    toneClass = 'highlight-green';
+                    toneClass = 'tone-emerald';
                 } else if (tr > 0) {
                     classification = 'Nó Repulsor (Instável)';
-                    toneClass = 'highlight-rose';
+                    toneClass = 'tone-rose';
                 } else {
                     classification = 'Ponto Fixo Neutro';
-                    toneClass = 'highlight-cyan';
+                    toneClass = 'tone-cyan';
                 }
             }
         }
@@ -473,7 +478,7 @@ export class ModoDinamico {
 
         if (elClassif) {
             elClassif.textContent = classification;
-            elClassif.className = `sim-readout-value readout-value ${toneClass}`;
+            elClassif.className = `sim-readout-value ${toneClass}`;
         }
 
         if (elEigen) {
@@ -517,10 +522,11 @@ export class ModoDinamico {
 
     unmount() {
         this.isActive = false;
-        this.isPlaying = false;
-        cancelAnimationFrame(this.animRequestId);
         if (this.playToggleControl && this.playToggleControl.isActive()) {
-            this.playToggleControl.setState(0);
+            this.playToggleControl.setState(0, true);
+        } else {
+            this.isPlaying = false;
+            cancelAnimationFrame(this.animRequestId);
         }
     }
 }

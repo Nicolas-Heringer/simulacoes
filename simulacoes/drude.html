@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
     <!-- Metadados da Página -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#1c1917">
     <title>Modelo de Drude — Condução Elétrica em Redes Cristalinas</title>
 
     <meta name="description"
@@ -40,7 +40,7 @@
             <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
                 <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
             </button>
-            <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
+            <button type="button" id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
             </button>
@@ -61,11 +61,11 @@
 
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
-                <button id="btn-toggle-tracer" class="canvas-btn-floating" title="Alternar Rastro do Elétron Traçador">
+                <button type="button" id="btn-toggle-tracer" class="canvas-btn-floating" title="Alternar Rastro do Elétron Traçador">
                     <img src="../assets/icons/sparkles.svg" class="icon-svg" alt="Traçador">
                     <span class="btn-label-text">Elétron Traçador</span>
                 </button>
-                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Painel de Controles (F)">
+                <button type="button" id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Painel de Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
                 </button>
@@ -73,20 +73,20 @@
 
             <!-- Barra Flutuante de Transporte (#canvas-transport-toolbar) -->
             <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
-                <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
+                <button type="button" class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
                         data-state="0" data-text-idle="Executar" data-text-active="Pausar"
                         data-icon-idle="play" data-icon-active="pause" title="Executar / Pausar">
                     <img src="../assets/icons/play.svg" class="icon-svg" alt="Executar">
                     <span class="btn-text">Executar</span>
                 </button>
-                <button class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
+                <button type="button" class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
                     <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
                 </button>
-                <button class="toolbar-btn" id="btn-reset-sim" title="Reiniciar Posições (t = 0)">
+                <button type="button" class="toolbar-btn" id="btn-reset-sim" title="Reiniciar Posições (t = 0)">
                     <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                 </button>
                 <span class="toolbar-divider"></span>
-                <button class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
+                <button type="button" class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
                     1.0×
                 </button>
             </div>
@@ -101,16 +101,16 @@
         <aside class="controls-panel">
 
             <!-- Topo: Barra de Abas Expansíveis -->
-            <div class="tab-nav">
-                <button class="tab-btn active" id="tab-btn-params" data-tab="panel-tab-params" title="Parâmetros Físicos">
-                    <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Parâmetros">
+            <div class="tab-nav" role="tablist">
+                <button type="button" class="tab-btn active" id="tab-btn-params" data-tab="panel-tab-params" title="Parâmetros Físicos">
+                    <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Parâmetros">
                     <span class="tab-label">Parâmetros</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-theory" data-tab="panel-tab-theory" title="Fundamentação Teórica & Fórmulas">
-                    <img src="../assets/icons/compass.svg" class="icon-svg" alt="Teoria">
+                <button type="button" class="tab-btn" id="tab-btn-theory" data-tab="panel-tab-theory" title="Fundamentação Teórica & Fórmulas">
+                    <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                     <span class="tab-label">Teoria</span>
                 </button>
-                <button class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
+                <button type="button" class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
                     <img src="../assets/icons/collapse.svg" class="icon-svg" alt="Recolher">
                 </button>
             </div>
@@ -192,7 +192,7 @@
 
                     <!-- Slider Sincronizado: Intensidade do Campo -->
                     <div class="control-group">
-                        <div class="slider-container sim-dual-slider" data-focus-control="slider" data-focus-label="|E|" data-focus-order="4">
+                        <div class="slider-container sim-dual-slider">
                             <div class="slider-header">
                                 <label for="slider-intensidade" class="slider-label">Intensidade do Campo ($|E|$)</label>
                                 <div class="dual-input-wrapper">
@@ -201,6 +201,7 @@
                                 </div>
                             </div>
                             <input type="range" class="sim-slider" id="slider-intensidade"
+                                   data-focus-control="slider" data-focus-label="|E|" data-focus-order="4"
                                    min="0.00" max="1.00" step="0.05" value="0.20">
                         </div>
                     </div>
@@ -209,7 +210,7 @@
 
                     <!-- Slider Sincronizado: Temperatura -->
                     <div class="control-group">
-                        <div class="slider-container sim-dual-slider" data-focus-control="slider" data-focus-label="Temp (T)" data-focus-order="5">
+                        <div class="slider-container sim-dual-slider">
                             <div class="slider-header">
                                 <label for="slider-temperatura" class="slider-label">Temperatura ($T$)</label>
                                 <div class="dual-input-wrapper">
@@ -219,6 +220,7 @@
                                 </div>
                             </div>
                             <input type="range" class="sim-slider" id="slider-temperatura"
+                                   data-focus-control="slider" data-focus-label="Temp (T)" data-focus-order="5"
                                    min="0" max="100" step="1" value="0">
                         </div>
                     </div>
@@ -257,7 +259,7 @@
 
                     <!-- Botão de Ação: Zerar Velocidades Térmicas -->
                     <div class="control-group">
-                        <button id="btnZerar" class="btn-secondary" style="width: 100%;" data-focus-control="action" data-focus-label="Zerar T" data-focus-icon="snowflake" data-focus-order="7">
+                        <button type="button" id="btnZerar" class="btn-secondary w-full" data-focus-control="action" data-focus-label="Zerar T" data-focus-icon="snowflake" data-focus-order="7">
                             <img src="../assets/icons/snowflake.svg" class="icon-svg" alt="Zerar">
                             <span>Zerar Velocidades Térmicas</span>
                         </button>
@@ -265,7 +267,7 @@
                 </div>
 
                 <!-- ABA 2: TEORIA E DEDUÇÃO MATEMÁTICA -->
-                <div id="panel-tab-theory" class="tab-pane" style="display: none;">
+                <div id="panel-tab-theory" class="tab-pane">
                     <div class="tab-header">
                         <div class="tab-header-row">
                             <h3 class="tab-title">Fundamentação Teórica</h3>
@@ -299,8 +301,8 @@
                             </p>
                             $$\mathbf{J} = -n e \mathbf{v}_d = \frac{n e^2 \tau}{m} \mathbf{E} = \sigma_0 \mathbf{E}$$
 
-                            <button class="btn-secondary" id="btn-open-theory-modal" style="width: 100%; margin-top: 12px;">
-                                <img src="../assets/icons/compass.svg" class="icon-svg" alt="Teoria">
+                            <button type="button" class="btn-secondary w-full" id="btn-open-theory-modal">
+                                <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                                 Ver Dedução Matemática Completa
                             </button>
                         </div>
@@ -321,7 +323,8 @@
                     <!-- Referência Bibliográfica -->
                     <div class="control-group">
                         <div class="biblio-ref">
-                            📖 <strong>Referência:</strong> N. W. Ashcroft & N. D. Mermin, <em>Solid State Physics</em> (Cap. 1: The Drude Theory of Metals), Saunders College Publishing.
+                            <img src="../assets/icons/book.svg" class="icon-svg icon-accent" alt="">
+                            <strong>Referência:</strong> N. W. Ashcroft & N. D. Mermin, <em>Solid State Physics</em> (Cap. 1: The Drude Theory of Metals), Saunders College Publishing.
                         </div>
                     </div>
                 </div>
@@ -332,7 +335,7 @@
             <div class="panel-footer">
                 <div class="sim-badge idle" id="footer-status-badge">
                     <span class="status-dot"></span>
-                    <span id="footer-status-text">Simulação Pausada</span>
+                    <span id="footer-status-text">Simulação Pronta</span>
                 </div>
                 <span class="footer-meta" id="footer-sim-info">v_d = 0.00 px/s</span>
             </div>
@@ -346,10 +349,10 @@
         <div class="sim-modal-container">
             <div class="sim-modal-header">
                 <div class="sim-modal-title">
-                    <img src="../assets/icons/compass.svg" class="icon-svg icon-accent" alt="Teoria">
+                    <img src="../assets/icons/book-open.svg" class="icon-svg icon-accent" alt="Teoria">
                     <span>Fundamentação Teórica: Modelo de Condução de Drude</span>
                 </div>
-                <button class="sim-modal-close" data-modal-close title="Fechar Modal (Esc)">✕</button>
+                <button type="button" class="sim-modal-close" data-modal-close title="Fechar Modal (Esc)">✕</button>
             </div>
 
             <div class="sim-modal-body">
@@ -378,7 +381,7 @@
                 </div>
 
                 <div class="theory-callout">
-                    <strong>💡 Ordens de Grandeza Notáveis em Metais Típicos (Cobre):</strong>
+                    <strong><img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt=""> Ordens de Grandeza Notáveis em Metais Típicos (Cobre):</strong>
                     <ul>
                         <li><strong>Velocidade Térmica ($v_{\text{th}}$ / $v_F$):</strong> $\sim 10^6 \text{ m/s}$ (movimento ultrarrápido caótico).</li>
                         <li><strong>Velocidade de Deriva ($v_d$):</strong> $\sim 10^{-4} \text{ m/s} = 0.1 \text{ mm/s}$ (deriva líquida extremamente lenta).</li>
@@ -413,7 +416,7 @@
 
             <div class="sim-modal-footer">
                 <span class="sim-modal-hint">Pressione <kbd>Esc</kbd> para fechar</span>
-                <button class="btn-primary" data-modal-close style="min-width: 100px;">Entendido</button>
+                <button type="button" class="btn-primary" data-modal-close>Entendido</button>
             </div>
         </div>
     </div>
@@ -428,7 +431,7 @@
                     <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                     <span>Modelo de Drude — Condução Elétrica Clássica — Guia Rápido</span>
                 </div>
-                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+                <button type="button" class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">

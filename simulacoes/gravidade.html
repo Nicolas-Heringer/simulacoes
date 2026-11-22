@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#1c1917">
     <title>Forças Centrais & Leis de Kepler 2D — Plataforma Científica</title>
 
     <meta name="description"
@@ -35,7 +35,7 @@
             <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
                 <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
             </button>
-            <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
+            <button type="button" id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
             </button>
@@ -70,11 +70,11 @@
                         <span class="frame-step-prefix">3. </span>CM
                     </button>
                 </div>
-                <button id="btn-reset-view" class="canvas-btn-floating" data-camera-mode="fit" aria-pressed="false" title="Alternar Câmera: Enquadrar → Seguir m₁ → Seguir m₂">
+                <button type="button" id="btn-reset-view" class="canvas-btn-floating" data-camera-mode="fit" aria-pressed="false" title="Alternar Câmera: Enquadrar → Seguir m₁ → Seguir m₂">
                     <img src="../assets/icons/camera-reset.svg" class="icon-svg" alt="Câmera">
                     <span class="btn-label-text" id="btn-reset-view-text">Enquadrar</span>
                 </button>
-                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
+                <button type="button" id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
                 </button>
@@ -88,20 +88,20 @@
 
             <!-- Barra Flutuante de Transporte (#canvas-transport-toolbar) -->
             <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
-                <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
+                <button type="button" class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
                         data-state="0" data-text-idle="Executar" data-text-active="Pausar"
                         data-icon-idle="play" data-icon-active="pause" title="Executar / Pausar Órbita (Espaço)">
                     <img src="../assets/icons/play.svg" class="icon-svg" alt="Executar">
                     <span class="btn-text">Executar</span>
                 </button>
-                <button class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
+                <button type="button" class="toolbar-btn" id="btn-step-sim" title="Avançar 1 Passo (Δt)">
                     <img src="../assets/icons/step.svg" class="icon-svg" alt="Passo">
                 </button>
-                <button class="toolbar-btn" id="btn-reset-sim" title="Reiniciar Órbita (t = 0)">
+                <button type="button" class="toolbar-btn" id="btn-reset-sim" title="Reiniciar Órbita (t = 0)">
                     <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                 </button>
                 <span class="toolbar-divider"></span>
-                <button class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
+                <button type="button" class="toolbar-btn speed-cycle-btn" id="btn-speed-cycle" data-speed="1.0" title="Alternar Velocidade Temporal">
                     1.0×
                 </button>
             </div>
@@ -116,20 +116,20 @@
         <aside class="controls-panel" id="controls-panel">
 
             <!-- Topo: Barra de Abas Expansíveis -->
-            <div class="tab-nav">
-                <button class="tab-btn active" id="tab-btn-orbit" data-tab="panel-tab-orbit" title="Força Central & Órbita">
+            <div class="tab-nav" role="tablist">
+                <button type="button" class="tab-btn active" id="tab-btn-orbit" data-tab="panel-tab-orbit" title="Força Central & Órbita">
                     <img src="../assets/icons/orbital.svg" class="icon-svg" alt="Órbita">
                     <span class="tab-label">Força & Órbita</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-kepler" data-tab="panel-tab-kepler" title="Leis de Kepler & Gráficos">
+                <button type="button" class="tab-btn" id="tab-btn-kepler" data-tab="panel-tab-kepler" title="Leis de Kepler & Gráficos">
                     <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="Kepler">
                     <span class="tab-label">Kepler & Gráficos</span>
                 </button>
-                <button class="tab-btn" id="tab-btn-theory" data-tab="panel-tab-theory" title="Teoria & Deduções">
+                <button type="button" class="tab-btn" id="tab-btn-theory" data-tab="panel-tab-theory" title="Teoria & Deduções">
                     <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                     <span class="tab-label">Teoria</span>
                 </button>
-                <button class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
+                <button type="button" class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
                     <img src="../assets/icons/collapse.svg" class="icon-svg" alt="Recolher">
                 </button>
             </div>
@@ -156,10 +156,10 @@
                     <div class="control-group">
                         <label>Regimes Orbitais Pré-configurados</label>
                         <div class="control-grid-2x2">
-                            <button class="btn-preset" data-preset="circular">Circular ($e=0$)</button>
-                            <button class="btn-preset active" data-preset="eliptica">Elíptica ($e=0.60$)</button>
-                            <button class="btn-preset" data-preset="cometa">Cometa ($e=0.80$)</button>
-                            <button class="btn-preset" data-preset="escape">Escape / Hipérbole</button>
+                            <button type="button" class="btn-preset" data-preset="circular">Circular ($e=0$)</button>
+                            <button type="button" class="btn-preset active" data-preset="eliptica">Elíptica ($e=0.60$)</button>
+                            <button type="button" class="btn-preset" data-preset="cometa">Cometa ($e=0.80$)</button>
+                            <button type="button" class="btn-preset" data-preset="escape">Escape / Hipérbole</button>
                         </div>
                     </div>
 
@@ -211,11 +211,11 @@
                         </div>
                         <div class="field-hint" id="hint-exponent" data-for="field-exponent"></div>
 
-                        <div class="control-grid-2x2" style="margin-top: 6px;">
-                            <button class="btn-preset active" data-bertrand="2.00">Newton ($n=2$)</button>
-                            <button class="btn-preset" data-bertrand="-1.00">Hooke ($n=-1$)</button>
-                            <button class="btn-preset" data-bertrand="2.20">Roseta ($n=2.2$)</button>
-                            <button class="btn-preset" data-bertrand="3.00">Instável ($n=3$)</button>
+                        <div class="control-grid-2x2 preset-grid-spaced">
+                            <button type="button" class="btn-preset active" data-bertrand="2.00">Newton ($n=2$)</button>
+                            <button type="button" class="btn-preset" data-bertrand="-1.00">Hooke ($n=-1$)</button>
+                            <button type="button" class="btn-preset" data-bertrand="2.20">Roseta ($n=2.2$)</button>
+                            <button type="button" class="btn-preset" data-bertrand="3.00">Instável ($n=3$)</button>
                         </div>
                     </div>
 
@@ -276,7 +276,7 @@
                         </div>
                         <div class="field-hint" id="hint-m2" data-for="field-m2"></div>
 
-                        <div class="control-grid-2x2" style="margin-top: 2px;">
+                        <div class="control-grid-2x2 preset-grid-tight">
                             <button type="button" class="btn-preset active" data-mass-ratio="0">Partícula ($m_2 = 0$)</button>
                             <button type="button" class="btn-preset" data-mass-ratio="0.2">Gigante ($1:5$)</button>
                             <button type="button" class="btn-preset" data-mass-ratio="0.3333">Duplo ($1:3$)</button>
@@ -381,7 +381,7 @@
                 <!-- ========================================================= -->
                 <!-- ABA 2: LEIS DE KEPLER, SETORES DE ÁREA & GRÁFICOS         -->
                 <!-- ========================================================= -->
-                <div class="tab-pane" id="panel-tab-kepler" style="display: none;">
+                <div class="tab-pane" id="panel-tab-kepler">
                     <div class="tab-header">
                         <div class="tab-header-row">
                             <h3 class="tab-title">Leis de Kepler & Telemetria</h3>
@@ -453,10 +453,10 @@
                     <!-- Gráfico Tempo × Área (MultiSeriesPlot) -->
                     <div class="control-group">
                         <div class="segmented-control" id="areaplot-mode-selector">
-                            <button class="segment-btn active" data-area-mode="accumulated">
+                            <button type="button" class="segment-btn active" data-area-mode="accumulated">
                                 <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="Área"> Área $A(t) \times t$
                             </button>
-                            <button class="segment-btn" data-area-mode="rate-vs-speed">
+                            <button type="button" class="segment-btn" data-area-mode="rate-vs-speed">
                                 <img src="../assets/icons/gauge.svg" class="icon-svg" alt="Taxa"> $dA/dt$ vs. $v(t)$
                             </button>
                         </div>
@@ -555,10 +555,10 @@
 
                     <div class="control-group">
                         <div class="segmented-control" id="energyplot-mode-selector">
-                            <button class="segment-btn active" data-plot-mode="time-series">
+                            <button type="button" class="segment-btn active" data-plot-mode="time-series">
                                 <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="Energia"> Energias $K, U, E$
                             </button>
-                            <button class="segment-btn" data-plot-mode="phase-space">
+                            <button type="button" class="segment-btn" data-plot-mode="phase-space">
                                 <img src="../assets/icons/orbital.svg" class="icon-svg" alt="Fase"> Fase Radial $(r, p_r)$
                             </button>
                         </div>
@@ -579,7 +579,7 @@
                 <!-- ========================================================= -->
                 <!-- ABA 3: TEORIA, FORÇAS CENTRAIS & LEIS DE KEPLER           -->
                 <!-- ========================================================= -->
-                <div class="tab-pane" id="panel-tab-theory" style="display: none;">
+                <div class="tab-pane" id="panel-tab-theory">
                     <div class="theory-card">
                         <h3>1. Forças Centrais e Confinamento Planar</h3>
                         <p>
@@ -696,7 +696,7 @@
                     <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                     <span>Forças Centrais & Leis de Kepler — Guia Rápido</span>
                 </div>
-                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+                <button type="button" class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">

@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const bottomSheetCtrl = initBottomSheet({
         panelSelector: '#controls-panel',
+        triggerSelector: '#btn-mobile-settings',
         onStateChange: (state) => {
             const isMobileOpen = window.innerWidth <= 900 && state !== 'peek';
             const targetRatio = isMobileOpen ? 0.27 : 0.5;
@@ -171,15 +172,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // Sincronizar painel de ferramentas reativo do Modo Foco
         focusToolbar?.rebuild(newMode);
 
-        // Atualizar Legenda no Rodapé
+        // Atualizar Legenda no Rodapé (concisa para manter linha única)
         if (newMode === 'base') {
-            footerStatusText.textContent = 'Modo 1: Interpretação Geométrica Canônica';
+            footerStatusText.textContent = 'Modo 1: Base Canônica';
         } else if (newMode === 'construir') {
-            footerStatusText.textContent = 'Modo 2: Construir Operador por Imagens';
+            footerStatusText.textContent = 'Modo 2: Construir Operador';
         } else if (newMode === 'funcoes') {
-            footerStatusText.textContent = 'Modo 3: Matrizes Não-Lineares M(x, y, t)';
+            footerStatusText.textContent = 'Modo 3: Matriz M(x, y, t)';
         } else if (newMode === 'dinamico') {
-            footerStatusText.textContent = 'Modo 4: Sistemas Dinâmicos dx/dt = Mx';
+            footerStatusText.textContent = 'Modo 4: Sistema dx/dt = Mx';
         }
 
         // Redimensionar e montar o novo modo

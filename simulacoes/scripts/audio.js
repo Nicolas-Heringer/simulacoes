@@ -10,8 +10,10 @@
 
 import {
     initSidebarCollapse,
+    initBottomSheet,
     initKaTeXAutoRender,
     inlineSVGImages,
+    setElementIcon,
     initTabs,
     initFocusMirrorToolbar,
     initOnboardingModal,
@@ -54,8 +56,8 @@ const transportScaleText  = document.getElementById('transportScaleText');
 const micFieldHint        = document.getElementById('micFieldHint');
 const headerStatusBadge   = document.getElementById('headerStatusBadge');
 const headerStatusText    = document.getElementById('headerStatusText');
-const footerStatusBadge   = document.getElementById('footerStatusBadge');
-const footerStatusText    = document.getElementById('footerStatusText');
+const footerStatusBadge   = document.getElementById('footer-status-badge');
+const footerStatusText    = document.getElementById('footer-status-text');
 const scaleBtns           = document.querySelectorAll('#scaleControl .segment-btn');
 
 // Leituras Numéricas (.sim-readout)
@@ -65,15 +67,11 @@ const readoutRms          = document.getElementById('readoutRms');
 const readoutResolution   = document.getElementById('readoutResolution');
 const readoutSampleRate   = document.getElementById('readoutSampleRate');
 
-// Gaveta e Responsividade Mobile
-const controlsPanel       = document.getElementById('controls-panel');
-const mobileDrawerBackdrop = document.getElementById('mobileDrawerBackdrop');
-const btnCloseDrawer      = document.getElementById('btn-close-drawer');
-const btnExpandSidebar    = document.getElementById('btn-expand-sidebar');
-
 // Modais
 const btnOpenTheoryModal      = document.getElementById('btn-open-theory-modal');
 const btnOpenTheoryModalInner = document.getElementById('btn-open-theory-modal-inner');
+
+let playControl           = null;
 
 // =============================================================================
 // 2. ESTADO GLOBAL DO SISTEMA DE ÁUDIO E ANÁLISE
@@ -255,17 +253,20 @@ function resetBuffers() {
 
 function updateControlsState() {
     const playBtn = btnTransportPlay;
-    const iconImg = playBtn?.querySelector('.icon-svg');
     const playText = playBtn?.querySelector('.btn-text');
 
     if (isCapturing && !isFrozen) {
-        playBtn?.classList.add('is-active');
-        playBtn?.setAttribute('data-state', '1');
-        if (iconImg) iconImg.src = '../assets/icons/pause.svg';
+        if (playControl) {
+            playControl.setState(1, false);
+        } else {
+            playBtn?.classList.add('is-active');
+            playBtn?.setAttribute('data-state', '1');
+            setElementIcon(playBtn, 'pause');
+        }
         if (playText) playText.textContent = 'Congelar Tela';
 
         if (headerStatusBadge) {
-            headerStatusBadge.className = 'sim-badge status-live';
+            headerStatusBadge.className = 'sim-badge';
             if (headerStatusText) headerStatusText.textContent = 'Ao Vivo';
         }
         if (footerStatusBadge) {
@@ -273,9 +274,13 @@ function updateControlsState() {
             if (footerStatusText) footerStatusText.textContent = 'Captura Ativa';
         }
     } else if (isCapturing && isFrozen) {
-        playBtn?.classList.remove('is-active');
-        playBtn?.setAttribute('data-state', '0');
-        if (iconImg) iconImg.src = '../assets/icons/play.svg';
+        if (playControl) {
+            playControl.setState(0, false);
+        } else {
+            playBtn?.classList.remove('is-active');
+            playBtn?.setAttribute('data-state', '0');
+            setElementIcon(playBtn, 'play');
+        }
         if (playText) playText.textContent = 'Retomar Captura';
 
         if (headerStatusBadge) {
@@ -287,9 +292,13 @@ function updateControlsState() {
             if (footerStatusText) footerStatusText.textContent = 'Tela Congelada';
         }
     } else {
-        playBtn?.classList.remove('is-active');
-        playBtn?.setAttribute('data-state', '0');
-        if (iconImg) iconImg.src = '../assets/icons/play.svg';
+        if (playControl) {
+            playControl.setState(0, false);
+        } else {
+            playBtn?.classList.remove('is-active');
+            playBtn?.setAttribute('data-state', '0');
+            setElementIcon(playBtn, 'play');
+        }
         if (playText) playText.textContent = 'Capturar Áudio';
 
         if (headerStatusBadge) {
@@ -768,7 +777,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
 
     // 4. Barra de Transporte na Base (initToggleButton)
-    initToggleButton('#btn-transport-play', () => {
+    playControl = initToggleButton('#btn-transport-play', () => {
         toggleFreeze();
     });
 
@@ -842,21 +851,12 @@ window.addEventListener('DOMContentLoaded', async () => {
     freqCanvas.addEventListener('pointercancel', clearInspect);
     freqCanvas.addEventListener('pointerleave', clearInspect);
 
-    // 11. Gaveta Lateral no Mobile (Substitui o Bottom Sheet)
-    btnExpandSidebar?.addEventListener('click', () => {
-        if (window.innerWidth <= 900) {
-            controlsPanel?.classList.add('mobile-drawer-open');
-            mobileDrawerBackdrop?.classList.add('active');
-        }
+    // 11. Painel Flutuante Mobile (Design System 2.0 <= 900px)
+    initBottomSheet({
+        panelSelector: '#controls-panel',
+        triggerSelector: '#btn-mobile-settings',
+        defaultState: 'peek'
     });
-
-    const closeMobileDrawer = () => {
-        controlsPanel?.classList.remove('mobile-drawer-open');
-        mobileDrawerBackdrop?.classList.remove('active');
-    };
-
-    btnCloseDrawer?.addEventListener('click', closeMobileDrawer);
-    mobileDrawerBackdrop?.addEventListener('click', closeMobileDrawer);
 
     // 12. Modais
     initOnboardingModal('#modal-onboarding', { triggerSelector: '#btn-open-onboarding' });

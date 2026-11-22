@@ -4,7 +4,7 @@
     <!-- Metadados da Página -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#1c1917">
     <title>Tensor de Inércia — Visualização Interativa</title>
 
     <meta name="description"
@@ -25,6 +25,16 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+
+    <!-- Three.js 0.165 via Import Map -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+        }
+    }
+    </script>
 </head>
 <body>
     <!-- Cabeçalho da Simulação -->
@@ -38,7 +48,7 @@
             <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
                 <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
             </button>
-            <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
+            <button type="button" id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
             </button>
@@ -48,7 +58,7 @@
     <!-- Conteúdo Principal -->
     <main class="sim-layout">
         <!-- Área de Visualização 3D -->
-        <div class="canvas-area" id="canvas-area" style="touch-action: none;">
+        <div class="canvas-area" id="canvas-area">
             <!-- Pilha Vertical Automática no Canto Superior Esquerdo -->
             <div class="canvas-top-left-stack">
                 <!-- Barra Flutuante em Modo Foco (Design System 2.0 Mirror) -->
@@ -57,7 +67,7 @@
 
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
-                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Painel (F)">
+                <button type="button" id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Painel (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
                 </button>
@@ -70,13 +80,13 @@
 
             <!-- Barra Flutuante de Transporte na Base do Canvas -->
             <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
-                <button class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
+                <button type="button" class="toolbar-btn btn-toggle tone-accent" id="btn-play-sim"
                         data-state="0" data-text-idle="Executar" data-text-active="Pausar"
                         data-icon-idle="play" data-icon-active="pause" title="Girar Corpo / Pausar">
                     <img src="../assets/icons/play.svg" class="icon-svg" alt="Executar">
                     <span class="btn-text">Executar</span>
                 </button>
-                <button class="toolbar-btn" id="btn-reset-sim" title="Reiniciar Rotação (t = 0)">
+                <button type="button" class="toolbar-btn" id="btn-reset-sim" title="Reiniciar Rotação (t = 0)">
                     <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                 </button>
             </div>
@@ -91,19 +101,19 @@
         <aside class="controls-panel" id="controls-panel">
 
             <!-- Navegação por Abas -->
-            <nav class="tab-nav">
-                <button class="tab-btn active" data-tab="tab-controls">
+            <div class="tab-nav" role="tablist">
+                <button type="button" class="tab-btn active" data-tab="tab-controls">
                     <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Controles">
                     <span class="tab-label">Controles</span>
                 </button>
-                <button class="tab-btn" data-tab="tab-theory">
+                <button type="button" class="tab-btn" data-tab="tab-theory">
                     <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                     <span class="tab-label">Teoria</span>
                 </button>
-                <button class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Recolher painel (F)">
+                <button type="button" class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Recolher painel (F)">
                     <img src="../assets/icons/collapse.svg" class="icon-svg" alt="Recolher">
                 </button>
-            </nav>
+            </div>
 
             <div class="panel-body">
                 <!-- Aba de Controles -->
@@ -112,7 +122,7 @@
                     <!-- Seletor de Modo -->
                     <div class="control-group">
                         <label for="part-select" class="group-title">Modo da Simulação</label>
-                        <select class="sim-control" id="part-select">
+                        <select class="sim-control" id="part-select" data-focus-control="select" data-focus-order="1" data-focus-label="Modo">
                             <option value="1">Parte 1 – Massa pontual única</option>
                             <option value="2">Parte 2 – Várias massas pontuais</option>
                             <option value="3">Parte 3 – Corpos extensos</option>
@@ -122,11 +132,11 @@
                     <!-- Controle do Eixo de Rotação -->
                     <div class="control-group" id="axis-group">
                         <label class="group-title">Eixo de Rotação</label>
-                        <div class="axis-preset-row">
-                            <button class="btn-action axis-btn active" data-axis="y" id="axis-y-btn">Eixo Y</button>
-                            <button class="btn-action axis-btn" data-axis="x" id="axis-x-btn">Eixo X</button>
-                            <button class="btn-action axis-btn" data-axis="z" id="axis-z-btn">Eixo Z</button>
-                            <button class="btn-action axis-btn" data-axis="custom" id="axis-custom-btn">Personalizado</button>
+                        <div class="control-grid-2x2">
+                            <button type="button" class="btn-preset axis-btn active" data-axis="y" id="axis-y-btn">Eixo Y</button>
+                            <button type="button" class="btn-preset axis-btn" data-axis="x" id="axis-x-btn">Eixo X</button>
+                            <button type="button" class="btn-preset axis-btn" data-axis="z" id="axis-z-btn">Eixo Z</button>
+                            <button type="button" class="btn-preset axis-btn" data-axis="custom" id="axis-custom-btn">Personalizado</button>
                         </div>
                         <div class="custom-axis-inputs" id="custom-axis-inputs" style="display:none;">
                             <div class="input-row">
@@ -168,9 +178,9 @@
                     <!-- Controles Parte 2: Várias massas pontuais -->
                     <div class="control-group part-controls" id="part2-controls" style="display:none;">
                         <label class="group-title">Massas Pontuais</label>
-                        <div class="button-row">
-                            <button class="btn-action primary" id="add-mass-btn">+ Adicionar Massa</button>
-                            <button class="btn-action secondary" id="clear-masses-btn">Limpar Todas</button>
+                        <div class="control-grid-2x2">
+                            <button type="button" class="btn-primary" id="add-mass-btn">+ Adicionar Massa</button>
+                            <button type="button" class="btn-secondary" id="clear-masses-btn">Limpar Todas</button>
                         </div>
                         <div id="mass-list" class="mass-list"></div>
                     </div>
@@ -206,7 +216,8 @@
                                     <span class="dual-input-unit">rad/s</span>
                                 </div>
                             </div>
-                            <input type="range" id="speed-slider" class="sim-slider" min="0.1" max="5.0" step="0.1" value="1.0" />
+                            <input type="range" id="speed-slider" class="sim-slider" min="0.1" max="5.0" step="0.1" value="1.0"
+                                   data-focus-control="slider" data-focus-order="2" data-focus-label="ω" />
                         </div>
                     </div>
 
@@ -252,8 +263,11 @@
 
                     <!-- Diagonalização -->
                     <div class="control-group" id="diag-group">
-                        <button class="btn-action primary" id="diagonalize-btn"
-                            data-focus-control="action" data-focus-order="3" data-focus-icon="axis-3d" data-focus-tooltip="Diagonalizar Tensor">⚡ Diagonalizar Tensor</button>
+                        <button type="button" class="btn-primary w-full" id="diagonalize-btn"
+                            data-focus-control="action" data-focus-order="3" data-focus-icon="axis-3d" data-focus-tooltip="Diagonalizar Tensor">
+                            <img src="../assets/icons/axis-3d.svg" class="icon-svg" alt="">
+                            <span>Diagonalizar Tensor</span>
+                        </button>
                     </div>
 
                 </div>
@@ -336,10 +350,9 @@
             <footer class="panel-footer">
                 <div class="sim-badge idle" id="footer-status-badge">
                     <span class="status-dot"></span>
-                    <span id="footer-status-text">Pausado</span>
+                    <span id="footer-status-text">Simulação Pronta</span>
                 </div>
-                <span class="shortcut-tip">Pressione <kbd>F</kbd> para Modo Foco</span>
-                <span class="panel-version">DS 2.0 • Mecânica Clássica</span>
+                <span class="footer-meta">Modo Foco: [F]</span>
             </footer>
         </aside>
     </main>
@@ -352,7 +365,7 @@
                     <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                     <span>Tensor de Inércia — Guia Rápido</span>
                 </div>
-                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+                <button type="button" class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
@@ -424,15 +437,6 @@
         </div>
     </div>
 
-    <!-- Three.js 0.165 via Import Map -->
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
-        }
-    }
-    </script>
     <script type="module" src="scripts/tensor_de_inercia.js"></script>
 </body>
 </html>

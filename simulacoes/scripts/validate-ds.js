@@ -4,8 +4,8 @@
 // modo foco/onboarding, paridade com ui_lab, integridade do plugin e CSS.
 //
 // Uso:
-//   node simulacoes/scripts/validate-ds.js          # Gate CI (ERROR falha; WARN lista baseline Fase 2)
-//   node simulacoes/scripts/validate-ds.js --strict # Promove WARNs da Fase 2 para falha (auditoria estrita)
+//   node simulacoes/scripts/validate-ds.js          # Gate CI completo (todas as 14 simulações + ui_lab + templates em modo bloqueante)
+//   node simulacoes/scripts/validate-ds.js --strict # Promove qualquer WARN futuro também para erro bloqueante
 // =============================================================================
 
 import fs from 'fs';
@@ -249,7 +249,7 @@ for (const cssRel of cssFiles) {
         if (/\b\d+(?:\.\d+)?vh\b/.test(lineNoComment)) {
             const isAllowedFallback = isCoreDs && /--app-height\s*:\s*100vh\s*;/.test(lineNoComment);
             if (!isAllowedFallback) {
-                reportByScope(isCoreDs, `${cssRel}:${lineNo}`, `Uso proibido de unidade "vh" pura (${lineNoComment.trim()}). Utilize var(--app-height).`);
+                reportError(`${cssRel}:${lineNo}`, `Uso proibido de unidade "vh" pura (${lineNoComment.trim()}). Utilize var(--app-height).`);
             }
         }
 
@@ -258,7 +258,7 @@ for (const cssRel of cssFiles) {
             const valuePart = lineNoComment.slice(lineNoComment.indexOf(':') + 1).replace(/url\([^)]*\)/g, '');
             const hexMatches = [...valuePart.matchAll(/(?:^|[\s,:(\/])(#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3}))(?![0-9a-fA-F_-])/g)];
             if (hexMatches.length > 0) {
-                reportWarn(
+                reportError(
                     `${cssRel}:${lineNo}`,
                     `Cor hexadecimal hardcoded (${hexMatches.map(m => m[1]).join(', ')}) em CSS de simulação — prefira tokens de :root ou --stage-*.`
                 );
@@ -531,7 +531,7 @@ for (const htmlPath of simulationHtmlPaths) {
     validatePage({
         htmlPath,
         jsFiles,
-        isStrictTarget: false
+        isStrictTarget: true
     });
 }
 
@@ -543,7 +543,7 @@ if (totalErrors === 0) {
     if (totalWarnings === 0) {
         console.log('✅ SUCESSO TOTAL: 0 erros e 0 avisos em toda a plataforma.');
     } else {
-        console.log(`✅ SUCESSO (Gate Fase 1): 0 erros críticos. (${totalWarnings} avisos de baseline para a Fase 2 — use --strict para modo bloqueante).`);
+        console.log(`✅ SUCESSO: 0 erros críticos. (${totalWarnings} aviso(s) — use --strict para modo bloqueante).`);
     }
 } else {
     console.error(`🚨 FALHA${isStrict ? ' (MODO STRICT)' : ''}: Foram encontrados ${totalErrors} erro(s)${totalWarnings ? ` e ${totalWarnings} aviso(s)` : ''}.`);

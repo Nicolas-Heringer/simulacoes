@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
     <!-- Metadados da Página -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#1c1917">
     <title>Átomo de Hidrogênio — Orbitais Quânticos</title>
 
     <meta name="description"
@@ -51,7 +51,7 @@
             <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
                 <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
             </button>
-            <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
+            <button type="button" id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
             </button>
@@ -72,11 +72,11 @@
 
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
-                <button id="btn-quick-autorotate" class="canvas-btn-floating" title="Alternar Rotação da Câmera">
+                <button type="button" id="btn-quick-autorotate" class="canvas-btn-floating" title="Alternar Rotação da Câmera">
                     <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Rotação">
                     <span class="btn-label-text">Rotação</span>
                 </button>
-                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
+                <button type="button" id="btn-expand-sidebar" class="canvas-btn-expand-sidebar" title="Expandir Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
                     <span class="btn-label-text">Controles</span>
                 </button>
@@ -92,16 +92,16 @@
         <aside class="controls-panel">
 
             <!-- Topo: Barra de Abas Expansíveis com Botão de Recolher Sidebar -->
-            <div class="tab-nav">
-                <button class="tab-btn active" data-tab="panel-tab-params" id="tab-btn-params" title="Controles e Parâmetros">
+            <div class="tab-nav" role="tablist">
+                <button type="button" class="tab-btn active" data-tab="panel-tab-params" id="tab-btn-params" title="Controles e Parâmetros">
                     <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Parâmetros">
                     <span class="tab-label">Parâmetros</span>
                 </button>
-                <button class="tab-btn" data-tab="panel-tab-theory" id="tab-btn-theory" title="Fundamentação Teórica & Fórmulas">
+                <button type="button" class="tab-btn" data-tab="panel-tab-theory" id="tab-btn-theory" title="Fundamentação Teórica & Fórmulas">
                     <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                     <span class="tab-label">Teoria</span>
                 </button>
-                <button class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
+                <button type="button" class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Modo Foco (F)">
                     <img src="../assets/icons/collapse.svg" class="icon-svg" alt="Recolher">
                 </button>
             </div>
@@ -136,8 +136,8 @@
                         <div class="quantum-grid">
 
                             <div class="qn-cell">
-                                <span class="qn-symbol">$n$</span>
-                                <select id="select-n" class="sim-control qn-select" data-focus-control="select">
+                                <label for="select-n" class="qn-symbol">$n$</label>
+                                <select id="select-n" class="sim-control qn-select" aria-label="Número quântico principal n" data-focus-control="select" data-focus-label="n" data-focus-order="2">
                                     <option value="1">1</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>
@@ -148,20 +148,20 @@
                             </div>
 
                             <div class="qn-cell">
-                                <span class="qn-symbol">$l$</span>
-                                <select id="select-l" class="sim-control qn-select" data-focus-control="select"></select>
+                                <label for="select-l" class="qn-symbol">$l$</label>
+                                <select id="select-l" class="sim-control qn-select" aria-label="Número quântico azimutal l" data-focus-control="select" data-focus-label="l" data-focus-order="3"></select>
                                 <span class="qn-desc">azimutal</span>
                             </div>
 
                             <div class="qn-cell">
-                                <span class="qn-symbol">$m_l$</span>
-                                <select id="select-ml" class="sim-control qn-select" data-focus-control="select"></select>
+                                <label for="select-ml" class="qn-symbol">$m_l$</label>
+                                <select id="select-ml" class="sim-control qn-select" aria-label="Número quântico magnético ml" data-focus-control="select" data-focus-label="mₗ" data-focus-order="4"></select>
                                 <span class="qn-desc">magnético</span>
                             </div>
 
                             <div class="qn-cell">
-                                <span class="qn-symbol">$m_s$</span>
-                                <select id="select-ms" class="sim-control qn-select">
+                                <label for="select-ms" class="qn-symbol">$m_s$</label>
+                                <select id="select-ms" class="sim-control qn-select" aria-label="Número quântico de spin ms">
                                     <option value="+0.5">+½</option>
                                     <option value="-0.5">−½</option>
                                 </select>
@@ -221,7 +221,10 @@
                     <div class="sim-divider-label"><span>Execução</span></div>
 
                     <!-- Botão -->
-                    <button id="btn-gerar" class="sim-btn" data-focus-control="action">⚛ Gerar Orbital</button>
+                    <button type="button" id="btn-gerar" class="btn-primary w-full" data-focus-control="action" data-focus-label="Gerar" data-focus-icon="orbital" data-focus-order="5">
+                        <img src="../assets/icons/orbital.svg" class="icon-svg" alt="">
+                        <span>Gerar Orbital</span>
+                    </button>
 
                     <!-- Status -->
                     <p id="status-msg" class="status"></p>
@@ -268,8 +271,8 @@
                                 <li><img src="../assets/icons/touch-pan.svg" class="icon-svg" alt="2 dedos">
                                     <span><strong>2 dedos arrastar:</strong> deslocar câmera</span>
                                 </li>
-                                <li><img src="../assets/icons/smartphone.svg" class="icon-svg" alt="Painel">
-                                    <span><strong>Deslizar barra:</strong> expandir/recolher controles</span>
+                                <li><img src="../assets/icons/gear.svg" class="icon-svg" alt="Painel">
+                                    <span><strong>Botão de engrenagem:</strong> abrir/fechar controles</span>
                                 </li>
                             </ul>
                         </div>
@@ -277,7 +280,7 @@
                 </div>
 
                 <!-- ABA 2: TEORIA E FÓRMULAS MATEMÁTICAS -->
-                <div class="tab-pane" id="panel-tab-theory" style="display: none;">
+                <div class="tab-pane" id="panel-tab-theory">
                     <div class="tab-header">
                         <div class="tab-header-row">
                             <h3 class="tab-title">Fundamentação Teórica</h3>
@@ -356,7 +359,7 @@
                     <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                     <span>Átomo de Hidrogênio — Guia Rápido</span>
                 </div>
-                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+                <button type="button" class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">

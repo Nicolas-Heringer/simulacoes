@@ -1,5 +1,6 @@
 /* =============================================================================
    Estilos específicos para a simulação de Partículas & Campos Retardados
+   Design System 2.0
    ============================================================================= */
 
 #myCanvas {
@@ -7,52 +8,31 @@
     width: 100%;
     height: 100%;
     cursor: crosshair;
-    background-color: #070b16;
+    background-color: var(--bg-canvas);
     touch-action: none;
 }
 
-/* =============================================================================
-   Ícones Customizados dos Seletores de Presets de Partículas
-   ============================================================================= */
-.particle-dot,
-.icon-svg .particle-dot {
-    fill: currentColor !important;
-    stroke: none !important;
+.plot-dot-emerald {
+    background: var(--color-emerald);
 }
 
-/* Animação do Vetor Velocidade (1 Partícula Móvel) */
-.particle-stem {
-    transform-origin: 11px 12px;
-    animation: particleVectorStem 1.6s ease-in-out infinite;
+.plot-dot-accent {
+    background: var(--accent-color);
 }
 
-.particle-head {
-    animation: particleVectorHead 1.6s ease-in-out infinite;
+#btn-abrir-modal-teoria {
+    margin-top: 12px;
 }
 
-@keyframes particleVectorStem {
-    0%, 100% {
-        transform: scaleX(0.28);
-    }
-    50% {
-        transform: scaleX(1.02);
-    }
+.callout-heading {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
 }
 
-@keyframes particleVectorHead {
-    0%, 100% {
-        transform: translateX(-6.2px);
-    }
-    50% {
-        transform: translateX(0px);
-    }
-}
-
-/* Acelera levemente o vetor no hover para feedback tátil dinâmico */
-.btn-preset:hover .particle-stem {
-    animation-duration: 1.0s;
-}
-
-.btn-preset:hover .particle-head {
-    animation-duration: 1.0s;
+.callout-heading .icon-svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
 }

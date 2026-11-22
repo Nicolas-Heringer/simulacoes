@@ -9,33 +9,30 @@
     width: 100%;
     height: 100%;
     cursor: crosshair;
-    background-color: var(--bg-canvas, #070b16);
+    background-color: var(--bg-canvas);
     touch-action: none;
 }
 
-/* Bloco de citação bibliográfica */
-.biblio-ref {
-    margin-top: 10px;
-    padding: 10px 12px;
-    background: var(--accent-subtle);
-    border-left: 3px solid var(--accent-color);
-    border-radius: var(--radius-xs);
-    font-size: 0.82rem;
-    line-height: 1.45;
-    color: var(--text-secondary);
+#btn-open-theory-modal {
+    margin-top: 12px;
 }
 
-.biblio-ref strong {
-    color: var(--text-primary);
+.biblio-ref .icon-svg {
+    width: 14px;
+    height: 14px;
+    vertical-align: -2px;
+    margin-right: 4px;
 }
 
-.biblio-ref a {
-    color: var(--accent-color);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-    transition: opacity 0.2s ease;
+.callout-heading {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
 }
 
-.biblio-ref a:hover {
-    opacity: 0.85;
+.callout-heading .icon-svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
 }

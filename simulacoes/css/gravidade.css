@@ -7,7 +7,7 @@
     display: block;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at center, var(--bg-canvas-inner, #0f172a) 0%, var(--bg-canvas, #070b16) 100%);
+    background: radial-gradient(circle at center, var(--bg-canvas-inner) 0%, var(--bg-canvas) 100%);
     touch-action: none;
     cursor: grab;
 }
@@ -129,14 +129,30 @@
     white-space: nowrap;
 }
 
+/* Espaçamento auxiliar para grids de presets */
+.preset-grid-spaced {
+    margin-top: 6px;
+}
+
+.preset-grid-tight {
+    margin-top: 2px;
+}
+
 @media (max-width: 900px) {
     .canvas-top-left-stack .canvas-info-badge {
-        font-size: 0.75rem;
+        font-size: 0.74rem;
         padding: 5px 10px;
-        max-width: calc(100vw - 190px);
+        max-width: calc(100vw - 260px);
+    }
+
+    .canvas-top-actions .frame-switcher-bar {
+        padding: 3px;
+        gap: 3px;
     }
 
     .canvas-top-actions .frame-switcher-bar .toolbar-btn {
+        min-width: 34px;
+        min-height: 34px;
         padding: 4px 7px;
         font-size: 0.71rem;
     }
@@ -146,12 +162,19 @@
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 680px) {
     .frame-step-prefix {
         display: none;
     }
 
+    /* Empilha o badge de regime abaixo da barra de referencial (m1/m2/CM) para evitar colisão em 390px e 320px */
+    .canvas-top-left-stack {
+        top: 56px;
+        left: max(10px, var(--safe-left));
+        right: max(10px, var(--safe-right));
+    }
+
     .canvas-top-left-stack .canvas-info-badge {
-        max-width: calc(100vw - 165px);
+        max-width: calc(100vw - 20px - var(--safe-left) - var(--safe-right));
     }
 }

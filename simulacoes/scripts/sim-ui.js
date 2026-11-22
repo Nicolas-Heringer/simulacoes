@@ -3651,7 +3651,7 @@ export function setFieldState(target, state = null, hintText = '') {
         });
     }
 
-    let hintEl = el.querySelector?.('.field-hint');
+    let hintEl = el.classList?.contains('field-hint') ? el : el.querySelector?.('.field-hint');
     if (!hintEl && el.id && el.parentElement) {
         hintEl = el.parentElement.querySelector(`.field-hint[data-for="${el.id}"]`);
     }

@@ -161,12 +161,14 @@ export class ModoBase {
             btnAddCircle.addEventListener('click', () => {
                 const active = this.toggleSurface('circle');
                 btnAddCircle.classList.toggle('active', active);
+                btnAddCircle.classList.toggle('is-active', active);
             });
         }
         if (btnAddSquare) {
             btnAddSquare.addEventListener('click', () => {
                 const active = this.toggleSurface('square');
                 btnAddSquare.classList.toggle('active', active);
+                btnAddSquare.classList.toggle('is-active', active);
             });
         }
 
@@ -299,13 +301,13 @@ export class ModoBase {
         if (presetSelect.value !== detected) {
             presetSelect.value = detected;
             const rotGroup = document.getElementById('base-rotationGroup');
-            if (rotGroup) rotGroup.style.display = (detected === 'rotation') ? 'block' : 'none';
+            if (rotGroup) rotGroup.classList.toggle('hidden', detected !== 'rotation');
         }
     }
 
     applyPreset(name) {
         const rotGroup = document.getElementById('base-rotationGroup');
-        if (rotGroup) rotGroup.style.display = (name === 'rotation') ? 'block' : 'none';
+        if (rotGroup) rotGroup.classList.toggle('hidden', name !== 'rotation');
 
         if (name === 'identity') {
             this.targetMatrix = { a: 1, b: 0, c: 0, d: 1 };

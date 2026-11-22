@@ -391,7 +391,7 @@ function triggerMode1Force() {
     if (state.m1.pos.x > 22 || Math.abs(state.m1.pos.z) > 20) {
         resetMode1();
         if (playControl && !state.isRunning) {
-            playControl.setState(1);
+            playControl.setState(1, true);
         }
     }
 
@@ -444,7 +444,7 @@ function stepPhysicsMode1(dt) {
     // Pausa suave ao atingir o limite da arena para que toda a trajetória fique visível para estudo
     if (m1.pos.x > 24 || Math.abs(m1.pos.z) > 22) {
         if (state.isRunning && playControl) {
-            playControl.setState(0);
+            playControl.setState(0, true);
         }
     }
 }
@@ -609,7 +609,7 @@ function stepPhysicsMode2(dt) {
         // Se escapar para muito longe, pausa para permitir inspeção da reta de escape
         if (m2.pos.length() > 28) {
             if (state.isRunning && playControl) {
-                playControl.setState(0);
+                playControl.setState(0, true);
             }
         }
     }
@@ -857,8 +857,8 @@ function switchMode(newMode) {
     });
 
     if (newMode === 1) {
-        if (ctrl1) ctrl1.style.display = 'block';
-        if (ctrl2) ctrl2.style.display = 'none';
+        if (ctrl1) ctrl1.hidden = false;
+        if (ctrl2) ctrl2.hidden = true;
         if (hudMode) {
             hudMode.textContent = '1. Inércia & Desvio';
             hudMode.style.color = 'var(--color-cyan)';
@@ -870,11 +870,11 @@ function switchMode(newMode) {
         arrowNewtonCorrection.visible = false;
         resetMode1();
     } else {
-        if (ctrl1) ctrl1.style.display = 'none';
-        if (ctrl2) ctrl2.style.display = 'block';
+        if (ctrl1) ctrl1.hidden = true;
+        if (ctrl2) ctrl2.hidden = false;
         const pnlNewton = document.getElementById('panel-m2-newton');
         if (pnlNewton) {
-            pnlNewton.style.display = state.m2.ghostMode === 'newton' ? 'block' : 'none';
+            pnlNewton.hidden = state.m2.ghostMode !== 'newton';
         }
         if (hudMode) {
             hudMode.textContent = '2. Movimento Circular';
@@ -882,12 +882,14 @@ function switchMode(newMode) {
         }
         resetMode2();
     }
+    focusToolbar?.rebuild(String(newMode));
 }
 
 // =============================================================================
 // 9. CONFIGURAÇÃO DE CONTROLES E LISTENERS DE UI
 // =============================================================================
 let playControl = null;
+let focusToolbar = null;
 
 function setupUI() {
     // 1. Modo Foco Desktop
@@ -898,12 +900,10 @@ function setupUI() {
         onResize: onWindowResize
     });
 
-    // 2. Mobile Bottom Sheet
+    // 2. Painel Flutuante Mobile
     initBottomSheet({
         panelSelector: '.controls-panel',
-        handleSelector: '#sheet-drag-handle',
-        tabNavSelector: '.tab-nav',
-        collapseBtnSelector: '#btn-collapse-sidebar',
+        triggerSelector: '#btn-mobile-settings',
         defaultState: 'peek'
     });
 
@@ -913,16 +913,18 @@ function setupUI() {
     // 4. Play / Pause
     playControl = initToggleButton('#btn-play-sim', (active) => {
         state.isRunning = active;
+        const footerBadge = document.getElementById('footer-status-badge');
         const footerStatus = document.getElementById('footer-status-text');
         const hudStatus = document.getElementById('hud-status');
         const label = active ? 'Executando' : 'Pausado';
+        if (footerBadge) footerBadge.classList.toggle('idle', !active);
         if (footerStatus) footerStatus.textContent = label;
         if (hudStatus) hudStatus.textContent = label;
     });
 
     // 5. Botão Passo Único (dt)
     document.getElementById('btn-step-sim')?.addEventListener('click', () => {
-        if (state.isRunning && playControl) playControl.setState(0);
+        if (state.isRunning && playControl) playControl.setState(0, true);
         if (state.mode === 2 && state.m2.ghostMode === 'newton') {
             advanceNewtonStep();
         } else {
@@ -932,9 +934,14 @@ function setupUI() {
         }
     });
 
-    // 6. Botão Reset
+    // 6. Botão Reset (Pausa e reinicia — Padrão DS 2.0)
     document.getElementById('btn-reset-sim')?.addEventListener('click', () => {
+        if (state.isRunning && playControl) playControl.setState(0, true);
+        const footerStatus = document.getElementById('footer-status-text');
+        if (footerStatus) footerStatus.textContent = 'Simulação Pronta';
         state.time = 0.0;
+        const timerEl = document.getElementById('footer-sim-timer');
+        if (timerEl) timerEl.textContent = 't = 0.00s';
         if (state.mode === 1) resetMode1();
         else resetMode2();
     });
@@ -1003,7 +1010,7 @@ function setupUI() {
 
             const pnlNewton = document.getElementById('panel-m2-newton');
             if (pnlNewton) {
-                pnlNewton.style.display = state.m2.ghostMode === 'newton' ? 'block' : 'none';
+                pnlNewton.hidden = state.m2.ghostMode !== 'newton';
             }
 
             resetMode2();
@@ -1080,7 +1087,8 @@ function setupUI() {
     });
 
     // 10. Barra Flutuante de Modo Foco
-    initFocusMirrorToolbar({
+    focusToolbar = initFocusMirrorToolbar({
+        toolbarTarget: '#focus-context-toolbar',
         scopeSelector: '.controls-panel',
         layoutSelector: '.sim-layout',
         onlyInFocusMode: true

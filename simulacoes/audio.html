@@ -5,7 +5,7 @@
     <!-- Metadados da Página -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#1c1917">
     <title>Laboratório de Áudio e Análise Espectral - Plataforma Científica</title>
 
     <meta name="description"
@@ -39,7 +39,7 @@
             <button type="button" id="btn-theme-toggle" class="btn-header-action btn-theme-toggle" title="Alternar para modo claro" aria-label="Alternar tema claro/escuro" aria-pressed="false">
                 <img src="../assets/icons/sun.svg" class="icon-svg" alt="">
             </button>
-            <button id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
+            <button type="button" id="btn-open-onboarding" class="btn-header-action" title="Instruções e Guia Rápido">
                 <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                 <span class="btn-label-text">Instruções</span>
             </button>
@@ -48,9 +48,6 @@
 
     <!-- Layout Principal -->
     <main class="sim-layout">
-        <!-- Backdrop para Drawer Lateral no Mobile -->
-        <div class="mobile-drawer-backdrop" id="mobileDrawerBackdrop"></div>
-
         <!-- Área de Visualização (Canvases de Tempo e Frequência) -->
         <div class="canvas-area">
             <!-- Pilha Vertical no Canto Superior Esquerdo (Barra de Modo Foco) -->
@@ -60,7 +57,7 @@
 
             <!-- Ações do Topo Direito (Modo Foco) -->
             <div class="canvas-top-actions">
-                <button id="btn-expand-sidebar" class="canvas-btn-expand-sidebar"
+                <button type="button" id="btn-expand-sidebar" class="canvas-btn-expand-sidebar"
                     title="Alternar Painel de Controles (F)">
                     <img src="../assets/icons/sliders.svg" class="icon-svg" alt="Controles">
                     <span class="btn-label-text">Controles</span>
@@ -113,50 +110,46 @@
 
             <!-- Barra Flutuante de Transporte na Base (Padrão DS 2.0) -->
             <div class="canvas-toolbar pos-bottom-center" id="canvas-transport-toolbar">
-                <button class="toolbar-btn btn-toggle tone-accent" id="btn-transport-play" data-state="0"
+                <button type="button" class="toolbar-btn btn-toggle tone-accent" id="btn-transport-play" data-state="0"
                     data-text-idle="Capturar Áudio" data-text-active="Congelar Tela" data-icon-idle="play"
                     data-icon-active="pause" title="Capturar Microfone / Congelar Tela (Espaço)">
                     <img src="../assets/icons/play.svg" class="icon-svg" alt="Play">
                     <span class="btn-text">Capturar Áudio</span>
                 </button>
-                <button class="toolbar-btn" id="btn-transport-reset" title="Limpar buffers de áudio">
+                <button type="button" class="toolbar-btn" id="btn-transport-reset" title="Limpar buffers de áudio">
                     <img src="../assets/icons/refresh.svg" class="icon-svg" alt="Reset">
                 </button>
                 <span class="toolbar-divider"></span>
-                <button class="toolbar-btn" id="btn-transport-trigger"
+                <button type="button" class="toolbar-btn" id="btn-transport-trigger"
                     title="Estabilização Zero-Crossing (Osciloscópio)">
                     <img src="../assets/icons/wave-sine.svg" class="icon-svg" alt="Trigger">
                     <span class="btn-text" id="transportTriggerText">Trigger: On</span>
                 </button>
-                <button class="toolbar-btn" id="btn-transport-scale" title="Alternar Escala FFT (Logarítmica / Linear)">
+                <button type="button" class="toolbar-btn" id="btn-transport-scale" title="Alternar Escala FFT (Logarítmica / Linear)">
                     <img src="../assets/icons/fft-bars.svg" class="icon-svg" alt="Escala">
                     <span class="btn-text" id="transportScaleText">Log</span>
                 </button>
             </div>
+
+            <!-- Botão de Configurações Mobile (Canto Inferior Direito) -->
+            <button type="button" id="btn-mobile-settings" class="canvas-btn-settings" title="Configurações e Parâmetros" aria-label="Configurações e Parâmetros" aria-expanded="false">
+                <img src="../assets/icons/gear.svg" class="icon-svg" alt="Configurações">
+            </button>
         </div>
 
-        <!-- Painel Lateral de Controles (Desktop: Sidebar | Mobile: Drawer Lateral sob demanda) -->
+        <!-- Painel Lateral de Controles (Desktop: Sidebar | Mobile: Card Flutuante DS 2.0) -->
         <aside class="controls-panel" id="controls-panel">
-            <!-- Cabeçalho do Drawer para Mobile -->
-            <div class="drawer-header-mobile">
-                <div class="drawer-title">
-                    <img src="../assets/icons/sliders.svg" class="icon-svg icon-accent" alt="">
-                    <span>Ajustes & Teoria</span>
-                </div>
-                <button id="btn-close-drawer" class="btn-icon" title="Fechar Menu">✕</button>
-            </div>
-
             <!-- Topo: Barra de Abas Expansíveis -->
-            <div class="tab-nav">
-                <button class="tab-btn active" data-tab="tab-mic" id="tabBtnMic" title="Captura e Gráficos">
+            <div class="tab-nav" role="tablist">
+                <button type="button" class="tab-btn active" data-tab="tab-mic" id="tabBtnMic" title="Captura e Gráficos">
                     <img src="../assets/icons/fft-bars.svg" class="icon-svg" alt="">
                     <span class="tab-label">Microfone & FFT</span>
                 </button>
-                <button class="tab-btn" data-tab="tab-theory" id="tabBtnTheory" title="Teoria e Deduções">
+                <button type="button" class="tab-btn" data-tab="tab-theory" id="tabBtnTheory" title="Teoria e Deduções">
                     <img src="../assets/icons/book-open.svg" class="icon-svg" alt="">
                     <span class="tab-label">Teoria</span>
                 </button>
-                <button class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Recolher Painel (F)">
+                <button type="button" class="btn-collapse-sidebar" id="btn-collapse-sidebar" title="Recolher Painel (F)">
                     <img src="../assets/icons/collapse.svg" class="icon-svg" alt="Recolher">
                 </button>
             </div>
@@ -180,7 +173,7 @@
                     </div>
 
                     <!-- Feedback de Conexão do Microfone -->
-                    <div class="field-hint" id="micFieldHint" style="margin-bottom: 6px;"></div>
+                    <div class="field-hint" id="micFieldHint"></div>
 
                     <!-- Divisor de Ajustes Gráficos -->
                     <div class="sim-divider-label"><span>Ajustes dos Gráficos</span></div>
@@ -198,7 +191,7 @@
                             </div>
                             <input type="range" class="sim-slider" id="slider-visual-gain" min="0.5" max="5.0"
                                 step="0.25" value="1.00" data-focus-control="slider" data-focus-label="Ganho"
-                                data-focus-order="2">
+                                data-focus-order="1">
                         </div>
                     </div>
 
@@ -215,15 +208,14 @@
                                 </div>
                             </div>
                             <input type="range" class="sim-slider" id="slider-fft-smoothing" min="0.00" max="0.95"
-                                step="0.05" value="0.75">
+                                step="0.05" value="0.75" data-focus-control="slider" data-focus-label="Suaviz."
+                                data-focus-order="2">
                         </div>
                     </div>
 
                     <!-- Chave Segmentada: Escala de Frequência -->
                     <div class="control-group">
-                        <label
-                            style="font-size: 0.82rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 6px; display: block;">Escala
-                            do Eixo de Frequências:</label>
+                        <label>Escala do Eixo de Frequências:</label>
                         <div class="segmented-control" id="scaleControl">
                             <button type="button" class="segment-btn active" data-scale="log">Logarítmica
                                 (Oitavas)</button>
@@ -265,7 +257,7 @@
                 </div>
 
                 <!-- CONTEÚDO DA ABA 2: TEORIA & FOURIER -->
-                <div id="tab-theory" class="tab-pane" style="display: none;">
+                <div id="tab-theory" class="tab-pane">
                     <div class="theory-card">
                         <h4><img src="../assets/icons/book-open.svg" class="icon-svg icon-accent" alt=""> Análise de
                             Fourier & Física Acústica</h4>
@@ -290,8 +282,7 @@
                             aliasing é metade da taxa de amostragem ($f_{\text{Nyquist}} = f_s / 2$).
                         </p>
 
-                        <button class="btn-secondary" id="btn-open-theory-modal-inner"
-                            style="width: 100%; margin-top: 10px;">
+                        <button type="button" class="btn-secondary w-full" id="btn-open-theory-modal-inner">
                             <img src="../assets/icons/book-open.svg" class="icon-svg" alt=""> Ver Dedução Completa em
                             Modal
                         </button>
@@ -320,7 +311,7 @@
                     <img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt="Instruções">
                     <span>Laboratório de Áudio & Análise Espectral — Guia Rápido</span>
                 </div>
-                <button class="sim-modal-close" data-modal-close title="Fechar (Esc)">✕</button>
+                <button type="button" class="sim-modal-close" data-modal-close title="Fechar (Esc)" aria-label="Fechar">✕</button>
             </div>
             <div class="sim-modal-body">
                 <p class="onboarding-intro">
@@ -410,7 +401,7 @@
                     <img src="../assets/icons/book-open.svg" class="icon-svg icon-accent" alt="Teoria">
                     <span>Fundamentação Teórica: Decomposição de Fourier & Acústica</span>
                 </div>
-                <button class="sim-modal-close" data-modal-close title="Fechar Modal (Esc)">✕</button>
+                <button type="button" class="sim-modal-close" data-modal-close title="Fechar Modal (Esc)" aria-label="Fechar">✕</button>
             </div>
             <div class="sim-modal-body">
                 <div class="theory-section">
@@ -456,7 +447,7 @@
             </div>
             <div class="sim-modal-footer">
                 <span class="sim-modal-hint">Pressione <kbd>Esc</kbd> para fechar</span>
-                <button class="btn-primary tone-accent" data-modal-close style="min-width: 100px;">Entendido</button>
+                <button type="button" class="btn-primary tone-accent" data-modal-close>Entendido</button>
             </div>
         </div>
     </div>
