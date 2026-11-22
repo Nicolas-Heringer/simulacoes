@@ -37,3 +37,4 @@ Invariantes obrigatórios para toda simulação científica e matemática do pro
 * **Proibição de `vh` Puro e Safe Areas**: Utilize `var(--app-height)` e some `var(--safe-bottom)` em elementos ancorados na base.
 * **Desktop & Mobile**: Modo Foco desktop (`initSidebarCollapse()`, tecla `F`/`[`), Painel Flutuante mobile `<= 900px` (`#btn-mobile-settings` + `initBottomSheet()`, sem `.sheet-drag-handle` legado), `touch-action: none` no canvas e Pointer Events.
 * **Gate Automatizado**: Antes de encerrar qualquer alteração no Design System ou em simulações, execute `node simulacoes/scripts/validate-ds.js` e corrija todos os erros reportados.
+* **Mensagens de Commit (Git)**: Escreva todas as mensagens de commit em **português (pt-BR)** seguindo o padrão *Conventional Commits* (`tipo(escopo): descrição concisa em português`, ex.: `feat(clima): ...`, `fix(snell): ...`, `refactor(ds): ...`).
