@@ -93,9 +93,10 @@ function startStaticServer(rootDir) {
     return new Promise((resolve, reject) => {
         const server = http.createServer((req, res) => {
             const urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
-            let filePath = path.join(rootDir, urlPath === '/' ? 'index.html' : urlPath);
+            const resolvedRoot = path.resolve(rootDir);
+            const filePath = path.resolve(resolvedRoot, (urlPath === '/' ? 'index.html' : urlPath).replace(/^\/+/, ''));
 
-            if (!filePath.startsWith(rootDir)) {
+            if (filePath !== resolvedRoot && !filePath.startsWith(resolvedRoot + path.sep)) {
                 res.writeHead(403);
                 res.end('Forbidden');
                 return;
@@ -254,10 +255,10 @@ async function prepareAndCapture(cdp, url, outPath) {
     await cdp.send('Runtime.evaluate', {
         awaitPromise: true,
         expression: `(async () => {
-            // Fecha possíveis modais de boas-vindas
-            document.querySelectorAll('.sim-modal-overlay.is-open, .modal-overlay.active').forEach(el => {
-                el.classList.remove('is-open', 'active');
-                el.style.display = 'none';
+            // Fecha possíveis modais de boas-vindas (Onboarding DS 2.0)
+            document.querySelectorAll('.sim-modal-overlay').forEach(el => {
+                el.classList.add('hidden');
+                el.setAttribute('aria-hidden', 'true');
             });
 
             // Recolhe a sidebar (Modo Foco) para o canvas ocupar 100%
@@ -267,19 +268,26 @@ async function prepareAndCapture(cdp, url, outPath) {
             const layout = document.querySelector('.sim-layout');
             if (layout) layout.classList.add('sidebar-collapsed');
 
-            // Oculta controles flutuantes/HUDs para gerar um preview limpo da simulação
+            // Oculta cabeçalho, controles flutuantes e HUDs para gerar um preview limpo do palco
             const style = document.createElement('style');
             style.textContent = \`
+                .sim-header,
                 .controls-panel,
                 .sidebar-expand-btn,
                 #btn-expand-sidebar,
+                .canvas-top-actions,
+                .canvas-top-left-stack,
+                .canvas-btn-floating,
                 .canvas-toolbar,
+                .canvas-zoom-toolbar,
                 #canvas-transport-toolbar,
                 #focus-context-toolbar,
                 .canvas-btn-settings,
                 #btn-mobile-settings,
                 .sim-hud,
                 .canvas-info-badge,
+                .interactive-hint,
+                .stage-pills,
                 .display-toolbar,
                 .floating-hud,
                 .sim-modal-overlay,
@@ -288,9 +296,15 @@ async function prepareAndCapture(cdp, url, outPath) {
                     opacity: 0 !important;
                     visibility: hidden !important;
                 }
+                .sim-layout {
+                    height: var(--app-height, 100vh) !important;
+                    padding: 0 !important;
+                }
                 .canvas-area {
                     width: 100vw !important;
-                    height: 100vh !important;
+                    height: 100% !important;
+                    border-radius: 0 !important;
+                    border: none !important;
                 }
             \`;
             document.head.appendChild(style);
@@ -299,13 +313,14 @@ async function prepareAndCapture(cdp, url, outPath) {
             window.dispatchEvent(new Event('resize'));
 
             // Aciona o botão Play caso a simulação comece pausada
-            const playSelectors = ['#btn-play-sim', '#btn-play-orbit'];
+            const playSelectors = ['#btn-play-sim', '#base-btnApply', '#dyn-btnPlay'];
             for (const sel of playSelectors) {
                 const btn = document.querySelector(sel);
-                if (btn && !btn.classList.contains('is-active') && !btn.classList.contains('active')) {
+                if (btn && btn.getAttribute('data-state') !== '1' && !btn.classList.contains('is-active') && !btn.classList.contains('active')) {
                     const txt = (btn.textContent || '').toLowerCase();
                     if (!txt.includes('pausar') && !txt.includes('pause')) {
                         btn.click();
+                        break;
                     }
                 }
             }

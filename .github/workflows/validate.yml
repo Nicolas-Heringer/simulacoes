@@ -20,5 +20,11 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Verificar Sintaxe JavaScript (ES Modules & Scripts)
+        run: |
+          for f in script.js theme-init.js scripts/*.mjs $(find simulacoes/scripts -name '*.js'); do
+            node --check "$f"
+          done
+
       - name: Executar Validador do Design System
         run: node simulacoes/scripts/validate-ds.js

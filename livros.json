@@ -119,7 +119,7 @@
     "categoria": "ensino-medio",
     "categoriaNome": "Ensino Médio & Conceitual",
     "nivel": "Ensino Médio / Introdução",
-    "descricao": "Referência mundial na compreensão intutiva da física. Prioriza ideias e conceitos físicos antes das formalizações matemáticas pesadas.",
+    "descricao": "Referência mundial na compreensão intuitiva da física. Prioriza ideias e conceitos físicos antes das formalizações matemáticas pesadas.",
     "tags": [
       "Física Conceitual",
       "Intuição",
@@ -595,6 +595,8 @@
       "Acesso Aberto"
     ],
     "link": true,
+    "linkTipo": "acesso-aberto",
+    "linkLabel": "Acessar PDF",
     "url": "https://www.livrosabertos.abcd.usp.br/portaldelivrosUSP/catalog/download/96/80/396?inline=1"
   }
 ]

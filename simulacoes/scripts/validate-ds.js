@@ -97,7 +97,7 @@ const iconCatalogPath = path.join(pluginRoot, 'skills', 'desenvolver-simulacao',
 const dsGuidePath = path.join(pluginRoot, 'skills', 'desenvolver-simulacao', 'references', 'design-system-guide.md');
 
 console.log(
-    `[VALIDADOR DS 2.0${isStrict ? ' · STRICT' : ''}] Analisando ${simulationHtmlPaths.length} simulações + ui_lab + templates + plugin contra ${simUiExports.size} exportações e ${existingIcons.size} ícones...\n`
+    `[VALIDADOR DS 2.0${isStrict ? ' · STRICT' : ''}] Analisando ${simulationHtmlPaths.length} simulações + ui_lab + templates + plugin + portal/livros.json contra ${simUiExports.size} exportações e ${existingIcons.size} ícones...\n`
 );
 
 // =============================================================================
@@ -536,7 +536,132 @@ for (const htmlPath of simulationHtmlPaths) {
 }
 
 // =============================================================================
-// 5. SUMÁRIO FINAL
+// 5. INTEGRIDADE DOS 75 SVGs, PORTAL (index.html) E BIBLIOGRAFIA (livros.json)
+// =============================================================================
+
+// 5.1 Integridade estrutural dos SVGs em assets/icons/
+for (const iconFile of [...existingIcons].sort()) {
+    const svgRel = path.join('assets/icons', iconFile);
+    const svgContent = fs.readFileSync(path.join(iconsDir, iconFile), 'utf8');
+    if (!/<svg\b[^>]*\bviewBox=/i.test(svgContent)) {
+        reportError(svgRel, 'SVG sem atributo viewBox.');
+    }
+    if (/<script\b/i.test(svgContent)) {
+        reportError(svgRel, 'Tag <script> proibida dentro de ícone SVG.');
+    }
+    if (/(?:fill|stroke)=["']#[0-9a-fA-F]{3,8}["']/i.test(svgContent)) {
+        reportError(svgRel, 'Cor hexadecimal hardcoded em fill/stroke de ícone SVG — utilize currentColor.');
+    }
+    if (/\bid=["'][^"']+["']/i.test(svgContent)) {
+        reportError(svgRel, 'Atributo id="..." em ícone SVG causa colisão quando inlined múltiplas vezes.');
+    }
+}
+
+// 5.2 Validação do Portal (index.html)
+const indexRelPath = 'index.html';
+const indexFullPath = path.join(projectRoot, indexRelPath);
+let biblioFilterCategories = new Set();
+
+if (fs.existsSync(indexFullPath)) {
+    const indexHtml = stripHtmlComments(fs.readFileSync(indexFullPath, 'utf8'));
+
+    // Boot de tema antes de styles.css
+    const themeInitIdx = indexHtml.indexOf('theme-init.js');
+    const stylesCssIdx = indexHtml.indexOf('styles.css');
+    if (themeInitIdx === -1) {
+        reportError(indexRelPath, 'Ausência de <script src="theme-init.js"></script> na Home.');
+    } else if (stylesCssIdx !== -1 && themeInitIdx > stylesCssIdx) {
+        reportError(indexRelPath, 'theme-init.js deve ser carregado ANTES de styles.css.');
+    }
+    if (!indexHtml.includes('id="btn-theme-toggle"')) {
+        reportError(indexRelPath, 'Botão #btn-theme-toggle ausente na Home.');
+    }
+
+    // IDs duplicados na Home
+    const seenHomeIds = new Set();
+    for (const m of indexHtml.matchAll(/\bid=["']([^"']+)["']/g)) {
+        const id = m[1];
+        if (seenHomeIds.has(id)) {
+            reportError(indexRelPath, `ID duplicado na Home: "#${id}".`);
+        }
+        seenHomeIds.add(id);
+    }
+
+    // Recursos locais (src/href) sem 404
+    for (const m of indexHtml.matchAll(/(?:src|href)=["']([^"'#]+)(?:#[^"']*)?["']/g)) {
+        const ref = m[1].trim();
+        if (!ref || /^(?:https?:|mailto:|tel:|data:|javascript:)/i.test(ref)) continue;
+        const cleanRef = ref.split('?')[0];
+        if (!cleanRef) continue;
+        if (!fs.existsSync(path.resolve(projectRoot, cleanRef))) {
+            reportError(indexRelPath, `Recurso local inexistente (404): "${ref}".`);
+        }
+    }
+
+    // Previews dos cards visíveis sem 404
+    for (const m of indexHtml.matchAll(/<a\s+([^>]*class="card-link"[^>]*)>/g)) {
+        const attrs = m[1];
+        const isHidden = /\bhidden\b/.test(attrs);
+        const previewMatch = attrs.match(/data-preview=["']([^"']+)["']/);
+        if (!isHidden && previewMatch) {
+            const previewRef = previewMatch[1].split('?')[0];
+            if (!fs.existsSync(path.resolve(projectRoot, previewRef))) {
+                reportError(indexRelPath, `Preview ausente (404) para card visível: "${previewRef}".`);
+            }
+        }
+    }
+
+    // Categorias válidas da barra de filtros bibliográficos
+    const biblioFilterBlock = indexHtml.match(/id="biblio-filter-bar"[\s\S]*?<\/div>/);
+    if (biblioFilterBlock) {
+        for (const m of biblioFilterBlock[0].matchAll(/data-filtro=["']([^"']+)["']/g)) {
+            if (m[1] !== 'todas') biblioFilterCategories.add(m[1]);
+        }
+    }
+}
+
+// 5.3 Validação do Catálogo Bibliográfico (livros.json)
+const livrosRelPath = 'livros.json';
+const livrosFullPath = path.join(projectRoot, livrosRelPath);
+if (fs.existsSync(livrosFullPath)) {
+    try {
+        const livros = JSON.parse(fs.readFileSync(livrosFullPath, 'utf8'));
+        if (!Array.isArray(livros) || livros.length === 0) {
+            reportError(livrosRelPath, 'livros.json deve ser um array JSON não vazio.');
+        } else {
+            const seenBookIds = new Set();
+            const requiredFields = ['id', 'titulo', 'autores', 'citacao', 'categoria', 'categoriaNome', 'nivel'];
+            livros.forEach((book, idx) => {
+                const label = `${livrosRelPath}[${idx}:${book.id || '?'}]`;
+                for (const field of requiredFields) {
+                    if (!book[field] || String(book[field]).trim() === '') {
+                        reportError(label, `Campo obrigatório ausente ou vazio: "${field}".`);
+                    }
+                }
+                if (book.id) {
+                    if (seenBookIds.has(book.id)) {
+                        reportError(label, `ID duplicado em livros.json: "${book.id}".`);
+                    }
+                    seenBookIds.add(book.id);
+                }
+                if (biblioFilterCategories.size > 0 && book.categoria && !biblioFilterCategories.has(book.categoria)) {
+                    reportError(label, `Categoria "${book.categoria}" não existe em #biblio-filter-bar de index.html.`);
+                }
+                if (book.link === true && (!book.url || !/^https?:\/\//i.test(book.url))) {
+                    reportError(label, 'Livro marcado com link=true sem URL http(s) válida.');
+                }
+                if (book.link === false && book.url) {
+                    reportError(label, 'Livro marcado com link=false possui URL preenchida.');
+                }
+            });
+        }
+    } catch (err) {
+        reportError(livrosRelPath, `JSON inválido em livros.json: ${err.message}`);
+    }
+}
+
+// =============================================================================
+// 6. SUMÁRIO FINAL
 // =============================================================================
 console.log('\n-------------------------------------------------------------');
 if (totalErrors === 0) {

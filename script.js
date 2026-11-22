@@ -34,6 +34,7 @@ async function inlineSVGImages() {
     }
 
     const doc = parser.parseFromString(svgText, "image/svg+xml");
+    if (doc.querySelector("parsererror")) continue;
     const svg = doc.querySelector("svg");
     if (!svg) continue;
 
@@ -138,60 +139,66 @@ document.addEventListener("DOMContentLoaded", function () {
   const secoes = document.querySelectorAll(".section");
   const links = document.querySelectorAll(".menu a");
 
-  // Oculta todas as seções e remove 'active' dos links
+  // Oculta todas as seções e remove 'active' / 'aria-current' dos links
   function resetSections() {
     secoes.forEach(secao => {
       secao.classList.remove("active");
     });
     links.forEach(link => {
       link.classList.remove("active");
+      link.removeAttribute("aria-current");
     });
   }
 
-  // Verifica se há um hash na URL (ex: #secao-sobre)
-  const hash = window.location.hash;
-  let secaoInicial = "secao-simulacoes"; // Padrão: abre direto no acervo de simulações
+  function resolveSectionFromHash(rawHash) {
+    const fallback = "secao-simulacoes";
+    if (!rawHash) return fallback;
+    const candidate = rawHash.replace(/^#/, "");
+    return document.getElementById(candidate) ? candidate : fallback;
+  }
 
-  if (hash) {
-    const secaoTentativa = hash.substring(1); // Remove o #
-    if (document.getElementById(secaoTentativa)) {
-      secaoInicial = secaoTentativa;
+  function activateSection(idSecao, { pushHistory = false, scrollTop = false } = {}) {
+    const secaoAlvo = document.getElementById(idSecao);
+    if (!secaoAlvo) return;
+
+    resetSections();
+    secaoAlvo.classList.add("active");
+
+    const linkCorrespondente = document.querySelector(`.menu a[href="#${idSecao}"]`);
+    if (linkCorrespondente) {
+      linkCorrespondente.classList.add("active");
+      linkCorrespondente.setAttribute("aria-current", "page");
+    }
+
+    if (pushHistory && window.location.hash !== `#${idSecao}`) {
+      history.pushState({ section: idSecao }, "", `#${idSecao}`);
+    }
+
+    if (scrollTop) {
+      const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
     }
   }
 
-  // Define aba inicial ativa
-  const secaoPadrao = document.getElementById(secaoInicial);
-  const linkPadrao = document.querySelector(`.menu a[href="#${secaoInicial}"]`);
+  // Define aba inicial ativa a partir do hash da URL
+  activateSection(resolveSectionFromHash(window.location.hash));
 
-  if (secaoPadrao && linkPadrao) {
-    resetSections();
-    secaoPadrao.classList.add("active");
-    linkPadrao.classList.add("active");
-  }
+  // Sincroniza a seção ativa ao navegar pelos botões Voltar/Avançar do navegador
+  window.addEventListener("popstate", () => {
+    activateSection(resolveSectionFromHash(window.location.hash));
+  });
 
-  // Adiciona o evento de clique para todos os links de seção (menu e botões CTA)
+  window.addEventListener("hashchange", () => {
+    activateSection(resolveSectionFromHash(window.location.hash));
+  });
+
+  // Adiciona o evento de clique para todos os links de seção (menu e marca)
   const allSectionLinks = document.querySelectorAll('a[href^="#secao-"]');
   allSectionLinks.forEach(link => {
     link.addEventListener("click", function (event) {
       event.preventDefault();
-
       const idSecao = this.getAttribute("href").substring(1);
-      const secaoAlvo = document.getElementById(idSecao);
-
-      if (secaoAlvo) {
-        resetSections();
-        secaoAlvo.classList.add("active");
-
-        // Destaca o link correspondente no menu da sidebar
-        const linkCorrespondente = document.querySelector(`.menu a[href="#${idSecao}"]`);
-        if (linkCorrespondente) {
-          linkCorrespondente.classList.add("active");
-        }
-
-        // Atualiza a URL com o hash e rola até o topo
-        history.pushState(null, null, '#' + idSecao);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+      activateSection(idSecao, { pushHistory: true, scrollTop: true });
     });
   });
 
@@ -203,9 +210,13 @@ document.addEventListener("DOMContentLoaded", function () {
   if (filterBtnsSim.length > 0) {
     filterBtnsSim.forEach(btn => {
       btn.addEventListener('click', function () {
-        // Atualiza botão ativo
-        filterBtnsSim.forEach(b => b.classList.remove('active'));
+        // Atualiza botão ativo e estado ARIA
+        filterBtnsSim.forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-pressed', 'false');
+        });
         this.classList.add('active');
+        this.setAttribute('aria-pressed', 'true');
 
         const filtro = this.getAttribute('data-filtro');
         let visiveis = 0;
@@ -224,7 +235,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Exibe mensagem se nenhum card for encontrado
         if (noResultsSim) {
-          noResultsSim.style.display = visiveis === 0 ? 'block' : 'none';
+          noResultsSim.hidden = visiveis > 0;
         }
       });
     });
@@ -344,6 +355,48 @@ async function initBibliograficaSection() {
     return;
   }
 
+  function normalizeSearchText(str) {
+    return String(str || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  }
+
+  function escapeAttr(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  async function copyTextToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    ta.remove();
+  }
+
+  function getLinkMeta(livro) {
+    const isOpenAccess =
+      livro.linkTipo === "acesso-aberto" ||
+      (Array.isArray(livro.tags) &&
+        livro.tags.some(t => normalizeSearchText(t) === "acesso aberto"));
+    return {
+      icon: isOpenAccess ? "open-outline" : "cart-outline",
+      label: livro.linkLabel || (isOpenAccess ? "Acessar PDF" : "Comprar")
+    };
+  }
+
   function getLevelClass(nivel) {
     if (nivel.includes("Ensino Médio")) return "nivel-em";
     if (nivel.includes("Pós")) return "nivel-pos";
@@ -354,19 +407,20 @@ async function initBibliograficaSection() {
     gridLivros.innerHTML = "";
 
     if (livros.length === 0) {
-      if (noResults) noResults.style.display = "block";
+      if (noResults) noResults.hidden = false;
       return;
     }
 
-    if (noResults) noResults.style.display = "none";
+    if (noResults) noResults.hidden = true;
 
     livros.forEach((livro, index) => {
       const item = document.createElement("div");
       item.className = "biblio-item";
-      item.style.animationDelay = `${index * 0.1}s`;
+      item.style.animationDelay = `${Math.min(index, 8) * 0.035}s`;
       item.setAttribute("data-categoria", livro.categoria);
 
       const nivelClass = getLevelClass(livro.nivel);
+      const linkMeta = getLinkMeta(livro);
 
       item.innerHTML = `
         <div class="biblio-item-main">
@@ -379,13 +433,13 @@ async function initBibliograficaSection() {
         
         <div class="biblio-actions">
           ${livro.link && livro.url ? `
-            <a href="${livro.url}" target="_blank" rel="noopener noreferrer" class="btn-link-afiliado">
-              <ion-icon name="cart-outline"></ion-icon>
-              <span>Comprar</span>
+            <a href="${escapeAttr(livro.url)}" target="_blank" rel="noopener noreferrer" class="btn-link-afiliado">
+              <ion-icon name="${linkMeta.icon}" aria-hidden="true"></ion-icon>
+              <span>${linkMeta.label}</span>
             </a>
           ` : ''}
-          <button class="btn-copiar-citacao" data-citacao="${livro.citacao.replace(/"/g, '&quot;')}">
-            <ion-icon name="copy-outline"></ion-icon>
+          <button type="button" class="btn-copiar-citacao" data-citacao="${escapeAttr(livro.citacao)}">
+            <ion-icon name="copy-outline" aria-hidden="true"></ion-icon>
             <span>Copiar ABNT</span>
           </button>
         </div>
@@ -396,22 +450,21 @@ async function initBibliograficaSection() {
 
     // Evento dos botões de copiar citação
     gridLivros.querySelectorAll(".btn-copiar-citacao").forEach(btn => {
-      btn.addEventListener("click", function () {
+      btn.addEventListener("click", async function () {
         const citacao = this.getAttribute("data-citacao");
-        navigator.clipboard.writeText(citacao).then(() => {
+        try {
+          await copyTextToClipboard(citacao);
           const span = this.querySelector("span");
           const originalText = span.textContent;
           span.textContent = "Copiado!";
-          this.style.borderColor = "var(--accent-color)";
-          this.style.color = "var(--accent-color)";
+          this.classList.add("is-copied");
           setTimeout(() => {
             span.textContent = originalText;
-            this.style.borderColor = "";
-            this.style.color = "";
+            this.classList.remove("is-copied");
           }, 2000);
-        }).catch(err => {
+        } catch (err) {
           console.error("Erro ao copiar citação:", err);
-        });
+        }
       });
     });
   }
@@ -427,12 +480,14 @@ async function initBibliograficaSection() {
 
     const activeBtn = document.querySelector("#biblio-filter-bar .filter-btn.active");
     const categoriaFiltro = activeBtn ? activeBtn.getAttribute("data-filtro") : "todas";
-    const termoBusca = (searchInput ? searchInput.value : "").toLowerCase().trim();
+    const termoBusca = normalizeSearchText(searchInput ? searchInput.value.trim() : "");
 
     const livrosFiltrados = livrosData.filter(livro => {
       const bateCategoria = categoriaFiltro === "todas" || livro.categoria === categoriaFiltro;
 
-      const textoCompleto = `${livro.titulo} ${livro.autores} ${livro.editora} ${livro.ano} ${livro.descricao} ${(livro.tags || []).join(' ')}`.toLowerCase();
+      const textoCompleto = normalizeSearchText(
+        `${livro.titulo} ${livro.autores} ${livro.editora} ${livro.ano} ${livro.descricao} ${(livro.tags || []).join(" ")}`
+      );
       const bateBusca = !termoBusca || textoCompleto.includes(termoBusca);
 
       return bateCategoria && bateBusca;
@@ -444,8 +499,12 @@ async function initBibliograficaSection() {
   // Event Listeners para Filtros de Categoria
   filterBtns.forEach(btn => {
     btn.addEventListener("click", function () {
-      filterBtns.forEach(b => b.classList.remove("active"));
+      filterBtns.forEach(b => {
+        b.classList.remove("active");
+        b.setAttribute("aria-pressed", "false");
+      });
       this.classList.add("active");
+      this.setAttribute("aria-pressed", "true");
       filterAndSearch();
     });
   });

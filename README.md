@@ -13,7 +13,7 @@ Repositório dedicado ao desenvolvimento de simulações interativas para o ensi
 
 Este projeto tem como objetivo fornecer ferramentas visuais e interativas para explorar fenômenos físicos e formulações matemáticas. O repositório e a página são atualizados de forma contínua para adicionar novas simulações, funcionalidades e melhorias na interface. Minha principal inspiração é o Phet, reconhecidamente uma das plataformas mais completas sobre simulações educacionais.
 
-Todas as simulações seguem uma arquitetura visual que está encapsulada no que eu estou chamando de **Design System 2.0**, com controladores padronizados, suporte completo a dispositivos móveis via *Bottom Sheet*, modo de foco imersivo em tela cheia e renderização de equações em KaTeX. A proposta dessa padronização é que eu possa requisitar um agente para fazer uma alteração em qualquer uma das simulações, e ela não fique totalmente fora do formato após as alterações.
+Todas as simulações seguem uma arquitetura visual que está encapsulada no que eu estou chamando de **Design System 2.0**, com controladores padronizados, tema Claro/Escuro (Superfície Papel com blindagem escura do palco), suporte completo a dispositivos móveis via *Painel Flutuante Mobile*, modo de foco imersivo em tela cheia, onboarding com QR Code para sala de aula e renderização de equações em KaTeX. A proposta dessa padronização é que eu possa requisitar um agente para fazer uma alteração em qualquer uma das simulações, e ela não fique totalmente fora do formato após as alterações.
 
 ---
 
@@ -42,24 +42,30 @@ A estrutura adota uma separação anatômica clara entre o portal de entrada, os
 
 ```text
 simulacoes/
-├── index.html                   # Portal de entrada com cards de navegação e filtros por categoria
-├── script.js                    # Mecanismo de busca, filtros e interatividade do portal
-├── styles.css                   # Identidade visual e layout responsivo do portal principal
+├── index.html                   # Portal de entrada com cards de navegação, filtros e bibliografia
+├── script.js                    # Mecanismo de busca, filtros, tema e interatividade do portal
+├── styles.css                   # Identidade visual (Claro/Escuro) e layout responsivo do portal
+├── theme-init.js                # Boot síncrono de tema claro/escuro (zero-FOUC)
 ├── livros.json                  # Referências bibliográficas e recomendações didáticas
 ├── assets/
-│   └── icons/                   # Catálogo nativo com 71 ícones vetoriais SVG (currentColor)
+│   ├── icons/                   # Catálogo nativo com 75 ícones vetoriais SVG (currentColor)
+│   └── previews/                # Imagens de pré-visualização usadas nos cards da página inicial
+├── scripts/
+│   └── capture-previews.mjs     # Gerador headless (CDP) de capturas limpas das simulações
+├── .agents/plugins/
+│   └── simulacoes-lab/          # Regras, skills, referências e templates oficiais do Design System 2.0
 ├── .github/
 │   └── workflows/
-│       └── validate.yml         # Integração Contínua (CI) para checagem estática automática
+│       └── validate.yml         # Integração Contínua (CI) para sintaxe JS e conformidade DS 2.0
 └── simulacoes/
     ├── ui_lab.html              # Vitrine canônica e fonte da verdade do Design System 2.0
-    ├── [simulacao].html         # Páginas individuais com layout responsivo (Desktop & Mobile Bottom-Sheet)
+    ├── [simulacao].html         # Páginas individuais com layout responsivo (Desktop & Painel Flutuante Mobile)
     ├── css/
-    │   ├── design-system.css    # Tokens globais (:root), temas, barras de transporte, abas e modais
+    │   ├── design-system.css    # Tokens globais (:root), temas Claro/Escuro, transporte, abas e modais
     │   └── [simulacao].css      # Estilos complementares e dimensionamento do canvas da simulação
     └── scripts/
-        ├── sim-ui.js            # Biblioteca central de controladores (sliders, abas, plots, modais)
-        ├── validate-ds.js       # Script de análise estática e prevenção de regressões
+        ├── sim-ui.js            # Biblioteca central de controladores (sliders, abas, plots, modais, QR)
+        ├── validate-ds.js       # Validador estático de integridade do DS 2.0, portal, JSON e SVGs
         ├── [simulacao].js       # Lógica matemática e física estruturada em ES Modules
         └── *.worker.js          # Processamento numérico em segundo plano (Clima, Snell)
 ```
@@ -69,7 +75,7 @@ simulacoes/
 ## Tecnologias Utilizadas
 
 - **HTML5 & Web APIs:** Estruturação semântica, Canvas 2D, Web Audio API e Web Workers para cálculos em segundo plano sem travamento da taxa de quadros (60 FPS).
-- **Design System 2.0 (CSS3):** Design tokens semânticos (`:root`), responsividade adaptativa com *Bottom Sheet* para mobile e *Modo Foco* (`F`) para desktop.
+- **Design System 2.0 (CSS3):** Design tokens semânticos (`:root` + tema claro/escuro), responsividade adaptativa com *Painel Flutuante Mobile* (`#btn-mobile-settings`) e *Modo Foco* (`F` / `[`) para desktop.
 - **JavaScript Moderno (ES Modules):** Código desacoplado e manutenível, sem dependências externas obsoletas.
 - **Three.js (WebGL):** Visualizações tridimensionais de alta performance e controles orbitais com prevenção de rolagem acidental (`touch-action: none`).
 - **KaTeX:** Renderização ultrarrápida de tipografia matemática para equações e deduções didáticas.

@@ -40,8 +40,8 @@ body:
         - Visual / Renderização 3D ou 2D (Three.js / Canvas)
         - Divergência Numérica ou Física (cálculos incorretos, passos no tempo)
         - Fórmulas Matemáticas / KaTeX (renderização ou erro conceitual)
-        - Interface / Controles (sliders, transport-bar, abas, foco)
-        - Responsividade Mobile / Tablet (Bottom Sheet, gestos touch)
+        - Interface / Controles (sliders, barra de transporte, abas, modo foco, tema claro/escuro)
+        - Responsividade Mobile / Tablet (Painel Flutuante Mobile, gestos touch)
         - Erro no Console / JavaScript
     validations:
       required: true

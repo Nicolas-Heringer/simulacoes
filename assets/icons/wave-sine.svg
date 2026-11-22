@@ -1,5 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <style>
+    .sine-wave-clip {
+      clip-path: inset(3px 2px 3px 2px round 2px);
+    }
     .sine-wave-line {
       animation: wavePropagateAnim 2.5s linear infinite;
     }
@@ -12,13 +15,8 @@
       }
     }
   </style>
-  <defs>
-    <clipPath id="waveClip">
-      <rect x="2" y="3" width="20" height="18" rx="2"/>
-    </clipPath>
-  </defs>
   <line x1="2" y1="12" x2="22" y2="12" stroke="currentColor" stroke-opacity="0.3" stroke-dasharray="2 2"/>
-  <g clip-path="url(#waveClip)">
+  <g class="sine-wave-clip">
     <path class="sine-wave-line" d="M -6 12 Q -4 6 -2 12 T 2 12 T 6 12 T 10 12 T 14 12 T 18 12 T 22 12 T 26 12 T 30 12"/>
   </g>
 </svg>

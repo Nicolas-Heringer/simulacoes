@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
@@ -38,20 +38,6 @@
 
     <script src="theme-init.js"></script>
     <link rel="stylesheet" type="text/css" href="styles.css">
-
-    <!-- Suporte a LaTeX com KaTeX -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
-        crossorigin="anonymous" onload="renderMathInElement(document.body, {
-            delimiters: [
-                {left: '$$', right: '$$', display: true},
-                {left: '$', right: '$', display: false},
-                {left: '\\(', right: '\\)', display: false},
-                {left: '\\[', right: '\\]', display: true}
-            ],
-            throwOnError: false
-        });"></script>
 </head>
 
 <body>
@@ -69,7 +55,7 @@
         </div>
         <ul class="menu">
             <li class="list">
-                <a href="#secao-simulacoes" class="active">
+                <a href="#secao-simulacoes" class="active" aria-current="page">
                     <span class="icone"><ion-icon name="apps-outline"></ion-icon></span>
                     <span class="texto">Acervo</span>
                     <span class="menu-count" id="menu-count-sim"></span>
@@ -191,12 +177,12 @@
             </p>
 
             <!-- Barra de Filtros -->
-            <div class="filter-bar" id="filter-bar">
-                <button class="filter-btn active" data-filtro="todas">Todas</button>
-                <button class="filter-btn" data-filtro="fisica">Física</button>
-                <button class="filter-btn" data-filtro="matematica">Matemática</button>
-                <button class="filter-btn" data-filtro="quimica">Química</button>
-                <button class="filter-btn" data-filtro="biologia">Biologia</button>
+            <div class="filter-bar" id="filter-bar" role="group" aria-label="Filtrar simulações por disciplina">
+                <button type="button" class="filter-btn active" data-filtro="todas" aria-pressed="true">Todas</button>
+                <button type="button" class="filter-btn" data-filtro="fisica" aria-pressed="false">Física</button>
+                <button type="button" class="filter-btn" data-filtro="matematica" aria-pressed="false">Matemática</button>
+                <button type="button" class="filter-btn" data-filtro="quimica" aria-pressed="false">Química</button>
+                <button type="button" class="filter-btn" data-filtro="biologia" aria-pressed="false">Biologia</button>
             </div>
 
             <div id="cards">
@@ -538,7 +524,7 @@
                 </a>
             </div>
 
-            <p class="no-results" id="no-results" style="display:none;">Nenhuma simulação encontrada nesta categoria.
+            <p class="no-results" id="no-results" hidden>Nenhuma simulação encontrada nesta categoria.
             </p>
         </div>
 
@@ -550,21 +536,22 @@
 
             <div class="biblio-controls">
                 <div class="biblio-search-box">
-                    <ion-icon name="search-outline" class="search-icon"></ion-icon>
-                    <input type="text" id="biblio-search" placeholder="Buscar por título, autor, assunto ou ano...">
+                    <ion-icon name="search-outline" class="search-icon" aria-hidden="true"></ion-icon>
+                    <input type="text" id="biblio-search" aria-label="Buscar livros por título, autor, assunto ou ano"
+                        placeholder="Buscar por título, autor, assunto ou ano...">
                     <button type="button" id="biblio-clear-search" class="biblio-clear-btn" aria-label="Limpar pesquisa"
                         title="Limpar pesquisa">
                         <ion-icon name="close-outline"></ion-icon>
                     </button>
                 </div>
 
-                <div class="filter-bar" id="biblio-filter-bar">
-                    <button class="filter-btn active" data-filtro="todas">Todas as áreas</button>
-                    <button class="filter-btn" data-filtro="ensino-medio">Ensino Médio & Conceitual</button>
-                    <button class="filter-btn" data-filtro="fisica-geral">Física Geral</button>
-                    <button class="filter-btn" data-filtro="eletromagnetismo">Eletromagnetismo</button>
-                    <button class="filter-btn" data-filtro="fisica-quantica">Física Quântica</button>
-                    <button class="filter-btn" data-filtro="muitos-corpos">Muitos Corpos</button>
+                <div class="filter-bar" id="biblio-filter-bar" role="group" aria-label="Filtrar bibliografia por área">
+                    <button type="button" class="filter-btn active" data-filtro="todas" aria-pressed="true">Todas as áreas</button>
+                    <button type="button" class="filter-btn" data-filtro="ensino-medio" aria-pressed="false">Ensino Médio &amp; Conceitual</button>
+                    <button type="button" class="filter-btn" data-filtro="fisica-geral" aria-pressed="false">Física Geral</button>
+                    <button type="button" class="filter-btn" data-filtro="eletromagnetismo" aria-pressed="false">Eletromagnetismo</button>
+                    <button type="button" class="filter-btn" data-filtro="fisica-quantica" aria-pressed="false">Física Quântica</button>
+                    <button type="button" class="filter-btn" data-filtro="muitos-corpos" aria-pressed="false">Muitos Corpos</button>
                 </div>
             </div>
 
@@ -572,7 +559,7 @@
                 <!-- Injetado dinamicamente via script.js -->
             </div>
 
-            <p class="no-results" id="biblio-no-results" style="display:none;">Nenhum livro encontrado para esta busca.
+            <p class="no-results" id="biblio-no-results" hidden>Nenhum livro encontrado para esta busca.
             </p>
         </div>
 
