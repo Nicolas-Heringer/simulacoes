@@ -602,10 +602,10 @@ function animate(currentTime) {
         if (plotEnergia) {
             plotEnergia.push(metrics.E, state.time);
         }
+        updateVisualScene();
+    } else if (ball.isDragging) {
+        updateVisualScene();
     }
-
-    // Pass de Apresentação Gráfica e Leituras Numéricas
-    updateVisualScene();
 }
 
 // =============================================================================

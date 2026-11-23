@@ -839,7 +839,11 @@ function applyDirectBuffersToScene(payload) {
     currentCellCount = numCells;
 
     // --- MALHA 2: CASCA ATMOSFÉRICA POLIGONAL ---
-    if (globeMesh) earthSpinGroup.remove(globeMesh);
+    if (globeMesh) {
+        earthSpinGroup.remove(globeMesh);
+        if (globeMesh.geometry) globeMesh.geometry.dispose();
+        if (globeMesh.material) globeMesh.material.dispose();
+    }
 
     globeGeometry = new THREE.BufferGeometry();
     globeGeometry.setAttribute('position', new THREE.BufferAttribute(meshPositions, 3));
@@ -871,7 +875,11 @@ function applyDirectBuffersToScene(payload) {
     earthSpinGroup.add(globeMesh);
 
     // --- MALHA 3: WIREFRAME DEDUPLICADO ---
-    if (wireframeMesh) earthSpinGroup.remove(wireframeMesh);
+    if (wireframeMesh) {
+        earthSpinGroup.remove(wireframeMesh);
+        if (wireframeMesh.geometry) wireframeMesh.geometry.dispose();
+        if (wireframeMesh.material) wireframeMesh.material.dispose();
+    }
 
     const wireGeo = new THREE.BufferGeometry();
     wireGeo.setAttribute('position', new THREE.BufferAttribute(wireframePositions, 3));
@@ -888,7 +896,11 @@ function applyDirectBuffersToScene(payload) {
     earthSpinGroup.add(wireframeMesh);
 
     // --- MALHA 4: MARCADORES DOS CENTROS ---
-    if (generatorPointsMesh) earthSpinGroup.remove(generatorPointsMesh);
+    if (generatorPointsMesh) {
+        earthSpinGroup.remove(generatorPointsMesh);
+        if (generatorPointsMesh.geometry) generatorPointsMesh.geometry.dispose();
+        if (generatorPointsMesh.material) generatorPointsMesh.material.dispose();
+    }
 
     const genGeo = new THREE.BufferGeometry();
     genGeo.setAttribute('position', new THREE.BufferAttribute(generatorPositions, 3));

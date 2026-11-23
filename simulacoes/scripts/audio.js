@@ -215,6 +215,9 @@ function stopMicrophone(cleanBuffers = false) {
         try { micSourceNode.disconnect(); } catch (_) {}
         micSourceNode = null;
     }
+    if (audioCtx && audioCtx.state === 'running') {
+        audioCtx.suspend().catch(() => {});
+    }
 
     if (cleanBuffers && timeFloatData && freqFloatData) {
         timeFloatData.fill(0);
@@ -233,6 +236,11 @@ function toggleFreeze() {
 
     isFrozen = !isFrozen;
     updateControlsState();
+    if (!isFrozen) {
+        startAnimationLoop();
+    } else {
+        renderFrame();
+    }
 }
 
 function resetBuffers() {
@@ -644,10 +652,7 @@ function resizeCanvases() {
 }
 
 function renderFrame() {
-    if (document.hidden) {
-        requestAnimationFrame(renderFrame);
-        return;
-    }
+    if (document.hidden) return;
     resizeCanvases();
     drawTimeDomain();
     drawFrequencySpectrum();
@@ -657,14 +662,16 @@ function startAnimationLoop() {
     if (animationId) cancelAnimationFrame(animationId);
 
     function loop() {
+        if (!isCapturing || isFrozen) {
+            animationId = null;
+            return;
+        }
         if (document.hidden) {
             animationId = requestAnimationFrame(loop);
             return;
         }
         renderFrame();
-        if (isCapturing || isFrozen) {
-            animationId = requestAnimationFrame(loop);
-        }
+        animationId = requestAnimationFrame(loop);
     }
     animationId = requestAnimationFrame(loop);
 }

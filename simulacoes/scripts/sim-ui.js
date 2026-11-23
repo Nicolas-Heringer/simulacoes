@@ -3286,6 +3286,16 @@ export function eigen2x2(M) {
     const lambda1 = (tr + sqrtDisc) / 2;
     const lambda2 = (tr - sqrtDisc) / 2;
 
+    if (Math.abs(b) <= 1e-9 && Math.abs(c) <= 1e-9 && Math.abs(a - d) <= 1e-9) {
+        return {
+            isReal: true,
+            trace: tr,
+            determinant: det,
+            eigenvalues: [lambda1, lambda2],
+            eigenvectors: [[1, 0], [0, 1]]
+        };
+    }
+
     const findVector = (lambda) => {
         let vx, vy;
         if (Math.abs(b) > 1e-9) {
@@ -3419,9 +3429,22 @@ export function diagonalizeSymmetric3x3(A_in, maxSweeps = 30) {
 
     const vals = [A[0][0], A[1][1], A[2][2]];
     const indices = [0, 1, 2].sort((i, j) => vals[i] - vals[j]);
+    const sortedVectors = indices.map(i => [V[0][i], V[1][i], V[2][i]]);
+
+    // Garante base ortonormal destra (det = +1 em SO(3))
+    const [v0, v1, v2] = sortedVectors;
+    const crossX = v0[1] * v1[2] - v0[2] * v1[1];
+    const crossY = v0[2] * v1[0] - v0[0] * v1[2];
+    const crossZ = v0[0] * v1[1] - v0[1] * v1[0];
+    if (crossX * v2[0] + crossY * v2[1] + crossZ * v2[2] < 0) {
+        v2[0] = -v2[0];
+        v2[1] = -v2[1];
+        v2[2] = -v2[2];
+    }
+
     return {
         values: indices.map(i => vals[i]),
-        vectors: indices.map(i => [V[0][i], V[1][i], V[2][i]])
+        vectors: sortedVectors
     };
 }
 

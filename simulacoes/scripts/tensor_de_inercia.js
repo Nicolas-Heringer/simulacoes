@@ -204,8 +204,25 @@ function addAxisLabel(text, position, color) {
 // EIXO DE ROTAÇÃO VISUAL
 // =============================================================================
 
+function disposeObject3D(obj) {
+    if (!obj) return;
+    if (obj.children && obj.children.length > 0) {
+        for (let i = obj.children.length - 1; i >= 0; i--) {
+            disposeObject3D(obj.children[i]);
+        }
+    }
+    if (obj.geometry) obj.geometry.dispose();
+    if (obj.material) {
+        if (Array.isArray(obj.material)) obj.material.forEach(m => m && m.dispose());
+        else obj.material.dispose();
+    }
+}
+
 function createRotationAxisVisual() {
-    if (axisArrow) scene.remove(axisArrow);
+    if (axisArrow) {
+        scene.remove(axisArrow);
+        disposeObject3D(axisArrow);
+    }
 
     const dir = state.rotationAxis.clone().normalize();
     const origin = dir.clone().multiplyScalar(-6);
@@ -469,15 +486,21 @@ function diagonalizeTensor(tensor) {
 // RECONSTRUIR CENA
 // =============================================================================
 
+function clearTrajectories() {
+    if (scene.userData.trajectories) {
+        scene.userData.trajectories.forEach(t => {
+            scene.remove(t);
+            disposeObject3D(t);
+        });
+    }
+    scene.userData.trajectories = [];
+}
+
 function clearAnimationGroup() {
     while (animationGroup.children.length > 0) {
         const child = animationGroup.children[0];
         animationGroup.remove(child);
-        if (child.geometry) child.geometry.dispose();
-        if (child.material) {
-            if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
-            else child.material.dispose();
-        }
+        disposeObject3D(child);
     }
     massObjects = [];
     bodyMesh = null;
@@ -486,13 +509,13 @@ function clearAnimationGroup() {
     while (principalAxesGroup.children.length > 0) {
         const c = principalAxesGroup.children[0];
         principalAxesGroup.remove(c);
-        if (c.geometry) c.geometry.dispose();
-        if (c.material) c.material.dispose();
+        disposeObject3D(c);
     }
 }
 
 function rebuildScene() {
     clearAnimationGroup();
+    clearTrajectories();
     state.time = 0;
     animationGroup.rotation.set(0, 0, 0);
     animationGroup.quaternion.identity();
@@ -508,17 +531,13 @@ function rebuildScene() {
 
         // Trajetória
         const traj = createTrajectoryCircle(pos, axis);
-        if (traj) scene.add(traj);
-        // Guardar referência para limpar
-        if (!scene.userData.trajectories) scene.userData.trajectories = [];
-        scene.userData.trajectories.forEach(t => scene.remove(t));
-        scene.userData.trajectories = traj ? [traj] : [];
+        if (traj) {
+            scene.add(traj);
+            scene.userData.trajectories.push(traj);
+        }
 
     } else if (state.currentPart === 2) {
         // Múltiplas massas
-        scene.userData.trajectories?.forEach(t => scene.remove(t));
-        scene.userData.trajectories = [];
-
         state.masses.forEach((m, i) => {
             const color = MASS_COLORS[i % MASS_COLORS.length];
             const sphere = createMassSphere(m.position, color, m.mass);
@@ -534,9 +553,6 @@ function rebuildScene() {
 
     } else if (state.currentPart === 3) {
         // Corpo extenso
-        scene.userData.trajectories?.forEach(t => scene.remove(t));
-        scene.userData.trajectories = [];
-
         bodyMesh = createExtendedBody(state.bodyType, state.bodyDimensions, state.bodyMass);
         animationGroup.add(bodyMesh);
     }
@@ -596,8 +612,7 @@ function setupDragControls() {
 
 function rebuildTrajectories() {
     const axis = state.rotationAxis.clone().normalize();
-    scene.userData.trajectories?.forEach(t => scene.remove(t));
-    scene.userData.trajectories = [];
+    clearTrajectories();
 
     const positions = state.currentPart === 1
         ? [state.singleMass.position]
@@ -633,6 +648,7 @@ function computeAndDisplayTensor() {
         tensor = extendedBodyTensor(state.bodyType, state.bodyMass, state.bodyDimensions);
     }
 
+    state.rawInertiaTensor = tensor;
     state.inertiaTensor = tensor;
 
     // Momento de inércia no eixo selecionado
@@ -800,8 +816,7 @@ function updatePrincipalAxes() {
     while (principalAxesGroup.children.length > 0) {
         const c = principalAxesGroup.children[0];
         principalAxesGroup.remove(c);
-        if (c.geometry) c.geometry.dispose();
-        if (c.material) c.material.dispose();
+        disposeObject3D(c);
     }
 
     const colors = [0xef4444, 0x22c55e, 0x3b82f6]; // R, G, B
@@ -836,11 +851,12 @@ function updatePrincipalAxes() {
 // =============================================================================
 
 function animateDiagonalization() {
-    const diag = diagonalizeTensor(state.inertiaTensor);
+    const baseTensor = state.rawInertiaTensor || state.inertiaTensor;
+    const diag = diagonalizeTensor(baseTensor);
     state.eigenvalues = diag.values;
     state.eigenvectors = diag.vectors;
 
-    // Construir quaternion de rotação a partir dos autovetores
+    // Construir quaternion de rotação própria (SO(3)) a partir dos autovetores
     const e = diag.vectors;
     const rotMatrix = new THREE.Matrix4();
     rotMatrix.set(
@@ -868,14 +884,18 @@ function animateDiagonalization() {
         if (t < 1) {
             requestAnimationFrame(step);
         } else {
-            // Atualizar tensor exibido para forma diagonal
+            // Atualizar tensor exibido para forma diagonal e recalcular momento no eixo selecionado
             const diagTensor = [
                 [diag.values[0], 0, 0],
                 [0, diag.values[1], 0],
                 [0, 0, diag.values[2]],
             ];
             state.inertiaTensor = diagTensor;
+            const axis = state.rotationAxis.clone().normalize();
+            state.momentAboutAxis = momentAboutAxis(diagTensor, axis);
+            state.eigenvectors = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
             updateTensorDisplay();
+            updateEllipsoid();
         }
     }
     requestAnimationFrame(step);

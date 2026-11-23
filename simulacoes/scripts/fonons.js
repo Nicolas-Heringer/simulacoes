@@ -172,32 +172,40 @@ class SistemaParticulas {
     }
 
     atualizar(dt, amortecimento) {
-        // Zera acelerações
-        for (let i = 0; i < this.particulas.length; i++) {
-            this.particulas[i].resetarForcas();
-        }
+        if (dt <= 0) return;
 
-        // Calcula forças de mola
-        for (let i = 0; i < this.molas.length; i++) {
-            this.molas[i].aplicarForcas();
-        }
+        // Sub-stepping automático para garantir estabilidade CFL em 5.0× ou quedas de FPS
+        const maxSubDt = 0.016;
+        const subSteps = Math.max(1, Math.ceil(dt / maxSubDt));
+        const subDt = dt / subSteps;
+        const dampingFactor = Math.exp(-amortecimento * 60 * subDt);
 
-        // Integração numérica Euler-Cromer com amortecimento
-        const dampingFactor = Math.max(0, 1 - amortecimento * 60 * dt);
-
-        for (let i = 0; i < this.particulas.length; i++) {
-            const p = this.particulas[i];
-            if (p.fixa) {
-                p.vx = 0;
-                p.vy = 0;
-                continue;
+        for (let s = 0; s < subSteps; s++) {
+            // Zera acelerações
+            for (let i = 0; i < this.particulas.length; i++) {
+                this.particulas[i].resetarForcas();
             }
 
-            p.vx = (p.vx + p.ax * dt) * dampingFactor;
-            p.vy = (p.vy + p.ay * dt) * dampingFactor;
+            // Calcula forças de mola
+            for (let i = 0; i < this.molas.length; i++) {
+                this.molas[i].aplicarForcas();
+            }
 
-            p.x += p.vx * dt;
-            p.y += p.vy * dt;
+            // Integração numérica Euler-Cromer com amortecimento exponencial estável
+            for (let i = 0; i < this.particulas.length; i++) {
+                const p = this.particulas[i];
+                if (p.fixa) {
+                    p.vx = 0;
+                    p.vy = 0;
+                    continue;
+                }
+
+                p.vx = (p.vx + p.ax * subDt) * dampingFactor;
+                p.vy = (p.vy + p.ay * subDt) * dampingFactor;
+
+                p.x += p.vx * subDt;
+                p.y += p.vy * subDt;
+            }
         }
     }
 
@@ -685,17 +693,15 @@ function animate(currentTime) {
 
         const timerEl = document.getElementById('footer-sim-timer');
         if (timerEl) timerEl.textContent = `t = ${state.time.toFixed(2)}s`;
-    }
 
-    // Presentation Pass: redesenho contínuo da cena física
-    render();
-
-    // Telemetria em tempo real (painel + HUD)
-    const kMedia = updateReadouts();
-
-    // Atualização do buffer do gráfico exclusivamente se a simulação estiver em execução
-    if (plotEnergia && state.isRunning) {
-        plotEnergia.push(kMedia, state.time);
+        render();
+        const kMedia = updateReadouts();
+        if (plotEnergia) {
+            plotEnergia.push(kMedia, state.time);
+        }
+    } else if (pointer.isDown) {
+        render();
+        updateReadouts();
     }
 }
 

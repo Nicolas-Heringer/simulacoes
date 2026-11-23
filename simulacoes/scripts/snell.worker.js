@@ -29,12 +29,12 @@ const refractiveIndexFunctions = {
     },
 
     fibraOptica: {
-        minN: 0.0, maxN: 2.0, dispersion: 0.05,
+        minN: 1.0, maxN: 2.0, dispersion: 0.05,
         n: (x, y, W, H) => {
             const cy = H / 2;
-            return 1.0
-                - Math.exp(y - cy - 50) / (Math.exp(y - cy - 50) + 1)
-                + Math.exp(y - cy + 50) / (Math.exp(y - cy + 50) + 1);
+            const sigTop = 1.0 / (1.0 + Math.exp(-(y - cy + 50)));
+            const sigBot = 1.0 / (1.0 + Math.exp(-(y - cy - 50)));
+            return 1.0 + sigTop - sigBot;
         }
     },
 

@@ -284,6 +284,9 @@ export class ModoDinamico {
         this.seeds.forEach(seed => {
             const x0 = seed.x;
             const y0 = seed.y;
+            if (!Number.isFinite(x0) || !Number.isFinite(y0) || Math.hypot(x0, y0) > 200) {
+                return;
+            }
 
             // RK4
             const k1 = f(x0, y0);

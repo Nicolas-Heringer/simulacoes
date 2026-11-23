@@ -136,9 +136,9 @@ class Eletron {
         this.x = x;
         this.y = y;
         this.radius = 3;
-        // Velocidade térmica inicial estocástica
+        // Velocidade térmica inicial estocástica (consistente com a re-termalização pós-colisão)
         const angle = Math.random() * Math.PI * 2;
-        const speed = 1.0 + (temperatura * 0.05);
+        const speed = 0.5 + (temperatura * 0.05);
         this.vx = speed * Math.cos(angle);
         this.vy = speed * Math.sin(angle);
     }
@@ -159,13 +159,13 @@ class Eletron {
             this.vy = -Math.abs(this.vy);
         }
 
-        // Condições de contorno periódicas em X (circuito contínuo)
-        if (this.x > canvas.width) {
-            this.x = 0;
-            this.vx *= 0.8;
-        } else if (this.x < 0) {
-            this.x = canvas.width;
-            this.vx *= 0.8;
+        // Condições de contorno periódicas em X (circuito contínuo sem dissipação de borda)
+        if (canvas.width > 0) {
+            if (this.x > canvas.width) {
+                this.x = this.x % canvas.width;
+            } else if (this.x < 0) {
+                this.x = ((this.x % canvas.width) + canvas.width) % canvas.width;
+            }
         }
 
         // Colisões inelásticas com os núcleos da rede (relaxação estocástica)
@@ -487,7 +487,7 @@ function updateHUD() {
     }
     if (footerSimInfo) {
         const sign = vd >= 0 ? '+' : '';
-        footerSimInfo.textContent = `v_d = ${sign}${vd.toFixed(2)} px/s`;
+        footerSimInfo.textContent = `v_d = ${sign}${vd.toFixed(2)} px/f`;
     }
     return vd;
 }
@@ -541,12 +541,12 @@ function loop() {
     if (isRunning) {
         simTime += (1 / 60) * simSpeed;
         updateFisica(simSpeed);
+        const vd = updateHUD();
+        if (plotVd) {
+            plotVd.push(vd, simTime);
+        }
+        draw();
     }
-    const vd = updateHUD();
-    if (plotVd && isRunning) {
-        plotVd.push(vd, simTime);
-    }
-    draw();
 }
 
 // =============================================================================
