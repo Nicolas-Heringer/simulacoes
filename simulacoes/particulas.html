@@ -28,6 +28,16 @@
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
         crossorigin="anonymous"></script>
+
+    <!-- Three.js via Importmap (ES Modules) -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+        }
+    }
+    </script>
 </head>
 
 <body>
@@ -52,17 +62,22 @@
     <!-- Layout Grid Principal -->
     <main class="sim-layout">
 
-        <!-- 1. Área do Canvas Interativo 2D -->
+        <!-- 1. Área do Palco Interativo 2D (Three.js Orthographic) -->
         <div class="canvas-area">
-            <canvas id="myCanvas"></canvas>
+            <div id="three-container"></div>
 
-            <!-- Pilha Vertical no Canto Superior Esquerdo -->
+            <!-- Barra Contextual no Modo Foco (Canto Superior Esquerdo) -->
             <div class="canvas-top-left-stack">
                 <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
             </div>
 
             <!-- Grupo de Ações Flutuantes no Topo Direito -->
             <div class="canvas-top-actions">
+                <button type="button" id="btn-reset-camera" class="canvas-btn-floating"
+                    title="Enquadrar Caixa 2D na Tela">
+                    <img src="../assets/icons/camera-reset.svg" class="icon-svg" alt="Enquadrar">
+                    <span class="btn-label-text">Enquadrar</span>
+                </button>
                 <button type="button" id="btn-expand-sidebar" class="canvas-btn-expand-sidebar"
                     title="Expandir Painel de Controles (F)">
                     <img src="../assets/icons/expand.svg" class="icon-svg" alt="Expandir">
@@ -175,21 +190,27 @@
                         </div>
                     </div>
 
-                    <div class="sim-divider-label"><span>Interação por Clique / Toque</span></div>
+                    <div class="sim-divider-label"><span>Câmera & Interação</span></div>
 
-                    <!-- Seletor de Modo de Impulso no Canvas (Repulsão vs. Atração Radial) -->
+                    <!-- Seletor de Modo de Interação no Palco (Mover Câmera vs. Repulsão vs. Atração) -->
                     <div class="control-group">
-                        <label>Ação ao Clicar / Arrastar no Canvas:</label>
+                        <label>Ação ao Arrastar no Palco:</label>
                         <div class="segmented-control" id="cursor-mode-selector">
+                            <button type="button" class="segment-btn" id="btn-cursor-pan"
+                                data-cursor-mode="pan" data-focus-control="action" data-focus-label=""
+                                data-focus-order="1" data-focus-tooltip="Arrastar no Palco: Mover Câmera (Pan)">
+                                <img src="../assets/icons/touch-pan.svg" class="icon-svg" alt="Mover">
+                                <span>Mover</span>
+                            </button>
                             <button type="button" class="segment-btn active" id="btn-cursor-repel"
                                 data-cursor-mode="repel" data-focus-control="action" data-focus-label=""
-                                data-focus-order="1" data-focus-tooltip="Clique no Canvas: Repulsão Radial">
+                                data-focus-order="2" data-focus-tooltip="Clique no Palco: Repulsão Radial">
                                 <img src="../assets/icons/radial-outward.svg" class="icon-svg" alt="Repulsão">
                                 <span>Repulsão</span>
                             </button>
                             <button type="button" class="segment-btn" id="btn-cursor-attract" data-cursor-mode="attract"
-                                data-focus-control="action" data-focus-label="" data-focus-order="2"
-                                data-focus-divider="after" data-focus-tooltip="Clique no Canvas: Atração Radial">
+                                data-focus-control="action" data-focus-label="" data-focus-order="3"
+                                data-focus-divider="after" data-focus-tooltip="Clique no Palco: Atração Radial">
                                 <img src="../assets/icons/radial-inward.svg" class="icon-svg" alt="Atração">
                                 <span>Atração</span>
                             </button>
@@ -213,7 +234,7 @@
                     <div class="control-group" id="group-potential-select">
                         <label for="selector-de-tipo-de-interacao">Modelo de Força / Potencial:</label>
                         <select id="selector-de-tipo-de-interacao" class="sim-control" data-focus-control="select"
-                            data-focus-label="Potencial" data-focus-order="3">
+                            data-focus-label="Potencial" data-focus-order="4">
                             <option value="coulomb" selected>Interação Coulombiana Retardada (Cargas ±q)</option>
                             <option value="lennardJones">Potencial de Lennard-Jones 12-6</option>
                             <option value="atracao">Apenas Atração ($F \propto 1/r$)</option>
@@ -238,10 +259,21 @@
                         </div>
                     </div>
 
-                    <div class="sim-divider-label"><span>Parâmetros Termodinâmicos & de Onda</span></div>
+                    <div class="sim-divider-label"><span>Termostato de Berendsen</span></div>
+
+                    <!-- Switch: Termostato de Berendsen (NVT) vs. Isolado (NVE) -->
+                    <div class="control-group">
+                        <div class="switch-container">
+                            <span class="switch-label">Termostato de Berendsen ($NVT$)</span>
+                            <label class="sim-switch">
+                                <input type="checkbox" id="switch-termostato" checked>
+                                <span class="slider-round"></span>
+                            </label>
+                        </div>
+                    </div>
 
                     <!-- Slider 1: Temperatura Alvo / Limite -->
-                    <div class="control-group">
+                    <div class="control-group" id="group-temp-target">
                         <div class="slider-container sim-dual-slider">
                             <div class="slider-header">
                                 <label for="slider-temp" class="slider-label">Temperatura Alvo
@@ -253,10 +285,29 @@
                                 </div>
                             </div>
                             <input type="range" class="sim-slider" id="slider-temp" data-focus-control="slider"
-                                data-focus-label="T" data-focus-order="4" min="0.001" max="10.0" step="0.01"
+                                data-focus-label="T" data-focus-order="5" min="0.001" max="10.0" step="0.01"
                                 value="0.10">
                         </div>
                     </div>
+
+                    <!-- Slider 3: Taxa de Acoplamento Térmico (Berendsen γ) -->
+                    <div class="control-group" id="group-attenuation">
+                        <div class="slider-container sim-dual-slider">
+                            <div class="slider-header">
+                                <label for="slider-attenuation" class="slider-label">Acoplamento do Termostato
+                                    ($\gamma$)</label>
+                                <div class="dual-input-wrapper">
+                                    <input type="number" class="dual-input-number" id="num-attenuation" min="0.01"
+                                        max="0.50" step="0.01" value="0.09">
+                                    <span class="dual-input-unit">taxa</span>
+                                </div>
+                            </div>
+                            <input type="range" class="sim-slider" id="slider-attenuation" min="0.01" max="0.50"
+                                step="0.01" value="0.09">
+                        </div>
+                    </div>
+
+                    <div class="sim-divider-label"><span>Propagação & Emissão de Ondas</span></div>
 
                     <!-- Slider 2: Velocidade de Propagação da Onda (c) -->
                     <div class="control-group">
@@ -274,20 +325,20 @@
                         </div>
                     </div>
 
-                    <!-- Slider 3: Taxa de Atenuação Térmica -->
+                    <!-- Slider 5: Intervalo de Emissão de Ondas (waveInterval) -->
                     <div class="control-group">
                         <div class="slider-container sim-dual-slider">
                             <div class="slider-header">
-                                <label for="slider-attenuation" class="slider-label">Atenuação do Termostato
-                                    ($\gamma$)</label>
+                                <label for="slider-wave-interval" class="slider-label">Intervalo de Emissão
+                                    ($\Delta n_{\text{onda}}$)</label>
                                 <div class="dual-input-wrapper">
-                                    <input type="number" class="dual-input-number" id="num-attenuation" min="0.01"
-                                        max="0.50" step="0.01" value="0.09">
-                                    <span class="dual-input-unit">taxa</span>
+                                    <input type="number" class="dual-input-number" id="num-wave-interval" min="1"
+                                        max="20" step="1" value="3">
+                                    <span class="dual-input-unit">passos</span>
                                 </div>
                             </div>
-                            <input type="range" class="sim-slider" id="slider-attenuation" min="0.01" max="0.50"
-                                step="0.01" value="0.09">
+                            <input type="range" class="sim-slider" id="slider-wave-interval" min="1" max="20"
+                                step="1" value="3">
                         </div>
                     </div>
 
@@ -298,7 +349,7 @@
                     <div class="tab-header">
                         <div class="tab-header-row">
                             <h3 class="tab-title">Telemetria em Tempo Real</h3>
-                            <div class="sim-badge"><span class="status-dot"></span><span>60 FPS</span></div>
+                            <div class="sim-badge"><span class="status-dot"></span><span>30 Hz Fixo</span></div>
                         </div>
                         <p class="tab-subtitle">Monitoramento contínuo de energia cinética, temperatura e equilíbrio
                             estatístico.</p>
@@ -568,11 +619,11 @@
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <span>2. Tipos de Interação & Colisões</span>
+                            <span>2. Caixa 2D & Tipos de Interação</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Alterne entre os tipos de interação: coulombiana, Lennard-Jones e modelos de atração ou
-                            repulsão pura. As partículas colidem elasticamente com as bordas da tela.
+                            Alterne entre interações coulombiana, Lennard-Jones, atração ou repulsão. As partículas
+                            confinam-se elasticamente na caixa de $180 \times 130\text{ Å}$.
                         </p>
                     </div>
                     <div class="onboarding-card">
@@ -586,11 +637,11 @@
                     </div>
                     <div class="onboarding-card">
                         <div class="onboarding-card-title">
-                            <span>4. Presets & Interação na Tela</span>
+                            <span>4. Câmera, Escala & Interação</span>
                         </div>
                         <p class="onboarding-card-text">
-                            Alterne entre configurações prontas como cristais, anéis e grades. Clique ou arraste
-                            diretamente na tela para atrair ou repelir partículas.
+                            Use o scroll ou pinça para dar zoom ($10\text{ Å}$ em pixels), o modo Mover para deslocar a
+                            câmera ou clique na caixa para atrair e repelir partículas.
                         </p>
                     </div>
                 </div>
