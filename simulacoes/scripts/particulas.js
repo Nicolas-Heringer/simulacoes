@@ -44,10 +44,10 @@ const CURSOR_RADIUS_ANG = 24.0;     // 120 px / 5.0 px/Å = 24.0 Å
 const MAX_SHELL_MARGIN_ANG = 2.0;
 
 // Impulso entregue por CRUZAMENTO ÚNICO de cada frente de onda.
-// Calibrado para reproduzir o impulso médio do gatilho anterior por casca (0.05 × ~3.5 acertos
-// por onda em c = 2), preservando a dinâmica e a distância de equilíbrio já ajustadas,
-// mas agora sem dependência artificial em relação à velocidade c.
-const IMPULSE_PER_CROSSING = 0.175;
+// Calibrado para o intervalo padrão (waveInterval = 3 passos) de modo a preservar a taxa média
+// de transferência de momento (3 × 0.175 = 0.525) necessária para captura orbital e coesão cristalina,
+// mantendo o impulso individual fixo quando o usuário altera o slider de waveInterval.
+const IMPULSE_PER_CROSSING = 0.525;
 const MAX_WAVES = 65536;
 const MAX_PARTICLES = 256;
 
@@ -126,6 +126,11 @@ let cursorRingMat = null;
 let cursorDotMat = null;
 
 let playControl = null;
+let tempSliderCtrl = null;
+let waveSpeedSliderCtrl = null;
+let waveIntervalSliderCtrl = null;
+let attenuationSliderCtrl = null;
+let epsilonSliderCtrl = null;
 let focusToolbarCtrl = null;
 let plotEnergia = null;
 let plotTemp = null;
@@ -148,33 +153,59 @@ function parseHexToLinearArray(hex) {
 // =============================================================================
 // 3. ESTRATÉGIAS DE CÁLCULO DE INTERAÇÃO & FORÇAS (STAGE 1 — FIEL AO MODELO ATUAL)
 // =============================================================================
+// Unidade de distância das leis de força: r = distAng / FORCE_UNIT_ANG (1 unidade = 20 Å).
+// Convenção: magnitude positiva = força em direção ao ponto de emissão da onda (atrativa).
+
+// Escala de referência para que o decaimento 1/r² mantenha alcance efetivo de captura orbital
+// em r ∈ [1.0, 2.5] (20 a 50 Å) e equilíbrio estável com o caroço repulsivo de Pauli (1/r⁶).
+const COULOMB_RANGE_GAIN = 2.2;                  // Fator de alcance para compensar 1/r² em r > 1
+// Raio de equilíbrio em ε_C = 0.10: r_eq = 0.72 (14.4 Å) => PAULI_A = 0.10 * 2.2 * 0.72⁴
+const PAULI_A = 0.10 * COULOMB_RANGE_GAIN * Math.pow(0.72, 4); // ≈ 0.0591
+
+// Lennard-Jones efetivo com decaimento de onda 1/r² e caroço 1/r⁶ (equilíbrio em r_eq = 1.0 = 20 Å),
+// garantindo alcance atrativo compatível com a propagação de ondas na caixa 2D.
+const LJ_STRENGTH = 0.18;
+
+// Limitadores do caroço repulsivo (evitam chutes explosivos no passo discreto)
+const R_MIN_CORE = 0.38;                         // distância mínima efetiva (7.6 Å)
+const F_MAX_CORE = 1.2;                          // módulo máximo da força por cruzamento
+
+function forceFromMagnitude(mag, dx, dy, distance, impulse) {
+    const clamped = Math.max(-F_MAX_CORE, Math.min(F_MAX_CORE, mag));
+    const s = (clamped * impulse) / distance;
+    return { fx: dx * s, fy: dy * s };
+}
+
 const calculadoresDeInteracao = {
-    lennardJones(particle, waveCharge, dx, dy, distance, distSq, force) {
-        const dist6 = distSq * distSq * distSq;
-        const fx = (0.1 * (dx / distance) - 0.1 * (dx / dist6)) * force;
-        const fy = (0.1 * (dy / distance) - 0.1 * (dy / dist6)) * force;
-        return { fx, fy };
+    lennardJones(particle, waveCharge, dx, dy, distance, distSq, impulse) {
+        // Atração mediada pela frente de onda (∝ 1/r²) + repulsão de caroço de Pauli (∝ 1/r⁶)
+        // com equilíbrio exato em r = 1.0 (20 Å)
+        const r = Math.max(distance, R_MIN_CORE);
+        const r2 = r * r;
+        const r6 = r2 * r2 * r2;
+        const mag = LJ_STRENGTH * (1.0 / r2 - 1.0 / r6);
+        return forceFromMagnitude(mag, dx, dy, distance, impulse);
     },
-    ambos(particle, waveCharge, dx, dy, distance, distSq, force) {
-        return calculadoresDeInteracao.lennardJones(particle, waveCharge, dx, dy, distance, distSq, force);
+    ambos(particle, waveCharge, dx, dy, distance, distSq, impulse) {
+        return calculadoresDeInteracao.lennardJones(particle, waveCharge, dx, dy, distance, distSq, impulse);
     },
-    atracao(particle, waveCharge, dx, dy, distance, distSq, force) {
-        const fx = 0.1 * (dx / distance) * force;
-        const fy = 0.1 * (dy / distance) * force;
-        return { fx, fy };
+    atracao(particle, waveCharge, dx, dy, distance, distSq, impulse) {
+        // F ∝ 1/r (fluxo circular 2D)
+        const r = Math.max(distance, R_MIN_CORE);
+        return forceFromMagnitude(0.18 / r, dx, dy, distance, impulse);
     },
-    repulsao(particle, waveCharge, dx, dy, distance, distSq, force) {
-        const fx = 0.1 * (dx / distance) * (-force);
-        const fy = 0.1 * (dy / distance) * (-force);
-        return { fx, fy };
+    repulsao(particle, waveCharge, dx, dy, distance, distSq, impulse) {
+        const r = Math.max(distance, R_MIN_CORE);
+        return forceFromMagnitude(-0.18 / r, dx, dy, distance, impulse);
     },
-    coulomb(particle, waveCharge, dx, dy, distance, distSq, force) {
+    coulomb(particle, waveCharge, dx, dy, distance, distSq, impulse) {
+        // F = −q_i q_j ε_C / r² − A / r⁶
+        const r = Math.max(distance, R_MIN_CORE);
+        const r2 = r * r;
+        const r6 = r2 * r2 * r2;
         const qProduct = particle.charge * waveCharge;
-        const dist6 = distSq * distSq * distSq;
-        const factorCoulomb = -qProduct * epsilonCoulomb;
-        const fx = (factorCoulomb * (dx / distance) - 0.01 * (dx / dist6)) * force;
-        const fy = (factorCoulomb * (dy / distance) - 0.01 * (dy / dist6)) * force;
-        return { fx, fy };
+        const mag = (-qProduct * epsilonCoulomb * COULOMB_RANGE_GAIN) / r2 - PAULI_A / r6;
+        return forceFromMagnitude(mag, dx, dy, distance, impulse);
     }
 };
 
@@ -280,14 +311,40 @@ const positionGenerators = {
     many: {
         num: () => 3,
         generate(index) {
-            const dist = BOX_WIDTH / 3; // 60 Å
+            const dist = 40.0; // -40, 0, +40 Å
             return { x: -dist + dist * index, y: 0 };
         },
         velocity: () => ({ x: 0, y: 0 }),
         radius: () => 1.0,
-        color: (type, index) => ['#facc15', '#38bdf8', '#22c55e'][index % 3],
+        color: (type, index) => ['#22c55e', '#38bdf8', '#22c55e'][index % 3],
         mass: () => 1,
         charge: (type, index) => (index === 1 ? -1 : 1),
+    },
+    figure8: {
+        num: () => 3,
+        generate(index) {
+            const L = 28.0;
+            const coords = [
+                { x:  0.98795266 * L, y: -0.15475642 * L },
+                { x: -0.98795266 * L, y:  0.15475642 * L },
+                { x:  0.0,            y:  0.0 }
+            ];
+            return coords[index] || coords[0];
+        },
+        velocity(index) {
+            const mass = 12;
+            const vMult = 0.96;
+            const kappa = (0.18 * FORCE_UNIT_ANG * IMPULSE_PER_CROSSING) / (S_REF * mass);
+            const vScale = S_REF * Math.sqrt(kappa) * vMult;
+            if (index === 2) {
+                return { x: -1.15824446 * vScale, y: -0.63550608 * vScale };
+            }
+            return { x: 0.57912223 * vScale, y: 0.31775304 * vScale };
+        },
+        radius: () => 1.2,
+        color: (type, index) => ['#fb923c', '#38bdf8', '#facc15'][index % 3],
+        mass: () => 12,
+        charge: (type, index) => [1, -1, 0][index % 3],
     },
     circular: {
         num: () => 12,
@@ -328,14 +385,15 @@ const positionGenerators = {
     NaCl: {
         num: () => 64,
         generate(index) {
+            // Grade quadrada centrada para evitar colapso anisotrópico em fileiras separadas
             const cols = 8;
+            const spacing = 12.5; // Å (próximo ao equilíbrio da rede iônica)
+            const halfSpan = ((cols - 1) * spacing) * 0.5;
             const gridX = index % cols;
             const gridY = Math.floor(index / cols);
-            const spacingX = BOX_WIDTH / (cols + 1);
-            const spacingY = BOX_HEIGHT / (cols + 1);
             return {
-                x: -HALF_BOX_W + (gridX + 1) * spacingX,
-                y: HALF_BOX_H - (gridY + 1) * spacingY,
+                x: -halfSpan + gridX * spacing,
+                y:  halfSpan - gridY * spacing,
                 type: (gridX + gridY) % 2 === 0 ? 'Na' : 'Cl',
             };
         },
@@ -646,20 +704,21 @@ function initThreeStage() {
     scaleBarLines.renderOrder = 4;
     scene.add(scaleBarLines);
 
-    // Rótulo "10 Å" ao lado da barra de escala física no palco
+    // Rótulo "10 Å" em alta resolução ao lado da barra de escala física no palco
     const labelCanvas = document.createElement('canvas');
-    labelCanvas.width = 128;
-    labelCanvas.height = 48;
+    labelCanvas.width = 256;
+    labelCanvas.height = 96;
     const lCtx = labelCanvas.getContext('2d');
     if (lCtx) {
-        lCtx.clearRect(0, 0, 128, 48);
-        lCtx.font = '600 24px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
-        lCtx.fillStyle = 'rgba(250, 204, 21, 0.9)';
+        lCtx.clearRect(0, 0, 256, 96);
+        lCtx.font = '700 46px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+        lCtx.fillStyle = 'rgba(250, 204, 21, 0.95)';
         lCtx.textAlign = 'left';
         lCtx.textBaseline = 'middle';
-        lCtx.fillText('10 Å', 8, 25);
+        lCtx.fillText('10 Å', 14, 50);
         const labelTex = new THREE.CanvasTexture(labelCanvas);
-        labelTex.minFilter = THREE.LinearFilter;
+        labelTex.generateMipmaps = true;
+        labelTex.minFilter = THREE.LinearMipmapLinearFilter;
         const labelMat = new THREE.SpriteMaterial({
             map: labelTex,
             transparent: true,
@@ -667,8 +726,8 @@ function initThreeStage() {
             depthWrite: false
         });
         const scaleLabelSprite = new THREE.Sprite(labelMat);
-        scaleLabelSprite.position.set(barX1 + 5.2, barY, 0);
-        scaleLabelSprite.scale.set(9.0, 3.375, 1);
+        scaleLabelSprite.position.set(barX1 + 6.4, barY, 0);
+        scaleLabelSprite.scale.set(11.0, 4.125, 1);
         scaleLabelSprite.renderOrder = 4;
         scene.add(scaleLabelSprite);
     }
@@ -1191,6 +1250,50 @@ function updateVisualScene() {
     renderSceneNow();
 }
 
+// Configurações físicas calibradas por preset (aplicadas ao selecionar um preset)
+const presetConfigs = {
+    singleStatic: { potential: 'coulomb',      interaction: true, epsilon: 0.10, thermostat: true,  temp: 0.10,  gamma: 0.20, c: 2.0,  waveInterval: 3 },
+    singleMoving: { potential: 'coulomb',      interaction: true, epsilon: 0.10, thermostat: false, temp: 0.10,  gamma: 0.20, c: 2.0,  waveInterval: 3 },
+    double:       { potential: 'coulomb',      interaction: true, epsilon: 1.00, thermostat: true,  temp: 0.02,  gamma: 0.50, c: 8.0,  waveInterval: 1 },
+    doubleMoving: { potential: 'atracao',      interaction: true, epsilon: 0.10, thermostat: true,  temp: 0.20,  gamma: 0.40, c: 2.0,  waveInterval: 3 },
+    many:         { potential: 'coulomb',      interaction: true, epsilon: 1.00, thermostat: true,  temp: 0.02,  gamma: 0.50, c: 8.0,  waveInterval: 1 },
+    figure8:      { potential: 'atracao',      interaction: true, epsilon: 0.10, thermostat: true,  temp: 4.20,  gamma: 0.02, c: 10.0, waveInterval: 1 },
+    circular:     { potential: 'lennardJones', interaction: true, epsilon: 0.10, thermostat: true,  temp: 0.001, gamma: 0.20, c: 10.0, waveInterval: 1 },
+    grid:         { potential: 'lennardJones', interaction: true, epsilon: 0.10, thermostat: true,  temp: 0.40,  gamma: 0.20, c: 10.0, waveInterval: 1 },
+    NaCl:         { potential: 'coulomb',      interaction: true, epsilon: 1.00, thermostat: true,  temp: 0.05,  gamma: 0.40, c: 9.0,  waveInterval: 1 },
+};
+
+function applyPresetConfig(templateName) {
+    const cfg = presetConfigs[templateName];
+    if (!cfg) return;
+
+    tipoDeInteracao = cfg.potential;
+    interactionEnabled = cfg.interaction;
+    epsilonCoulomb = cfg.epsilon;
+    thermostatEnabled = cfg.thermostat;
+    TEMP_LIMIT = cfg.temp;
+    attenuation = cfg.gamma;
+    c = cfg.c;
+    waveInterval = cfg.waveInterval;
+
+    const selectPotencial = document.getElementById('selector-de-tipo-de-interacao');
+    if (selectPotencial) selectPotencial.value = tipoDeInteracao;
+
+    const switchInteracao = document.getElementById('switch-interacao');
+    if (switchInteracao) switchInteracao.checked = interactionEnabled;
+
+    const switchTermostato = document.getElementById('switch-termostato');
+    if (switchTermostato) switchTermostato.checked = thermostatEnabled;
+
+    if (epsilonSliderCtrl) epsilonSliderCtrl.setValue(epsilonCoulomb, false);
+    if (tempSliderCtrl) tempSliderCtrl.setValue(TEMP_LIMIT, false);
+    if (attenuationSliderCtrl) attenuationSliderCtrl.setValue(attenuation, false);
+    if (waveSpeedSliderCtrl) waveSpeedSliderCtrl.setValue(c, false);
+    if (waveIntervalSliderCtrl) waveIntervalSliderCtrl.setValue(waveInterval, false);
+
+    syncContextualControlsVisibility();
+}
+
 function reiniciarSistema(novoTemplate = 'none') {
     waveCount = 0;
     cumulativeWavePath = 0.0;
@@ -1454,6 +1557,7 @@ function setupEventListeners() {
                 document.querySelectorAll('.control-grid-2x2 .btn-preset').forEach(b => b.classList.remove('active'));
                 defaultBtn.classList.add('active');
             }
+            applyPresetConfig('singleStatic');
             reiniciarSistema('singleStatic');
         }
 
@@ -1469,6 +1573,7 @@ function setupEventListeners() {
     if (btnStep) {
         btnStep.addEventListener('click', () => {
             if (particles.length === 0) {
+                applyPresetConfig('singleStatic');
                 reiniciarSistema('singleStatic');
                 const defaultBtn = document.getElementById('preset-single-static');
                 if (defaultBtn) defaultBtn.classList.add('active');
@@ -1513,6 +1618,7 @@ function setupEventListeners() {
             btn.classList.add('active');
             const tmpl = btn.dataset.template;
             if (tmpl) {
+                applyPresetConfig(tmpl);
                 reiniciarSistema(tmpl);
             }
         });
@@ -1561,27 +1667,27 @@ function setupEventListeners() {
     syncContextualControlsVisibility();
 
     // --- SLIDERS FÍSICOS SINCRONIZADOS (DUAL-INPUT) ---
-    syncDualSlider('#slider-temp', '#num-temp', (val) => {
+    tempSliderCtrl = syncDualSlider('#slider-temp', '#num-temp', (val) => {
         TEMP_LIMIT = val;
         updateVisualScene();
     });
 
-    syncDualSlider('#slider-wave-speed', '#num-wave-speed', (val) => {
+    waveSpeedSliderCtrl = syncDualSlider('#slider-wave-speed', '#num-wave-speed', (val) => {
         c = val;
         updateVisualScene();
     });
 
-    syncDualSlider('#slider-wave-interval', '#num-wave-interval', (val) => {
+    waveIntervalSliderCtrl = syncDualSlider('#slider-wave-interval', '#num-wave-interval', (val) => {
         waveInterval = Math.max(1, Math.round(val));
         updateVisualScene();
     });
 
-    syncDualSlider('#slider-attenuation', '#num-attenuation', (val) => {
+    attenuationSliderCtrl = syncDualSlider('#slider-attenuation', '#num-attenuation', (val) => {
         attenuation = val;
         updateVisualScene();
     });
 
-    syncDualSlider('#slider-epsilon', '#num-epsilon', (val) => {
+    epsilonSliderCtrl = syncDualSlider('#slider-epsilon', '#num-epsilon', (val) => {
         epsilonCoulomb = val;
         updateVisualScene();
     });

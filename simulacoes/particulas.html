@@ -172,8 +172,12 @@
                                 Partículas (Opostas)
                             </button>
                             <button type="button" class="btn-preset" id="preset-many" data-template="many">
-                                <img src="../assets/icons/particles-three.svg" class="icon-svg" alt="3 Corpos"> 3 Corpos
-                                (3)
+                                <img src="../assets/icons/particles-three.svg" class="icon-svg" alt="3 Corpos Linear"> 3 Corpos
+                                (Linear)
+                            </button>
+                            <button type="button" class="btn-preset" id="preset-figure8" data-template="figure8">
+                                <img src="../assets/icons/orbital.svg" class="icon-svg" alt="3 Corpos Figura-8"> 3 Corpos
+                                (Figura-8)
                             </button>
                             <button type="button" class="btn-preset" id="preset-circular" data-template="circular">
                                 <img src="../assets/icons/particle-circle.svg" class="icon-svg" alt="Anel"> Anel
@@ -190,7 +194,7 @@
                         </div>
                     </div>
 
-                    <div class="sim-divider-label"><span>Câmera & Interação</span></div>
+                    <div class="sim-divider-label"><span>Interação & Temperatura</span></div>
 
                     <!-- Seletor de Modo de Interação no Palco (Mover Câmera vs. Repulsão vs. Atração) -->
                     <div class="control-group">
@@ -217,62 +221,7 @@
                         </div>
                     </div>
 
-                    <div class="sim-divider-label"><span>Potencial de Interação</span></div>
-
-                    <!-- Switch: Interação Ligada / Desligada -->
-                    <div class="control-group">
-                        <div class="switch-container">
-                            <span class="switch-label">Interação Mediada por Campos</span>
-                            <label class="sim-switch">
-                                <input type="checkbox" id="switch-interacao" checked>
-                                <span class="slider-round"></span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Seletor de Tipo de Potencial (Oculto quando interação desligada) -->
-                    <div class="control-group" id="group-potential-select">
-                        <label for="selector-de-tipo-de-interacao">Modelo de Força / Potencial:</label>
-                        <select id="selector-de-tipo-de-interacao" class="sim-control" data-focus-control="select"
-                            data-focus-label="Potencial" data-focus-order="4">
-                            <option value="coulomb" selected>Interação Coulombiana Retardada (Cargas ±q)</option>
-                            <option value="lennardJones">Potencial de Lennard-Jones 12-6</option>
-                            <option value="atracao">Apenas Atração ($F \propto 1/r$)</option>
-                            <option value="repulsao">Apenas Repulsão ($F \propto -1/r$)</option>
-                        </select>
-                    </div>
-
-                    <!-- Slider 4: Acoplamento Coulombiano (Exibido apenas quando potencial = coulomb e interação ligada) -->
-                    <div class="control-group" id="group-epsilon">
-                        <div class="slider-container sim-dual-slider">
-                            <div class="slider-header">
-                                <label for="slider-epsilon" class="slider-label">Acoplamento de Cargas
-                                    ($\varepsilon_C$)</label>
-                                <div class="dual-input-wrapper">
-                                    <input type="number" class="dual-input-number" id="num-epsilon" min="0.01"
-                                        max="1.00" step="0.01" value="0.10">
-                                    <span class="dual-input-unit">a.u.</span>
-                                </div>
-                            </div>
-                            <input type="range" class="sim-slider" id="slider-epsilon" min="0.01" max="1.00" step="0.01"
-                                value="0.10">
-                        </div>
-                    </div>
-
-                    <div class="sim-divider-label"><span>Termostato de Berendsen</span></div>
-
-                    <!-- Switch: Termostato de Berendsen (NVT) vs. Isolado (NVE) -->
-                    <div class="control-group">
-                        <div class="switch-container">
-                            <span class="switch-label">Termostato de Berendsen ($NVT$)</span>
-                            <label class="sim-switch">
-                                <input type="checkbox" id="switch-termostato" checked>
-                                <span class="slider-round"></span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Slider 1: Temperatura Alvo / Limite -->
+                    <!-- Slider 1: Temperatura Alvo / Limite (Visível na visão inicial) -->
                     <div class="control-group" id="group-temp-target">
                         <div class="slider-container sim-dual-slider">
                             <div class="slider-header">
@@ -290,56 +239,124 @@
                         </div>
                     </div>
 
-                    <!-- Slider 3: Taxa de Acoplamento Térmico (Berendsen γ) -->
-                    <div class="control-group" id="group-attenuation">
-                        <div class="slider-container sim-dual-slider">
-                            <div class="slider-header">
-                                <label for="slider-attenuation" class="slider-label">Acoplamento do Termostato
-                                    ($\gamma$)</label>
-                                <div class="dual-input-wrapper">
-                                    <input type="number" class="dual-input-number" id="num-attenuation" min="0.01"
-                                        max="0.50" step="0.01" value="0.09">
-                                    <span class="dual-input-unit">taxa</span>
-                                </div>
-                            </div>
-                            <input type="range" class="sim-slider" id="slider-attenuation" min="0.01" max="0.50"
-                                step="0.01" value="0.09">
-                        </div>
-                    </div>
-
-                    <div class="sim-divider-label"><span>Propagação & Emissão de Ondas</span></div>
-
-                    <!-- Slider 2: Velocidade de Propagação da Onda (c) -->
+                    <!-- Seção Recolhível: Ajustes Avançados (Inicia Minimizada) -->
                     <div class="control-group">
-                        <div class="slider-container sim-dual-slider">
-                            <div class="slider-header">
-                                <label for="slider-wave-speed" class="slider-label">Velocidade da Onda ($c$)</label>
-                                <div class="dual-input-wrapper">
-                                    <input type="number" class="dual-input-number" id="num-wave-speed" min="1.0"
-                                        max="10.0" step="0.5" value="2.0">
-                                    <span class="dual-input-unit">px/f</span>
-                                </div>
-                            </div>
-                            <input type="range" class="sim-slider" id="slider-wave-speed" min="1.0" max="10.0"
-                                step="0.5" value="2.0">
-                        </div>
-                    </div>
+                        <details class="sim-accordion" id="accordion-advanced">
+                            <summary class="sim-accordion-summary">
+                                <span class="sim-accordion-title">
+                                    <img src="../assets/icons/sliders.svg" class="icon-svg" alt="">
+                                    <span>Ajustes Avançados</span>
+                                </span>
+                                <img src="../assets/icons/chevron-right.svg" class="icon-svg sim-accordion-chevron" alt="">
+                            </summary>
+                            <div class="sim-accordion-body">
+                                <div class="sim-divider-label"><span>Potencial de Interação</span></div>
 
-                    <!-- Slider 5: Intervalo de Emissão de Ondas (waveInterval) -->
-                    <div class="control-group">
-                        <div class="slider-container sim-dual-slider">
-                            <div class="slider-header">
-                                <label for="slider-wave-interval" class="slider-label">Intervalo de Emissão
-                                    ($\Delta n_{\text{onda}}$)</label>
-                                <div class="dual-input-wrapper">
-                                    <input type="number" class="dual-input-number" id="num-wave-interval" min="1"
-                                        max="20" step="1" value="3">
-                                    <span class="dual-input-unit">passos</span>
+                                <!-- Switch: Interação Ligada / Desligada -->
+                                <div class="control-group">
+                                    <div class="switch-container">
+                                        <span class="switch-label">Interação Mediada por Campos</span>
+                                        <label class="sim-switch">
+                                            <input type="checkbox" id="switch-interacao" checked>
+                                            <span class="slider-round"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Seletor de Tipo de Potencial (Oculto quando interação desligada) -->
+                                <div class="control-group" id="group-potential-select">
+                                    <label for="selector-de-tipo-de-interacao">Modelo de Força / Potencial:</label>
+                                    <select id="selector-de-tipo-de-interacao" class="sim-control" data-focus-control="select"
+                                        data-focus-label="Potencial" data-focus-order="4">
+                                        <option value="coulomb" selected>Interação Coulombiana Retardada (Cargas ±q)</option>
+                                        <option value="lennardJones">Potencial de Lennard-Jones 12-6</option>
+                                        <option value="atracao">Apenas Atração (F ∝ 1/r)</option>
+                                        <option value="repulsao">Apenas Repulsão (F ∝ −1/r)</option>
+                                    </select>
+                                </div>
+
+                                <!-- Slider 4: Acoplamento Coulombiano (Exibido apenas quando potencial = coulomb e interação ligada) -->
+                                <div class="control-group" id="group-epsilon">
+                                    <div class="slider-container sim-dual-slider">
+                                        <div class="slider-header">
+                                            <label for="slider-epsilon" class="slider-label">Acoplamento de Cargas
+                                                ($\varepsilon_C$)</label>
+                                            <div class="dual-input-wrapper">
+                                                <input type="number" class="dual-input-number" id="num-epsilon" min="0.01"
+                                                    max="1.00" step="0.01" value="0.10">
+                                                <span class="dual-input-unit">a.u.</span>
+                                            </div>
+                                        </div>
+                                        <input type="range" class="sim-slider" id="slider-epsilon" min="0.01" max="1.00" step="0.01"
+                                            value="0.10">
+                                    </div>
+                                </div>
+
+                                <div class="sim-divider-label"><span>Termostato de Berendsen</span></div>
+
+                                <!-- Switch: Termostato de Berendsen (NVT) vs. Isolado (NVE) -->
+                                <div class="control-group">
+                                    <div class="switch-container">
+                                        <span class="switch-label">Termostato de Berendsen ($NVT$)</span>
+                                        <label class="sim-switch">
+                                            <input type="checkbox" id="switch-termostato" checked>
+                                            <span class="slider-round"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Slider 3: Taxa de Acoplamento Térmico (Berendsen γ) -->
+                                <div class="control-group" id="group-attenuation">
+                                    <div class="slider-container sim-dual-slider">
+                                        <div class="slider-header">
+                                            <label for="slider-attenuation" class="slider-label">Acoplamento ($\gamma$)</label>
+                                            <div class="dual-input-wrapper">
+                                                <input type="number" class="dual-input-number" id="num-attenuation" min="0.01"
+                                                    max="0.50" step="0.01" value="0.09">
+                                                <span class="dual-input-unit">taxa</span>
+                                            </div>
+                                        </div>
+                                        <input type="range" class="sim-slider" id="slider-attenuation" min="0.01" max="0.50"
+                                            step="0.01" value="0.09">
+                                    </div>
+                                </div>
+
+                                <div class="sim-divider-label"><span>Propagação & Emissão de Ondas</span></div>
+
+                                <!-- Slider 2: Velocidade de Propagação da Onda (c) -->
+                                <div class="control-group">
+                                    <div class="slider-container sim-dual-slider">
+                                        <div class="slider-header">
+                                            <label for="slider-wave-speed" class="slider-label">Velocidade da Onda ($c$)</label>
+                                            <div class="dual-input-wrapper">
+                                                <input type="number" class="dual-input-number" id="num-wave-speed" min="1.0"
+                                                    max="10.0" step="0.5" value="2.0">
+                                                <span class="dual-input-unit">px/f</span>
+                                            </div>
+                                        </div>
+                                        <input type="range" class="sim-slider" id="slider-wave-speed" min="1.0" max="10.0"
+                                            step="0.5" value="2.0">
+                                    </div>
+                                </div>
+
+                                <!-- Slider 5: Intervalo de Emissão de Ondas (waveInterval) -->
+                                <div class="control-group">
+                                    <div class="slider-container sim-dual-slider">
+                                        <div class="slider-header">
+                                            <label for="slider-wave-interval" class="slider-label">Emissão
+                                                ($\Delta n_{\text{onda}}$)</label>
+                                            <div class="dual-input-wrapper">
+                                                <input type="number" class="dual-input-number" id="num-wave-interval" min="1"
+                                                    max="20" step="1" value="3">
+                                                <span class="dual-input-unit">passos</span>
+                                            </div>
+                                        </div>
+                                        <input type="range" class="sim-slider" id="slider-wave-interval" min="1" max="20"
+                                            step="1" value="3">
+                                    </div>
                                 </div>
                             </div>
-                            <input type="range" class="sim-slider" id="slider-wave-interval" min="1" max="20"
-                                step="1" value="3">
-                        </div>
+                        </details>
                     </div>
 
                 </div>
@@ -429,63 +446,94 @@
                             intermoleculares.</p>
                     </div>
 
-                    <!-- Card Didático 1: Função de Green Retardada -->
+                    <!-- Card Didático 1: Campos Retardados, Doppler & Cruzamento Causal -->
                     <div class="control-group">
                         <div class="theory-card">
                             <h4><img src="../assets/icons/book-open.svg" class="icon-svg icon-accent" alt="Teoria">
-                                Campos Retardados & Funções de Green</h4>
+                                <span>Campos Retardados, Doppler & Cruzamento Causal</span></h4>
                             <p>
-                                A informação de força não se propaga instantaneamente ($c < \infty$). A equação de onda
-                                    d'Alembertiana governante: </p>
-                                    $$\left( \nabla^2 - \frac{1}{c^2}\frac{\partial^2}{\partial t^2} \right)
-                                    \Phi(\mathbf{r}, t) = -\frac{\rho(\mathbf{r}, t)}{\varepsilon_0}$$
-                                    <p>
-                                        Possui solução exata via a <strong>Função de Green Retardada Causal</strong>:
-                                    </p>
-                                    $$G_{\text{ret}}(\mathbf{r}, t; \mathbf{r}', t') = \frac{\delta\left( t - t' -
-                                    \frac{|\mathbf{r} - \mathbf{r}'|}{c} \right)}{4\pi |\mathbf{r} - \mathbf{r}'|}$$
-                                    <p>
-                                        O campo em $\mathbf{r}$ no instante $t$ depende unicamente do estado da
-                                        partícula emissora no instante retardado $t_{\text{ret}} = t - |\mathbf{r} -
-                                        \mathbf{r}'|/c$.
-                                    </p>
+                                A força propaga-se em velocidade finita ($c &lt; \infty$) segundo a equação d'Alembertiana
+                                cuja solução é dada pela <strong>Função de Green Retardada</strong>:
+                            </p>
+                            $$\left( \nabla^2 - \frac{1}{c^2}\frac{\partial^2}{\partial t^2} \right)
+                            \Phi(\mathbf{r}, t) = -\frac{\rho(\mathbf{r}, t)}{\varepsilon_0}$$
+                            $$G_{\text{ret}}(\mathbf{r}, t; \mathbf{r}', t') = \frac{\delta\!\left( t - t' -
+                            \frac{|\mathbf{r} - \mathbf{r}'|}{c} \right)}{4\pi |\mathbf{r} - \mathbf{r}'|}$$
+                            <p>
+                                Cada frente entrega um impulso no <strong>cruzamento causal único</strong>
+                                ($t_{\text{ret}} = t - |\mathbf{r} - \mathbf{r}'|/c$), gerando <strong>Efeito Doppler</strong>
+                                e espirais de radiação quando as fontes se movem.
+                            </p>
                         </div>
                     </div>
 
-                    <!-- Card Didático 2: Potenciais Efetivos -->
+                    <!-- Card Didático 2: Leis de Força na Caixa 2D -->
                     <div class="control-group">
                         <div class="theory-card">
                             <h4><img src="../assets/icons/sparkles.svg" class="icon-svg icon-accent"
-                                    alt="Lennard-Jones"> Potencial de Lennard-Jones & Coulomb</h4>
+                                    alt="Potenciais"> <span>Leis de Força na Caixa 2D (180 × 130 Å)</span></h4>
                             <p>
-                                Potencial 12-6 de equilíbrio intermolecular:
+                                <strong>Coulomb + Pauli:</strong> estabiliza dipolos $\text{Na}^+\text{Cl}^-$ e células
+                                cristalinas:
                             </p>
-                            $$V_{\text{LJ}}(r) = 4\varepsilon \left[ \left(\frac{\sigma}{r}\right)^{12} -
-                            \left(\frac{\sigma}{r}\right)^6 \right]$$
-                            <p>
-                                Para o cristal iônico de $\text{NaCl}$, a força coulombiana combinada com a repulsão de
-                                caroço de Pauli ($r^{-6}$) gera a estabilização da rede cristalina:
-                            </p>
-                            $$\mathbf{F}_{ij}(t) = \left( -\frac{q_i q_j \varepsilon_C}{r^2} - \frac{A}{r^6} \right)
+                            $$\mathbf{F}_{\text{C}}(r) = \left( -\frac{q_i q_j \varepsilon_C}{r^2} - \frac{A}{r^6} \right)
                             \hat{\mathbf{r}}_{ij}$$
+                            <p>
+                                <strong>Lennard-Jones efetivo adaptado:</strong> usa atração $r^{-2}$ acoplada à onda e
+                                caroço $r^{-6}$ (equilíbrio em $20\text{ Å}$) para preservar alcance em toda a caixa:
+                            </p>
+                            $$\mathbf{F}_{\text{LJ}}(r) \propto \left( \frac{1}{r^2} - \frac{1}{r^6} \right)\hat{\mathbf{r}}_{ij}$$
+                            <p>
+                                <strong>Atração / Repulsão 2D ($F \propto \pm 1/r$):</strong> fluxo circular 2D, no qual
+                                a velocidade orbital de um par é <strong>independente do raio</strong>:
+                            </p>
+                            $$v_{\text{orb}} = \sqrt{\frac{k}{2m}}$$
                         </div>
                     </div>
 
-                    <!-- Card Didático 3: Termostato e Equipartição -->
+                    <!-- Card Didático 3: Fenômenos Emergentes nos Presets -->
+                    <div class="control-group">
+                        <div class="theory-card">
+                            <h4><img src="../assets/icons/orbital.svg" class="icon-svg icon-accent"
+                                    alt="Fenômenos"> <span>Fenômenos Emergentes nos Presets</span></h4>
+                            <ul>
+                                <li><strong>Transição de Fase (Grade $6\times 6$):</strong> baixar $T_{\text{target}}$ de
+                                    $0{,}40$ para $0{,}001$ cristaliza o fluido em camadas concêntricas.</li>
+                                <li><strong>Quebra de Simetria (Anel 12):</strong> o anel oco ($D_{12}$) sofre
+                                    flambagem radial e relaxa espontaneamente para a simetria $D_4$ ($4 + 8$).</li>
+                                <li><strong>Órbitas & Figura-8:</strong> par em $1/r$ gera espirais ("ondas
+                                    gravitacionais") e $3$ corpos traçam a coreografia em $\infty$.</li>
+                                <li><strong>Nucleação Iônica ($\text{NaCl}$):</strong> pares $\text{Na}^+\text{Cl}^-$
+                                    blindam a carga ($1/r^2 \to 1/r^4$) e formam células quadradas $\text{Na}_2\text{Cl}_2$.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Card Didático 4: Equipartição 2D & Termostato de Berendsen -->
                     <div class="control-group">
                         <div class="theory-card">
                             <h4><img src="../assets/icons/thermometer.svg" class="icon-svg icon-accent" alt="Termo">
-                                Termostato & Equipartição</h4>
+                                <span>Equipartição 2D & Berendsen ($NVT/NVE$)</span></h4>
                             <p>
-                                Pelo Teorema da Equipartição em 2D com $N$ partículas ($2N$ graus de liberdade
-                                translacionais):
+                                Pelo Teorema da Equipartição em 2D com $N$ partículas ($2N$ graus de liberdade):
                             </p>
                             $$K = \sum_{i=1}^N \frac{1}{2}m_i v_i^2 = N k_B T \quad \implies \quad T = \frac{K}{N k_B}$$
+                            <p>
+                                O termostato ($NVT$) reescalona suavemente as velocidades pelo fator $\lambda$ de Berendsen;
+                                ao desligá-lo, o sistema evolui isolado ($NVE$).
+                            </p>
 
                             <button type="button" class="btn-secondary w-full" id="btn-abrir-modal-teoria">
                                 <img src="../assets/icons/book-open.svg" class="icon-svg" alt="Teoria">
                                 Ver Dedução Matemática Completa (Modal)
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- Referência Bibliográfica -->
+                    <div class="control-group">
+                        <div class="biblio-ref">
+                            <strong>Referência:</strong> David J. Griffiths, <a href="../index.html#secao-bibliografia"><em>Introduction to Electrodynamics</em></a> (3ª ed., Cap. 10.3: <em>Point Charges</em> — potenciais retardados de cargas pontuais em movimento).
                         </div>
                     </div>
                 </div>
@@ -520,68 +568,120 @@
                 <div class="theory-section">
                     <h4>1. Propagação Causal & Função de Green Retardada</h4>
                     <p>
-                        Em teorias de campo clássicas e eletrodinâmica relativística, nenhuma interação pode se propagar
-                        mais rápido que a velocidade da luz no meio ($c$). A equação diferencial que rege o potencial
-                        escalar ou eletromagnético $\Phi$ gerado por uma densidade de carga/fonte pontual
-                        $\rho(\mathbf{r}, t) = q \delta(\mathbf{r} - \mathbf{r}_0(t))$ é a equação de onda inomogênea:
+                        Em teorias de campo clássicas, nenhuma interação se propaga mais rápido que a velocidade
+                        característica do meio ($c$). A equação de onda inomogênea que rege o potencial escalar $\Phi$
+                        gerado por uma fonte pontual $\rho(\mathbf{r}, t) = q\,\delta(\mathbf{r} - \mathbf{r}_0(t))$ é:
                     </p>
                     $$\Box \Phi(\mathbf{r}, t) \equiv \left( \nabla^2 - \frac{1}{c^2} \frac{\partial^2}{\partial t^2}
                     \right) \Phi(\mathbf{r}, t) = -\frac{\rho(\mathbf{r}, t)}{\varepsilon_0}$$
                     <p>
-                        A resposta a uma fonte impulsiva pontual no espaço-tempo $(\mathbf{r}', t')$ é obtida através da
-                        <strong>Função de Green Retardada</strong>:
+                        A resposta a uma fonte impulsiva no espaço-tempo $(\mathbf{r}', t')$ é dada pela
+                        <strong>Função de Green Retardada Causal</strong>:
                     </p>
                     $$G_{\text{ret}}(\mathbf{r}, t; \mathbf{r}', t') = \frac{1}{4\pi |\mathbf{r} - \mathbf{r}'|}
-                    \delta\left( t - t' - \frac{|\mathbf{r} - \mathbf{r}'|}{c} \right) \Theta(t - t')$$
+                    \delta\!\left( t - t' - \frac{|\mathbf{r} - \mathbf{r}'|}{c} \right) \Theta(t - t')$$
                     <p>
-                        Onde $\Theta(t - t')$ é a função degrau de Heaviside que impõe estritamente o princípio da
-                        <em>causalidade física</em> (efeitos não precedem suas causas). A integração no espaço-tempo
-                        resulta nos célebres <strong>Potenciais Retardados de Liénard-Wiechert</strong>:
+                        Onde $\Theta(t - t')$ impõe estritamente a causalidade. Integrando no espaço-tempo obtêm-se os
+                        potenciais retardados avaliados em $t_{\text{ret}} = t - |\mathbf{r} - \mathbf{r}'|/c$.
                     </p>
-                    $$\Phi(\mathbf{r}, t) = \frac{1}{4\pi\varepsilon_0} \int \frac{\rho(\mathbf{r}',
-                    t_{\text{ret}})}{|\mathbf{r} - \mathbf{r}'|} d^3 r', \quad \text{onde} \quad t_{\text{ret}} = t -
-                    \frac{|\mathbf{r} - \mathbf{r}'|}{c}$$
                 </div>
 
                 <div class="theory-callout">
-                    <strong class="callout-heading"><img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt=""> Correspondência com a Simulação:</strong>
+                    <strong class="callout-heading"><img src="../assets/icons/lightbulb.svg" class="icon-svg icon-accent" alt=""> Correspondência com o Motor Numérico:</strong>
                     <ul>
-                        <li>Cada círculo emitido por uma partícula no Canvas representa a crista de uma <strong>frente
-                                de onda esférica $\delta\left(t - t' - R/c\right)$</strong>.</li>
-                        <li>A partícula receptora $j$ só experimenta a força devida à partícula $i$ no momento exato em
-                            que a frente de onda correspondente atinge sua posição atual.</li>
-                        <li>Isso reproduz naturalmente o <strong>Efeito Doppler</strong> e deformações anisotrópicas no
-                            campo de forças quando as partículas estão em movimento.</li>
+                        <li><strong>Domínio Métrico:</strong> caixa 2D confinada de $180 \times 130\text{ Å}$ com paredes
+                            elásticas e régua física calibrada de $10\text{ Å}$ no palco ortográfico WebGL.</li>
+                        <li><strong>Frequência Constante ($30\text{ Hz}$):</strong> o relógio físico roda a passo fixo
+                            de $\Delta t = 1/30\text{ s}$, garantindo taxa exata de emissão
+                            $f = 30 / \Delta n_{\text{onda}}\text{ Hz}$ em qualquer monitor.</li>
+                        <li><strong>Cruzamento Causal Único:</strong> cada frente de onda entrega seu impulso exatamente
+                            uma vez, no passo em que $f(t) = |\mathbf{r}_p(t) - \mathbf{r}_0| - R(t)$ troca de sinal de
+                            positivo para não positivo, tornando o impulso por onda independente de $c$.</li>
                     </ul>
                 </div>
 
                 <div class="theory-section">
-                    <h4>2. Potenciais de Lennard-Jones e Interação Coulombiana Iônica</h4>
+                    <h4>2. Potenciais Intermoleculares na Caixa 2D & Regularização</h4>
                     <p>
-                        O modelo de <strong>Lennard-Jones (12-6)</strong> descreve a interação entre átomos neutros
-                        considerando atração por forças dispersivas de van der Waals ($\propto r^{-6}$) e repulsão
-                        quântica de curto alcance por sobreposição de orbitais e Princípio de Exclusão de Pauli
-                        ($\propto r^{-12}$):
+                        No modo <strong>Coulombiano Iônico</strong> ($\text{NaCl}$), cargas opostas ($q_{\text{Na}} = +1$,
+                        $q_{\text{Cl}} = -1$) combinam a força eletrostática com o caroço repulsivo de exclusão de Pauli:
                     </p>
-                    $$V_{\text{LJ}}(r) = 4\varepsilon \left[ \left(\frac{\sigma}{r}\right)^{12} -
-                    \left(\frac{\sigma}{r}\right)^6 \right]$$
+                    $$F_{\text{C}}(r) = -\frac{q_i q_j \varepsilon_C}{r^2} - \frac{A}{r^6}$$
                     <p>
-                        No cristal de $\text{NaCl}$, as partículas carregam cargas líquidas $q_{\text{Na}} = +1$ e
-                        $q_{\text{Cl}} = -1$. O potencial efetivo acopla a atração/repulsão eletrostática mediada por
-                        ondas com o termo repulsivo de Pauli:
+                        Para pares $\text{Na}^+\text{Cl}^-$, o equilíbrio ocorre em $14{,}4\text{ Å}$ ($\varepsilon_C = 0{,}10$)
+                        e encurta para $8{,}1\text{ Å}$ em $\varepsilon_C = 1{,}00$.
                     </p>
-                    $$F_{\text{eff}}(r) = -\frac{q_i q_j \varepsilon_C}{r^2} - \frac{A}{r^6}$$
+                    <p>
+                        No modelo <strong>Lennard-Jones 12-6 clássico</strong>, a atração de van der Waals decai com
+                        $r^{-7}$ ($\propto (\sigma/r)^7 - (\sigma/r)^{13}$), extinguindo-se muito rápido em escalas de
+                        dezenas de Ångströms. Para preservar interações visíveis através de toda a caixa 2D, adotamos a
+                        <strong>forma efetiva adaptada</strong> acoplada ao decaimento das frentes de onda, com equilíbrio
+                        em $r_{\text{eq}} = 20\text{ Å}$:
+                    </p>
+                    $$F_{\text{LJ,ef}}(r) = k_{\text{LJ}} \left( \frac{1}{r^2} - \frac{1}{r^6} \right)$$
+                    <p>
+                        Em encontros frontais muito próximos, aplicam-se limitadores numéricos de caroço
+                        ($r_{\min} = 7{,}6\text{ Å}$ e saturação $F_{\max}$) para evitar impulsos divergentes no passo discreto.
+                    </p>
                 </div>
 
                 <div class="theory-section">
-                    <h4>3. Termostato de Velocidades e Teorema de Equipartição</h4>
+                    <h4>3. Potencial Logarítmico 2D ($F \propto 1/r$), Órbitas Planas & Figura-8</h4>
                     <p>
-                        Para manter a estabilidade térmica ou simular processos isotérmicos a uma temperatura
-                        $T_{\text{target}}$, aplica-se um algoritmo de reescalonamento contínuo das velocidades (análogo
-                        ao termostato de Berendsen):
+                        Em duas dimensões espaciais, o fluxo de Gauss através de um círculo de perímetro $2\pi r$ resulta
+                        em uma força central $F(r) = k / r$ (potencial logarítmico). Igualando a força mútua de um par
+                        em órbita circular separada por diâmetro $2 R_{\text{orb}}$ à força centrípeta:
+                    </p>
+                    $$\frac{m v^2}{R_{\text{orb}}} = \frac{k}{2 R_{\text{orb}}} \quad \implies \quad v_{\text{orb}} = \sqrt{\frac{k}{2m}}$$
+                    <p>
+                        Notavelmente, a velocidade orbital $v_{\text{orb}}$ <strong>independe do raio da órbita</strong> — a
+                        mesma assinatura cinemática das curvas de rotação planas de galáxias. Em <strong>2 Partículas (Opostas)</strong>,
+                        ajustar $T_{\text{target}}$ abaixo ou acima desse valor crítico fecha ou abre a órbita enquanto
+                        as cristas emitidas desenham braços espirais contínuos. No preset <strong>3 Corpos (Figura-8)</strong>,
+                        velocidades iniciais calibradas reproduzem a famosa coreografia periódica em $\infty$ mediada
+                        pelas ondas retardadas.
+                    </p>
+                </div>
+
+                <div class="theory-section">
+                    <h4>4. Fenômenos Coletivos Emergentes</h4>
+                    <ul>
+                        <li><strong>Transição de Fase 2D (Grade $6\times 6$):</strong> em Lennard-Jones, resfriar $T_{\text{target}}$
+                            de $0{,}40$ para $0{,}001$ leva o sistema fluido a nuclear um aglomerado cristalino em camadas
+                            concêntricas; voltar a aquecer promove a fusão.</li>
+                        <li><strong>Quebra Espontânea de Simetria ($D_{12} \to D_4$):</strong> o <strong>Anel Circular (12)</strong>
+                            inicia em equilíbrio instável (ponto de sela). Ao contrair além do ponto em que vizinhos
+                            adjacentes se comprimem ($d &lt; 20\text{ Å}$), sofre flambagem radial (<em>buckling</em>),
+                            amplificando assimetrias numéricas infinitesimais até relaxar em 2 camadas simétricas ($4 + 8$).</li>
+                        <li><strong>Rede Iônica & Blindagem Dipolar ($\text{Sal NaCl}$):</strong> pares $\text{Na}^+\text{Cl}^-$
+                            formam dipolos elétricos que blindam o campo de longo alcance ($1/r^2 \to 1/r^4$) e se
+                            conectam formando células unitárias quadradas $\text{Na}_2\text{Cl}_2$.</li>
+                    </ul>
+                </div>
+
+                <div class="theory-section">
+                    <h4>5. Equipartição em 2D & Termostato de Berendsen ($NVT / NVE$)</h4>
+                    <p>
+                        Com $2N$ graus de liberdade translacionais no plano ($k_B = 1$), a temperatura cinética
+                        instantânea satisfaz:
+                    </p>
+                    $$K = \sum_{i=1}^N \frac{1}{2}m_i v_i^2 = N k_B T \quad \implies \quad T_{\text{instantâneo}} = \frac{K}{N k_B}$$
+                    <p>
+                        Com o <strong>Termostato de Berendsen ($NVT$)</strong> ligado, as velocidades são reescalonadas
+                        suavemente a cada passo para manter a temperatura próxima de $T_{\text{target}}$:
                     </p>
                     $$\lambda = \sqrt{1 + \gamma \left( \frac{T_{\text{target}}}{T_{\text{instantâneo}}} - 1 \right)},
                     \quad \mathbf{v}_i \leftarrow \lambda \mathbf{v}_i$$
+                    <p>
+                        Ao desligar o termostato (modo <strong>Microcanônico $NVE$</strong>, padrão em
+                        <strong>1 Partícula Móvel</strong>), as velocidades não sofrem amortecimento térmico, permitindo
+                        observar o Efeito Doppler puro das frentes de onda.
+                    </p>
+                </div>
+
+                <!-- Referência Bibliográfica -->
+                <div class="biblio-ref">
+                    <strong>Referência:</strong> David J. Griffiths, <a href="../index.html#secao-bibliografia"><em>Introduction to Electrodynamics</em></a> (3ª ed., Cap. 10.3: <em>Point Charges</em> — potenciais retardados de cargas pontuais em movimento).
                 </div>
             </div>
 

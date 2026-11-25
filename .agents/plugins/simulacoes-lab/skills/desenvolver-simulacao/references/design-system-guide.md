@@ -268,6 +268,25 @@ Posicionar dentro de `.canvas-area`. Não utilize `.sim-transport-bar` legado na
 ```
 > **Contrato de Estados Semânticos (`setFieldState`)**: Os estados `.is-valid`, `.is-invalid`, `.is-warning` e `.is-ready` **mantêm os contornos, sliders, inputs e botões com as cores originais do tema**, alterando exclusivamente a cor semântica de `.field-hint` e de `.icon-svg` com a classe de estado. Já `.is-disabled` reduz a opacidade (`0.4`), bloqueia ponteiro (`pointer-events: none`) e desabilita automaticamente inputs/botões internos para teclado.
 
+### 3.4.1 Seção Recolhível / Acordeão (`.sim-accordion`)
+Baseado em `<details class="sim-accordion">` nativo (sem dependência de JavaScript). Começa recolhido por padrão (ou expandido com o atributo `open`), permitindo ocultar parâmetros avançados na carga inicial da simulação:
+```html
+<div class="control-group">
+    <details class="sim-accordion" id="accordion-advanced">
+        <summary class="sim-accordion-summary">
+            <span class="sim-accordion-title">
+                <img src="../assets/icons/sliders.svg" class="icon-svg" alt="">
+                <span>Ajustes Avançados</span>
+            </span>
+            <img src="../assets/icons/chevron-right.svg" class="icon-svg sim-accordion-chevron" alt="">
+        </summary>
+        <div class="sim-accordion-body">
+            <!-- Divisores, switches, selects e dual-sliders avançados -->
+        </div>
+    </details>
+</div>
+```
+
 ### 3.5 Leituras Numéricas (`.sim-readout`) e Status Badges (`.sim-badge`)
 ```html
 <div class="sim-readout">

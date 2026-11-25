@@ -3871,6 +3871,97 @@ button.btn-outline:not(:disabled):is(.tone-accent, .tone-cyan, .tone-emerald, .t
 }
 
 /* =============================================================================
+   SEÇÃO RECOLHÍVEL / ACORDEÃO (.sim-accordion)
+   ============================================================================= */
+.sim-accordion {
+    border: var(--ui-border-width, 1.5px) solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    overflow: hidden;
+    transition: border-color var(--trans-fast);
+}
+
+.sim-accordion:hover {
+    border-color: var(--border-color);
+}
+
+.sim-accordion[open] {
+    border-color: color-mix(in srgb, var(--accent-card, var(--accent-color)) 45%, var(--border-color));
+}
+
+.sim-accordion-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: background var(--trans-fast), color var(--trans-fast);
+}
+
+.sim-accordion-summary::-webkit-details-marker {
+    display: none;
+}
+
+.sim-accordion-summary:hover {
+    background: var(--bg-hover);
+}
+
+.sim-accordion-summary:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: -2px;
+}
+
+.sim-accordion[open] > .sim-accordion-summary {
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--accent-text, var(--accent-color));
+    background: var(--accent-subtle);
+}
+
+.sim-accordion-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.sim-accordion-title .icon-svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    color: var(--accent-text, var(--accent-color));
+}
+
+.sim-accordion-chevron {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+    transition: transform var(--trans-fast), color var(--trans-fast);
+}
+
+.sim-accordion[open] > .sim-accordion-summary .sim-accordion-chevron {
+    transform: rotate(90deg);
+    color: var(--accent-text, var(--accent-color));
+}
+
+.sim-accordion-body {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sim-accordion-body > .sim-divider-label:first-child {
+    margin-top: 2px;
+}
+
+/* =============================================================================
    12. ACESSIBILIDADE: REDUÇÃO DE MOVIMENTO (prefers-reduced-motion)
    ============================================================================= */
 @media (prefers-reduced-motion: reduce) {

@@ -52,3 +52,7 @@
     height: 15px;
     flex-shrink: 0;
 }
+
+#preset-nacl {
+    grid-column: 1 / -1;
+}
