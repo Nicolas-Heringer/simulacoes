@@ -509,6 +509,15 @@ async function initBibliograficaSection() {
     });
   });
 
+  function clearBiblioUrlParams() {
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("livro") || url.searchParams.has("busca")) {
+      url.searchParams.delete("livro");
+      url.searchParams.delete("busca");
+      window.history.replaceState({}, "", url.pathname + url.search + url.hash);
+    }
+  }
+
   // Event Listener para Busca Textual e Botão Limpar
   if (searchInput) {
     searchInput.addEventListener("input", filterAndSearch);
@@ -516,6 +525,7 @@ async function initBibliograficaSection() {
     searchInput.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && this.value) {
         this.value = "";
+        clearBiblioUrlParams();
         filterAndSearch();
       }
     });
@@ -524,12 +534,28 @@ async function initBibliograficaSection() {
   if (clearSearchBtn && searchInput) {
     clearSearchBtn.addEventListener("click", function () {
       searchInput.value = "";
+      clearBiblioUrlParams();
       searchInput.focus();
       filterAndSearch();
     });
   }
 
-  // Renderização inicial
-  renderLivros(livrosData);
+  // Renderização inicial (com suporte a deep-link ?livro= ou ?busca= vindo das simulações)
+  const urlParams = new URLSearchParams(window.location.search);
+  const rawQuery = (urlParams.get("livro") || urlParams.get("busca") || "").trim();
+
+  if (rawQuery && searchInput) {
+    const livroPorId = livrosData.find(livro => livro.id === rawQuery);
+    searchInput.value = livroPorId ? livroPorId.titulo : rawQuery;
+    filterAndSearch();
+    requestAnimationFrame(() => {
+      document.getElementById("secao-bibliografia")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    });
+  } else {
+    renderLivros(livrosData);
+  }
 }
 
