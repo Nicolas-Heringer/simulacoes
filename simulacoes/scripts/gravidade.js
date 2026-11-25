@@ -911,11 +911,29 @@ function setFrame(nextFrame, { refit = true } = {}) {
     if (!['m1', 'm2', 'cm'].includes(nextFrame)) return;
     state.frame = nextFrame;
 
-    document.querySelectorAll('[data-frame]').forEach(btn => {
-        const active = btn.dataset.frame === state.frame;
-        btn.classList.toggle('active', active);
-        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-    });
+    const btn = document.getElementById('btn-frame-cycle');
+    const txt = document.getElementById('btn-frame-cycle-text');
+    const labelMap = {
+        m1: 'Em m₁',
+        m2: 'Em m₂',
+        cm: 'CM'
+    };
+    const titleMap = {
+        m1: 'Referencial: Em m₁ — m₁ fixo (clique para alternar para Em m₂)',
+        m2: 'Referencial: Em m₂ — m₂ fixo (clique para alternar para CM)',
+        cm: 'Referencial: Centro de Massa (clique para voltar a Em m₁)'
+    };
+
+    if (btn) {
+        const isAltFrame = state.frame !== 'm1';
+        btn.dataset.frame = state.frame;
+        btn.classList.toggle('active', isAltFrame);
+        btn.setAttribute('aria-pressed', isAltFrame ? 'true' : 'false');
+        btn.title = titleMap[state.frame];
+    }
+    if (txt) {
+        txt.textContent = labelMap[state.frame];
+    }
 
     syncForceHints();
     renderSectorsComparisonList();
@@ -926,6 +944,12 @@ function setFrame(nextFrame, { refit = true } = {}) {
     } else {
         updateVisualScene();
     }
+}
+
+function cycleFrame() {
+    const order = ['m1', 'm2', 'cm'];
+    const next = order[(order.indexOf(state.frame) + 1) % order.length];
+    setFrame(next, { refit: true });
 }
 
 function updateForceParamBlocksVisibility() {
@@ -1000,15 +1024,8 @@ function syncForceHints() {
     updateCentralParamLabels();
     updateMassRatioButtons();
 
-    // Feedback contextual da progressão de referenciais e massa do Corpo 2 (m₂)
+    // Feedback contextual da massa do Corpo 2 (m₂) no Centro de Massa
     const { m1, m2, eta1, eta2 } = getMassFractions();
-    if (state.frame === 'm1') {
-        setFieldState('#panel-frame-selector', null, 'Estágio 1: m₁ fixo na origem — órbita e vetores exibidos apenas em m₂.');
-    } else if (state.frame === 'm2') {
-        setFieldState('#panel-frame-selector', 'ready', 'Estágio 2: m₂ fixo na origem — órbita e reação F₂→₁ exibidas no corpo central m₁.');
-    } else {
-        setFieldState('#panel-frame-selector', 'valid', 'Estágio 3 (Inercial): ambos os corpos orbitam o Centro de Massa (CM) com F₁₂ = −F₂₁.');
-    }
 
     if (state.frame === 'cm' && m2 <= 0.001) {
         setFieldState('#field-m2', 'warning', 'CM coincide com m₁ (m₂ = 0). Aumente m₂ ou escolha 1:5, 1:3 ou Binário 1:1 para ver ambos orbitarem!');
@@ -2371,10 +2388,8 @@ function resetPeriodTracking() {
         btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
     });
 
-    document.querySelectorAll('[data-frame]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            setFrame(btn.dataset.frame, { refit: true });
-        });
+    document.getElementById('btn-frame-cycle')?.addEventListener('click', () => {
+        cycleFrame();
     });
 
     document.querySelectorAll('[data-mass-ratio]').forEach(btn => {
@@ -2592,6 +2607,21 @@ function resetPeriodTracking() {
             btn.classList.add('active');
             setEnergyPlotMode(btn.dataset.plotMode || 'time-series');
         });
+    });
+
+    // Redimensiona gráficos ao expandir acordeões que iniciam fechados
+    const accordionSecond = document.getElementById('accordion-kepler-second');
+    accordionSecond?.addEventListener('toggle', () => {
+        if (accordionSecond.open) {
+            requestAnimationFrame(() => areaPlot?.resize());
+        }
+    });
+
+    const accordionEnergy = document.getElementById('accordion-kepler-energy');
+    accordionEnergy?.addEventListener('toggle', () => {
+        if (accordionEnergy.open) {
+            requestAnimationFrame(() => energyPlot?.resize());
+        }
     });
 }
 

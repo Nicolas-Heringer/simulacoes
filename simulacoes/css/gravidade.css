@@ -110,23 +110,9 @@
     display: none;
 }
 
-/* Seletor rápido de 3 estágios (Referencial) integrado a .canvas-top-actions */
-.canvas-top-actions .frame-switcher-bar {
-    position: static;
-    top: auto;
-    left: auto;
-    right: auto;
-    bottom: auto;
-    transform: none;
-    padding: 3px;
-    gap: 3px;
-    border-radius: var(--radius-lg);
-}
-
-.canvas-top-actions .frame-switcher-bar .toolbar-btn {
-    padding: 5px 9px;
-    font-size: 0.74rem;
-    white-space: nowrap;
+/* Mantém o rótulo do referencial (Em m₁ / Em m₂ / CM) sempre visível no botão flutuante */
+#btn-frame-cycle .btn-label-text {
+    display: inline;
 }
 
 /* Espaçamento auxiliar para grids de presets */
@@ -142,19 +128,7 @@
     .canvas-top-left-stack .canvas-info-badge {
         font-size: 0.74rem;
         padding: 5px 10px;
-        max-width: calc(100vw - 260px);
-    }
-
-    .canvas-top-actions .frame-switcher-bar {
-        padding: 3px;
-        gap: 3px;
-    }
-
-    .canvas-top-actions .frame-switcher-bar .toolbar-btn {
-        min-width: 34px;
-        min-height: 34px;
-        padding: 4px 7px;
-        font-size: 0.71rem;
+        max-width: calc(100vw - 180px);
     }
 
     .interactive-hint {
@@ -163,11 +137,7 @@
 }
 
 @media (max-width: 680px) {
-    .frame-step-prefix {
-        display: none;
-    }
-
-    /* Empilha o badge de regime abaixo da barra de referencial (m1/m2/CM) para evitar colisão em 390px e 320px */
+    /* Empilha o badge de regime abaixo dos botões do topo direito para evitar colisão em 390px e 320px */
     .canvas-top-left-stack {
         top: 56px;
         left: max(10px, var(--safe-left));
