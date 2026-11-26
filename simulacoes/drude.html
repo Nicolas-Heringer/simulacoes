@@ -131,53 +131,6 @@
                         <p class="tab-subtitle">Modelo microscópico clássico de condução em sólidos cristalinos e amorfos.</p>
                     </div>
 
-                    <!-- Card de Telemetria de Transporte (.sim-readout) -->
-                    <div class="control-group">
-                        <div class="sim-readout">
-                            <div class="sim-readout-title">
-                                <img src="../assets/icons/gauge.svg" class="icon-svg icon-accent" alt="Telemetria">
-                                <span>Diagnóstico de Transporte Eletrônico</span>
-                            </div>
-                            <div class="sim-readout-row">
-                                <span class="sim-readout-label">Velocidade de Deriva ($v_d$):</span>
-                                <span class="sim-readout-value tone-accent" id="readout-vd">v_d = 0.00</span>
-                            </div>
-                            <div class="sim-readout-row">
-                                <span class="sim-readout-label">Velocidade Térmica ($v_{\text{th}}$):</span>
-                                <span class="sim-readout-value tone-cyan" id="readout-vth">v_th = 1.00</span>
-                            </div>
-                            <div class="sim-readout-row">
-                                <span class="sim-readout-label">Campo Elétrico ($\vec{E}$):</span>
-                                <span class="sim-readout-value tone-rose" id="readout-efield">0.00 (Off)</span>
-                            </div>
-                            <div class="sim-readout-row">
-                                <span class="sim-readout-label">Taxa de Colisões:</span>
-                                <span class="sim-readout-value tone-emerald" id="readout-col-rate">0 col/s</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Mini-Gráfico RealtimePlot: Velocidade de Deriva vd(t) -->
-                    <div class="control-group">
-                        <div class="sim-plot-card" id="card-telemetria-vd">
-                            <div class="plot-header">
-                                <div class="plot-title-group">
-                                    <span class="plot-dot"></span>
-                                    <span class="plot-title">Velocidade de Deriva $\langle v_d(t) \rangle$</span>
-                                </div>
-                                <div class="plot-stats">
-                                    <span class="plot-stat-label">Média:</span>
-                                    <span class="plot-stat-val" id="plot-valor-vd">0.00 px/f</span>
-                                </div>
-                            </div>
-                            <div class="plot-canvas-wrapper">
-                                <canvas class="sim-plot-canvas" id="canvas-plot-vd"></canvas>
-                                <span class="plot-axis-label plot-axis-max" id="plot-vd-max-label">+1.0</span>
-                                <span class="plot-axis-label plot-axis-min" id="plot-vd-min-label">-1.0</span>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="sim-divider-label"><span>Campo Elétrico Externo</span></div>
 
                     <!-- Sentido do Campo Elétrico -->
@@ -225,44 +178,111 @@
                         </div>
                     </div>
 
-                    <div class="sim-divider-label"><span>Estrutura da Rede Cristalina</span></div>
+                    <div class="sim-divider-label"><span>Telemetria &amp; Rede Cristalina</span></div>
 
-                    <!-- Seletor de Tipo de Rede -->
                     <div class="control-group">
-                        <label for="tipoRede">Geometria da Rede:</label>
-                        <select id="tipoRede" class="sim-control" data-focus-control="select" data-focus-label="Rede" data-focus-order="6">
-                            <option value="quadrada">Rede Quadrada (Cúbica Simples 2D)</option>
-                            <option value="triangular">Rede Triangular (Compacta)</option>
-                            <option value="hexagonal">Rede Hexagonal (Grafeno / Honeycomb)</option>
-                            <option value="armchair">Grafeno com Borda Armchair</option>
-                            <option value="kagome">Rede de Kagome (Tri-hexagonal)</option>
-                            <option value="amorfa">Rede Amorfa (Sólido Desordenado)</option>
-                        </select>
-                    </div>
+                        <!-- Acordeão 1: Telemetria & Gráfico de Deriva vd(t) -->
+                        <details class="sim-accordion" id="accordion-drude-plot">
+                            <summary class="sim-accordion-summary">
+                                <span class="sim-accordion-title">
+                                    <img src="../assets/icons/chart-line.svg" class="icon-svg" alt="">
+                                    <span>Telemetria &amp; Gráfico $\langle v_d(t) \rangle$</span>
+                                </span>
+                                <img src="../assets/icons/chevron-right.svg" class="icon-svg sim-accordion-chevron" alt="">
+                            </summary>
+                            <div class="sim-accordion-body">
+                                <!-- Card de Telemetria de Transporte (.sim-readout) -->
+                                <div class="sim-readout">
+                                    <div class="sim-readout-title">
+                                        <img src="../assets/icons/gauge.svg" class="icon-svg icon-accent" alt="Telemetria">
+                                        <span>Diagnóstico de Transporte Eletrônico</span>
+                                    </div>
+                                    <div class="sim-readout-row">
+                                        <span class="sim-readout-label">Velocidade de Deriva ($v_d$):</span>
+                                        <span class="sim-readout-value tone-accent" id="readout-vd">v_d = 0.00</span>
+                                    </div>
+                                    <div class="sim-readout-row">
+                                        <span class="sim-readout-label">Velocidade Térmica ($v_{\text{th}}$):</span>
+                                        <span class="sim-readout-value tone-cyan" id="readout-vth">v_th = 1.00</span>
+                                    </div>
+                                    <div class="sim-readout-row">
+                                        <span class="sim-readout-label">Campo Elétrico ($\vec{E}$):</span>
+                                        <span class="sim-readout-value tone-rose" id="readout-efield">0.00 (Off)</span>
+                                    </div>
+                                    <div class="sim-readout-row">
+                                        <span class="sim-readout-label">Taxa de Colisões:</span>
+                                        <span class="sim-readout-value tone-emerald" id="readout-col-rate">0 col/s</span>
+                                    </div>
+                                </div>
 
-                    <div class="sim-divider-label"><span>Portadores de Carga</span></div>
-
-                    <!-- Slider Sincronizado: Quantidade de Elétrons -->
-                    <div class="control-group">
-                        <div class="slider-container sim-dual-slider">
-                            <div class="slider-header">
-                                <label for="slider-eletrons" class="slider-label">Número de Elétrons ($N$)</label>
-                                <div class="dual-input-wrapper">
-                                    <input type="number" class="dual-input-number" id="numEletronsInput"
-                                           min="50" max="400" step="25" value="200">
+                                <!-- Mini-Gráfico RealtimePlot: Velocidade de Deriva vd(t) -->
+                                <div class="sim-plot-card" id="card-telemetria-vd">
+                                    <div class="plot-header">
+                                        <div class="plot-title-group">
+                                            <span class="plot-dot"></span>
+                                            <span class="plot-title">Velocidade de Deriva $\langle v_d(t) \rangle$</span>
+                                        </div>
+                                        <div class="plot-stats">
+                                            <span class="plot-stat-label">Média:</span>
+                                            <span class="plot-stat-val" id="plot-valor-vd">0.00 px/f</span>
+                                        </div>
+                                    </div>
+                                    <div class="plot-canvas-wrapper">
+                                        <canvas class="sim-plot-canvas" id="canvas-plot-vd"></canvas>
+                                        <span class="plot-axis-label plot-axis-max" id="plot-vd-max-label">+1.0</span>
+                                        <span class="plot-axis-label plot-axis-min" id="plot-vd-min-label">-1.0</span>
+                                    </div>
                                 </div>
                             </div>
-                            <input type="range" class="sim-slider" id="slider-eletrons"
-                                   min="50" max="400" step="25" value="200">
-                        </div>
-                    </div>
+                        </details>
 
-                    <!-- Botão de Ação: Zerar Velocidades Térmicas -->
-                    <div class="control-group">
-                        <button type="button" id="btnZerar" class="btn-secondary w-full" data-focus-control="action" data-focus-label="Zerar T" data-focus-icon="snowflake" data-focus-order="7">
-                            <img src="../assets/icons/snowflake.svg" class="icon-svg" alt="Zerar">
-                            <span>Zerar Velocidades Térmicas</span>
-                        </button>
+                        <!-- Acordeão 2: Rede Cristalina & Portadores -->
+                        <details class="sim-accordion" id="accordion-drude-lattice">
+                            <summary class="sim-accordion-summary">
+                                <span class="sim-accordion-title">
+                                    <img src="../assets/icons/particle-grid.svg" class="icon-svg" alt="">
+                                    <span>Rede Cristalina &amp; Portadores</span>
+                                </span>
+                                <img src="../assets/icons/chevron-right.svg" class="icon-svg sim-accordion-chevron" alt="">
+                            </summary>
+                            <div class="sim-accordion-body">
+                                <!-- Seletor de Tipo de Rede -->
+                                <div class="control-group">
+                                    <label for="tipoRede">Geometria da Rede:</label>
+                                    <select id="tipoRede" class="sim-control" data-focus-control="select" data-focus-label="Rede" data-focus-order="6">
+                                        <option value="quadrada">Rede Quadrada (Cúbica Simples 2D)</option>
+                                        <option value="triangular">Rede Triangular (Compacta)</option>
+                                        <option value="hexagonal">Rede Hexagonal (Grafeno / Honeycomb)</option>
+                                        <option value="armchair">Grafeno com Borda Armchair</option>
+                                        <option value="kagome">Rede de Kagome (Tri-hexagonal)</option>
+                                        <option value="amorfa">Rede Amorfa (Sólido Desordenado)</option>
+                                    </select>
+                                </div>
+
+                                <!-- Slider Sincronizado: Quantidade de Elétrons -->
+                                <div class="control-group">
+                                    <div class="slider-container sim-dual-slider">
+                                        <div class="slider-header">
+                                            <label for="slider-eletrons" class="slider-label">Número de Elétrons ($N$)</label>
+                                            <div class="dual-input-wrapper">
+                                                <input type="number" class="dual-input-number" id="numEletronsInput"
+                                                       min="50" max="400" step="25" value="200">
+                                            </div>
+                                        </div>
+                                        <input type="range" class="sim-slider" id="slider-eletrons"
+                                               min="50" max="400" step="25" value="200">
+                                    </div>
+                                </div>
+
+                                <!-- Botão de Ação: Zerar Velocidades Térmicas -->
+                                <div class="control-group">
+                                    <button type="button" id="btnZerar" class="btn-secondary w-full" data-focus-control="action" data-focus-label="Zerar T" data-focus-icon="snowflake" data-focus-order="7">
+                                        <img src="../assets/icons/snowflake.svg" class="icon-svg" alt="Zerar">
+                                        <span>Zerar Velocidades Térmicas</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </details>
                     </div>
                 </div>
 

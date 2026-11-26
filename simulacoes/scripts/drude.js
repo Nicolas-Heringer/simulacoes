@@ -775,6 +775,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Redimensiona gráfico ao expandir o acordeão que inicia fechado
+    const accordionPlot = document.getElementById('accordion-drude-plot');
+    accordionPlot?.addEventListener('toggle', () => {
+        if (accordionPlot.open) {
+            requestAnimationFrame(() => plotVd?.resize());
+        }
+    });
+
     // 21. Inicialização e Início do Loop
     resizeCanvas();
     inicializarEletrons();
