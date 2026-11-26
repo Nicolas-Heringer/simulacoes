@@ -70,23 +70,11 @@
             <div class="canvas-top-left-stack">
                 <div class="canvas-toolbar pos-top-left focus-mirror-toolbar" id="focus-context-toolbar"></div>
 
-                <!-- Barra de Ferramentas Flutuante no Topo Esquerdo (Opções de Exibição / Camadas) -->
+                <!-- Barra de Ferramentas Flutuante no Topo Esquerdo (Menu de Exibição / Camadas) -->
                 <div class="canvas-toolbar pos-top-left" id="display-toolbar">
                     <button type="button" id="btn-toggle-layers-popover" class="toolbar-btn" title="Menu de Camadas & Exibição">
                         <img src="../assets/icons/globe.svg" class="icon-svg" alt="Exibição">
                         <span>Exibição</span>
-                    </button>
-                    <div class="toolbar-divider"></div>
-                    <button type="button" id="btn-quick-generators" class="toolbar-btn active"
-                        title="Alternar Pontos Geradores (Centros)">
-                        <span class="btn-label-text">Centros</span>
-                    </button>
-                    <button type="button" id="btn-quick-wireframe" class="toolbar-btn active"
-                        title="Alternar Linhas das Células (Wireframe)">
-                        <span class="btn-label-text">Wireframe</span>
-                    </button>
-                    <button type="button" id="btn-quick-graticule" class="toolbar-btn active" title="Alternar Equador & Linhas de Grade">
-                        <span class="btn-label-text">Grade</span>
                     </button>
                 </div>
             </div>
@@ -231,10 +219,15 @@
                     <!-- ETAPA 1: APRESENTAÇÃO MATEMÁTICA (VORONOI & LLOYD PURO)       -->
                     <!-- ============================================================= -->
                     <div id="panel-tab-math">
-                        <div class="climate-badge">
-                            <span class="climate-title" id="span-badge-title">Malha Inicial (Pontos Aleatórios)</span>
-                            <span class="climate-status" id="span-topology-status">Etapa 1: Geometria Esférica
-                                Pura</span>
+                        <div class="tab-header">
+                            <div class="tab-header-row">
+                                <h3 class="tab-title">Geometria Esférica</h3>
+                                <div class="sim-badge" id="math-status-badge">
+                                    <span class="status-dot"></span>
+                                    <span id="span-badge-title">Malha Inicial</span>
+                                </div>
+                            </div>
+                            <p class="tab-subtitle" id="span-topology-status">Etapa 1: Voronoi Esférico &amp; Relaxamento de Lloyd</p>
                         </div>
 
                         <!-- Divisores com Label: Resolução da Malha -->
@@ -313,9 +306,15 @@
                     <!-- ETAPA 2: TERRA & ESCALA ATMOSFÉRICA                           -->
                     <!-- ============================================================= -->
                     <div id="panel-tab-science" style="display: none;">
-                        <div class="climate-badge">
-                            <span class="climate-title">O Planeta Terra & A Atmosfera</span>
-                            <span class="climate-status">Etapa 2: Geografia e Escala Planetária</span>
+                        <div class="tab-header">
+                            <div class="tab-header-row">
+                                <h3 class="tab-title">O Planeta Terra &amp; A Atmosfera</h3>
+                                <div class="sim-badge">
+                                    <span class="status-dot"></span>
+                                    <span>Etapa 2</span>
+                                </div>
+                            </div>
+                            <p class="tab-subtitle">Geografia, proporção atmosférica e cenário astronômico.</p>
                         </div>
 
                         <!-- Divisores com Label: Escala Planetária -->
@@ -356,21 +355,21 @@
                             <div class="switch-container">
                                 <span class="switch-label">Textura da Terra (NASA Blue Marble)</span>
                                 <label class="sim-switch">
-                                    <input type="checkbox" id="toggle-earth-texture" checked>
+                                    <input type="checkbox" id="toggle-earth-texture">
                                     <span class="slider-round"></span>
                                 </label>
                             </div>
                             <div class="switch-container">
                                 <span class="switch-label">Fundo Estelar (Deep Space - 2.000 Estrelas)</span>
                                 <label class="sim-switch">
-                                    <input type="checkbox" id="toggle-stars" checked>
+                                    <input type="checkbox" id="toggle-stars">
                                     <span class="slider-round"></span>
                                 </label>
                             </div>
                             <div class="switch-container">
                                 <span class="switch-label">Constelações do Zodíaco & Órion/Crux</span>
                                 <label class="sim-switch">
-                                    <input type="checkbox" id="toggle-constellations" checked>
+                                    <input type="checkbox" id="toggle-constellations">
                                     <span class="slider-round"></span>
                                 </label>
                             </div>
@@ -381,96 +380,20 @@
                     <!-- ETAPA 3: ESTAÇÕES DO ANO & MOVIMENTOS CELESTES                -->
                     <!-- ============================================================= -->
                     <div id="panel-tab-seasons" style="display: none;">
-                        <div class="climate-badge">
-                            <span class="climate-title" id="span-season-badge-title">Mecânica Orbital & Estações</span>
-                            <span class="climate-status" id="span-season-badge-status">Declinação Solar (δ): +23.4°
-                                N</span>
-                        </div>
-
-                        <!-- Divisores com Label: Órbita 2D -->
-                        <div class="sim-divider-label"><span>Órbita Terrestre & Zodíaco 2D</span></div>
-
-                        <!-- Mini-Orrery (Mapa 2D da Órbita Terrestre e Zodíaco) -->
-                        <div class="mini-orrery-container">
-                            <div class="mini-orrery-header">
-                                <span>Órbita Terrestre (Vista da Eclíptica)</span>
-                                <span id="label-orrery-month" class="orrery-month-badge">21/Jun</span>
-                            </div>
-                            <canvas id="canvas-mini-orrery" width="280" height="180"></canvas>
-                            <div class="mini-orrery-caption" id="orrery-caption-text">
-                                O Sol é projetado contra <strong>Gêmeos (Gemini)</strong>. À meia-noite, o céu aponta para <strong>Sagitário (Sagittarius)</strong>.
-                            </div>
-                            <div class="mini-orrery-note" id="orrery-ophiuchus-note">
-                                Nota astronômica (J2000): usamos os limites reais das 12 constelações clássicas; entre 30/Nov e 17/Dez o Sol também atravessa Ofiúco (13ª constelação da eclíptica).
-                            </div>
-                        </div>
-
-                        <!-- Divisores com Label: Posição Orbital -->
-                        <div class="sim-divider-label"><span>Posição Orbital & Hora Local</span></div>
-
-                        <!-- Controles Orbitais e Temporais -->
-                        <div class="control-group">
-                            <div class="slider-container sim-dual-slider">
-                                <div class="slider-header">
-                                    <label for="slider-day-of-year" class="slider-label">Translação Orbital</label>
-                                    <div class="dual-input-wrapper date-dual-wrapper">
-                                        <span id="val-day-of-year" class="slider-val date-day-counter">Dia 172</span>
-                                        <span class="date-sep">•</span>
-                                        <input type="number" id="input-date-day" class="dual-input-number date-input-day"
-                                            min="1" max="31" step="1" value="21" title="Dia do Mês" aria-label="Dia do Mês">
-                                        <span class="date-slash">/</span>
-                                        <select id="select-date-month" class="date-select-month" title="Mês do Ano" aria-label="Mês do Ano">
-                                            <option value="0">Jan</option>
-                                            <option value="1">Fev</option>
-                                            <option value="2">Mar</option>
-                                            <option value="3">Abr</option>
-                                            <option value="4">Mai</option>
-                                            <option value="5" selected>Jun</option>
-                                            <option value="6">Jul</option>
-                                            <option value="7">Ago</option>
-                                            <option value="8">Set</option>
-                                            <option value="9">Out</option>
-                                            <option value="10">Nov</option>
-                                            <option value="11">Dez</option>
-                                        </select>
-                                        <input type="number" id="input-day-of-year" class="dual-input-number" min="1" max="365" step="1" value="172" style="display:none;" aria-hidden="true">
-                                    </div>
+                        <div class="tab-header">
+                            <div class="tab-header-row">
+                                <h3 class="tab-title" id="span-season-badge-title">Mecânica Orbital &amp; Estações</h3>
+                                <div class="sim-badge">
+                                    <span class="status-dot"></span>
+                                    <span>Etapa 3</span>
                                 </div>
-                                <input type="range" class="sim-slider" id="slider-day-of-year" min="1" max="365"
-                                    step="1" value="172">
                             </div>
-
-                            <div class="slider-container sim-dual-slider">
-                                <div class="slider-header">
-                                    <label for="slider-hour-of-day" class="slider-label">Rotação Diurna (Hora Local)</label>
-                                    <div class="dual-input-wrapper">
-                                        <input type="number" class="dual-input-number" id="input-hour-of-day"
-                                               min="0" max="24" step="0.25" value="12.00">
-                                        <span class="dual-input-unit">h</span>
-                                    </div>
-                                </div>
-                                <input type="range" class="sim-slider" id="slider-hour-of-day" min="0" max="24"
-                                    step="0.25" value="12">
-                            </div>
-
-                            <div class="control-grid-2x2 clima-btn-spacer">
-                                <button type="button" id="btn-play-orbit" class="btn-preset tone-cyan"
-                                    data-focus-control="action" data-focus-order="3" data-focus-icon="play" data-focus-tooltip="Translação Anual">
-                                    <img src="../assets/icons/play.svg" class="icon-svg" alt="Play"> Translação Anual
-                                </button>
-                                <button type="button" id="btn-play-diurnal" class="btn-preset"
-                                    data-focus-control="action" data-focus-order="4" data-focus-icon="rotate" data-focus-tooltip="Rotação Contínua">
-                                    <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Rotação"> Rotação
-                                    Contínua
-                                </button>
-                            </div>
+                            <p class="tab-subtitle" id="span-season-badge-status">Declinação Solar (δ): +23.4° (Norte)</p>
                         </div>
-
-                        <!-- Divisores com Label: Estações Cardeais -->
-                        <div class="sim-divider-label"><span>Estações Cardeais</span></div>
 
                         <!-- Botões Rápidos das 4 Estações Cardeais -->
                         <div class="control-group">
+                            <label>Estações Cardeais</label>
                             <div class="control-grid-2x2">
                                 <button type="button" id="btn-season-jun" class="btn-preset active" title="21 de Junho">
                                     <img src="../assets/icons/sun.svg" class="icon-svg" alt="Sol"> Solstício Junho
@@ -488,46 +411,156 @@
                             </div>
                         </div>
 
-                        <!-- Divisores com Label: Guias Astronômicas -->
-                        <div class="sim-divider-label"><span>Guias Astronômicas</span></div>
+                        <div class="sim-divider-label"><span>Órbita & Controles</span></div>
 
-                        <!-- Guias Astronômicas -->
                         <div class="control-group">
-                            <div class="switch-container">
-                                <span class="switch-label">Inclinação Axial Real (23,44°)</span>
-                                <label class="sim-switch">
-                                    <input type="checkbox" id="toggle-axial-tilt" checked>
-                                    <span class="slider-round"></span>
-                                </label>
-                            </div>
-                            <div class="switch-container">
-                                <span class="switch-label">Linha do Eixo Polar (Norte-Sul)</span>
-                                <label class="sim-switch">
-                                    <input type="checkbox" id="toggle-polar-axis" checked>
-                                    <span class="slider-round"></span>
-                                </label>
-                            </div>
-                            <div class="switch-container">
-                                <span class="switch-label">Terminador Dia/Noite (Luz Solar)</span>
-                                <label class="sim-switch">
-                                    <input type="checkbox" id="toggle-sun-terminator" checked>
-                                    <span class="slider-round"></span>
-                                </label>
-                            </div>
-                            <div class="switch-container">
-                                <span class="switch-label">Plano da Eclíptica</span>
-                                <label class="sim-switch">
-                                    <input type="checkbox" id="toggle-ecliptic-plane" checked>
-                                    <span class="slider-round"></span>
-                                </label>
-                            </div>
-                            <div class="switch-container">
-                                <span class="switch-label">Rótulos & Destaque das Constelações 3D</span>
-                                <label class="sim-switch">
-                                    <input type="checkbox" id="toggle-constellation-labels" checked>
-                                    <span class="slider-round"></span>
-                                </label>
-                            </div>
+                            <!-- Acordeão 1: Órbita Terrestre & Zodíaco 2D -->
+                            <details class="sim-accordion" id="accordion-seasons-orrery">
+                                <summary class="sim-accordion-summary">
+                                    <span class="sim-accordion-title">
+                                        <img src="../assets/icons/orbital.svg" class="icon-svg" alt="">
+                                        <span>Órbita Terrestre & Zodíaco 2D</span>
+                                    </span>
+                                    <img src="../assets/icons/chevron-right.svg" class="icon-svg sim-accordion-chevron" alt="">
+                                </summary>
+                                <div class="sim-accordion-body">
+                                    <!-- Mini-Orrery (Mapa 2D da Órbita Terrestre e Zodíaco) -->
+                                    <div class="mini-orrery-container">
+                                        <div class="mini-orrery-header">
+                                            <span>Órbita Terrestre (Vista da Eclíptica)</span>
+                                            <span id="label-orrery-month" class="orrery-month-badge">21/Jun</span>
+                                        </div>
+                                        <canvas id="canvas-mini-orrery" width="280" height="180"></canvas>
+                                        <div class="mini-orrery-caption" id="orrery-caption-text">
+                                            O Sol é projetado contra <strong>Gêmeos (Gemini)</strong>. À meia-noite, o céu aponta para <strong>Sagitário (Sagittarius)</strong>.
+                                        </div>
+                                        <div class="mini-orrery-note" id="orrery-ophiuchus-note">
+                                            Nota astronômica (J2000): usamos os limites reais das 12 constelações clássicas; entre 30/Nov e 17/Dez o Sol também atravessa Ofiúco (13ª constelação da eclíptica).
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
+
+                            <!-- Acordeão 2: Posição Orbital & Hora Local -->
+                            <details class="sim-accordion" id="accordion-seasons-controls">
+                                <summary class="sim-accordion-summary">
+                                    <span class="sim-accordion-title">
+                                        <img src="../assets/icons/sliders.svg" class="icon-svg" alt="">
+                                        <span>Posição Orbital & Hora Local</span>
+                                    </span>
+                                    <img src="../assets/icons/chevron-right.svg" class="icon-svg sim-accordion-chevron" alt="">
+                                </summary>
+                                <div class="sim-accordion-body">
+                                    <!-- Controles Orbitais e Temporais -->
+                                    <div class="control-group">
+                                        <div class="slider-container sim-dual-slider">
+                                            <div class="slider-header">
+                                                <label for="slider-day-of-year" class="slider-label">Translação Orbital</label>
+                                                <div class="dual-input-wrapper date-dual-wrapper">
+                                                    <span id="val-day-of-year" class="slider-val date-day-counter">Dia 172</span>
+                                                    <span class="date-sep">•</span>
+                                                    <input type="number" id="input-date-day" class="dual-input-number date-input-day"
+                                                        min="1" max="31" step="1" value="21" title="Dia do Mês" aria-label="Dia do Mês">
+                                                    <span class="date-slash">/</span>
+                                                    <select id="select-date-month" class="date-select-month" title="Mês do Ano" aria-label="Mês do Ano">
+                                                        <option value="0">Jan</option>
+                                                        <option value="1">Fev</option>
+                                                        <option value="2">Mar</option>
+                                                        <option value="3">Abr</option>
+                                                        <option value="4">Mai</option>
+                                                        <option value="5" selected>Jun</option>
+                                                        <option value="6">Jul</option>
+                                                        <option value="7">Ago</option>
+                                                        <option value="8">Set</option>
+                                                        <option value="9">Out</option>
+                                                        <option value="10">Nov</option>
+                                                        <option value="11">Dez</option>
+                                                    </select>
+                                                    <input type="number" id="input-day-of-year" class="dual-input-number" min="1" max="365" step="1" value="172" style="display:none;" aria-hidden="true">
+                                                </div>
+                                            </div>
+                                            <input type="range" class="sim-slider" id="slider-day-of-year" min="1" max="365"
+                                                step="1" value="172">
+                                        </div>
+
+                                        <div class="slider-container sim-dual-slider">
+                                            <div class="slider-header">
+                                                <label for="slider-hour-of-day" class="slider-label">Rotação Diurna (Hora Local)</label>
+                                                <div class="dual-input-wrapper">
+                                                    <input type="number" class="dual-input-number" id="input-hour-of-day"
+                                                           min="0" max="24" step="0.25" value="12.00">
+                                                    <span class="dual-input-unit">h</span>
+                                                </div>
+                                            </div>
+                                            <input type="range" class="sim-slider" id="slider-hour-of-day" min="0" max="24"
+                                                step="0.25" value="12">
+                                        </div>
+
+                                        <div class="control-grid-2x2 clima-btn-spacer">
+                                            <button type="button" id="btn-play-orbit" class="btn-preset tone-cyan"
+                                                data-focus-control="action" data-focus-order="3" data-focus-icon="play" data-focus-tooltip="Translação Anual">
+                                                <img src="../assets/icons/play.svg" class="icon-svg" alt="Play"> Translação Anual
+                                            </button>
+                                            <button type="button" id="btn-play-diurnal" class="btn-preset"
+                                                data-focus-control="action" data-focus-order="4" data-focus-icon="rotate" data-focus-tooltip="Rotação Contínua">
+                                                <img src="../assets/icons/rotate.svg" class="icon-svg" alt="Rotação"> Rotação
+                                                Contínua
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
+
+                            <!-- Acordeão 3: Guias Astronômicas -->
+                            <details class="sim-accordion" id="accordion-seasons-guides">
+                                <summary class="sim-accordion-summary">
+                                    <span class="sim-accordion-title">
+                                        <img src="../assets/icons/toggle-switch.svg" class="icon-svg" alt="">
+                                        <span>Guias Astronômicas</span>
+                                    </span>
+                                    <img src="../assets/icons/chevron-right.svg" class="icon-svg sim-accordion-chevron" alt="">
+                                </summary>
+                                <div class="sim-accordion-body">
+                                    <!-- Guias Astronômicas -->
+                                    <div class="control-group">
+                                        <div class="switch-container">
+                                            <span class="switch-label">Inclinação Axial Real (23,44°)</span>
+                                            <label class="sim-switch">
+                                                <input type="checkbox" id="toggle-axial-tilt" checked>
+                                                <span class="slider-round"></span>
+                                            </label>
+                                        </div>
+                                        <div class="switch-container">
+                                            <span class="switch-label">Linha do Eixo Polar (Norte-Sul)</span>
+                                            <label class="sim-switch">
+                                                <input type="checkbox" id="toggle-polar-axis" checked>
+                                                <span class="slider-round"></span>
+                                            </label>
+                                        </div>
+                                        <div class="switch-container">
+                                            <span class="switch-label">Terminador Dia/Noite (Luz Solar)</span>
+                                            <label class="sim-switch">
+                                                <input type="checkbox" id="toggle-sun-terminator" checked>
+                                                <span class="slider-round"></span>
+                                            </label>
+                                        </div>
+                                        <div class="switch-container">
+                                            <span class="switch-label">Plano da Eclíptica</span>
+                                            <label class="sim-switch">
+                                                <input type="checkbox" id="toggle-ecliptic-plane">
+                                                <span class="slider-round"></span>
+                                            </label>
+                                        </div>
+                                        <div class="switch-container">
+                                            <span class="switch-label">Rótulos & Destaque das Constelações 3D</span>
+                                            <label class="sim-switch">
+                                                <input type="checkbox" id="toggle-constellation-labels" checked>
+                                                <span class="slider-round"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
                         </div>
                     </div>
 
@@ -535,9 +568,15 @@
                     <!-- ETAPA 4: MODELOS CLIMÁTICOS GLOBAIS (EARTH NULLSCHOOL)        -->
                     <!-- ============================================================= -->
                     <div id="panel-tab-atmosphere" style="display: none;">
-                        <div class="climate-badge">
-                            <span class="climate-title">Modelos Climáticos Globais</span>
-                            <span class="climate-status">Etapa 4: Da Geometria aos Supercomputadores</span>
+                        <div class="tab-header">
+                            <div class="tab-header-row">
+                                <h3 class="tab-title">Modelos Climáticos Globais</h3>
+                                <div class="sim-badge">
+                                    <span class="status-dot"></span>
+                                    <span>Etapa 4</span>
+                                </div>
+                            </div>
+                            <p class="tab-subtitle">Da geometria esférica aos supercomputadores meteorológicos.</p>
                         </div>
 
                         <!-- Divisores com Label: Plataforma de Referência -->

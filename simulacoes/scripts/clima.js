@@ -58,15 +58,15 @@ const state = {
     showAxialTilt: true,
     showPolarAxis: true,
     showSunTerminator: true,
-    showEclipticPlane: true,
+    showEclipticPlane: false,
 
     // Parâmetros Astronômicos Acoplados
     sunDeclinationRad: 0.0,  // Declinação solar orbital acoplada (δ em radianos)
 
     // Visualização 3D Comum
-    showEarthTexture: true,
-    showStars: true,
-    showConstellations: true,
+    showEarthTexture: false,
+    showStars: false,
+    showConstellations: false,
     showConstellationLabels: true,
     showGenerators: true,
     showWireframe: true,
@@ -283,7 +283,7 @@ function initThreeScene() {
                 EARTH_TEXTURE_FALLBACK,
                 (tex) => {
                     tex.colorSpace = THREE.SRGBColorSpace;
-                    if (earthSolidMaterial) {
+                    if (earthSolidMaterial && state.showEarthTexture) {
                         earthSolidMaterial.map = tex;
                         earthSolidMaterial.needsUpdate = true;
                     }
@@ -299,7 +299,8 @@ function initThreeScene() {
     // Planeta Sólido Interno
     const coreGeo = new THREE.SphereGeometry(1.0, 64, 32);
     earthSolidMaterial = new THREE.MeshStandardMaterial({
-        map: earthTexture,
+        map: state.showEarthTexture ? earthTexture : null,
+        color: state.showEarthTexture ? 0xffffff : 0x061126,
         roughness: 0.65,
         metalness: 0.05,
         side: THREE.FrontSide,
@@ -370,7 +371,8 @@ function createProceduralEarthTexture() {
 
     const procTexture = new THREE.CanvasTexture(canvas);
     procTexture.colorSpace = THREE.SRGBColorSpace;
-    if (earthSolidMaterial) {
+    earthTexture = procTexture;
+    if (earthSolidMaterial && state.showEarthTexture) {
         earthSolidMaterial.map = procTexture;
         earthSolidMaterial.needsUpdate = true;
     }
@@ -1917,10 +1919,6 @@ function setupUIListeners() {
         });
     }
 
-    const btnQuickGenerators = document.getElementById('btn-quick-generators');
-    const btnQuickWireframe = document.getElementById('btn-quick-wireframe');
-    const btnQuickGraticule = document.getElementById('btn-quick-graticule');
-
     const toggleGenerators = document.getElementById('toggle-generators');
     const toggleWireframe = document.getElementById('toggle-wireframe');
     const toggleGraticule = document.getElementById('toggle-graticule');
@@ -1929,40 +1927,28 @@ function setupUIListeners() {
         state.showGenerators = visible;
         if (generatorPointsMesh) generatorPointsMesh.visible = visible;
         if (toggleGenerators) toggleGenerators.checked = visible;
-        if (btnQuickGenerators) btnQuickGenerators.classList.toggle('active', visible);
     }
 
     function setWireframeVisible(visible) {
         state.showWireframe = visible;
         if (wireframeMesh) wireframeMesh.visible = visible;
         if (toggleWireframe) toggleWireframe.checked = visible;
-        if (btnQuickWireframe) btnQuickWireframe.classList.toggle('active', visible);
     }
 
     function setGraticuleVisible(visible) {
         state.showGraticule = visible;
         if (graticuleGroup) graticuleGroup.visible = visible;
         if (toggleGraticule) toggleGraticule.checked = visible;
-        if (btnQuickGraticule) btnQuickGraticule.classList.toggle('active', visible);
     }
 
-    if (btnQuickGenerators) {
-        btnQuickGenerators.addEventListener('click', () => setGeneratorsVisible(!state.showGenerators));
-    }
     if (toggleGenerators) {
         toggleGenerators.addEventListener('change', (e) => setGeneratorsVisible(e.target.checked));
     }
 
-    if (btnQuickWireframe) {
-        btnQuickWireframe.addEventListener('click', () => setWireframeVisible(!state.showWireframe));
-    }
     if (toggleWireframe) {
         toggleWireframe.addEventListener('change', (e) => setWireframeVisible(e.target.checked));
     }
 
-    if (btnQuickGraticule) {
-        btnQuickGraticule.addEventListener('click', () => setGraticuleVisible(!state.showGraticule));
-    }
     if (toggleGraticule) {
         toggleGraticule.addEventListener('change', (e) => setGraticuleVisible(e.target.checked));
     }

@@ -449,7 +449,6 @@ const selectMl     = document.getElementById('select-ml');
 const selectMs     = document.getElementById('select-ms');
 const selectModo   = document.getElementById('select-modo');
 const sliderPts    = document.getElementById('slider-pontos');
-const spanPts      = document.getElementById('span-pontos');
 const btnGerar     = document.getElementById('btn-gerar');
 const spanOrbital  = document.getElementById('span-orbital');
 const spanEnergia  = document.getElementById('span-energia');
@@ -459,6 +458,7 @@ const legendDens   = document.getElementById('legend-density');
 
 // Ações Flutuantes no Topo Direito & Rodapé
 const btnQuickAutorotate   = document.getElementById('btn-quick-autorotate');
+const headerStatusBadge    = document.getElementById('header-status-badge');
 const footerEnergyMeta     = document.getElementById('footer-energy-meta');
 const footerStatusText     = document.getElementById('footer-status-text');
 
@@ -487,11 +487,10 @@ function atualizarBadges() {
     const ml = parseInt(selectMl.value) || 0;
     const descCompleta = formatarBadgeOrbital(n, l, ml);
     const energiaVal = (-13.6 / (n * n)).toFixed(3);
-    const energiaStr = `E = ${energiaVal} eV`;
 
     if (spanOrbital) spanOrbital.innerHTML = descCompleta;
-    if (spanEnergia) spanEnergia.textContent = energiaStr;
-    if (footerEnergyMeta) footerEnergyMeta.textContent = energiaStr;
+    if (spanEnergia) spanEnergia.textContent = `${energiaVal} eV`;
+    if (footerEnergyMeta) footerEnergyMeta.textContent = `E = ${energiaVal} eV`;
 }
 
 /** Preenche os <select> de l no painel lateral (0 … n−1). */
@@ -553,6 +552,11 @@ function setStatus(msg, carregando = false) {
         statusMsg.textContent = msg;
         statusMsg.className = carregando ? 'status loading' : 'status';
     }
+    if (headerStatusBadge) {
+        headerStatusBadge.classList.toggle('idle', carregando);
+        const label = headerStatusBadge.querySelector('span:last-child');
+        if (label) label.textContent = carregando ? 'Calculando…' : 'Pronto';
+    }
     if (btnGerar) btnGerar.disabled = carregando;
 }
 
@@ -592,11 +596,7 @@ selectModo.addEventListener('change', () => {
 });
 
 // 5. Slider de Pontos com Dual Slider
-syncDualSlider('#slider-pontos', '#num-pontos', (val) => {
-    const pts = parseInt(val);
-    const formatted = pts.toLocaleString('pt-BR');
-    if (spanPts) spanPts.textContent = formatted;
-});
+syncDualSlider('#slider-pontos', '#num-pontos');
 
 // 6. Alternância de Rotação da Câmera
 btnQuickAutorotate?.addEventListener('click', () => {

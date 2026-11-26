@@ -82,6 +82,24 @@
                 </button>
             </div>
 
+            <!-- Legenda de Cores Flutuante no Canto Inferior Esquerdo -->
+            <div class="sim-hud color-legend-hud" id="canvas-color-legend" aria-live="polite">
+                <div id="legend-fase">
+                    <p class="legend-title">Fase: $\arg(\Psi) = m_l \phi + \arg(R \cdot Y)$</p>
+                    <div class="phase-gradient"></div>
+                    <div class="legend-labels">
+                        <span>0</span><span>π</span><span>2π</span>
+                    </div>
+                </div>
+                <div id="legend-density" class="hidden">
+                    <p class="legend-title">Densidade de probabilidade $|\Psi|^2$</p>
+                    <div class="density-gradient"></div>
+                    <div class="legend-labels">
+                        <span>mínima</span><span>máxima</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Botão de Configurações Mobile (Canto Inferior Direito) -->
             <button type="button" id="btn-mobile-settings" class="canvas-btn-settings" title="Configurações e Parâmetros" aria-label="Configurações e Parâmetros" aria-expanded="false">
                 <img src="../assets/icons/gear.svg" class="icon-svg" alt="Configurações">
@@ -122,11 +140,22 @@
                             Schrödinger.</p>
                     </div>
 
-                    <!-- Badge do orbital atual -->
-                    <div class="orbital-badge">
-                        <span class="orbital-name" id="span-orbital" data-focus-control="badge">1s <span class="badge-math">$(m_l =
-                                0)$</span></span>
-                        <span class="orbital-energy" id="span-energia">E = −13.600 eV</span>
+                    <!-- Estado Quântico Atual (.sim-readout canônico) -->
+                    <div class="control-group">
+                        <div class="sim-readout">
+                            <div class="sim-readout-title">
+                                <img src="../assets/icons/orbital.svg" class="icon-svg icon-accent" alt="Orbital">
+                                <span>Estado Quântico Atual</span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Orbital:</span>
+                                <span class="sim-readout-value tone-accent" id="span-orbital" data-focus-control="badge">1s <span class="badge-math">$(m_l = 0)$</span></span>
+                            </div>
+                            <div class="sim-readout-row">
+                                <span class="sim-readout-label">Energia ($E_n$):</span>
+                                <span class="sim-readout-value tone-cyan" id="span-energia">−13.600 eV</span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Seção 1: Números Quânticos -->
@@ -169,113 +198,60 @@
                             </div>
 
                         </div>
+
+                        <div class="field-hint" id="hint-spin">
+                            <span><strong>$m_s$ (spin)</strong> não altera a distribuição espacial $\Psi(r,\theta,\phi)$ — afeta apenas o estado quântico interno do elétron.</span>
+                        </div>
                     </div>
 
-                    <!-- Seção 2: Amostragem & Visualização -->
-                    <div class="sim-divider-label"><span>Amostragem & Cores</span></div>
-
-                    <!-- Número de pontos com Dual Slider -->
+                    <!-- Seção 2: Ação & Execução -->
                     <div class="control-group">
-                        <div class="slider-container sim-dual-slider">
-                            <div class="slider-header">
-                                <label for="slider-pontos" class="slider-label">Pontos Amostrados (Monte Carlo)</label>
-                                <div class="dual-input-wrapper">
-                                    <input type="number" class="dual-input-number" id="num-pontos"
-                                           min="500" max="20000" step="500" value="5000">
-                                    <span class="dual-input-unit">pts</span>
+                        <button type="button" id="btn-gerar" class="btn-primary w-full" data-focus-control="action" data-focus-label="Gerar" data-focus-icon="orbital" data-focus-order="5">
+                            <img src="../assets/icons/orbital.svg" class="icon-svg" alt="">
+                            <span>Gerar Orbital</span>
+                        </button>
+                        <p id="status-msg" class="status"></p>
+                    </div>
+
+                    <!-- Seção 3: Ajustes Avançados (Acordeão Fechado) -->
+                    <div class="sim-divider-label"><span>Ajustes Avançados</span></div>
+
+                    <div class="control-group">
+                        <details class="sim-accordion" id="accordion-sampling-colors">
+                            <summary class="sim-accordion-summary">
+                                <span class="sim-accordion-title">
+                                    <img src="../assets/icons/sliders.svg" class="icon-svg" alt="">
+                                    <span>Amostragem &amp; Cores</span>
+                                </span>
+                                <img src="../assets/icons/chevron-right.svg" class="icon-svg sim-accordion-chevron" alt="">
+                            </summary>
+                            <div class="sim-accordion-body">
+                                <!-- Número de pontos com Dual Slider -->
+                                <div class="control-group">
+                                    <div class="slider-container sim-dual-slider">
+                                        <div class="slider-header">
+                                            <label for="slider-pontos" class="slider-label">Pontos Amostrados (Monte Carlo)</label>
+                                            <div class="dual-input-wrapper">
+                                                <input type="number" class="dual-input-number" id="num-pontos"
+                                                       min="500" max="20000" step="500" value="5000">
+                                                <span class="dual-input-unit">pts</span>
+                                            </div>
+                                        </div>
+                                        <input type="range" id="slider-pontos" class="sim-slider" min="500" max="20000" step="500"
+                                            value="5000">
+                                    </div>
+                                </div>
+
+                                <!-- Modo de colorização -->
+                                <div class="control-group">
+                                    <label for="select-modo">Colorização</label>
+                                    <select id="select-modo" class="sim-control">
+                                        <option value="fase">Fase de Ψ — arg(ψ)</option>
+                                        <option value="densidade">Densidade — |Ψ|²</option>
+                                    </select>
                                 </div>
                             </div>
-                            <input type="range" id="slider-pontos" class="sim-slider" min="500" max="20000" step="500"
-                                value="5000">
-                        </div>
-                    </div>
-
-                    <!-- Modo de colorização -->
-                    <div class="control-group">
-                        <label for="select-modo">Colorização</label>
-                        <select id="select-modo" class="sim-control">
-                            <option value="fase">Fase de Ψ — arg(ψ)</option>
-                            <option value="densidade">Densidade — |Ψ|²</option>
-                        </select>
-                    </div>
-
-                    <!-- Legenda de cores -->
-                    <div class="color-legend">
-                        <div id="legend-fase">
-                            <p class="legend-title">Fase: $\arg(\Psi) = m_l \phi + \arg(R \cdot Y)$</p>
-                            <div class="phase-gradient"></div>
-                            <div class="legend-labels">
-                                <span>0</span><span>π</span><span>2π</span>
-                            </div>
-                        </div>
-                        <div id="legend-density" class="hidden">
-                            <p class="legend-title">Densidade de probabilidade |Ψ|²</p>
-                            <div class="density-gradient"></div>
-                            <div class="legend-labels">
-                                <span>mínima</span><span>máxima</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Seção 3: Ação & Execução -->
-                    <div class="sim-divider-label"><span>Execução</span></div>
-
-                    <!-- Botão -->
-                    <button type="button" id="btn-gerar" class="btn-primary w-full" data-focus-control="action" data-focus-label="Gerar" data-focus-icon="orbital" data-focus-order="5">
-                        <img src="../assets/icons/orbital.svg" class="icon-svg" alt="">
-                        <span>Gerar Orbital</span>
-                    </button>
-
-                    <!-- Status -->
-                    <p id="status-msg" class="status"></p>
-
-                    <!-- Seção 4: Instruções de Navegação -->
-                    <div class="sim-divider-label"><span>Instruções & Ajuda</span></div>
-
-                    <!-- Info com ícones vetoriais responsivos (Desktop & Mobile) -->
-                    <div class="info-section">
-                        <p>
-                            <strong>$m_s$ (spin)</strong> não altera a distribuição espacial $\Psi(r,\theta,\phi)$ —
-                            afeta apenas o estado quântico interno do elétron.
-                        </p>
-
-                        <!-- Instruções Desktop -->
-                        <div class="instructions-block desktop-only">
-                            <span class="instructions-title">Controles Desktop</span>
-                            <ul class="sim-instructions-list">
-                                <li><img src="../assets/icons/mouse-left.svg" class="icon-svg" alt="Arrastar">
-                                    <span><strong>Arrastar:</strong> orbitar câmera 3D</span>
-                                </li>
-                                <li><img src="../assets/icons/mouse-wheel.svg" class="icon-svg" alt="Scroll">
-                                    <span><strong>Scroll:</strong> zoom aproximar/afastar</span>
-                                </li>
-                                <li><img src="../assets/icons/mouse-right.svg" class="icon-svg" alt="Botão direito">
-                                    <span><strong>Botão dir.:</strong> deslocar câmera (pan)</span>
-                                </li>
-                                <li><img src="../assets/icons/keyboard.svg" class="icon-svg" alt="Teclado">
-                                    <span><strong>F ou [:</strong> alternar modo foco</span>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <!-- Instruções Mobile / Touch -->
-                        <div class="instructions-block mobile-only">
-                            <span class="instructions-title">Gestos Touch / Mobile</span>
-                            <ul class="sim-instructions-list">
-                                <li><img src="../assets/icons/touch-drag.svg" class="icon-svg" alt="1 dedo">
-                                    <span><strong>1 dedo:</strong> orbitar nuvem 3D</span>
-                                </li>
-                                <li><img src="../assets/icons/touch-pinch.svg" class="icon-svg" alt="Pinçar">
-                                    <span><strong>Pinçar (2 dedos):</strong> zoom</span>
-                                </li>
-                                <li><img src="../assets/icons/touch-pan.svg" class="icon-svg" alt="2 dedos">
-                                    <span><strong>2 dedos arrastar:</strong> deslocar câmera</span>
-                                </li>
-                                <li><img src="../assets/icons/gear.svg" class="icon-svg" alt="Painel">
-                                    <span><strong>Botão de engrenagem:</strong> abrir/fechar controles</span>
-                                </li>
-                            </ul>
-                        </div>
+                        </details>
                     </div>
                 </div>
 

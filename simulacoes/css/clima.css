@@ -68,71 +68,6 @@
     box-shadow: var(--shadow-sm);
 }
 
-/* ---------- Badge de Estado do Clima ---------- */
-.climate-badge {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    background: linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--color-cyan) 12%, var(--bg-card)) 0%,
-        var(--bg-card) 100%
-    );
-    border: var(--ui-border-width, 1.5px) solid color-mix(in srgb, var(--color-cyan) 35%, transparent);
-    border-radius: var(--radius-lg);
-    padding: 10px 14px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    margin-bottom: 12px;
-    min-height: 60px;
-    box-sizing: border-box;
-}
-
-.climate-badge::before {
-    content: '';
-    position: absolute;
-    top: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 140px;
-    height: 50px;
-    background: radial-gradient(
-        ellipse,
-        color-mix(in srgb, var(--color-cyan) 18%, transparent) 0%,
-        transparent 70%
-    );
-    pointer-events: none;
-}
-
-.climate-title {
-    display: block;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--color-cyan);
-    letter-spacing: 0.02em;
-    line-height: 1.25;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-}
-
-.climate-status {
-    display: block;
-    font-size: 0.72rem;
-    color: var(--text-secondary);
-    font-family: var(--font-mono);
-    letter-spacing: 0.02em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-}
-
 /* ---------- Espaçamentos Auxiliares ---------- */
 .clima-btn-spacer {
     margin-top: 8px;
@@ -352,6 +287,15 @@
     box-shadow: var(--shadow-sm);
 }
 
+.sim-accordion-body > .mini-orrery-container {
+    margin-top: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+}
+
 .mini-orrery-header {
     width: 100%;
     display: flex;
@@ -461,15 +405,6 @@
         min-width: 0;
         max-width: calc(100vw - 20px - var(--safe-left) - var(--safe-right));
         bottom: calc(66px + var(--safe-bottom));
-    }
-}
-
-@media (max-width: 640px) {
-    #btn-quick-generators,
-    #btn-quick-wireframe,
-    #btn-quick-graticule,
-    #display-toolbar .toolbar-divider {
-        display: none !important;
     }
 }
 
